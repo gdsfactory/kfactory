@@ -118,7 +118,7 @@ slab_enc = kf.LayerEnclosure(
 )
 
 npp_enc = kf.LayerEnclosure(
-    dsections=[(L.NPP, 1.0, 4.0)],   # annular: 1 µm to 4 µm from WG edge
+    dsections=[(L.NPP, 1.0, 4.0)],  # annular: 1 µm to 4 µm from WG edge
     name="WG_NPP",
     main_layer=L.WG,
     kcl=kf.kcl,
@@ -294,6 +294,7 @@ vertical_straight_clad_x(length=20.0, width=0.5).plot()
 #
 # A diamond (rotated square) rounds corners at 45° — a good compromise between a box
 # (very angular) and a circle (many points, slower).
+
 
 # %%
 def diamond(d: int) -> kf.kdb.Polygon:

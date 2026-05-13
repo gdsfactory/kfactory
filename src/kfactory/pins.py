@@ -210,10 +210,12 @@ class DPins(ProtoPins[float]):
             )
         port_bases = []
         for port in ports:
-            port_base = port.base
             if port.kcl != self.kcl:
-                port_base.kcl = self.kcl
-            port_bases.append(port_base)
+                raise ValueError(
+                    "Cannot add a pin which belongs to a different layout or cell to a"
+                    f" cell. {port=}, {self.kcl!r}"
+                )
+            port_bases.append(port.base)
 
         base_ = BasePin(
             name=name, kcl=self.kcl, ports=port_bases, pin_type=pin_type, info=info_

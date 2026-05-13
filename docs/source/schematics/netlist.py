@@ -33,14 +33,16 @@ import json
 import tempfile
 from pathlib import Path
 
+from kfnetlist import PortRef
+
 import kfactory as kf
-from kfactory.netlist import NetlistPort, PortRef
 
 # %% [markdown]
 # ## PDK setup
 #
 # We reuse the same minimal PDK from the overview page — a straight waveguide and a 90 °
 # euler bend, both registered on a dedicated `KCLayout`.
+
 
 # %%
 class LAYER(kf.LayerInfos):
@@ -91,10 +93,12 @@ def bend90(width: int, radius: int) -> kf.KCell:
         layer=L.WG,
     )
 
+
 # %% [markdown]
 # ## Building a schematic for inspection
 #
 # A simple L-shaped path: `s1 → b1 → s2`.
+
 
 # %%
 @pdk.schematic_cell
@@ -102,7 +106,7 @@ def l_path() -> kf.Schematic:
     schematic = kf.Schematic(kcl=pdk)
 
     s1 = schematic.create_inst("s1", "straight", {"width": 500, "length": 15_000})
-    b1 = schematic.create_inst("b1", "bend90",   {"width": 500, "radius": 10_000})
+    b1 = schematic.create_inst("b1", "bend90", {"width": 500, "radius": 10_000})
     s2 = schematic.create_inst("s2", "straight", {"width": 500, "length": 15_000})
 
     s1.place(x=0, y=0)
@@ -141,7 +145,7 @@ for name, inst in nl.instances.items():
 print(f"\nNets ({len(nl.nets)}):")
 for i, net in enumerate(nl.nets):
     parts = []
-    for p in net.root:
+    for p in net:
         if isinstance(p, PortRef):
             parts.append(f"{p.instance}.{p.port}")
         else:
@@ -238,6 +242,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
 # %% [markdown]
 # ### Defining a pad component with two equivalent ports
 
+
 # %%
 @pdk.cell
 def pad(port_width: int, size: int) -> kf.KCell:
@@ -267,15 +272,17 @@ def pad(port_width: int, size: int) -> kf.KCell:
     )
     return c
 
+
 # %% [markdown]
 # ### Building and extracting a netlist that contains the pad
+
 
 # %%
 @pdk.schematic_cell
 def pad_circuit() -> kf.Schematic:
     schematic = kf.Schematic(kcl=pdk)
 
-    s1  = schematic.create_inst("s1",  "straight", {"width": 500, "length": 10_000})
+    s1 = schematic.create_inst("s1", "straight", {"width": 500, "length": 10_000})
     pad_inst = schematic.create_inst("pad1", "pad", {"port_width": 500, "size": 5_000})
 
     s1.place(x=0, y=0)
@@ -291,8 +298,9 @@ extracted.sort()
 
 print("Extracted nets (before equivalence mapping):")
 for i, net in enumerate(extracted.nets):
-    parts = [f"{p.instance}.{p.port}" if isinstance(p, PortRef) else p.name
-             for p in net.root]
+    parts = [
+        f"{p.instance}.{p.port}" if isinstance(p, PortRef) else p.name for p in net
+    ]
     print(f"  net[{i}]: {parts}")
 
 # %% [markdown]
@@ -314,8 +322,9 @@ equiv_netlist.sort()
 
 print("Nets after equivalence mapping:")
 for i, net in enumerate(equiv_netlist.nets):
-    parts = [f"{p.instance}.{p.port}" if isinstance(p, PortRef) else p.name
-             for p in net.root]
+    parts = [
+        f"{p.instance}.{p.port}" if isinstance(p, PortRef) else p.name for p in net
+    ]
     print(f"  net[{i}]: {parts}")
 
 # %% [markdown]
@@ -334,10 +343,12 @@ from kfactory import Netlist
 manual_nl = Netlist()
 
 # Add instance definitions
-manual_nl.create_inst("wg1", kcl="MY_PDK", component="straight",
-                       settings={"width": 500, "length": 10_000})
-manual_nl.create_inst("wg2", kcl="MY_PDK", component="straight",
-                       settings={"width": 500, "length": 10_000})
+manual_nl.create_inst(
+    "wg1", kcl="MY_PDK", component="straight", settings={"width": 500, "length": 10_000}
+)
+manual_nl.create_inst(
+    "wg2", kcl="MY_PDK", component="straight", settings={"width": 500, "length": 10_000}
+)
 
 # Add a top-level port
 p_in = manual_nl.create_port("in")
@@ -357,8 +368,10 @@ print("Instances:", list(manual_nl.instances.keys()))
 print("Top-level ports:", [p.name for p in manual_nl.ports])
 print("Nets:")
 for i, net in enumerate(manual_nl.nets):
-    parts = [f"{p.instance}.{p.port}" if isinstance(p, PortRef) else f"<{p.name}>"
-             for p in net.root]
+    parts = [
+        f"{p.instance}.{p.port}" if isinstance(p, PortRef) else f"<{p.name}>"
+        for p in net
+    ]
     print(f"  net[{i}]: {parts}")
 
 # %% [markdown]
@@ -367,7 +380,7 @@ for i, net in enumerate(manual_nl.nets):
 # | Task | API |
 # |------|-----|
 # | Extract netlist from a cell | `cell.netlist()` → `dict[str, Netlist]` |
-# | Iterate nets | `for net in nl.nets: for p in net.root: ...` |
+# | Iterate nets | `for net in nl.nets: for p in net: ...` |
 # | Sort for stable comparison | `nl.sort()` |
 # | Export schematic to JSON | `schematic.model_dump_json()` |
 # | Load schematic from YAML/JSON file | `kf.read_schematic(path, unit="dbu")` |

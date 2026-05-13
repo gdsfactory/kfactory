@@ -48,7 +48,7 @@ L = LAYER()
 kf.kcl.infos = L
 
 WG_WIDTH = kf.kcl.to_dbu(0.5)  # 500 DBU
-SEP = kf.kcl.to_dbu(2.0)       # 2 µm centre-to-centre extra separation
+SEP = kf.kcl.to_dbu(2.0)  # 2 µm centre-to-centre extra separation
 
 wg_enc = kf.kcl.get_enclosure(
     kf.LayerEnclosure(name="WGSTD_BND", sections=[(L.WGCLAD, 0, 2_000)])
@@ -59,7 +59,8 @@ bend90 = kf.factories.euler.bend_euler_factory(kcl=kf.kcl)(
 )
 straight_factory = partial(
     kf.factories.straight.straight_dbu_factory(kcl=kf.kcl),
-    layer=L.WG, enclosure=wg_enc,
+    layer=L.WG,
+    enclosure=wg_enc,
 )
 bend_radius = kf.routing.optical.get_radius(bend90)
 
@@ -79,6 +80,7 @@ wl = kf.kcl.find_layer(L.WG)
 # %%
 # Start ports are ordered top-to-bottom; end ports are ordered bottom-to-top.
 # Without sort_ports the routes would cross.
+
 
 @kf.cell
 def bundle_sorted() -> kf.KCell:
@@ -115,7 +117,7 @@ def bundle_sorted() -> kf.KCell:
         separation=kf.kcl.to_dbu(10),
         straight_factory=straight_factory,
         bend90_cell=bend90,
-        sort_ports=True,       # ← automatically matches by Y position
+        sort_ports=True,  # ← automatically matches by Y position
     )
     return c
 
@@ -134,6 +136,7 @@ c_sorted.plot()
 # in the bundle.  Increase it to open up more space between waveguides, for example
 # near dense arrays where cladding layers would otherwise overlap.
 
+
 # %%
 @kf.cell
 def bundle_wide_sep() -> kf.KCell:
@@ -143,12 +146,16 @@ def bundle_wide_sep() -> kf.KCell:
         c.create_port(
             name=f"in{i}",
             trans=kf.kdb.Trans(2, False, -60_000, i * 4_000),
-            width=WG_WIDTH, layer=wl, port_type="optical",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="optical",
         )
         c.create_port(
             name=f"out{i}",
             trans=kf.kdb.Trans(0, False, 60_000, i * 4_000),
-            width=WG_WIDTH, layer=wl, port_type="optical",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="optical",
         )
 
     kf.routing.optical.route_bundle(
@@ -188,7 +195,9 @@ def bundle_sbend() -> kf.KCell:
         c.create_port(
             name=f"in{i}",
             trans=kf.kdb.Trans(2, False, -40_000, i * pitch),
-            width=WG_WIDTH, layer=wl, port_type="optical",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="optical",
         )
         for i in range(N)
     ]
@@ -196,7 +205,9 @@ def bundle_sbend() -> kf.KCell:
         c.create_port(
             name=f"out{i}",
             trans=kf.kdb.Trans(0, False, 40_000, i * pitch),
-            width=WG_WIDTH, layer=wl, port_type="optical",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="optical",
         )
         for i in range(N)
     ]
@@ -208,7 +219,7 @@ def bundle_sbend() -> kf.KCell:
         separation=SEP,
         straight_factory=straight_factory,
         bend90_cell=bend90,
-        sbend_factory=sbend_factory,   # ← enables S-bend optimisation
+        sbend_factory=sbend_factory,  # ← enables S-bend optimisation
         on_collision=None,
     )
     return c
@@ -243,12 +254,16 @@ def bundle_bbox_minimal() -> kf.KCell:
         c.create_port(
             name=f"in{i}",
             trans=kf.kdb.Trans(2, False, -60_000, i * 3_000),
-            width=WG_WIDTH, layer=wl, port_type="optical",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="optical",
         )
         c.create_port(
             name=f"out{i}",
             trans=kf.kdb.Trans(0, False, 60_000, i * 3_000),
-            width=WG_WIDTH, layer=wl, port_type="optical",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="optical",
         )
 
     kf.routing.optical.route_bundle(
@@ -273,12 +288,16 @@ def bundle_bbox_full() -> kf.KCell:
         c.create_port(
             name=f"in{i}",
             trans=kf.kdb.Trans(2, False, -60_000, i * 3_000),
-            width=WG_WIDTH, layer=wl, port_type="optical",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="optical",
         )
         c.create_port(
             name=f"out{i}",
             trans=kf.kdb.Trans(0, False, 60_000, i * 3_000),
-            width=WG_WIDTH, layer=wl, port_type="optical",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="optical",
         )
 
     kf.routing.optical.route_bundle(
@@ -308,6 +327,7 @@ bundle_bbox_full().plot()
 # Use `on_collision=None` in scripts or notebooks to suppress the KLayout interactive
 # error dialog; use `on_collision='error'` in CI to fail hard.
 
+
 # %%
 @kf.cell
 def bundle_collision_check() -> kf.KCell:
@@ -317,12 +337,16 @@ def bundle_collision_check() -> kf.KCell:
         c.create_port(
             name=f"in{i}",
             trans=kf.kdb.Trans(2, False, -60_000, i * 3_000),
-            width=WG_WIDTH, layer=wl, port_type="optical",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="optical",
         )
         c.create_port(
             name=f"out{i}",
             trans=kf.kdb.Trans(0, False, 60_000, i * 3_000),
-            width=WG_WIDTH, layer=wl, port_type="optical",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="optical",
         )
 
     kf.routing.optical.route_bundle(
@@ -333,7 +357,7 @@ def bundle_collision_check() -> kf.KCell:
         straight_factory=straight_factory,
         bend90_cell=bend90,
         collision_check_layers=[L.WG, L.WGCLAD],  # ← layers to check
-        on_collision=None,   # suppress dialog in notebooks; use 'error' in CI
+        on_collision=None,  # suppress dialog in notebooks; use 'error' in CI
     )
     return c
 
@@ -355,6 +379,7 @@ bundle_collision_check().plot()
 # These flags do not insert tapers — the route simply uses the width/layer of the
 # first (start) port.  Insert explicit `taper_cell` for mode-converting transitions.
 
+
 # %%
 @kf.cell
 def bundle_type_mismatch() -> kf.KCell:
@@ -366,7 +391,9 @@ def bundle_type_mismatch() -> kf.KCell:
         c.create_port(
             name=f"wg{i}",
             trans=kf.kdb.Trans(2, False, -50_000, i * 4_000),
-            width=WG_WIDTH, layer=wl, port_type="optical",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="optical",
         )
         for i in range(N)
     ]
@@ -375,7 +402,9 @@ def bundle_type_mismatch() -> kf.KCell:
         c.create_port(
             name=f"pin{i}",
             trans=kf.kdb.Trans(0, False, 50_000, i * 4_000),
-            width=WG_WIDTH, layer=wl, port_type="pin",
+            width=WG_WIDTH,
+            layer=wl,
+            port_type="pin",
         )
         for i in range(N)
     ]

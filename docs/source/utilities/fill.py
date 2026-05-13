@@ -61,6 +61,7 @@ kf.kcl.infos = L
 # A fill cell is any ordinary `KCell`.  Make it small and symmetric so it
 # tiles cleanly.  Here we use a 1 µm × 1 µm square centred on the origin.
 
+
 # %%
 @kf.cell
 def fill_dot() -> kf.KCell:
@@ -83,6 +84,7 @@ fill_dot()
 # A keepout of `2.0` µm means fill cells whose bounding box would overlap
 # within 2 µm of a waveguide edge are suppressed.
 
+
 # %%
 @kf.cell
 def chip_basic() -> kf.KCell:
@@ -95,10 +97,12 @@ def chip_basic() -> kf.KCell:
     fill_tiled(
         c,
         fill_dot(),
-        fill_layers=[(L.FLOORPLAN, 0)],   # fill inside FLOORPLAN; 0 µm keepout on the layer itself
-        exclude_layers=[(L.WG, 2.0)],     # keep 2 µm clear of WG edges
-        x_space=1.0,                       # 1 µm gap between fill cells in X
-        y_space=1.0,                       # 1 µm gap between fill cells in Y
+        fill_layers=[
+            (L.FLOORPLAN, 0)
+        ],  # fill inside FLOORPLAN; 0 µm keepout on the layer itself
+        exclude_layers=[(L.WG, 2.0)],  # keep 2 µm clear of WG edges
+        x_space=1.0,  # 1 µm gap between fill cells in X
+        y_space=1.0,  # 1 µm gap between fill cells in Y
     )
     return c
 
@@ -111,6 +115,7 @@ chip_basic()
 # Instead of relying on layer shapes you can pass a `kdb.Region` directly via
 # `fill_regions`.  This is useful when the fill boundary is computed
 # programmatically rather than stored on a layer.
+
 
 # %%
 @kf.cell
@@ -142,6 +147,7 @@ chip_region()
 # cell's bounding box.  Pass `row_step` and `col_step` as `kdb.DVector`
 # objects (in **µm**) for a custom pitch.
 
+
 # %%
 @kf.cell
 def chip_custom_pitch() -> kf.KCell:
@@ -169,6 +175,7 @@ chip_custom_pitch()
 # Pass multiple `(layer, keepout)` pairs to `exclude_layers`.  Each layer can
 # have a different keepout distance.
 
+
 # %%
 @kf.cell
 def chip_multi_excl() -> kf.KCell:
@@ -184,7 +191,7 @@ def chip_multi_excl() -> kf.KCell:
         fill_dot(),
         fill_layers=[(L.FLOORPLAN, 0)],
         exclude_layers=[
-            (L.WG, 2.0),     # 2 µm keepout around waveguides
+            (L.WG, 2.0),  # 2 µm keepout around waveguides
             (L.METAL, 3.0),  # 3 µm keepout around metal pads
         ],
         x_space=1.0,

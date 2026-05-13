@@ -68,7 +68,7 @@ kf.kcl.infos = L
 
 # %%
 clad_enc = kf.LayerEnclosure(
-    sections=[(L.WGCLAD, 2_000)],      # 2 µm cladding in DBU
+    sections=[(L.WGCLAD, 2_000)],  # 2 µm cladding in DBU
     name="WGSTD",
     main_layer=L.WG,
 )
@@ -95,7 +95,7 @@ bend_with_clad.plot()
 
 # %%
 clad_enc_um = kf.LayerEnclosure(
-    dsections=[(L.WGCLAD, 2.0)],       # 2 µm — converted to DBU automatically
+    dsections=[(L.WGCLAD, 2.0)],  # 2 µm — converted to DBU automatically
     name="WGSTD_UM",
     main_layer=L.WG,
     kcl=kf.kcl,
@@ -136,8 +136,8 @@ bend_um.plot()
 # NPP:  implant ring, 1 µm from WG edge to 3 µm from WG edge.
 doped_enc = kf.LayerEnclosure(
     dsections=[
-        (L.SLAB, 2.0),          # 0 → 2 µm
-        (L.NPP, 1.0, 3.0),      # 1 → 3 µm  (annular ring)
+        (L.SLAB, 2.0),  # 0 → 2 µm
+        (L.NPP, 1.0, 3.0),  # 1 → 3 µm  (annular ring)
     ],
     name="SLAB_DOPED",
     main_layer=L.WG,
@@ -245,7 +245,7 @@ c_two.plot()
 from kfactory.cross_section import SymmetricalCrossSection
 
 wg_xs = SymmetricalCrossSection(
-    width=kf.kcl.to_dbu(0.5),          # 500 nm core
+    width=kf.kcl.to_dbu(0.5),  # 500 nm core
     enclosure=clad_enc,
     name="WG_STD",
 )

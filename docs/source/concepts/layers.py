@@ -40,12 +40,14 @@ from kfactory.layer import LayerLevel, layerenum_from_dict
 # `LayerInfos` is a [Pydantic](https://docs.pydantic.dev) model.  Subclass it and declare
 # each layer as a class attribute typed `kf.kdb.LayerInfo`:
 
+
 # %%
 class LAYER(kf.LayerInfos):
-    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)      # waveguide core
-    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)    # waveguide exclusion zone
-    CLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4, 0)    # cladding
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)  # waveguide core
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)  # waveguide exclusion zone
+    CLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4, 0)  # cladding
     FLOORPLAN: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
+
 
 L = LAYER()
 
@@ -58,10 +60,10 @@ L = LAYER()
 # `kdb.LayerInfo` with valid `layer` and `datatype` numbers.
 
 # %%
-print(L.WG)          # LayerInfo(1/0) — KLayout's string representation
-print(L.WG.layer)    # 1
-print(L.WG.datatype) # 0
-print(L.WG.name)     # "WG"  — auto-set from the field name
+print(L.WG)  # LayerInfo(1/0) — KLayout's string representation
+print(L.WG.layer)  # 1
+print(L.WG.datatype)  # 0
+print(L.WG.name)  # "WG"  — auto-set from the field name
 
 # %% [markdown]
 # ### Registering layers with a layout
@@ -94,7 +96,7 @@ print(f"Indices match: {idx_wg == idx_wg2}")
 # `LayerInfos` supports dict-style access, which is useful in generic code:
 
 # %%
-print(L["CLAD"])   # same as L.CLAD
+print(L["CLAD"])  # same as L.CLAD
 
 # %% [markdown]
 # ### Iterating over all layers
@@ -119,11 +121,11 @@ for name in L.model_fields:
 # %%
 LE = layerenum_from_dict(L)
 
-print(type(LE.WG))         # <enum 'LAYER'>
-print(int(LE.WG))          # integer layer index in kf.kcl.layout
-print(LE.WG.layer)         # 1  — original layer number
-print(LE.WG.datatype)      # 0  — original datatype
-print(LE.WG[0], LE.WG[1]) # tuple-style access: (layer, datatype)
+print(type(LE.WG))  # <enum 'LAYER'>
+print(int(LE.WG))  # integer layer index in kf.kcl.layout
+print(LE.WG.layer)  # 1  — original layer number
+print(LE.WG.datatype)  # 0  — original datatype
+print(LE.WG[0], LE.WG[1])  # tuple-style access: (layer, datatype)
 
 # %% [markdown]
 # Both `LayerInfos` and `LayerEnum` are valid everywhere kfactory expects a layer —
@@ -131,11 +133,11 @@ print(LE.WG[0], LE.WG[1]) # tuple-style access: (layer, datatype)
 
 # %%
 # LayerInfos → find_layer gives the integer index:
-print(kf.kcl.find_layer(L.WG))         # from LayerInfos
-print(kf.kcl.find_layer(1, 0))         # from (layer, datatype) pair
+print(kf.kcl.find_layer(L.WG))  # from LayerInfos
+print(kf.kcl.find_layer(1, 0))  # from (layer, datatype) pair
 
 # LayerEnum members *are* layer indices already:
-print(int(LE.WG))                       # same integer, no find_layer needed
+print(int(LE.WG))  # same integer, no find_layer needed
 
 # %% [markdown]
 # ## `LayerStack` — 3-D process metadata
@@ -174,32 +176,34 @@ stack = kf.LayerStack(
 
 # %%
 # Access individual levels by attribute or dict key
-print(stack["wg_core"].thickness)   # 0.22
-print(stack.cladding.material)       # SiO2
+print(stack["wg_core"].thickness)  # 0.22
+print(stack.cladding.material)  # SiO2
 
 # Convenience helpers for simulation
-print(stack.get_layer_to_thickness())   # {(1,0): 0.22, (4,0): 3.22}
-print(stack.get_layer_to_material())    # {(1,0): 'Si', (4,0): 'SiO2'}
+print(stack.get_layer_to_thickness())  # {(1,0): 0.22, (4,0): 3.22}
+print(stack.get_layer_to_material())  # {(1,0): 'Si', (4,0): 'SiO2'}
 
 # %% [markdown]
 # ## Putting it all together: a minimal PDK layer set
 #
 # A typical PDK definition combines `LayerInfos` and `LayerStack` in one module:
 
+
 # %%
 class PDK_LAYER(kf.LayerInfos):
-    WG:         kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
-    WG_TRENCH:  kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
-    METAL1:     kf.kdb.LayerInfo = kf.kdb.LayerInfo(11, 0)
-    METAL2:     kf.kdb.LayerInfo = kf.kdb.LayerInfo(12, 0)
-    FLOORPLAN:  kf.kdb.LayerInfo = kf.kdb.LayerInfo(99, 0)
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    WG_TRENCH: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
+    METAL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(11, 0)
+    METAL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(12, 0)
+    FLOORPLAN: kf.kdb.LayerInfo = kf.kdb.LayerInfo(99, 0)
+
 
 pdk_layers = PDK_LAYER()
 
 pdk_stack = kf.LayerStack(
-    wg=LayerLevel(layer=pdk_layers.WG,     zmin=0.0,  thickness=0.22, material="Si"),
-    m1=LayerLevel(layer=pdk_layers.METAL1, zmin=0.5,  thickness=0.5,  material="Al"),
-    m2=LayerLevel(layer=pdk_layers.METAL2, zmin=1.2,  thickness=0.5,  material="Al"),
+    wg=LayerLevel(layer=pdk_layers.WG, zmin=0.0, thickness=0.22, material="Si"),
+    m1=LayerLevel(layer=pdk_layers.METAL1, zmin=0.5, thickness=0.5, material="Al"),
+    m2=LayerLevel(layer=pdk_layers.METAL2, zmin=1.2, thickness=0.5, material="Al"),
 )
 
 print("Layer palette:")
@@ -209,7 +213,9 @@ for name in pdk_layers.model_fields:
 
 print("\n3-D stack:")
 for name, level in pdk_stack.layers.items():
-    print(f"  {name:6s}  z={level.zmin:.1f}…{level.zmin+level.thickness:.2f} µm  {level.material}")
+    print(
+        f"  {name:6s}  z={level.zmin:.1f}…{level.zmin + level.thickness:.2f} µm  {level.material}"
+    )
 
 # %% [markdown]
 # ## See Also

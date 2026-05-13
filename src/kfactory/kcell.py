@@ -2733,6 +2733,19 @@ def _reconstruct(
     return kcls[kcl_name].factories[factory_name](**settings)
 
 
+def _check_pin_ports_in_cell(
+    cell: ProtoTKCell[Any], ports: Iterable[ProtoPort[Any]], *, pin_name: str
+) -> None:
+    cell_ports = cell.base.ports
+    for port in ports:
+        if port.base not in cell_ports:
+            raise ValueError(
+                f"Cannot create pin {pin_name!r}: port {port!r} is not a port"
+                f" of cell {cell.name!r}. Add it via cell.create_port/add_port"
+                " first."
+            )
+
+
 class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
     """Cell with floating point units."""
 
@@ -2852,6 +2865,8 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         info: dict[str, MetaData] | None = None,
     ) -> DPin:
         """Create a pin in the cell."""
+        ports = list(ports)
+        _check_pin_ports_in_cell(self, ports, pin_name=name)
         return self.pins.create_pin(
             name=name, ports=ports, pin_type=pin_type, info=info
         )
@@ -3056,6 +3071,8 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         info: dict[str, MetaData] | None = None,
     ) -> Pin:
         """Create a pin in the cell."""
+        ports = list(ports)
+        _check_pin_ports_in_cell(self, ports, pin_name=name)
         return self.pins.create_pin(
             name=name, ports=ports, pin_type=pin_type, info=info
         )

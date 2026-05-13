@@ -31,29 +31,34 @@
 
 # %%
 import dataclasses
+
 import kfactory as kf
-from kfactory.factories.straight import straight_dbu_factory
 from kfactory.factories.euler import bend_euler_factory
+from kfactory.factories.straight import straight_dbu_factory
+
 
 # Shared layers for all examples in this notebook
 class LAYER(kf.LayerInfos):
-    WG:   kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
     WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
+
 
 pdk = kf.KCLayout("patterns_pdk", infos=LAYER)
 L = pdk.infos
 # li_* = integer layer indices (for direct shape insertion / port construction)
-li_wg   = pdk.find_layer(L.WG)
+li_wg = pdk.find_layer(L.WG)
 li_wgex = pdk.find_layer(L.WGEX)
 
-enc = pdk.get_enclosure(kf.LayerEnclosure(
-    name="WG_EX",
-    main_layer=kf.kdb.LayerInfo(1, 0),
-    sections=[(kf.kdb.LayerInfo(2, 0), 2000)],
-))
+enc = pdk.get_enclosure(
+    kf.LayerEnclosure(
+        name="WG_EX",
+        main_layer=kf.kdb.LayerInfo(1, 0),
+        sections=[(kf.kdb.LayerInfo(2, 0), 2000)],
+    )
+)
 
 # Factory callables accept kdb.LayerInfo objects, not integer indices
-straight   = straight_dbu_factory(pdk)
+straight = straight_dbu_factory(pdk)
 bend_euler = bend_euler_factory(pdk)
 
 # %% [markdown]
@@ -69,6 +74,7 @@ bend_euler = bend_euler_factory(pdk)
 # 3. Connect the first instance to a fixed position; use `connect()` for the rest.
 # 4. Expose the external ports on the parent.
 
+
 # %%
 @pdk.cell
 def l_arm(
@@ -80,19 +86,19 @@ def l_arm(
     """L-shaped arm: straight → 90° euler bend → straight."""
     c = kf.KCell(kcl=pdk)
 
-    w_dbu  = pdk.to_dbu(width)
+    w_dbu = pdk.to_dbu(width)
     l1_dbu = pdk.to_dbu(length1)
     l2_dbu = pdk.to_dbu(length2)
 
     # Primitives (cached — same params reuse the same cell object)
     s1 = straight(width=w_dbu, length=l1_dbu, layer=L.WG)
-    b  = bend_euler(width=width, radius=radius, layer=L.WG)
+    b = bend_euler(width=width, radius=radius, layer=L.WG)
     s2 = straight(width=w_dbu, length=l2_dbu, layer=L.WG)
 
     # Instantiate and chain
     i1 = c << s1
     i_b = c << b
-    i2  = c << s2
+    i2 = c << s2
 
     i_b.connect("o1", i1.ports["o2"])
     i2.connect("o1", i_b.ports["o2"])
@@ -129,6 +135,7 @@ arm.plot()
 # The example below builds a Mach-Zehnder skeleton and exposes four ports
 # (`in`, `out`, `arm_top_in`, `arm_top_out`).
 
+
 # %%
 @pdk.cell
 def mz_skeleton(
@@ -142,11 +149,11 @@ def mz_skeleton(
     w_dbu = pdk.to_dbu(width)
     al_dbu = pdk.to_dbu(arm_length)
 
-    s_in  = straight(width=w_dbu, length=pdk.to_dbu(5.0), layer=L.WG)
+    s_in = straight(width=w_dbu, length=pdk.to_dbu(5.0), layer=L.WG)
     s_arm = straight(width=w_dbu, length=al_dbu, layer=L.WG)
 
     # Bottom arm
-    i_in  = c << s_in
+    i_in = c << s_in
     i_arm = c << s_arm
     i_arm.connect("o1", i_in.ports["o2"])
     i_out = c << s_in
@@ -157,8 +164,8 @@ def mz_skeleton(
     i_arm_top.dmove((0.0, radius * 2))  # pure µm offset
 
     # a) Direct port exposure with rename
-    c.add_port(port=i_in.ports["o1"],   name="in")
-    c.add_port(port=i_out.ports["o2"],  name="out")
+    c.add_port(port=i_in.ports["o1"], name="in")
+    c.add_port(port=i_out.ports["o2"], name="out")
 
     # b) Individual port exposure for arm access points
     c.add_port(port=i_arm_top.ports["o1"], name="arm_top_in")
@@ -182,21 +189,22 @@ print(f"ports: {[p.name for p in mz.ports]}")
 # module level instead.
 
 # %%
-from kfactory.factories.straight import StraightFactory
 from kfactory.factories.euler import BendEulerFactory
+from kfactory.factories.straight import StraightFactory
 
 
 @dataclasses.dataclass(frozen=True)
 class PDKFactories:
-    straight:   StraightFactory
+    straight: StraightFactory
     bend_euler: BendEulerFactory
 
 
 # Build once at module level, import everywhere.
 factories = PDKFactories(
-    straight   = straight_dbu_factory(pdk),
-    bend_euler = bend_euler_factory(pdk),
+    straight=straight_dbu_factory(pdk),
+    bend_euler=bend_euler_factory(pdk),
 )
+
 
 # Usage — cells receive the bundle, not the individual factories:
 @pdk.cell
@@ -236,7 +244,7 @@ xs_wg = SymmetricalCrossSection(
     enclosure=enc,
     name="WG",
 )
-pdk.get_icross_section(xs_wg)   # registers and returns it (idempotent)
+pdk.get_icross_section(xs_wg)  # registers and returns it (idempotent)
 
 xs_wide = SymmetricalCrossSection(
     width=pdk.to_dbu(1.0),
@@ -249,24 +257,34 @@ pdk.get_icross_section(xs_wide)
 @pdk.cell
 def wg_with_xs(xs_name: str = "WG", length: float = 10.0) -> kf.KCell:
     """Straight waveguide parameterised by cross-section name."""
-    xs = pdk.get_icross_section(xs_name)   # ← lookup inside the cell body
-    c  = kf.KCell(kcl=pdk)
+    xs = pdk.get_icross_section(xs_name)  # ← lookup inside the cell body
+    c = kf.KCell(kcl=pdk)
     l_dbu = pdk.to_dbu(length)
     c.shapes(li_wg).insert(kf.kdb.Box(l_dbu, xs.width))
-    c.add_port(port=kf.Port(
-        name="o1",
-        trans=kf.kdb.Trans(2, False, -l_dbu // 2, 0),
-        width=xs.width, layer=li_wg, port_type="optical", kcl=pdk,
-    ))
-    c.add_port(port=kf.Port(
-        name="o2",
-        trans=kf.kdb.Trans(0, False,  l_dbu // 2, 0),
-        width=xs.width, layer=li_wg, port_type="optical", kcl=pdk,
-    ))
+    c.add_port(
+        port=kf.Port(
+            name="o1",
+            trans=kf.kdb.Trans(2, False, -l_dbu // 2, 0),
+            width=xs.width,
+            layer=li_wg,
+            port_type="optical",
+            kcl=pdk,
+        )
+    )
+    c.add_port(
+        port=kf.Port(
+            name="o2",
+            trans=kf.kdb.Trans(0, False, l_dbu // 2, 0),
+            width=xs.width,
+            layer=li_wg,
+            port_type="optical",
+            kcl=pdk,
+        )
+    )
     return c
 
 
-wg_std  = wg_with_xs(xs_name="WG")
+wg_std = wg_with_xs(xs_name="WG")
 wg_wide = wg_with_xs(xs_name="WG_WIDE")
 print(f"WG width (DBU):      {pdk.get_icross_section('WG').width}")
 print(f"WG_WIDE width (DBU): {pdk.get_icross_section('WG_WIDE').width}")
@@ -290,10 +308,7 @@ print(f"WG_WIDE width (DBU): {pdk.get_icross_section('WG_WIDE').width}")
 
 # %%
 # Build a small set of components to tile
-components = [
-    wg_with_xs(xs_name="WG", length=float(5 + i))
-    for i in range(4)
-]
+components = [wg_with_xs(xs_name="WG", length=float(5 + i)) for i in range(4)]
 
 # grid_dbu places cells into a target KCell and returns an InstanceGroup
 target = kf.KCell("wg_array", kcl=pdk)
@@ -324,17 +339,18 @@ target.plot()
 # This keeps the route geometry isolated until you explicitly materialise it.
 
 # %%
-import kfactory.routing.aa.optical as aa
 from functools import partial
-from kfactory.factories.virtual.straight import virtual_straight_factory
+
+import kfactory.routing.aa.optical as aa
 from kfactory.factories.virtual.euler import virtual_bend_euler_factory
+from kfactory.factories.virtual.straight import virtual_straight_factory
 
 # Virtual factories are pre-configured with partial() — bind layer/width/radius
 _v_straight_raw = virtual_straight_factory(kcl=pdk)
-_v_bend_raw     = virtual_bend_euler_factory(kcl=pdk)
+_v_bend_raw = virtual_bend_euler_factory(kcl=pdk)
 
 v_straight = partial(_v_straight_raw, layer=L.WG)
-v_bend     = partial(_v_bend_raw, width=0.5, radius=10.0, layer=L.WG)
+v_bend = partial(_v_bend_raw, width=0.5, radius=10.0, layer=L.WG)
 
 # Step 1 — route into a VKCell (virtual; geometry stays in-memory only)
 # Create the VKCell via the PDK's KCLayout so layer indices match
@@ -344,8 +360,8 @@ aa.route(
     width=0.5,
     backbone=[
         kf.kdb.DPoint(0, 0),
-        kf.kdb.DPoint(80, 0),    # horizontal
-        kf.kdb.DPoint(80, 60),   # 90° corner upward
+        kf.kdb.DPoint(80, 0),  # horizontal
+        kf.kdb.DPoint(80, 60),  # 90° corner upward
         kf.kdb.DPoint(160, 60),  # horizontal to exit
     ],
     straight_factory=v_straight,

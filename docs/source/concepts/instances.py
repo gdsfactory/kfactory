@@ -53,7 +53,7 @@ poly = kf.KCell(name="polygon_source")
 xpts = [0, 0, 5, 6, 9, 12]
 ypts = [0, 1, 1, 2, 2, 0]
 poly.shapes(kf.kcl.find_layer(L.WGEX)).insert(
-    kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip(xpts, ypts)])
+    kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip(xpts, ypts, strict=False)])
 )
 poly
 
@@ -73,8 +73,8 @@ parent
 # We can move them independently without touching the original cell.
 
 # %%
-inst2.transform(kf.kdb.DCplxTrans(1, 15, False, 0, 0))   # rotate 15°
-inst3.transform(kf.kdb.DCplxTrans(1, 30, False, 0, 0))   # rotate 30°
+inst2.transform(kf.kdb.DCplxTrans(1, 15, False, 0, 0))  # rotate 15°
+inst3.transform(kf.kdb.DCplxTrans(1, 30, False, 0, 0))  # rotate 30°
 parent
 
 # %% [markdown]
@@ -85,9 +85,14 @@ parent
 
 # %%
 poly.shapes(kf.kcl.find_layer(L.WG)).insert(
-    kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip([14, 14, 16, 16], [0, 2, 2, 0])])
+    kf.kdb.DPolygon(
+        [
+            kf.kdb.DPoint(x, y)
+            for x, y in zip([14, 14, 16, 16], [0, 2, 2, 0], strict=False)
+        ]
+    )
 )
-parent   # all three instances now show the extra rectangle
+parent  # all three instances now show the extra rectangle
 
 # %% [markdown]
 # ## Transforming instances
@@ -109,7 +114,7 @@ inst_a = c << s
 inst_b = c << s
 inst_c = c << s
 
-inst_b.transform(kf.kdb.DTrans(0.0, 5.0))        # shift 5 µm north
+inst_b.transform(kf.kdb.DTrans(0.0, 5.0))  # shift 5 µm north
 inst_c.transform(kf.kdb.DCplxTrans(1, 45, False, 0, 10))  # shift + rotate 45°
 
 c
@@ -170,9 +175,10 @@ tile = kf.cells.straight.straight(length=10, width=0.5, layer=L.WG)
 grid = kf.KCell(name="instance_array")
 arr = grid.create_inst(
     tile,
-    na=3, nb=2,           # 3 columns, 2 rows
-    a=(20_000, 0),        # 20 µm step in x  (DBU = nm)
-    b=(0, 10_000),        # 10 µm step in y
+    na=3,
+    nb=2,  # 3 columns, 2 rows
+    a=(20_000, 0),  # 20 µm step in x  (DBU = nm)
+    b=(0, 10_000),  # 10 µm step in y
 )
 grid.draw_ports()
 grid
@@ -214,7 +220,7 @@ angled = kf.KCell(name="angled_connect")
 b30a = angled << kf.cells.euler.bend_euler(radius=5, width=1, layer=L.WG, angle=30)
 b30b = angled << kf.cells.euler.bend_euler(radius=5, width=1, layer=L.WG, angle=30)
 b30b.connect("o1", b30a.ports["o2"])
-b30b.flatten()   # merges geometry into parent to close sub-nm gaps
+b30b.flatten()  # merges geometry into parent to close sub-nm gaps
 angled
 
 # %% [markdown]

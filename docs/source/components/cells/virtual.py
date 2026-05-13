@@ -161,7 +161,7 @@ arm_b.shapes(wg_layer).insert(kf.kdb.DBox(0, -0.25, 30.0, 0.25))
 
 # Compose them inside a parent virtual cell
 parent_vc = pdk.vkcell(name="virtual_composed")
-inst_a = parent_vc.create_inst(cell=arm_a)                      # at (0, 0)
+inst_a = parent_vc.create_inst(cell=arm_a)  # at (0, 0)
 inst_b = parent_vc.create_inst(
     cell=arm_b,
     trans=kf.kdb.DCplxTrans(1, 0, False, 0.0, 2.0),  # shift 2 µm up
@@ -179,6 +179,7 @@ c_composed.plot()
 #
 # For reusable virtual component factories use the `@pdk.vcell` decorator — it
 # works like `@pdk.cell` but returns a `VKCell` and caches by parameter hash.
+
 
 # %%
 @pdk.vcell
@@ -226,11 +227,11 @@ print(f"s1 bbox : {s1.dbbox(pdk.layer(L.WG))} µm")
 
 # %%
 _v_straight_raw = virtual_straight_factory(kcl=pdk)
-_v_bend_raw     = virtual_bend_euler_factory(kcl=pdk)
+_v_bend_raw = virtual_bend_euler_factory(kcl=pdk)
 
 # Bind common parameters with functools.partial
 v_straight = partial(_v_straight_raw, layer=L.WG)
-v_bend     = partial(_v_bend_raw, width=0.5, radius=10.0, layer=L.WG)
+v_bend = partial(_v_bend_raw, width=0.5, radius=10.0, layer=L.WG)
 
 # Produce virtual components
 vs = v_straight(width=0.5, length=15.0)

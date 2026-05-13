@@ -1,283 +1,225 @@
 [build-system]
-requires = ["setuptools>=74", "wheel", "build", "setuptools_scm[toml]>=8.1"]
 build-backend = "setuptools.build_meta"
+requires = [ "build", "setuptools>=74", "setuptools-scm[toml]>=8.1", "wheel" ]
 
 [project]
 name = "kfactory"
+version = "3.0.0rc1"
 description = "KLayout API implementation of gdsfactory"
 readme = "README.md"
-classifiers = [
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
-    "Operating System :: OS Independent",
-]
+authors = [ { name = "gdsfactory community", email = "contact@gdsfactory.com" } ]
 requires-python = ">=3.12"
-
-
-version = "3.0.0rc1"
-authors = [{ name = "gdsfactory community", email = "contact@gdsfactory.com" }]
+classifiers = [
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
 dependencies = [
-    "aenum>=3.1.17,<4",
-    "cachetools>=7.1.1,<7.2",
-    "kfnetlist>=0.1.3",
-    "klayout>=0.30.8,<0.31",
-    "loguru>=0.7.3,<0.8",
-    "pydantic>=2.13.3,<2.14",
-    "pydantic-extra-types>=2.11.1,<2.12",
-    "pydantic-settings>=2.14.0,<3",
-    "pygit2>=1.19.2,<2",
-    "rapidfuzz>=3.14.5,<4",
-    "rectangle-packer>=2.1.0,<3",
-    "requests>=2.33.1,<3",
-    "ruamel.yaml>=0.19.1,<0.20",
-    "ruamel.yaml.string>=0.1.1,<0.2",
-    "semver>=3.0.4,<4",
-    "scipy>=1.17.1,<2",
-    "toolz>=1.1.0,<2",
-    "typer>=0.25.1,<0.26",
+  "aenum>=3.1.17,<4",
+  "cachetools>=7.1.1,<7.2",
+  "kfnetlist>=0.1.3",
+  "klayout>=0.30.8,<0.31",
+  "loguru>=0.7.3,<0.8",
+  "pydantic>=2.13.3,<2.14",
+  "pydantic-extra-types>=2.11.1,<2.12",
+  "pydantic-settings>=2.14,<3",
+  "pygit2>=1.19.2,<2",
+  "rapidfuzz>=3.14.5,<4",
+  "rectangle-packer>=2.1,<3",
+  "requests>=2.33.1,<3",
+  "ruamel-yaml>=0.19.1,<0.20",
+  "ruamel-yaml-string>=0.1.1,<0.2",
+  "scipy>=1.17.1,<2",
+  "semver>=3.0.4,<4",
+  "toolz>=1.1,<2",
+  "typer>=0.25.1,<0.26",
 ]
+optional-dependencies.ci = [
+  "pytest>=9.0.3,<9.1",
+  "pytest-cov>=7.1,<7.2",
+  "pytest-datadir>=1.8,<1.9",
+  "pytest-randomly>=4.1,<4.2",
+  "pytest-regressions>=2.10,<2.11",
+  "pytest-xdist>=3.8,<3.9",
+  "types-cachetools>=7.0.0.20260503,<7.1",
+  "types-requests>=2.33.0.20260503,<2.34",
+  "uv>=0.11.9,<0.12",
+]
+optional-dependencies.dev = [
+  "kfactory[ci]",
+  "pre-commit>=4.6,<4.7",
+  "python-lsp-server[all]>=1.14,<1.15",
+  "ruff>=0.15.12,<0.16",
+  "rust-just>=1.50,<1.51",
+  "scipy-stubs>=1.17.1.4,<1.18",
+  "tbump>=6.11,<6.12",
+  "ty>=0.0.34,<0.1",
+  "types-cachetools>=7.0.0.20260503,<7.1",
+  "types-docutils>=0.22.3.20260408,<0.23",
+  "types-pygments>=2.20.0.20260408,<2.21",
+  "types-requests>=2.33.0.20260503,<2.34",
+  "types-setuptools>=82.0.0.20260408,<82.1",
+]
+optional-dependencies.docs = [
+  "erdantic>=1.2.1,<1.3",
+  "griffe-inherited-docstrings>=1.1.3,<1.2",
+  "griffe-pydantic>=1.3.1,<1.4",
+  "griffe-warnings-deprecated>=1.1.1,<1.2",
+  "kfactory[notebooks]",                     # transitively pulls in kfactory[ipy]
+  "mkdocs-literate-nav>=0.6.3,<0.7",
+  "mkdocs-video>=1.5,<1.6",
+  "mkdocstrings[python]>=1.0.4,<1.1",
+  "pymdown-extensions>=10.21.2,<10.22",
+  "ruff>=0.15.12,<0.16",
+  "zensical>=0.0.40,<0.1",
+]
+optional-dependencies.ipy = [
+  "ipyevents>=2.0.4,<2.1",
+  "ipython>=9.13,<9.14",
+  "ipytree>=0.2.2,<0.3",
+  "ipywidgets>=8.1.8,<8.2",
+]
+optional-dependencies.notebooks = [
+  "ipykernel>=7.2,<7.3",
+  "jupytext>=1.19.1,<1.20",
+  # Notebook conversion needs the IPython display helpers
+  # (`c.plot()` lazy-imports kfactory.widgets.interactive, which
+  # pulls in ipyevents/ipywidgets/ipytree from the [ipy] extra).
+  "kfactory[ipy]",
+  "nbconvert>=7.17.1,<7.18",
+]
+scripts.kf = "kfactory.cli:app"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
-    "kfactory[ci]",
-    "mypy>=1.20.2,<1.21",
-    "pre-commit>=4.6.0,<4.7",
-    "pylsp-mypy>=0.7.1,<0.8",
-    "python-lsp-server[all]>=1.14.0,<1.15",
-    "ruff>=0.15.12,<0.16",
-    "ty>=0.0.34,<0.1",
-    "rust-just>=1.50.0,<1.51",
-    "tbump>=6.11.0,<6.12",
-    "types-cachetools>=7.0.0.20260503,<7.1",
-    "types-docutils>=0.22.3.20260408,<0.23",
-    "types-pygments>=2.20.0.20260408,<2.21",
-    "types-requests>=2.33.0.20260503,<2.34",
-    "types-setuptools>=82.0.0.20260408,<82.1",
-    "scipy-stubs>=1.17.1.4,<1.18",
-]
-docs = [
-    "kfactory[notebooks]",  # transitively pulls in kfactory[ipy]
-    "erdantic>=1.2.1,<1.3",
-    "zensical>=0.0.40,<0.1",
-    "mkdocs-literate-nav>=0.6.3,<0.7",
-    "mkdocs-video>=1.5.0,<1.6",
-    "mkdocstrings[python]>=1.0.4,<1.1",
-    "pymdown-extensions>=10.21.2,<10.22",
-    "griffe-pydantic>=1.3.1,<1.4",
-    "griffe-inherited-docstrings>=1.1.3,<1.2",
-    "griffe-warnings-deprecated>=1.1.1,<1.2",
-    "ruff>=0.15.12,<0.16",
-]
-ci = [
-    "pytest>=9.0.3,<9.1",
-    "pytest-cov>=7.1.0,<7.2",
-    "pytest-randomly>=4.1.0,<4.2",
-    "pytest-regressions>=2.10.0,<2.11",
-    "pytest-xdist>=3.8.0,<3.9",
-    "pytest-datadir>=1.8.0,<1.9",
-    "types-cachetools>=7.0.0.20260503,<7.1",
-    "types-requests>=2.33.0.20260503,<2.34",
-    "uv>=0.11.9,<0.12",
-]
-ipy = [
-    "ipyevents>=2.0.4,<2.1",
-    "ipython>=9.13.0,<9.14",
-    "ipytree>=0.2.2,<0.3",
-    "ipywidgets>=8.1.8,<8.2",
-]
-notebooks = [
-    # Notebook conversion needs the IPython display helpers
-    # (`c.plot()` lazy-imports kfactory.widgets.interactive, which
-    # pulls in ipyevents/ipywidgets/ipytree from the [ipy] extra).
-    "kfactory[ipy]",
-    "jupytext>=1.19.1,<1.20",
-    "nbconvert>=7.17.1,<7.18",
-    "ipykernel>=7.2.0,<7.3",
+  "pytest>=9.0.3,<9.1",
+  "pytest-regressions>=2.10,<2.11",
 ]
 
+[tool.setuptools]
+packages.find.where = [ "src" ]
 
-[project.scripts]
-kf = "kfactory.cli:app"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.mypy]
-python_version = "3.12"
-strict = true
-exclude = ["src/kfactory/widgets/interactive.py"]
-plugins = ["pydantic.mypy"]
-
-follow_imports = "silent"
-warn_redundant_casts = true
-warn_unused_ignores = true
-disallow_any_generics = true
-no_implicit_reexport = true
-disallow_untyped_defs = true
-
-[tool.pydantic-mypy]
-init_forbid_extra = true
-init_typed = true
-warn_required_dynamic_aliases = true
-
-[[tool.mypy.overrides]]
-module = ["src.*"]
-ignore_missing_imports = true
-
-[tool.pylsp-mypy]
-enabled = true
-live_mode = true
-strict = true
-
-[tool.pytest.ini_options]
-testpaths = ["src", "tests"]
-addopts = '--tb=short'
-norecursedirs = ["extra/*.py"]
-
-
-[tool.coverage.html]
-directory = "_build/coverage_html_report"
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+indent-width = 4
+exclude = [ "src/kfactory/widgets/interactive.py" ]
+fix = true
+# Like Black, indent with spaces, rather than tabs.
+format.indent-style = "space"
+# Like Black, use double quotes for strings.
+format.quote-style = "double"
+# Like Black, automatically detect the appropriate line ending.
+format.line-ending = "auto"
+# Like Black, respect magic trailing commas.
+format.skip-magic-trailing-comma = false
+lint.select = [ "ALL" ]
+lint.ignore = [
+  "ANN401",
+  "ARG",
+  "BLE001",
+  "C901",
+  "COM812",
+  "D",
+  "D100",
+  "EM",
+  "FBT",
+  "PLC0415",
+  "PLR0904",
+  "PLR0911",
+  "PLR0912",
+  "PLR0913",
+  "PLR0915",
+  "PLR2004",
+  "PLW1641",
+  "PT011",
+  "PT012",
+  "S101",
+  "S311",
+  "SLF001",
+  "TC004",
+  "TID252",
+  "TRY003",
+]
+lint.per-file-ignores = { "tests/*.py" = [ "D", "PLR2004", "INP001", "EM101" ], "docs/**/*.py" = [
+  "T201",
+  "B018",
+  "ERA001",
+  "INP001",
+  "E402",
+  "E501",
+  "N801",
+  "N806",
+  "E741",
+  "RUF001",
+  "RUF002",
+  "RUF003",
+  "PT018"
+] }
+lint.pydocstyle.convention = "google"
 
 [tool.codespell]
 ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem,commitish"
 skip = "pyproject.toml, uv.lock"
 
-[tool.ty.src]
-include = ["docs", "src", "tests"]
-exclude = [
-    "src/kfactory/widgets/interactive.py",
-    "tests/gdsfactory-yaml-pics",
-    "docs"
+[tool.ty]
+src.include = [ "docs", "src", "tests" ]
+src.exclude = [ "src/kfactory/widgets/interactive.py", "tests/gdsfactory-yaml-pics", "docs" ]
+
+[tool.pytest]
+ini_options.testpaths = [ "src", "tests" ]
+ini_options.addopts = "--tb=short"
+ini_options.norecursedirs = [ "extra/*.py" ]
+
+[tool.coverage]
+run.omit = [ "src/kfactory/cli/**/*.py" ]
+report.exclude_also = [
+  "@(abc\\.)?abstractmethod",
+  "@overload",
+  "class .*\\(Protocol(\\[.*\\])?(,.*)?.*\\):",
+  "def .*:[\\s]*\\.\\.\\.$",
+  "if __name__ == .__main__.:",
+  "if 0:",
+  "if self\\.debug",
+  "if TYPE_CHECKING:",
+  "raise AssertionError",
+  "raise NotImplementedError",
 ]
-
-[tool.ruff]
-fix = true
-line-length = 88
-exclude = ["docs", "src/kfactory/widgets/interactive.py"]
-indent-width = 4
-target-version = "py312"
-
-[tool.ruff.lint]
-select = ["ALL"]
-ignore = [
-    "ANN401",
-    "ARG",
-    "BLE001",
-    "C901",
-    "COM812",
-    "D100",
-    "D",
-    "EM",
-    "FBT",
-    "PLR0904",
-    "PLR0911",
-    "PLR0912",
-    "PLR0913",
-    "PLR0915",
-    "PLR2004",
-    "PT011",
-    "PT012",
-    "S101",
-    "S311",
-    "SLF001",
-    "TC004",
-    "TID252",
-    "TRY003",
-    "PLW1641",
-    "PLC0415",
-]
-per-file-ignores = { "tests/*.py" = ["D", "PLR2004", "INP001", "EM101"] }
-
-[tool.ruff.format]
-# Like Black, use double quotes for strings.
-quote-style = "double"
-# Like Black, indent with spaces, rather than tabs.
-indent-style = "space"
-# Like Black, respect magic trailing commas.
-skip-magic-trailing-comma = false
-# Like Black, automatically detect the appropriate line ending.
-line-ending = "auto"
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
-
-[tool.coverage.report]
-exclude_also = [
-    "if self\\.debug",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "@(abc\\.)?abstractmethod",
-    "if TYPE_CHECKING:",
-    "@overload",
-    "class .*\\(Protocol(\\[.*\\])?(,.*)?.*\\):",
-    "def .*:[\\s]*\\.\\.\\.$",
-]
-ignore_errors = true
-
-[tool.coverage.run]
-omit = ["src/kfactory/cli/**/*.py"]
-
+report.ignore_errors = true
+html.directory = "_build/coverage_html_report"
 
 [tool.tbump]
+file = [
+  # For each file to patch, add a [[file]] config
+  # section containing the path of the file, relative to the
+  # tbump.toml location.
+  { src = "README.md" },
+  { src = "pyproject.toml", search = 'version = "{current_version}"' },
+  { src = "pyproject.toml", search = 'current = "{current_version}"' },
+  { src = "src/kfactory/__init__.py" },
+]
+git.message_template = "Bump to {new_version}"
+git.tag_template = "v{new_version}"
 # Uncomment this if your project is hosted on GitHub:
 # github_url = "https://github.com/<user or organization>/<project>/"
-
-[tool.tbump.version]
-current = "3.0.0rc1"
-
+version.current = "3.0.0rc1"
 # Example of a semver regexp.
 # Make sure this matches current_version before
 # using tbump
-regex = '''
-  (?P<major>\d+)
-  \.
-  (?P<minor>\d+)
-  \.
-  (?P<patch>\d+)
+version.regex = """  (?P<major>\\d+)
+  \\.
+  (?P<minor>\\d+)
+  \\.
+  (?P<patch>\\d+)
   (?:
-    (?P<pre>(a|b|rc)\d+)
+    (?P<pre>(a|b|rc)\\d+)
   )?
   (?:
-    \.post(?P<post>\d+)
+    \\.post(?P<post>\\d+)
   )?
   (?:
-    \.dev(?P<dev>\d+)
+    \\.dev(?P<dev>\\d+)
   )?
-  '''
-
-[tool.tbump.git]
-message_template = "Bump to {new_version}"
-tag_template = "v{new_version}"
-
-# For each file to patch, add a [[file]] config
-# section containing the path of the file, relative to the
-# tbump.toml location.
-[[tool.tbump.file]]
-src = "README.md"
-
-[[tool.tbump.file]]
-src = "pyproject.toml"
-search = 'version = "{current_version}"'
-
-[[tool.tbump.file]]
-src = "pyproject.toml"
-search = 'current = "{current_version}"'
-
-[[tool.tbump.file]]
-src = "src/kfactory/__init__.py"
-# You can specify a list of commands to
-# run after the files have been patched
-# and before the git commit is made
-
-[tool.basedpyright]
-reportUnusedCallResult = false
-reportUnusedExpression = false
-
-[dependency-groups]
-dev = [
-    "pytest>=9.0.3,<9.1",
-    "pytest-regressions>=2.10.0,<2.11",
-]
+  """

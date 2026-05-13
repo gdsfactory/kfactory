@@ -41,10 +41,12 @@
 # %%
 import kfactory as kf
 
+
 class LAYER(kf.LayerInfos):
-    WG:   kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
     WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
     SLAB: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
+
 
 L = LAYER()
 kf.kcl.infos = L
@@ -67,11 +69,11 @@ print(f"1000 DBU = {kf.kcl.to_um(1000)} µm")
 
 # %%
 # DBU: integer coordinates, 1 unit = 1 nm
-box_dbu = kf.kdb.Box(2000, 1000)   # 2 µm × 1 µm
+box_dbu = kf.kdb.Box(2000, 1000)  # 2 µm × 1 µm
 print(f"Box (DBU):  {box_dbu}")
 
 # µm: float coordinates
-box_um = kf.kdb.DBox(2.0, 1.0)     # same size
+box_um = kf.kdb.DBox(2.0, 1.0)  # same size
 print(f"DBox (µm): {box_um}")
 
 # %% [markdown]
@@ -97,7 +99,7 @@ print(f"DBox → Box: {box_dbu_from_um}")
 
 # %%
 # DBU: displacement in integer DBU
-t_dbu = kf.kdb.Trans(0, False, 5000, 0)   # 5 µm to the right
+t_dbu = kf.kdb.Trans(0, False, 5000, 0)  # 5 µm to the right
 print(f"Trans (DBU):  {t_dbu}")
 
 # µm: displacement in float µm
@@ -122,9 +124,9 @@ print(f"DTrans → Trans: {t_um.to_itype(kf.kcl.dbu)}")
 li = kf.kcl.find_layer(L.WG)
 
 example = kf.KCell("example_bbox")
-example.shapes(li).insert(kf.kdb.Box(4000, 2000))   # 4 µm × 2 µm
+example.shapes(li).insert(kf.kdb.Box(4000, 2000))  # 4 µm × 2 µm
 
-print(f"bbox  (DBU): {example.bbox()}")   # integer coords
+print(f"bbox  (DBU): {example.bbox()}")  # integer coords
 print(f"dbbox (µm):  {example.dbbox()}")  # float coords
 
 # %% [markdown]
@@ -137,12 +139,12 @@ print(f"dbbox (µm):  {example.dbbox()}")  # float coords
 p = kf.Port(
     name="o1",
     trans=kf.kdb.Trans(0, False, 2000, 0),
-    width=500,          # 500 DBU = 0.5 µm
+    width=500,  # 500 DBU = 0.5 µm
     layer=li,
     port_type="optical",
 )
-print(f"Port width  (DBU): {p.width}")    # 500
-print(f"Port dwidth (µm):  {p.dwidth}")   # 0.5
+print(f"Port width  (DBU): {p.width}")  # 500
+print(f"Port dwidth (µm):  {p.dwidth}")  # 0.5
 
 # %% [markdown]
 # ## Shapes: inserting DBU and µm geometry
@@ -180,24 +182,36 @@ print(f"Total dbbox (µm): {mixed.dbbox()}")
 #
 # A common idiom is to accept µm at the function boundary and convert immediately:
 
+
 # %%
 @kf.cell
 def waveguide(width: float = 0.5, length: float = 10.0) -> kf.KCell:
     """Simple waveguide with µm parameters converted to DBU internally."""
     c = kf.KCell()
-    w  = kf.kcl.to_dbu(width)    # → int DBU
-    ll = kf.kcl.to_dbu(length)   # → int DBU
+    w = kf.kcl.to_dbu(width)  # → int DBU
+    ll = kf.kcl.to_dbu(length)  # → int DBU
 
     c.shapes(li).insert(kf.kdb.Box(ll, w))
-    c.add_port(port=kf.Port(
-        name="o1", trans=kf.kdb.Trans(2, False, -ll // 2, 0),
-        width=w, layer=li, port_type="optical",
-    ))
-    c.add_port(port=kf.Port(
-        name="o2", trans=kf.kdb.Trans(0, False,  ll // 2, 0),
-        width=w, layer=li, port_type="optical",
-    ))
+    c.add_port(
+        port=kf.Port(
+            name="o1",
+            trans=kf.kdb.Trans(2, False, -ll // 2, 0),
+            width=w,
+            layer=li,
+            port_type="optical",
+        )
+    )
+    c.add_port(
+        port=kf.Port(
+            name="o2",
+            trans=kf.kdb.Trans(0, False, ll // 2, 0),
+            width=w,
+            layer=li,
+            port_type="optical",
+        )
+    )
     return c
+
 
 wg = waveguide(width=0.5, length=10.0)
 print(f"bbox  (DBU): {wg.bbox()}")

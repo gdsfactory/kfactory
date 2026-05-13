@@ -53,8 +53,8 @@ L = LAYER()
 kf.kcl.infos = L
 
 # Typical metal wire: 2 µm wide, 2 µm separation between adjacent routes
-WIRE_WIDTH = kf.kcl.to_dbu(2)    # 2_000 DBU
-SEPARATION = kf.kcl.to_dbu(2)    # 2_000 DBU
+WIRE_WIDTH = kf.kcl.to_dbu(2)  # 2_000 DBU
+SEPARATION = kf.kcl.to_dbu(2)  # 2_000 DBU
 
 # %% [markdown]
 # ## 1 · Basic wire bundle
@@ -181,8 +181,8 @@ kf.routing.electrical.route_bundle(
     ends_stub,
     separation=SEPARATION,
     place_layer=L.METAL1,
-    starts=kf.kcl.to_dbu(20),   # 20 µm straight after each start port
-    ends=kf.kcl.to_dbu(10),     # 10 µm straight before each end port
+    starts=kf.kcl.to_dbu(20),  # 20 µm straight after each start port
+    ends=kf.kcl.to_dbu(10),  # 10 µm straight before each end port
 )
 c_stubs
 
@@ -266,8 +266,10 @@ ends_obs = [
 
 # A keep-out box blocking the centre of the routing area.
 obstacle = kf.kdb.Box(
-    kf.kcl.to_dbu(-5), kf.kcl.to_dbu(100),
-    kf.kcl.to_dbu(55), kf.kcl.to_dbu(180),
+    kf.kcl.to_dbu(-5),
+    kf.kcl.to_dbu(100),
+    kf.kcl.to_dbu(55),
+    kf.kcl.to_dbu(180),
 )
 # Draw the obstacle on the floorplan layer for visibility.
 c_obs.shapes(kf.kcl.find_layer(L.FLOORPLAN)).insert(obstacle)
@@ -304,8 +306,8 @@ c_obs
 c_dr = kf.KCell("elec_dual_rails")
 
 # Total outer width: rail(1µm) + gap(2µm) + rail(1µm) = 4µm
-DR_TOTAL = kf.kcl.to_dbu(4)   # outer path width
-DR_GAP   = kf.kcl.to_dbu(2)   # inner hollow width (the gap between rails)
+DR_TOTAL = kf.kcl.to_dbu(4)  # outer path width
+DR_GAP = kf.kcl.to_dbu(2)  # inner hollow width (the gap between rails)
 
 starts_dr = [
     kf.Port(

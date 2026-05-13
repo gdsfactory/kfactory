@@ -39,8 +39,8 @@ class LogoLayers(kf.LayerInfos):
 # palettes; the stubs use a slightly deeper teal so the port markers
 # show through against the lighter waveguide core.
 LAYER_FILL: dict[str, str] = {
-    "WG": "#14B8A6",   # tailwind teal-500 — main waveguide
-    "STUB": "#0F766E", # tailwind teal-700 — port-stub accents
+    "WG": "#14B8A6",  # tailwind teal-500 — main waveguide
+    "STUB": "#0F766E",  # tailwind teal-700 — port-stub accents
 }
 
 
@@ -109,9 +109,7 @@ def build_logo() -> tuple[kf.KCLayout, kf.KCell]:
     stub_size = 6
     for sx, sy in [(14, 59), (14, 5), (50, 55), (50, 9)]:
         half = stub_size / 2
-        c.shapes(stub).insert(
-            kdb.DBox(sx - half, sy - half, sx + half, sy + half)
-        )
+        c.shapes(stub).insert(kdb.DBox(sx - half, sy - half, sx + half, sy + half))
 
     return kcl, c
 
@@ -136,9 +134,7 @@ def export_svg(
         idx = kcl.find_layer(layer_info)
         for shape in cell.shapes(idx).each():
             poly = shape.dpolygon
-            pts = " ".join(
-                f"{p.x:g},{vb_h - p.y:g}" for p in poly.each_point_hull()
-            )
+            pts = " ".join(f"{p.x:g},{vb_h - p.y:g}" for p in poly.each_point_hull())
             parts.append(
                 f'  <polygon points="{pts}" fill="{fill}" data-layer="{layer_name}"/>'
             )

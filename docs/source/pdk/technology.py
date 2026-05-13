@@ -54,7 +54,7 @@ from kfactory.layer import Info, LayerLevel, LayerStack
 wg_level = LayerLevel(
     layer=(1, 0),
     zmin=0.0,
-    thickness=0.22,   # µm
+    thickness=0.22,  # µm
     material="si",
     sidewall_angle=80.0,  # near-vertical etch
 )
@@ -108,7 +108,7 @@ stack = LayerStack(
     slab=LayerLevel(
         layer=(3, 0),
         zmin=0.0,
-        thickness=0.09,   # partial etch leaves 90 nm slab
+        thickness=0.09,  # partial etch leaves 90 nm slab
         material="si",
         sidewall_angle=70.0,
         info=Info(mesh_order=2, refractive_index=3.47, type="grow"),
@@ -117,7 +117,7 @@ stack = LayerStack(
     clad=LayerLevel(
         layer=(111, 0),
         zmin=-3.0,
-        thickness=3.22,   # 3 µm below + 0.22 µm above wg top
+        thickness=3.22,  # 3 µm below + 0.22 µm above wg top
         material="sio2",
         info=Info(mesh_order=3, refractive_index=1.44, type="background"),
     ),
@@ -160,7 +160,9 @@ for layer_tuple, angle in stack.get_layer_to_sidewall_angle().items():
 
 # %%
 wg = stack["wg"]
-print(f"wg zmin={wg.zmin} µm, thickness={wg.thickness} µm, top={wg.zmin + wg.thickness} µm")
+print(
+    f"wg zmin={wg.zmin} µm, thickness={wg.thickness} µm, top={wg.zmin + wg.thickness} µm"
+)
 
 # %% [markdown]
 # ## 4 · Attaching a stack to a PDK
@@ -174,6 +176,7 @@ print(f"wg zmin={wg.zmin} µm, thickness={wg.thickness} µm, top={wg.zmin + wg.t
 # %%
 # --- pdk_with_stack.py (inline for demo) ---
 
+
 class LAYER(kf.LayerInfos):
     WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
     SLAB: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
@@ -183,7 +186,7 @@ class LAYER(kf.LayerInfos):
 
 
 pdk = kf.KCLayout("DEMO_TECH_PDK", infos=LAYER)
-L = pdk.infos   # LayerInfos instance; use for layer objects
+L = pdk.infos  # LayerInfos instance; use for layer objects
 
 STACK = LayerStack(
     wg=LayerLevel(

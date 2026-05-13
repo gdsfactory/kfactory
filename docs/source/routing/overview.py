@@ -46,8 +46,9 @@
 # `3` = South (270°).
 
 # %%
-import kfactory as kf
 from functools import partial
+
+import kfactory as kf
 
 
 # ── Layers ────────────────────────────────────────────────────────────────
@@ -72,8 +73,8 @@ wg_enc = kf.kcl.get_enclosure(
 # Euler bend cell (angle=90, radius=10 µm).
 # bend_euler_factory takes width and radius in µm.
 bend90 = kf.factories.euler.bend_euler_factory(kcl=kf.kcl)(
-    width=0.5,   # µm
-    radius=10,   # µm
+    width=0.5,  # µm
+    radius=10,  # µm
     layer=L.WG,
     enclosure=wg_enc,
     angle=90,
@@ -220,8 +221,10 @@ end_ports3 = [
 ]
 
 obstacle = kf.kdb.Box(
-    kf.kcl.to_dbu(-10), kf.kcl.to_dbu(150),
-    kf.kcl.to_dbu(100), kf.kcl.to_dbu(220),
+    kf.kcl.to_dbu(-10),
+    kf.kcl.to_dbu(150),
+    kf.kcl.to_dbu(100),
+    kf.kcl.to_dbu(220),
 )
 c3.shapes(kf.kcl.find_layer(L.FLOORPLAN)).insert(obstacle)
 

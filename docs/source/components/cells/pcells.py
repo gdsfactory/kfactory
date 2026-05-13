@@ -60,6 +60,7 @@ kf.kcl.infos = L
 # be hashable (integers, floats, strings, `LayerInfo`) so the cache key can be
 # computed.
 
+
 # %%
 @kf.cell
 def wg_straight(width: int, length: int) -> kf.KCell:
@@ -93,7 +94,7 @@ def wg_straight(width: int, length: int) -> kf.KCell:
 
 # Construct with DBU arguments (1 nm = 1 DBU at default dbu=0.001 µm/DBU)
 WG_WIDTH = kf.kcl.to_dbu(0.5)  # 500 DBU  (0.5 µm)
-WG_LEN = kf.kcl.to_dbu(20.0)   # 20000 DBU (20 µm)
+WG_LEN = kf.kcl.to_dbu(20.0)  # 20000 DBU (20 µm)
 
 s = wg_straight(WG_WIDTH, WG_LEN)
 s
@@ -105,8 +106,8 @@ s
 # formatted with `p` in place of `.` to keep the name GDS-legal.
 
 # %%
-print(s.name)       # → wg_straight_W500_L20000
-print(s.settings)   # → KCellSettings(width=500, length=20000)
+print(s.name)  # → wg_straight_W500_L20000
+print(s.settings)  # → KCellSettings(width=500, length=20000)
 
 # %% [markdown]
 # ### Caching
@@ -118,8 +119,8 @@ print(s.settings)   # → KCellSettings(width=500, length=20000)
 s2 = wg_straight(WG_WIDTH, WG_LEN)
 s3 = wg_straight(WG_WIDTH, kf.kcl.to_dbu(30.0))  # different length → new cell
 
-print("same args → same object:", s is s2)   # True
-print("diff args → new object: ", s is s3)   # False
+print("same args → same object:", s is s2)  # True
+print("diff args → new object: ", s is s3)  # False
 
 # %% [markdown]
 # ## 2 · µm API — `output_type=kf.DKCell`
@@ -127,6 +128,7 @@ print("diff args → new object: ", s is s3)   # False
 # For a µm-native interface, pass `output_type=kf.DKCell` to `@kf.cell`.  The
 # decorator wraps the returned `KCell` in a `DKCell` automatically — you can still
 # build geometry in DBU inside the function.
+
 
 # %%
 @kf.cell(output_type=kf.DKCell)
@@ -163,7 +165,7 @@ def wg_straight_um(width: float, length: float) -> kf.KCell:
 
 wg = wg_straight_um(0.5, 20.0)
 print("type:", type(wg).__name__)  # DKCell
-print("name:", wg.name)            # wg_straight_um_W0p5_L20
+print("name:", wg.name)  # wg_straight_um_W0p5_L20
 print("settings:", wg.settings)
 wg
 
@@ -172,6 +174,7 @@ wg
 #
 # PCells can draw on multiple layers.  Here a waveguide with a cladding layer
 # (slab) demonstrates layered geometry.
+
 
 # %%
 @kf.cell
@@ -226,6 +229,7 @@ wg_c
 # cell is fetched from the cache (or created once and cached), so there is no
 # duplication even when many parent cells share the same child.
 
+
 # %%
 @kf.cell
 def y_branch(width: int, length: int, arm_sep: int) -> kf.KCell:
@@ -260,6 +264,7 @@ yb
 # KLayout cell database.  It is useful for intermediate helper geometry that never
 # needs to appear as a standalone cell in the GDS.
 
+
 # %%
 @kf.vcell
 def marker_cross(size: int) -> kf.VKCell:
@@ -284,6 +289,7 @@ print("VKCell type:", type(m).__name__)  # VKCell
 # When building a PDK, each component should be created inside that PDK's
 # `KCLayout` instance rather than the global `kf.kcl`.  Use `@pdk.cell` instead
 # of `@kf.cell` so that layer indices are looked up from the correct layout.
+
 
 # %%
 class PDK_LAYERS(kf.LayerInfos):
@@ -329,7 +335,7 @@ def pdk_straight(width: float, length: float) -> kf.KCell:
 
 
 ps = pdk_straight(0.45, 15.0)
-print("name:", ps.name)   # pdk_straight_W0p45_L15
+print("name:", ps.name)  # pdk_straight_W0p45_L15
 print("kcl: ", ps.kcl.name)  # DEMO_PDK
 ps
 
@@ -348,6 +354,7 @@ ps
 # | `check_ports` | `True` | Warn on duplicate/unnamed ports |
 # | `snap_ports` | `True` | Snap port positions to grid |
 # | `cache` | shared per-layout dict | Custom cache (e.g. `{}` to disable) |
+
 
 # %%
 @kf.cell(basename="WG_STRIP", set_settings=True)
@@ -378,7 +385,7 @@ def strip_waveguide(width: float, length: float) -> kf.KCell:
 
 
 sw = strip_waveguide(0.5, 10.0)
-print("name:    ", sw.name)     # WG_STRIP_W0p5_L10
+print("name:    ", sw.name)  # WG_STRIP_W0p5_L10
 print("settings:", sw.settings)
 sw
 

@@ -40,7 +40,7 @@ import kfactory as kf
 
 
 class LAYER(kf.LayerInfos):
-    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)    # waveguide core
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)  # waveguide core
     WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)  # exclusion zone
 
 
@@ -60,6 +60,7 @@ kf.kcl.infos = L  # register with the global layout so helpers like find_layer w
 #   for shapes and ports.
 # - `kf.kcl.to_dbu(um)` converts µm to the integer DBU value required for port widths.
 
+
 # %%
 @kf.cell
 def straight(width: float = 1.0, length: float = 10.0) -> kf.KCell:
@@ -73,19 +74,33 @@ def straight(width: float = 1.0, length: float = 10.0) -> kf.KCell:
     ex = width + 2.0  # 1 µm exclusion on each side
 
     # Core geometry (µm coordinates via DBox)
-    c.shapes(kf.kcl.find_layer(L.WG)).insert(kf.kdb.DBox(0, -width / 2, length, width / 2))
+    c.shapes(kf.kcl.find_layer(L.WG)).insert(
+        kf.kdb.DBox(0, -width / 2, length, width / 2)
+    )
     # Exclusion zone
     c.shapes(kf.kcl.find_layer(L.WGEX)).insert(kf.kdb.DBox(0, -ex / 2, length, ex / 2))
 
     # Ports — DCplxTrans(mag, angle_deg, mirror, x_um, y_um)
     wl = kf.kcl.find_layer(L.WG)
     wd = kf.kcl.to_dbu(width)
-    c.add_port(port=kf.Port(name="o1", width=wd,
-                             dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, 0, 0),
-                             layer=wl, kcl=kf.kcl))
-    c.add_port(port=kf.Port(name="o2", width=wd,
-                             dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, length, 0),
-                             layer=wl, kcl=kf.kcl))
+    c.add_port(
+        port=kf.Port(
+            name="o1",
+            width=wd,
+            dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, 0, 0),
+            layer=wl,
+            kcl=kf.kcl,
+        )
+    )
+    c.add_port(
+        port=kf.Port(
+            name="o2",
+            width=wd,
+            dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, length, 0),
+            layer=wl,
+            kcl=kf.kcl,
+        )
+    )
     return c
 
 
@@ -111,10 +126,12 @@ bend.plot()
 # Place instances with the `<<` operator and connect them port-to-port with
 # `instance.connect(own_port, other_instance_or_cell, other_port)`.
 
+
 # %%
 @kf.cell
-def l_shaped_arm(wg_width: float = 1.0, bend_radius: float = 10.0,
-                 arm_length: float = 20.0) -> kf.KCell:
+def l_shaped_arm(
+    wg_width: float = 1.0, bend_radius: float = 10.0, arm_length: float = 20.0
+) -> kf.KCell:
     """Simple L-shaped arm: straight → 90° Euler bend → straight."""
     c = kf.KCell()
 

@@ -43,7 +43,7 @@ L = LAYER()
 straight = straight_dbu_factory(pdk)
 
 wg_short = straight(
-    width=pdk.to_dbu(0.5),    # 500 DBU = 0.5 µm
+    width=pdk.to_dbu(0.5),  # 500 DBU = 0.5 µm
     length=pdk.to_dbu(10.0),  # 10000 DBU = 10 µm
     layer=L.WG,
 )

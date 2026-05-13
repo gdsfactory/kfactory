@@ -43,7 +43,7 @@ from typing import Any
 import jupytext
 import nbformat
 from nbconvert import MarkdownExporter
-from nbconvert.preprocessors import ExecutePreprocessor, TagRemovePreprocessor
+from nbconvert.preprocessors import ExecutePreprocessor
 from traitlets.config import Config
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -81,9 +81,7 @@ _PY_LINK_RE = re.compile(r"(\]\((?!https?://)[^)]+?)\.py(#[^)]*)?\)")
 
 def rewrite_py_links(text: str) -> str:
     """Rewrite Markdown links from foo.py → foo.md (skips http(s) URLs)."""
-    return _PY_LINK_RE.sub(
-        lambda m: f"{m.group(1)}.md{m.group(2) or ''})", text
-    )
+    return _PY_LINK_RE.sub(lambda m: f"{m.group(1)}.md{m.group(2) or ''})", text)
 
 
 def fence_indented_blocks(text: str) -> str:
@@ -99,13 +97,15 @@ def fence_indented_blocks(text: str) -> str:
     while i < len(lines):
         line = lines[i]
         stripped = line.lstrip()
-        if stripped.startswith("```") or stripped.startswith("~~~"):
+        if stripped.startswith(("```", "~~~")):
             in_fence = not in_fence
             out.append(line)
             i += 1
             continue
-        if not in_fence and line.startswith("    ") and (
-            i == 0 or lines[i - 1].strip() == ""
+        if (
+            not in_fence
+            and line.startswith("    ")
+            and (i == 0 or lines[i - 1].strip() == "")
         ):
             # Collect a contiguous indented block (4-space-prefixed lines,
             # blank lines allowed inside as long as the next non-blank also
@@ -273,6 +273,15 @@ def gen_api_reference(out_root: Path, src_pkg: Path) -> list[Path]:
     so that `/reference/` itself is the top-level package API page,
     not a "click here to see the API" detour.
     """
+    # Wipe any previously-generated reference tree so a module removed
+    # from src/kfactory/ doesn't leave an orphan `::: kfactory.foo` page
+    # behind. CI restores docs/source-built/ via actions/cache restore-keys
+    # when the hash changes, and a stale directive for a now-removed
+    # module crashes mkdocstrings during the zensical build.
+    ref_root = out_root / "reference"
+    if ref_root.exists():
+        shutil.rmtree(ref_root)
+
     written: list[Path] = []
     # Tree of (depth, title, doc_rel) preserving traversal order.
     # Used to splice the API nav into zensical.yml since zensical 0.0.40
@@ -289,9 +298,7 @@ def gen_api_reference(out_root: Path, src_pkg: Path) -> list[Path]:
             parts = parts[:-1]
             sub_parts = parts[1:]  # drop leading "kfactory"
             doc_rel = (
-                Path("index.md")
-                if not sub_parts
-                else Path(*sub_parts) / "index.md"
+                Path("index.md") if not sub_parts else Path(*sub_parts) / "index.md"
             )
         else:
             sub_parts = parts[1:]  # drop leading "kfactory"
@@ -305,11 +312,7 @@ def gen_api_reference(out_root: Path, src_pkg: Path) -> list[Path]:
         # Submodule navigation goes through the side nav, which the build
         # script splices into zensical.yml from `api_tree` below.
         if is_package:
-            target.write_text(
-                f"::: {ident}\n"
-                "    options:\n"
-                "      members: false\n"
-            )
+            target.write_text(f"::: {ident}\n    options:\n      members: false\n")
         else:
             target.write_text(f"::: {ident}\n")
         written.append(target)
@@ -324,9 +327,7 @@ def gen_api_reference(out_root: Path, src_pkg: Path) -> list[Path]:
     return written
 
 
-def _api_tree_to_yaml(
-    tree: list[tuple[int, str, str]], indent: int = 0
-) -> str:
+def _api_tree_to_yaml(tree: list[tuple[int, str, str]], indent: int = 0) -> str:
     """Render the flat DFS-order (depth, title, doc_rel) list as a nested
     YAML nav fragment. Entries whose next sibling has greater depth are
     treated as subpackage headers; their `index.md` is rendered as an
@@ -344,10 +345,7 @@ def _api_tree_to_yaml(
               ...
     """
     n = len(tree)
-    is_pkg = [
-        i + 1 < n and tree[i + 1][0] > tree[i][0]
-        for i in range(n)
-    ]
+    is_pkg = [i + 1 < n and tree[i + 1][0] > tree[i][0] for i in range(n)]
     pad = " " * indent
     lines: list[str] = []
     for i, (depth, title, doc_rel) in enumerate(tree):
@@ -405,7 +403,7 @@ def gen_diagrams(out_root: Path) -> list[Path]:
         print("[diagrams] erdantic not installed — skipping", flush=True)
         return []
 
-    import kfactory as kf  # noqa: F401 — needed for class refs below
+    import kfactory as kf
 
     static_dir = out_root / "_static"
     static_dir.mkdir(parents=True, exist_ok=True)
@@ -528,7 +526,7 @@ def main(argv: list[str] | None = None) -> int:
                         f"({res['elapsed']:.1f}s)",
                         flush=True,
                     )
-                except BaseException as e:  # noqa: BLE001
+                except BaseException as e:
                     failures.append((src, e))
                     print(f"  ✗ {src.relative_to(src_root)}: {e}", flush=True)
 
@@ -547,6 +545,7 @@ def main(argv: list[str] | None = None) -> int:
     # Stage 4: logo (κ generated from a real kfactory KCell → GDS + SVG)
     print("[stage4] generating κ logo …", flush=True)
     from gen_logo import generate as generate_logo
+
     logo_gds, logo_svg = generate_logo(out_root / "_static")
     print(f"  wrote {logo_gds.name} + {logo_svg.name}", flush=True)
 

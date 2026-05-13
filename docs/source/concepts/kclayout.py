@@ -146,8 +146,8 @@ s2.ports.print(unit="um")
 
 # %%
 c = kf.kcl.kcell("mixed_pdks")
-si_default = c << s   # instance of the 1 nm-grid straight
-si_demo    = c << s2  # instance of the 5 nm-grid straight
+si_default = c << s  # instance of the 1 nm-grid straight
+si_demo = c << s2  # instance of the 5 nm-grid straight
 
 # Connect port o1 of the demo cell to port o2 of the default cell
 si_demo.connect("o1", si_default, "o2")

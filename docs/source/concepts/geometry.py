@@ -36,8 +36,9 @@
 # coordinates.
 
 # %%
-import kfactory as kf
 import numpy as np
+
+import kfactory as kf
 
 
 class LAYER(kf.LayerInfos):
@@ -58,7 +59,7 @@ kf.kcl.infos = L
 # `DBox(left, bottom, right, top)` or `DBox(width, height)` (centred at origin).
 
 # %%
-box_um = kf.kdb.DBox(-2.5, -5, 2.5, 5)   # 5 µm wide, 10 µm tall, centred
+box_um = kf.kdb.DBox(-2.5, -5, 2.5, 5)  # 5 µm wide, 10 µm tall, centred
 box_um
 
 # %%
@@ -76,9 +77,9 @@ print(f"µm  width : {box_um.width()} µm")
 poly_a = kf.kdb.DPolygon(
     [
         kf.kdb.DPoint(-8, -6),
-        kf.kdb.DPoint(6,   8),
-        kf.kdb.DPoint(7,  17),
-        kf.kdb.DPoint(9,   5),
+        kf.kdb.DPoint(6, 8),
+        kf.kdb.DPoint(7, 17),
+        kf.kdb.DPoint(9, 5),
     ]
 )
 
@@ -117,9 +118,7 @@ c.shapes(kf.kcl.find_layer(L.WG)).insert(kf.kdb.DBox(0, 0, 10, 1))
 
 # Polygon on CLAD layer (list-of-points style)
 c.shapes(kf.kcl.find_layer(L.CLAD)).insert(
-    kf.kdb.DPolygon(
-        [kf.kdb.DPoint(x, y) for x, y in ((0, 0), (1, 1), (1, 3), (-3, 3))]
-    )
+    kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in ((0, 0), (1, 1), (1, 3), (-3, 3))])
 )
 
 c.plot()
@@ -202,11 +201,13 @@ e2 = kf.kdb.DPolygon.ellipse(kf.kdb.DBox(10, 6), 64).transformed(
     kf.kdb.DTrans(2.0, 0.0)
 )
 
+
 # Helper: make a demo cell with the result of a Region operation
 def _show(name: str, region: kf.kdb.Region) -> kf.KCell:
     c = kf.KCell(name=name)
     c.shapes(kf.kcl.find_layer(L.WG)).insert(region)
     return c
+
 
 r1 = kf.kdb.Region(kf.kcl.to_dbu(e1))
 r2 = kf.kdb.Region(kf.kcl.to_dbu(e2))

@@ -100,9 +100,6 @@ extra:
     provider: mike
     default: latest
 
-watch:
-  - ../src/kfactory
-
 markdown_extensions:
   - admonition
   - attr_list                         # required for {.md-button} and {.lg .middle}

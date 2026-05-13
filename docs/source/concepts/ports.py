@@ -67,7 +67,7 @@ kf.kcl.infos = L
 # %%
 port_left = kf.Port(
     name="o1",
-    width=kf.kcl.to_dbu(1.0),            # 1 µm → DBU
+    width=kf.kcl.to_dbu(1.0),  # 1 µm → DBU
     dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, -5, 0),  # facing west at (-5, 0) µm
     layer=kf.kcl.find_layer(L.WG),
     kcl=kf.kcl,
@@ -76,7 +76,7 @@ port_left = kf.Port(
 port_right = kf.Port(
     name="o2",
     width=kf.kcl.to_dbu(1.0),
-    dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, 5, 0),     # facing east at (+5, 0) µm
+    dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, 5, 0),  # facing east at (+5, 0) µm
     layer=kf.kcl.find_layer(L.WG),
     kcl=kf.kcl,
 )
@@ -150,10 +150,10 @@ mixed = kf.KCell(name="mixed_ports")
 mixed.shapes(kf.kcl.find_layer(L.WG)).insert(kf.kdb.DBox(-5, -0.5, 5, 0.5))
 
 for name, angle, layer, ptype in [
-    ("o1",  180, L.WG,    "optical"),
-    ("o2",    0, L.WG,    "optical"),
-    ("e1",   90, L.METAL, "electrical"),
-    ("e2",  270, L.METAL, "electrical"),
+    ("o1", 180, L.WG, "optical"),
+    ("o2", 0, L.WG, "optical"),
+    ("e1", 90, L.METAL, "electrical"),
+    ("e2", 270, L.METAL, "electrical"),
 ]:
     mixed.add_port(
         port=kf.Port(
@@ -197,7 +197,7 @@ parent = kf.KCell(name="two_wg_parent")
 s = kf.cells.straight.straight(length=10, width=0.5, layer=L.WG)
 wg1 = parent << s
 wg2 = parent << s
-wg2.transform(kf.kdb.DTrans(0, 5))   # shift 5 µm north (in DBU: 5000 nm)
+wg2.transform(kf.kdb.DTrans(0, 5))  # shift 5 µm north (in DBU: 5000 nm)
 
 parent.add_ports(wg1.ports, prefix="top_")
 parent.add_ports(wg2.ports, prefix="bot_")

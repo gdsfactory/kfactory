@@ -229,10 +229,10 @@ kf.routing.optical.route_bundle(
     constraints=[
         kf.PathLengthMatch(
             route_names=["plm_demo"],
-            element=-1,        # insert loop in the last backbone segment
-            loop_side=-1,      # loops on the left side
+            element=-1,  # insert loop in the last backbone segment
+            loop_side=-1,  # loops on the left side
             loops=1,
-            loop_position=0,   # centered in the segment
+            loop_position=0,  # centered in the segment
         )
     ],
     route_name="plm_demo",

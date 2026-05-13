@@ -139,6 +139,7 @@ wg
 #
 # This is the recommended way to create any reusable, parametric component.
 
+
 # %%
 @kf.cell
 def straight(
@@ -257,6 +258,7 @@ line
 # Use `VKCell` (and the matching `@vcell` decorator) when you need a temporary cell that
 # should not pollute the global cell namespace, for example as a scratch pad during
 # routing or in tests.
+
 
 # %%
 @kf.vcell
