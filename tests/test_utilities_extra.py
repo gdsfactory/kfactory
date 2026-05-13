@@ -106,4 +106,6 @@ def test_get_session_directory_no_project_dir(
 ) -> None:
     monkeypatch.setattr(kf.config, "project_dir", None)
     target = get_session_directory()
-    assert "session/kcls" in str(target)
+    from pathlib import Path
+
+    assert Path("session/kcls").parts == target.parts[-2:]
