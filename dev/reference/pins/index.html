@@ -5911,7 +5911,9 @@
 <span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span>
-<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DPins</span><span class="p">(</span><span class="n">ProtoPins</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DPins</span><span class="p">(</span><span class="n">ProtoPins</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
     <span class="n">yaml_tag</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;!DPins&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">DPin</span><span class="p">]:</span>
@@ -5948,10 +5950,12 @@
             <span class="p">)</span>
         <span class="n">port_bases</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">ports</span><span class="p">:</span>
-            <span class="n">port_base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span>
             <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">kcl</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">:</span>
-                <span class="n">port_base</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span>
-            <span class="n">port_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port_base</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot add a pin which belongs to a different layout or cell to a&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; cell. </span><span class="si">{</span><span class="n">port</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="si">!r}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="n">port_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
 
         <span class="n">base_</span> <span class="o">=</span> <span class="n">BasePin</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">ports</span><span class="o">=</span><span class="n">port_bases</span><span class="p">,</span> <span class="n">pin_type</span><span class="o">=</span><span class="n">pin_type</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info_</span>
@@ -6105,7 +6109,9 @@
 <span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
-<span class="normal">223</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_pin</span><span class="p">(</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_pin</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -6123,10 +6129,12 @@
         <span class="p">)</span>
     <span class="n">port_bases</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">ports</span><span class="p">:</span>
-        <span class="n">port_base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span>
         <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">kcl</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">:</span>
-            <span class="n">port_base</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span>
-        <span class="n">port_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port_base</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Cannot add a pin which belongs to a different layout or cell to a&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; cell. </span><span class="si">{</span><span class="n">port</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="si">!r}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">port_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
 
     <span class="n">base_</span> <span class="o">=</span> <span class="n">BasePin</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">ports</span><span class="o">=</span><span class="n">port_bases</span><span class="p">,</span> <span class="n">pin_type</span><span class="o">=</span><span class="n">pin_type</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info_</span>
@@ -6158,9 +6166,9 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/pins.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_named</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DPin</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_named</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DPin</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all pins in a dictionary with names as keys.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">DPin</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>

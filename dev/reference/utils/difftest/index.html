@@ -5554,8 +5554,7 @@ overlaid.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/utils/difftest.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">201</span>
-<span class="normal">202</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">202</span>
 <span class="normal">203</span>
 <span class="normal">204</span>
 <span class="normal">205</span>
@@ -5752,7 +5751,8 @@ overlaid.</p>
 <span class="normal">396</span>
 <span class="normal">397</span>
 <span class="normal">398</span>
-<span class="normal">399</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">diff</span><span class="p">(</span>
+<span class="normal">399</span>
+<span class="normal">400</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">diff</span><span class="p">(</span>
     <span class="n">ref_file</span><span class="p">:</span> <span class="n">PathType</span><span class="p">,</span>
     <span class="n">run_file</span><span class="p">:</span> <span class="n">PathType</span><span class="p">,</span>
     <span class="n">xor</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -5966,7 +5966,7 @@ overlaid.</p>
 
 </h3>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">difftest</span><span class="p">(</span>
-    <span class="n">component</span><span class="p">:</span> <span class="n">TKCell</span><span class="p">,</span>
+    <span class="n">component</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="n">dirpath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">dirpath_run</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">test_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6003,12 +6003,7 @@ in KLayout.</p>
                 <code>component</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;TKCell&lt;/span&gt;
-
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../kcell/#kfactory.kcell.TKCell">TKCell</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;ProtoTKCell&lt;/span&gt;" href="../../kcell/#kfactory.kcell.ProtoTKCell">ProtoTKCell</a>[<span title="typing.Any">Any</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6139,8 +6134,7 @@ in XOR mode.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/utils/difftest.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">402</span>
-<span class="normal">403</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">403</span>
 <span class="normal">404</span>
 <span class="normal">405</span>
 <span class="normal">406</span>
@@ -6217,8 +6211,9 @@ in XOR mode.</p>
 <span class="normal">477</span>
 <span class="normal">478</span>
 <span class="normal">479</span>
-<span class="normal">480</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">difftest</span><span class="p">(</span>
-    <span class="n">component</span><span class="p">:</span> <span class="n">TKCell</span><span class="p">,</span>
+<span class="normal">480</span>
+<span class="normal">481</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">difftest</span><span class="p">(</span>
+    <span class="n">component</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="n">dirpath</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
     <span class="n">dirpath_run</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
     <span class="n">test_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6311,8 +6306,8 @@ in XOR mode.</p>
 
 </h3>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">xor</span><span class="p">(</span>
-    <span class="n">old</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
-    <span class="n">new</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
+    <span class="n">old</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+    <span class="n">new</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="n">test_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="n">ignore_sliver_differences</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">ignore_cell_name_differences</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -6342,12 +6337,7 @@ in XOR mode.</p>
                 <code>old</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;KCLayout&lt;/span&gt;
-
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../layout/#kfactory.layout.KCLayout">KCLayout</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;ProtoTKCell&lt;/span&gt;" href="../../kcell/#kfactory.kcell.ProtoTKCell">ProtoTKCell</a>[<span title="typing.Any">Any</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6363,12 +6353,7 @@ in XOR mode.</p>
                 <code>new</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;KCLayout&lt;/span&gt;
-
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../layout/#kfactory.layout.KCLayout">KCLayout</a></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;ProtoTKCell&lt;/span&gt;" href="../../kcell/#kfactory.kcell.ProtoTKCell">ProtoTKCell</a>[<span title="typing.Any">Any</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6468,8 +6453,7 @@ If False, all three are overlaid.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/utils/difftest.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 20</span>
-<span class="normal"> 21</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 21</span>
 <span class="normal"> 22</span>
 <span class="normal"> 23</span>
 <span class="normal"> 24</span>
@@ -6646,9 +6630,10 @@ If False, all three are overlaid.</p>
 <span class="normal">195</span>
 <span class="normal">196</span>
 <span class="normal">197</span>
-<span class="normal">198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">xor</span><span class="p">(</span>
-    <span class="n">old</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
-    <span class="n">new</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
+<span class="normal">198</span>
+<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">xor</span><span class="p">(</span>
+    <span class="n">old</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+    <span class="n">new</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="n">test_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="n">ignore_sliver_differences</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">ignore_cell_name_differences</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
