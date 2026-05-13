@@ -7526,7 +7526,7 @@ is not manhattan or the elements cannot be fitted.</p>
                 <span class="p">)</span>
             <span class="n">end_ports</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">p</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">post_trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">get_trans</span><span class="p">()</span><span class="o">.</span><span class="n">angle</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">end_angles</span><span class="p">,</span> <span class="n">start_ports</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">end_angles</span><span class="p">,</span> <span class="n">end_ports</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="p">]</span>
 
     <span class="k">if</span> <span class="n">route_width</span><span class="p">:</span>
