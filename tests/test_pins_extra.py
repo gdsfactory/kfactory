@@ -119,6 +119,36 @@ def test_pins_create_pin_wrong_kcl_raises(layers: Layers) -> None:
         c2.pins.create_pin(name="p_wrong", ports=[port])
 
 
+def test_cell_create_pin_port_from_other_cell_raises(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    """Same kcl, different cell: cell.create_pin must reject the foreign port."""
+    xs = kf.SymmetricalCrossSection(
+        width=5000,
+        enclosure=kf.LayerEnclosure(main_layer=layers.METAL1, name="M1_OC"),
+    )
+    c_owner = kcl.kcell()
+    c_other = kcl.kcell()
+    port = c_owner.create_port(name="e1", trans=kf.kdb.Trans.R0, cross_section=xs)
+    with pytest.raises(ValueError, match="not a port of cell"):
+        c_other.create_pin(name="p", ports=[port])
+
+
+def test_dcell_create_pin_port_from_other_cell_raises(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    """Same as above, but going through DKCell.create_pin."""
+    xs = kf.SymmetricalCrossSection(
+        width=5000,
+        enclosure=kf.LayerEnclosure(main_layer=layers.METAL1, name="M1_OC_D"),
+    )
+    c_owner = kcl.dkcell()
+    c_other = kcl.dkcell()
+    port = c_owner.create_port(name="e1", trans=kf.kdb.Trans.R0, cross_section=xs)
+    with pytest.raises(ValueError, match="not a port of cell"):
+        c_other.create_pin(name="p", ports=[port])
+
+
 def test_pin_repr(kcl: kf.KCLayout, layers: Layers) -> None:
     c = _make_kcell_with_pin(kcl, layers)
     r = repr(c.pins[0])
@@ -247,8 +277,8 @@ def test_dpins_create_pin_empty_raises(kcl: kf.KCLayout, layers: Layers) -> None
         dpins.create_pin(name="x", ports=[])
 
 
-def test_dpins_create_pin_other_kcl_assigns(layers: Layers) -> None:
-    """For DPins, ports from another kcl get re-assigned (no raise)."""
+def test_dpins_create_pin_other_kcl_raises(layers: Layers) -> None:
+    """DPins.create_pin rejects ports that belong to a different kcl."""
     kcl1 = kf.KCLayout("DPINS_OTHER_KCL_1", infos=Layers)
     kcl2 = kf.KCLayout("DPINS_OTHER_KCL_2", infos=Layers)
     xs = kf.SymmetricalCrossSection(
@@ -259,8 +289,8 @@ def test_dpins_create_pin_other_kcl_assigns(layers: Layers) -> None:
     c2 = kcl2.kcell()
     port = c1.create_port(name="e1", trans=kf.kdb.Trans.R0, cross_section=xs)
     dpins = c2.pins.to_dtype()
-    p = dpins.create_pin(name="p", ports=[port])
-    assert p.name == "p"
+    with pytest.raises(ValueError, match="different layout"):
+        dpins.create_pin(name="p", ports=[port])
 
 
 def test_pins_filter_no_match(kcl: kf.KCLayout, layers: Layers) -> None:
