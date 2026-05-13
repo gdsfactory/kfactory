@@ -4,10 +4,11 @@
 import filecmp
 import pathlib
 import shutil
+from typing import Any
 
 import kfactory as kf
 from kfactory import DKCell, KCLayout, kdb
-from kfactory.kcell import TKCell
+from kfactory.kcell import ProtoTKCell
 
 
 class GeometryDifferenceError(Exception):
@@ -18,8 +19,8 @@ PathType = pathlib.Path | str
 
 
 def xor(
-    old: KCLayout,
-    new: KCLayout,
+    old: ProtoTKCell[Any],
+    new: ProtoTKCell[Any],
     test_name: str = "",
     ignore_sliver_differences: bool = False,
     ignore_cell_name_differences: bool = False,
@@ -400,7 +401,7 @@ def diff(
 
 
 def difftest(
-    component: TKCell,
+    component: ProtoTKCell[Any],
     dirpath: pathlib.Path,
     dirpath_run: pathlib.Path,
     test_name: str | None = None,
