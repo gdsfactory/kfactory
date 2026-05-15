@@ -1,0 +1,85 @@
+          - Overview: reference/index.md
+          - cells:
+              - Overview: reference/cells/index.md
+              - _demopdk: reference/cells/_demopdk.md
+              - bezier: reference/cells/bezier.md
+              - circular: reference/cells/circular.md
+              - euler: reference/cells/euler.md
+              - straight: reference/cells/straight.md
+              - taper: reference/cells/taper.md
+              - virtual:
+                  - Overview: reference/cells/virtual/index.md
+                  - circular: reference/cells/virtual/circular.md
+                  - euler: reference/cells/virtual/euler.md
+                  - straight: reference/cells/virtual/straight.md
+          - checks: reference/checks.md
+          - cli:
+              - Overview: reference/cli/index.md
+              - build: reference/cli/build.md
+          - conf: reference/conf.md
+          - cross_section: reference/cross_section.md
+          - decorators: reference/decorators.md
+          - enclosure: reference/enclosure.md
+          - exceptions: reference/exceptions.md
+          - factories:
+              - Overview: reference/factories/index.md
+              - bezier: reference/factories/bezier.md
+              - circular: reference/factories/circular.md
+              - euler: reference/factories/euler.md
+              - straight: reference/factories/straight.md
+              - taper: reference/factories/taper.md
+              - utils: reference/factories/utils.md
+              - virtual:
+                  - Overview: reference/factories/virtual/index.md
+                  - circular: reference/factories/virtual/circular.md
+                  - euler: reference/factories/virtual/euler.md
+                  - straight: reference/factories/virtual/straight.md
+          - geometry: reference/geometry.md
+          - grid: reference/grid.md
+          - instance: reference/instance.md
+          - instance_group: reference/instance_group.md
+          - instance_pins: reference/instance_pins.md
+          - instance_ports: reference/instance_ports.md
+          - instances: reference/instances.md
+          - kcell: reference/kcell.md
+          - layer: reference/layer.md
+          - layout: reference/layout.md
+          - merge: reference/merge.md
+          - packing: reference/packing.md
+          - pin: reference/pin.md
+          - pins: reference/pins.md
+          - placer: reference/placer.md
+          - port: reference/port.md
+          - ports: reference/ports.md
+          - protocols: reference/protocols.md
+          - routing:
+              - Overview: reference/routing/index.md
+              - aa:
+                  - Overview: reference/routing/aa/index.md
+                  - optical: reference/routing/aa/optical.md
+              - electrical: reference/routing/electrical.md
+              - generic: reference/routing/generic.md
+              - length_functions: reference/routing/length_functions.md
+              - manhattan: reference/routing/manhattan.md
+              - optical: reference/routing/optical.md
+              - steps: reference/routing/steps.md
+              - utils: reference/routing/utils.md
+          - schematic: reference/schematic.md
+          - serialization: reference/serialization.md
+          - session_cache: reference/session_cache.md
+          - settings: reference/settings.md
+          - shapes: reference/shapes.md
+          - technology:
+              - Overview: reference/technology/index.md
+              - layer_map: reference/technology/layer_map.md
+          - typings: reference/typings.md
+          - utilities: reference/utilities.md
+          - utils:
+              - Overview: reference/utils/index.md
+              - difftest: reference/utils/difftest.md
+              - fill: reference/utils/fill.md
+              - simplify: reference/utils/simplify.md
+              - violations: reference/utils/violations.md
+          - widgets:
+              - Overview: reference/widgets/index.md
+              - interactive: reference/widgets/interactive.md
