@@ -51,6 +51,13 @@ from ruamel.yaml.constructor import SafeConstructor
 from semver import Version
 
 from . import kdb, rdb
+from .checks import (
+    _collect_inst_ports,
+    dangling_ports_check,
+    instance_overlap_check,
+    port_mismatch_check,
+    shape_instance_overlap_check,
+)
 from .conf import DEFAULT_TRANS, CheckInstances, ShowFunction, config, logger
 from .cross_section import (
     CrossSection,
@@ -78,9 +85,7 @@ from .port import (
     Port,
     PortCheck,
     ProtoPort,
-    create_port_error,
     port_check,
-    port_polygon,
 )
 from .ports import DCreatePort, DPorts, ICreatePort, Ports, ProtoPorts
 from .serialization import (
@@ -100,8 +105,6 @@ from .typings import (
     TBaseCell_co,
 )
 from .utilities import (
-    check_cell_ports,
-    check_inst_ports,
     get_build_path,
     instance_port_name,
     load_layout_options,
@@ -2244,439 +2247,78 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         add_cell_ports: bool = False,
         check_layer_connectivity: bool = True,
     ) -> rdb.ReportDatabase:
-        """Create a ReportDatabase for port problems.
+        """Create a ReportDatabase aggregating all standalone connectivity checks.
 
-        Problems are overlapping ports that aren't aligned, more than two ports
-        overlapping, width mismatch, port_type mismatch.
+        This is the all-in-one pass/fail entry point. It runs
+        [`port_mismatch_check`][kfactory.checks.port_mismatch_check],
+        [`dangling_ports_check`][kfactory.checks.dangling_ports_check], and (when
+        `check_layer_connectivity=True`)
+        [`instance_overlap_check`][kfactory.checks.instance_overlap_check] +
+        [`shape_instance_overlap_check`][kfactory.checks.shape_instance_overlap_check]
+        into a single report. Call those functions directly to run a narrower
+        check.
 
         Args:
-            port_types: Filter for certain port typers
-            layers: Only create the report for certain layers
-            db: Use an existing ReportDatabase instead of creating a new one
-            recursive: Create the report not only for this cell, but all child cells as
-                well.
-            add_cell_ports: Also add a category "CellPorts" which contains all the cells
-                selected ports.
-            check_layer_connectivity: Check whether the layer overlaps with instances.
+            port_types: Filter for certain port types.
+            layers: Only create the report for certain layers.
+            db: Use an existing ReportDatabase instead of creating a new one.
+            recursive: Create the report not only for this cell, but all child
+                cells as well.
+            add_cell_ports: Also add a category "CellPorts" which contains all
+                the cell's selected ports.
+            check_layer_connectivity: Run the shape/instance overlap checks.
         """
-        if layers is None:
-            layers = []
-        if port_types is None:
-            port_types = []
+        port_types = port_types or []
+        layers = layers or []
         db_: rdb.ReportDatabase = db or rdb.ReportDatabase(
             f"Connectivity Check {self.name}"
         )
-        assert isinstance(db_, rdb.ReportDatabase)
         if recursive:
             cc = self.called_cells()
             for c in self.kcl.each_cell_bottom_up():
                 if c in cc:
                     self.kcl[c].connectivity_check(
                         port_types=port_types,
+                        layers=layers,
                         db=db_,
                         recursive=False,
                         add_cell_ports=add_cell_ports,
-                        layers=layers,
+                        check_layer_connectivity=check_layer_connectivity,
                     )
-        db_cell = db_.create_cell(self.name)
-        cell_ports: dict[int, dict[tuple[float, float], list[ProtoPort[Any]]]] = {}
-        layer_cats: dict[int, rdb.RdbCategory] = {}
 
-        def layer_cat(layer: int) -> rdb.RdbCategory:
-            if layer not in layer_cats:
-                if isinstance(layer, LayerEnum):
-                    ln = str(layer.name)
-                else:
-                    li = self.kcl.get_info(layer)
-                    ln = str(li).replace("/", "_")
-                layer_cats[layer] = db_.category_by_path(ln) or db_.create_category(ln)
-            return layer_cats[layer]
-
-        for port in Ports(kcl=self.kcl, bases=self.ports.bases):
-            if (not port_types or port.port_type in port_types) and (
-                not layers or port.layer in layers
-            ):
-                if add_cell_ports:
-                    c_cat = db_.category_by_path(
-                        f"{layer_cat(port.layer).path()}.CellPorts"
-                    ) or db_.create_category(layer_cat(port.layer), "CellPorts")
-                    it = db_.create_item(db_cell, c_cat)
-                    if port.name:
-                        it.add_value(f"Port name: {port.name}")
-                    if port.base.trans:
-                        it.add_value(
-                            self.kcl.to_um(
-                                port_polygon(port.width).transformed(port.trans)
-                            )
-                        )
-                    else:
-                        it.add_value(
-                            self.kcl.to_um(port_polygon(port.width)).transformed(
-                                port.dcplx_trans
-                            )
-                        )
-                xy = (port.x, port.y)
-                if port.layer not in cell_ports:
-                    cell_ports[port.layer] = {xy: [port]}
-                elif xy not in cell_ports[port.layer]:
-                    cell_ports[port.layer][xy] = [port]
-                else:
-                    cell_ports[port.layer][xy].append(port)
-                rec_it = kdb.RecursiveShapeIterator(
-                    self.kcl.layout,
-                    self._base.kdb_cell,
-                    port.layer,
-                    kdb.Box(2, port.width).transformed(port.trans),
+        port_mismatch_check(
+            self,
+            port_types=port_types,
+            layers=layers,
+            db=db_,
+            recursive=False,
+            add_cell_ports=add_cell_ports,
+        )
+        dangling_ports_check(
+            self,
+            port_types=port_types,
+            layers=layers,
+            db=db_,
+            recursive=False,
+        )
+        if check_layer_connectivity:
+            # Preserve original behaviour: only scan layers that carry at least
+            # one (filtered) instance port. This avoids surfacing overlap items
+            # on layers the user didn't ask about via port_types/layers.
+            gated_layers = list(_collect_inst_ports(self, port_types, layers).keys())
+            if gated_layers:
+                instance_overlap_check(
+                    self,
+                    layers=gated_layers,
+                    db=db_,
+                    recursive=False,
                 )
-                edges = kdb.Region(rec_it).merge().edges().merge()
-                port_edge = kdb.Edge(0, port.width // 2, 0, -port.width // 2)
-                if port.base.trans:
-                    port_edge = port_edge.transformed(port.trans)
-                else:
-                    port_edge = port_edge.transformed(
-                        kdb.ICplxTrans(port.dcplx_trans, self.kcl.dbu)
-                    )
-                p_edges = kdb.Edges([port_edge])
-                phys_overlap = p_edges & edges
-                if not phys_overlap.is_empty() and phys_overlap[0] != port_edge:
-                    p_cat = db_.category_by_path(
-                        layer_cat(port.layer).path() + ".PartialPhysicalShape"
-                    ) or db_.create_category(
-                        layer_cat(port.layer), "PartialPhysicalShape"
-                    )
-                    it = db_.create_item(db_cell, p_cat)
-                    it.add_value(
-                        "Insufficient overlap, partial overlap with polygon of"
-                        f" {(phys_overlap[0].p1 - phys_overlap[0].p2).abs()}/"
-                        f"{port.width}"
-                    )
-                    it.add_value(
-                        self.kcl.to_um(port_polygon(port.width).transformed(port.trans))
-                        if port.base.trans
-                        else self.kcl.to_um(port_polygon(port.width)).transformed(
-                            port.dcplx_trans
-                        )
-                    )
-                elif phys_overlap.is_empty():
-                    p_cat = db_.category_by_path(
-                        layer_cat(port.layer).path() + ".MissingPhysicalShape"
-                    ) or db_.create_category(
-                        layer_cat(port.layer), "MissingPhysicalShape"
-                    )
-                    it = db_.create_item(db_cell, p_cat)
-                    it.add_value(
-                        f"Found no overlapping Edge with Port {port.name or str(port)}"
-                    )
-                    it.add_value(
-                        self.kcl.to_um(port_polygon(port.width).transformed(port.trans))
-                        if port.base.trans
-                        else self.kcl.to_um(port_polygon(port.width)).transformed(
-                            port.dcplx_trans
-                        )
-                    )
-
-        inst_ports: dict[
-            LayerEnum | int,
-            dict[tuple[int, int], list[tuple[Port, KCell, str]]],
-        ] = {}
-        for inst in self.insts:
-            inst_name = inst.name
-            inst_cell = inst.cell.to_itype()
-            for port in Ports(kcl=self.kcl, bases=[p.base for p in inst.ports]):
-                if (not port_types or port.port_type in port_types) and (
-                    not layers or port.layer in layers
-                ):
-                    xy = (port.x, port.y)
-                    entry = (port, inst_cell, inst_name)
-                    if port.layer not in inst_ports:
-                        inst_ports[port.layer] = {xy: [entry]}
-                    elif xy not in inst_ports[port.layer]:
-                        inst_ports[port.layer][xy] = [entry]
-                    else:
-                        inst_ports[port.layer][xy].append(entry)
-
-        for layer, port_coord_mapping in inst_ports.items():
-            lc = layer_cat(layer)
-            for coord, ports in port_coord_mapping.items():
-                match len(ports):
-                    case 1:
-                        if layer in cell_ports and coord in cell_ports[layer]:
-                            ccp = check_cell_ports(
-                                cell_ports[layer][coord][0], ports[0][0]
-                            )
-                            if ccp & 1:
-                                subc = db_.category_by_path(
-                                    lc.path() + ".WidthMismatch"
-                                ) or db_.create_category(lc, "WidthMismatch")
-                                create_port_error(
-                                    ports[0][0],
-                                    cell_ports[layer][coord][0],
-                                    ports[0][1],
-                                    self,
-                                    db_,
-                                    db_cell,
-                                    subc,
-                                    self.kcl.dbu,
-                                    inst_name1=ports[0][2],
-                                )
-
-                            if ccp & 2:
-                                subc = db_.category_by_path(
-                                    lc.path() + ".AngleMismatch"
-                                ) or db_.create_category(lc, "AngleMismatch")
-                                create_port_error(
-                                    ports[0][0],
-                                    cell_ports[layer][coord][0],
-                                    ports[0][1],
-                                    self,
-                                    db_,
-                                    db_cell,
-                                    subc,
-                                    self.kcl.dbu,
-                                    inst_name1=ports[0][2],
-                                )
-                            if ccp & 4:
-                                subc = db_.category_by_path(
-                                    lc.path() + ".TypeMismatch"
-                                ) or db_.create_category(lc, "TypeMismatch")
-                                create_port_error(
-                                    ports[0][0],
-                                    cell_ports[layer][coord][0],
-                                    ports[0][1],
-                                    self,
-                                    db_,
-                                    db_cell,
-                                    subc,
-                                    self.kcl.dbu,
-                                    inst_name1=ports[0][2],
-                                )
-                        else:
-                            subc = db_.category_by_path(
-                                lc.path() + ".OrphanPort"
-                            ) or db_.create_category(lc, "OrphanPort")
-                            it = db_.create_item(db_cell, subc)
-                            port_name = ports[0][0].name or str(ports[0][0])
-                            cell_name = ports[0][1].name
-                            inst_name = ports[0][2]
-                            if inst_name:
-                                it.add_value(
-                                    f"Port Name: {inst_name}.{port_name}"
-                                    f" (cell: {cell_name})"
-                                )
-                            else:
-                                it.add_value(f"Port Name: {cell_name}.{port_name}")
-                            if ports[0][0]._base.trans:
-                                it.add_value(
-                                    self.kcl.to_um(
-                                        port_polygon(ports[0][0].width).transformed(
-                                            ports[0][0]._base.trans
-                                        )
-                                    )
-                                )
-                            else:
-                                it.add_value(
-                                    self.kcl.to_um(
-                                        port_polygon(port.width)
-                                    ).transformed(port.dcplx_trans)
-                                )
-
-                    case 2:
-                        cip = check_inst_ports(ports[0][0], ports[1][0])
-                        if cip & 1:
-                            subc = db_.category_by_path(
-                                lc.path() + ".WidthMismatch"
-                            ) or db_.create_category(lc, "WidthMismatch")
-                            create_port_error(
-                                ports[0][0],
-                                ports[1][0],
-                                ports[0][1],
-                                ports[1][1],
-                                db_,
-                                db_cell,
-                                subc,
-                                self.kcl.dbu,
-                                inst_name1=ports[0][2],
-                                inst_name2=ports[1][2],
-                            )
-
-                        if cip & 2:
-                            subc = db_.category_by_path(
-                                lc.path() + ".AngleMismatch"
-                            ) or db_.create_category(lc, "AngleMismatch")
-                            create_port_error(
-                                ports[0][0],
-                                ports[1][0],
-                                ports[0][1],
-                                ports[1][1],
-                                db_,
-                                db_cell,
-                                subc,
-                                self.kcl.dbu,
-                                inst_name1=ports[0][2],
-                                inst_name2=ports[1][2],
-                            )
-                        if cip & 4:
-                            subc = db_.category_by_path(
-                                lc.path() + ".TypeMismatch"
-                            ) or db_.create_category(lc, "TypeMismatch")
-                            create_port_error(
-                                ports[0][0],
-                                ports[1][0],
-                                ports[0][1],
-                                ports[1][1],
-                                db_,
-                                db_cell,
-                                subc,
-                                self.kcl.dbu,
-                                inst_name1=ports[0][2],
-                                inst_name2=ports[1][2],
-                            )
-                        if layer in cell_ports and coord in cell_ports[layer]:
-                            subc = db_.category_by_path(
-                                lc.path() + ".portoverlap"
-                            ) or db_.create_category(lc, "portoverlap")
-                            it = db_.create_item(db_cell, subc)
-                            text = "Port Names: "
-                            values: list[rdb.RdbItemValue] = []
-                            cell_port = cell_ports[layer][coord][0]
-                            text += (
-                                f"{self.name}."
-                                f"{cell_port.name or cell_port.trans.to_s()}/"
-                            )
-                            if cell_port.base.trans:
-                                values.append(
-                                    rdb.RdbItemValue(
-                                        self.kcl.to_um(
-                                            port_polygon(cell_port.width).transformed(
-                                                cell_port.base.trans
-                                            )
-                                        )
-                                    )
-                                )
-                            else:
-                                values.append(
-                                    rdb.RdbItemValue(
-                                        self.kcl.to_um(
-                                            port_polygon(cell_port.width)
-                                        ).transformed(cell_port.dcplx_trans)
-                                    )
-                                )
-                            for _port in ports:
-                                _label = (
-                                    f"{_port[2]}." if _port[2] else f"{_port[1].name}."
-                                )
-                                text += (
-                                    f"{_label}{_port[0].name or _port[0].trans.to_s()}/"
-                                )
-
-                                values.append(
-                                    rdb.RdbItemValue(
-                                        self.kcl.to_um(
-                                            port_polygon(_port[0].width).transformed(
-                                                _port[0].trans
-                                            )
-                                        )
-                                    )
-                                )
-                            it.add_value(text[:-1])
-                            for value in values:
-                                it.add_value(value)
-
-                    case x if x > 2:
-                        subc = db_.category_by_path(
-                            lc.path() + ".portoverlap"
-                        ) or db_.create_category(lc, "portoverlap")
-                        it = db_.create_item(db_cell, subc)
-                        text = "Port Names: "
-                        values = []
-                        for _port in ports:
-                            _label = f"{_port[2]}." if _port[2] else f"{_port[1].name}."
-                            text += f"{_label}{_port[0].name or _port[0].trans.to_s()}/"
-
-                            values.append(
-                                rdb.RdbItemValue(
-                                    self.kcl.to_um(
-                                        port_polygon(_port[0].width).transformed(
-                                            _port[0].trans
-                                        )
-                                    )
-                                )
-                            )
-                        it.add_value(text[:-1])
-                        for value in values:
-                            it.add_value(value)
-                    case _:
-                        raise ValueError(f"Unexpected number of ports: {len(ports)}")
-            if check_layer_connectivity:
-                error_region_shapes = kdb.Region()
-                error_region_instances = kdb.Region()
-                reg = kdb.Region(self.shapes(layer))
-                inst_regions: dict[int, kdb.Region] = {}
-                inst_region = kdb.Region()
-                for i, inst in enumerate(self.insts):
-                    inst_region_ = kdb.Region(inst.ibbox(layer))
-                    inst_shapes: kdb.Region | None = None
-                    if not (inst_region & inst_region_).is_empty():
-                        if inst_shapes is None:
-                            inst_shapes = kdb.Region()
-                            shape_it = self.begin_shapes_rec_overlapping(
-                                layer, inst.bbox(layer)
-                            )
-                            shape_it.select_cells([inst.cell.cell_index()])
-                            shape_it.min_depth = 1
-                            shape_it.shape_flags = kdb.Shapes.SRegions
-                            for _it in shape_it.each():
-                                if _it.path()[0].inst() == inst.instance:
-                                    inst_shapes.insert(
-                                        _it.shape().polygon.transformed(_it.trans())
-                                    )
-
-                        for j, _reg in inst_regions.items():
-                            if _reg & inst_region_:
-                                reg_ = kdb.Region()
-                                shape_it = self.begin_shapes_rec_touching(
-                                    layer, (_reg & inst_region_).bbox()
-                                )
-                                shape_it.select_cells([self.insts[j].cell.cell_index()])
-                                shape_it.min_depth = 1
-                                shape_it.shape_flags = kdb.Shapes.SRegions
-                                for _it in shape_it.each():
-                                    if _it.path()[0].inst() == self.insts[j].instance:
-                                        reg_.insert(
-                                            _it.shape().polygon.transformed(_it.trans())
-                                        )
-
-                                error_region_instances.insert(reg_ & inst_shapes)
-
-                    if not (inst_region_ & reg).is_empty():
-                        rec_it = self.begin_shapes_rec_touching(
-                            layer, (inst_region_ & reg).bbox()
-                        )
-                        rec_it.min_depth = 1
-                        error_region_shapes += kdb.Region(rec_it) & reg
-                    inst_region += inst_region_
-                    inst_regions[i] = inst_region_
-                if not error_region_shapes.is_empty():
-                    sc = db_.category_by_path(
-                        layer_cat(layer).path() + ".ShapeInstanceshapeOverlap"
-                    ) or db_.create_category(
-                        layer_cat(layer), "ShapeInstanceshapeOverlap"
-                    )
-                    for poly in error_region_shapes.merge().each():
-                        it = db_.create_item(db_cell, sc)
-                        it.add_value("Shapes overlapping with shapes of instances")
-                        it.add_value(self.kcl.to_um(poly.downcast()))
-                if not error_region_instances.is_empty():
-                    sc = db_.category_by_path(
-                        layer_cat(layer).path() + ".InstanceshapeOverlap"
-                    ) or db_.create_category(layer_cat(layer), "InstanceshapeOverlap")
-                    for poly in error_region_instances.merge().each():
-                        it = db_.create_item(db_cell, sc)
-                        it.add_value(
-                            "Instance shapes overlapping with shapes of other instances"
-                        )
-                        it.add_value(self.kcl.to_um(poly.downcast()))
-
+                shape_instance_overlap_check(
+                    self,
+                    layers=gated_layers,
+                    db=db_,
+                    recursive=False,
+                )
         return db_
 
     def insert_vinsts(self, recursive: bool = True) -> None:

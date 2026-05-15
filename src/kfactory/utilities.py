@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from .kcell import ProtoTKCell
     from .pin import DPin, Pin
     from .port import Port, ProtoPort
+    from .typings import DShapeLike, MarkerConfig
 
 
 def load_layout_options(**attributes: Any) -> kdb.LoadLayoutOptions:
@@ -258,7 +259,23 @@ def as_png_data(
     layer_properties: str | Path | None = None,
     resolution: tuple[int, int] = (800, 600),
     synchronous: bool = True,
+    markers: list[tuple[DShapeLike, MarkerConfig]] | None = None,
 ) -> bytes:
+    """Render a cell to PNG bytes via a headless ``lay.LayoutView``.
+
+    Args:
+        c: cell to render.
+        layer_properties: optional ``.lyp`` to apply.
+        resolution: ``(width, height)`` in pixels.
+        synchronous: ``True`` to render synchronously (default), ``False`` to
+            return whatever the view currently has.
+        markers: optional list of ``(shape, config)`` pairs. Each shape becomes
+            a ``lay.Marker`` overlay on the view; ``config`` is the same
+            ``MarkerConfig`` dict that `kfactory.show` accepts (``color``,
+            ``line_width``, ``halo``, …). When markers are supplied, the view
+            zooms to the union of all marker bounding boxes expanded by 10 %
+            instead of fitting the full cell.
+    """
     layout_view = lay.LayoutView()
     layout_view.show_layout(c.kcl.layout.dup(), False)
     if layer_properties is not None:
@@ -271,7 +288,56 @@ def as_png_data(
     layout_view.max_hier()
     layout_view.resize(*resolution)
     layout_view.add_missing_layers()
-    layout_view.zoom_fit()
+
+    # Keep marker references alive — klayout drops markers whose Python
+    # handle has been garbage-collected before the screenshot is taken.
+    marker_refs: list[lay.Marker] = []
+    if markers:
+        bbox = kdb.DBox()
+        for shape, cfg in markers:
+            m = lay.Marker(layout_view)
+            if isinstance(shape, kdb.DPolygon | kdb.DSimplePolygon):
+                m.set_polygon(
+                    shape if isinstance(shape, kdb.DPolygon) else kdb.DPolygon(shape)
+                )
+            elif isinstance(shape, kdb.DBox):
+                m.set_box(shape)
+            elif isinstance(shape, kdb.DEdge):
+                m.set_edge(shape)
+            elif isinstance(shape, kdb.DPath):
+                m.set_path(shape)
+            elif isinstance(shape, kdb.DText):
+                m.set_text(shape)
+            else:
+                continue
+            if (color := cfg.get("color")) is not None:
+                m.color = color
+            if (frame_color := cfg.get("frame_color")) is not None:
+                m.frame_color = frame_color
+            if (line_width := cfg.get("line_width")) is not None:
+                m.line_width = line_width
+            if (line_style := cfg.get("line_style")) is not None:
+                m.line_style = line_style
+            if (halo := cfg.get("halo")) is not None:
+                m.halo = halo
+            if (vertex_size := cfg.get("vertex_size")) is not None:
+                m.vertex_size = vertex_size
+            if (dither_pattern := cfg.get("dither_pattern")) is not None:
+                m.dither_pattern = dither_pattern
+            if (dismissable := cfg.get("dismissable")) is not None:
+                m.dismissable = dismissable
+            bbox += shape.bbox()
+            marker_refs.append(m)
+
+        if not bbox.empty():
+            pad_x = bbox.width() * 0.1 or 1.0
+            pad_y = bbox.height() * 0.1 or 1.0
+            layout_view.zoom_box(bbox.enlarged(pad_x, pad_y))
+        else:
+            layout_view.zoom_fit()
+    else:
+        layout_view.zoom_fit()
+
     if synchronous:
         return layout_view.get_pixels_with_options(
             width=resolution[0], height=resolution[1]
