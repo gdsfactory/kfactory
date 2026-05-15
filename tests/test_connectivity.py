@@ -9,7 +9,7 @@ def test_connectivity_cell_ports() -> None:
             "WidthMismatch": 1,
             "TypeMismatch": 1,
             "DanglingPort": 7,
-            "InstanceshapeOverlap": 16,
+            "InstanceOverlap": 16,
             "CellPorts": 31,
         }
     }
@@ -39,7 +39,7 @@ def test_connectivity() -> None:
             "WidthMismatch": 1,
             "TypeMismatch": 1,
             "DanglingPort": 7,
-            "InstanceshapeOverlap": 16,
+            "InstanceOverlap": 16,
         }
     }
 
@@ -64,7 +64,7 @@ def test_connectivity_no_rec() -> None:
     num_items_per_category = {
         "3_0": {
             "DanglingPort": 4,
-            "InstanceshapeOverlap": 16,
+            "InstanceOverlap": 16,
         }
     }
 
@@ -110,7 +110,7 @@ def test_instance_overlap_check_standalone() -> None:
     cell = _load_chiplets()
     rdb = kf.checks.instance_overlap_check(cell)
 
-    cat = rdb.category_by_path("3_0.InstanceshapeOverlap")
+    cat = rdb.category_by_path("3_0.InstanceOverlap")
     assert cat is not None
     assert cat.num_items() == 16
 
@@ -121,7 +121,7 @@ def test_shape_instance_overlap_check_standalone() -> None:
     cell = _load_chiplets()
     rdb = kf.checks.shape_instance_overlap_check(cell)
 
-    cat = rdb.category_by_path("3_0.ShapeInstanceshapeOverlap")
+    cat = rdb.category_by_path("3_0.CellShapeInstanceOverlap")
     # No top-level shapes overlap with instances in this fixture.
     assert cat is None or cat.num_items() == 0
 
