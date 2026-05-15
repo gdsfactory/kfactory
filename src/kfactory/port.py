@@ -1542,7 +1542,7 @@ def filter_layer_pt_reg[TPort: ProtoPort[Any]](
 def filter_direction[TPort: ProtoPort[Any]](
     ports: Iterable[TPort], direction: int
 ) -> filter[TPort]:
-    """Filter iterable/sequence of ports by direction :py:class:~`DIRECTION`."""
+    """Filter iterable/sequence of ports by direction `DIRECTION`."""
 
     def f_func(p: TPort) -> bool:
         return p.trans.angle == direction
@@ -1553,7 +1553,7 @@ def filter_direction[TPort: ProtoPort[Any]](
 def filter_orientation[TPort: ProtoPort[Any]](
     ports: Iterable[TPort], orientation: float
 ) -> filter[TPort]:
-    """Filter iterable/sequence of ports by direction :py:class:~`DIRECTION`."""
+    """Filter iterable/sequence of ports by direction `DIRECTION`."""
 
     def f_func(p: TPort) -> bool:
         return p.dcplx_trans.angle == orientation

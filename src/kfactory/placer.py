@@ -121,7 +121,7 @@ def exploded_yaml(
 ) -> Any:
     """Expanded yaml.
 
-    Expand cross-references. Same syntax as :py:func:~`cells_from_yaml`
+    Expand cross-references. Same syntax as `cells_from_yaml`
     """
     yaml = YAML(pure=True)
 

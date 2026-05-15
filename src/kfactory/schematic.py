@@ -658,7 +658,7 @@ class PinRef(BaseModel, extra="forbid"):
     """Reference to a pin on a schematic instance.
 
     Produced by ``inst.pins["name"]`` and used as the ``pin`` argument of
-    :meth:`TSchematic.add_pin` to expose an instance pin as a top-level
+    `TSchematic.add_pin` to expose an instance pin as a top-level
     schematic pin.
     """
 
@@ -690,11 +690,11 @@ class Pin(BaseModel, extra="forbid"):
     """A schematic-level pin grouping one or more schematic-level ports.
 
     The pin will be materialized on the resulting cell at ``create_cell``
-    time as a :class:`kfactory.Pin`. The ``ports`` list references entries
-    in :attr:`TSchematic.ports` by name.
+    time as a `kfactory.Pin`. The ``ports`` list references entries
+    in `TSchematic.ports` by name.
 
     Attributes:
-        name: Pin name (key in :attr:`TSchematic.pins`).
+        name: Pin name (key in `TSchematic.pins`).
         ports: Names of schematic-level ports that belong to this pin.
         pin_type: Pin type (default ``"DC"``).
         info: Free-form info attached to the pin.
@@ -1235,7 +1235,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             info: Optional info dict attached to the pin.
 
         Returns:
-            The created :class:`Pin`, also stored in :attr:`self.pins`.
+            The created `Pin`, also stored in `self.pins`.
 
         Raises:
             ValueError: If a pin with ``name`` already exists, ``ports`` is

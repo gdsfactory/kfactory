@@ -52,6 +52,7 @@ from .utilities import (
 )
 
 from . import (
+    checks,
     enclosure,
     factories,
     packing,
@@ -138,6 +139,7 @@ __all__ = [
     "VShapes",
     "cell",
     "cells",
+    "checks",
     "conf",
     "config",
     "dpolygon_from_array",
