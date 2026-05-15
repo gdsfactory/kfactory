@@ -12,6 +12,7 @@
                   - circular: reference/cells/virtual/circular.md
                   - euler: reference/cells/virtual/euler.md
                   - straight: reference/cells/virtual/straight.md
+          - checks: reference/checks.md
           - cli:
               - Overview: reference/cli/index.md
               - build: reference/cli/build.md
