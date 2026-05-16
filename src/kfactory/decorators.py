@@ -839,11 +839,6 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
     @functools.cached_property
     def file(self) -> Path:
         return _get_path(self._f_orig)
-        if isinstance(self._f_orig, FunctionType):
-            return Path(self._f_orig.__code__.co_filename).resolve()
-        if isinstance(self._f_orig, functools.partial):
-            return Path(self._f_orig.func.__code__.co_filename).resolve()
-        return Path(self._f_orig.__code__.co_filename).resolve()
 
 
 def _get_path(f: Callable[..., Any]) -> Path:
