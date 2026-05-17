@@ -1591,7 +1591,7 @@ def filter_layer[TPort: ProtoPort[Any]](
 def filter_layer_info[TPort: ProtoPort[Any]](
     ports: Iterable[TPort], layer_info: kdb.LayerInfo
 ) -> filter[TPort]:
-    """Filter iterable/sequence of ports by layer index / LayerEnum."""
+    """Filter iterable/sequence of ports by kdb.LayerInfo."""
 
     def layer_filter(p: TPort) -> bool:
         return p.layer_info.is_equivalent(layer_info)
