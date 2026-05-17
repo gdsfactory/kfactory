@@ -1373,6 +1373,7 @@ def autorename(
 def rename_clockwise(
     ports: Iterable[ProtoPort[Any]],
     layer: LayerEnum | int | None = None,
+    layer_info: kdb.LayerInfo | None = None,
     port_type: str | None = None,
     regex: str | None = None,
     prefix: str = "o",
@@ -1398,7 +1399,7 @@ def rename_clockwise(
             o8  o7
     ```
     """
-    ports_ = filter_layer_pt_reg(ports, layer, port_type, regex)
+    ports_ = filter_layer_pt_reg(ports, layer, layer_info, port_type, regex)
 
     def sort_key(port: ProtoPort[Any]) -> tuple[int, int, int]:
         match port.trans.angle:
@@ -1479,6 +1480,7 @@ def rename_clockwise_multi(
 def rename_by_direction(
     ports: Iterable[ProtoPort[Any]],
     layer: LayerEnum | int | None = None,
+    layer_info: kdb.LayerInfo | None = None,
     port_type: str | None = None,
     regex: str | None = None,
     dir_names: tuple[str, str, str, str] = ("E", "N", "W", "S"),
@@ -1505,7 +1507,7 @@ def rename_by_direction(
     ```
     """
     for angle in DIRECTION:
-        ports_ = filter_layer_pt_reg(ports, layer, port_type, regex)
+        ports_ = filter_layer_pt_reg(ports, layer, layer_info, port_type, regex)
         dir_2 = -1 if angle < ANGLE_180 else 1
         if angle % 2:
 
@@ -1524,6 +1526,7 @@ def rename_by_direction(
 def filter_layer_pt_reg[TPort: ProtoPort[Any]](
     ports: Iterable[TPort],
     layer: LayerEnum | int | None = None,
+    layer_info: kdb.LayerInfo | None = None,
     port_type: str | None = None,
     regex: str | None = None,
 ) -> Iterable[TPort]:
@@ -1531,6 +1534,8 @@ def filter_layer_pt_reg[TPort: ProtoPort[Any]](
     ports_ = ports
     if layer is not None:
         ports_ = filter_layer(ports_, layer)
+    if layer_info is not None:
+        ports_ = filter_layer_info(ports_, layer_info)
     if port_type is not None:
         ports_ = filter_port_type(ports_, port_type)
     if regex is not None:
@@ -1573,12 +1578,23 @@ def filter_port_type[TPort: ProtoPort[Any]](
 
 
 def filter_layer[TPort: ProtoPort[Any]](
-    ports: Iterable[TPort], layer: int | LayerEnum
+    ports: Iterable[TPort], layer: LayerEnum | int
 ) -> filter[TPort]:
     """Filter iterable/sequence of ports by layer index / LayerEnum."""
 
     def layer_filter(p: TPort) -> bool:
         return p.layer == layer
+
+    return filter(layer_filter, ports)
+
+
+def filter_layer_info[TPort: ProtoPort[Any]](
+    ports: Iterable[TPort], layer_info: kdb.LayerInfo
+) -> filter[TPort]:
+    """Filter iterable/sequence of ports by kdb.LayerInfo."""
+
+    def layer_filter(p: TPort) -> bool:
+        return p.layer_info.is_equivalent(layer_info)
 
     return filter(layer_filter, ports)
 
@@ -1590,9 +1606,7 @@ def filter_regex[TPort: ProtoPort[Any]](
     pattern = re.compile(regex)
 
     def regex_filter(p: TPort) -> bool:
-        if p.name is not None:
-            return bool(pattern.match(p.name))
-        return False
+        return bool(pattern.match(p.name))
 
     return filter(regex_filter, ports)
 
