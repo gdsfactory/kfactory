@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.41">
+      <meta name="generator" content="zensical-0.0.42">
     
     
       
@@ -7415,7 +7415,7 @@ minkowski sum with a square.</p>
             <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">LayerSection</span><span class="p">],</span> <span class="n">RegionTilesOperator</span>
         <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Starting KCellEnclosure on </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Starting KCellEnclosure on </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">_future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
         <span class="n">n_enc</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enclosures</span><span class="o">.</span><span class="n">enclosures</span><span class="p">)</span>
 
@@ -7496,7 +7496,7 @@ minkowski sum with a square.</p>
                             <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">: Queuing string for </span><span class="si">{}</span><span class="s2"> on layer </span><span class="si">{}</span><span class="s2">: &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
                             <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
                             <span class="n">n_enc</span><span class="p">,</span>
-                            <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">_future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                             <span class="n">layer</span><span class="p">,</span>
                             <span class="n">queue_str</span><span class="p">,</span>
                         <span class="p">)</span>
@@ -7505,7 +7505,7 @@ minkowski sum with a square.</p>
         <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">start_changes</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
             <span class="s2">&quot;Starting enclosure </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">_future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">enc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">tp</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Minkowski </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -7519,7 +7519,7 @@ minkowski sum with a square.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">operator</span> <span class="ow">in</span> <span class="n">layer_regiontilesoperators</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="n">operator</span><span class="o">.</span><span class="n">insert</span><span class="p">()</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Finished KCellEnclosure on </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Finished KCellEnclosure on </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">_future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -8296,7 +8296,7 @@ threads as are set to the process (usually all cores of the machine).</p>
         <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">LayerSection</span><span class="p">],</span> <span class="n">RegionTilesOperator</span>
     <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Starting KCellEnclosure on </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Starting KCellEnclosure on </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">_future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="n">n_enc</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enclosures</span><span class="o">.</span><span class="n">enclosures</span><span class="p">)</span>
 
@@ -8377,7 +8377,7 @@ threads as are set to the process (usually all cores of the machine).</p>
                         <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">: Queuing string for </span><span class="si">{}</span><span class="s2"> on layer </span><span class="si">{}</span><span class="s2">: &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
                         <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
                         <span class="n">n_enc</span><span class="p">,</span>
-                        <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">_future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                         <span class="n">layer</span><span class="p">,</span>
                         <span class="n">queue_str</span><span class="p">,</span>
                     <span class="p">)</span>
@@ -8386,7 +8386,7 @@ threads as are set to the process (usually all cores of the machine).</p>
     <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">start_changes</span><span class="p">()</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
         <span class="s2">&quot;Starting enclosure </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">_future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
         <span class="n">enc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">tp</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Minkowski </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -8400,7 +8400,7 @@ threads as are set to the process (usually all cores of the machine).</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">operator</span> <span class="ow">in</span> <span class="n">layer_regiontilesoperators</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">operator</span><span class="o">.</span><span class="n">insert</span><span class="p">()</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Finished KCellEnclosure on </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Finished KCellEnclosure on </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">_future_cell_name</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -15811,7 +15811,7 @@ will be autocalculated from the last two elements</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.dbc0afdc.min.js"></script>
+      <script src="../../assets/javascripts/bundle.6e5f0216.min.js"></script>
       
     
   </body>
