@@ -898,7 +898,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
             regex: Filter by regex of the name.
         """
         if layer is None and layer_info is not None:
-            layer = self.kcl.laeyr(layer_info)
+            layer = self.kcl.layout.layer(layer_info)
         return _filter_ports(
             (DPort(base=b) for b in self._bases),
             angle,
