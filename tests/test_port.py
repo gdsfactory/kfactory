@@ -503,6 +503,30 @@ def test_filter_layer_pt_reg(
     oas_regression(cell)
 
 
+def test_filter_layer_info(
+    kcl: kf.KCLayout,
+    layers: Layers,
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
+    cell = kf.factories.straight.straight_dbu_factory(kcl)(
+        length=10000, width=2000, layer=layers.WG
+    )
+    ports = cell.ports
+    filtered = list(kf.port.filter_layer_info(ports, layers.WG))
+    assert len(filtered) == 2
+
+    filtered = list(kf.port.filter_layer_info(ports, kf.kdb.LayerInfo(42, 0)))
+    assert len(filtered) == 0
+
+    filtered = list(
+        kf.port.filter_layer_pt_reg(
+            ports, layer_info=layers.WG, port_type="optical", regex="o2"
+        )
+    )
+    assert len(filtered) == 1
+    oas_regression(cell)
+
+
 def test_rename_clockwise_multi(
     kcl: kf.KCLayout,
     layers: Layers,
