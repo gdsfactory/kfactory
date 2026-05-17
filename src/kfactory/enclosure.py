@@ -1507,7 +1507,7 @@ class KCellEnclosure(BaseModel):
             tuple[int, LayerSection], RegionTilesOperator
         ] = {}
 
-        logger.debug("Starting KCellEnclosure on {}", c.kcl.future_cell_name or c.name)
+        logger.debug("Starting KCellEnclosure on {}", c.kcl._future_cell_name or c.name)
 
         n_enc = len(self.enclosures.enclosures)
 
@@ -1588,7 +1588,7 @@ class KCellEnclosure(BaseModel):
                             "{}/{}: Queuing string for {} on layer {}: '{}'",
                             i + 1,
                             n_enc,
-                            c.kcl.future_cell_name or c.name,
+                            c.kcl._future_cell_name or c.name,
                             layer,
                             queue_str,
                         )
@@ -1597,7 +1597,7 @@ class KCellEnclosure(BaseModel):
         c.kcl.start_changes()
         logger.debug(
             "Starting enclosure {}",
-            c.kcl.future_cell_name or c.name,
+            c.kcl._future_cell_name or c.name,
             enc.name,
         )
         tp.execute(f"Minkowski {c.name}")
@@ -1611,7 +1611,7 @@ class KCellEnclosure(BaseModel):
         else:
             for operator in layer_regiontilesoperators.values():
                 operator.insert()
-        logger.debug("Finished KCellEnclosure on {}", c.kcl.future_cell_name or c.name)
+        logger.debug("Finished KCellEnclosure on {}", c.kcl._future_cell_name or c.name)
 
 
 class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):

@@ -146,7 +146,7 @@ def check_collisions(
         dbu = c.kcl.dbu
         db = rdb.ReportDatabase("Routing Errors")
         cat = db.create_category("Manhattan Routing Collisions")
-        c.name = c.kcl.future_cell_name or c.name
+        c.name = c.kcl._future_cell_name or c.name
         cell = db.create_cell(c.name)
         for name, edges in collision_edges.items():
             item = db.create_item(cell, cat)
@@ -242,11 +242,11 @@ def check_collisions(
                 case "show_error":
                     c.show(lyrdb=db)
                     raise RuntimeError(
-                        f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                        f"Routing collision in {c.kcl._future_cell_name or c.name}"
                     )
                 case "error":
                     raise RuntimeError(
-                        f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                        f"Routing collision in {c.kcl._future_cell_name or c.name}"
                     )
 
 
@@ -532,7 +532,7 @@ def route_bundle(
             error_routes.append((ps, pe, router.start.pts, router.width))
     if placer_errors and on_placer_error == "show_error":
         db = rdb.ReportDatabase("Route Placing Errors")
-        c.name = c.kcl.future_cell_name or c.name
+        c.name = c.kcl._future_cell_name or c.name
         cell = db.create_cell(c.name)
         for error, (ps, pe, pts, width) in zip(
             placer_errors, error_routes, strict=False
@@ -551,7 +551,7 @@ def route_bundle(
         for error in placer_errors:
             logger.error(error)
         if c.name.startswith("Unnamed_"):
-            c.name = c.kcl.future_cell_name or c.name
+            c.name = c.kcl._future_cell_name or c.name
         raise PlacerError(
             "Failed to place routes for bundle routing from "
             f"{[p.name for p in start_ports]} to {[p.name for p in end_ports]}"

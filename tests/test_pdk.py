@@ -33,8 +33,6 @@ def test_clear() -> None:
 def test_kcell_delete(layers: Layers) -> None:
     _kcl = kf.KCLayout("DELETE", infos=Layers)
 
-    _kcl.layers = _kcl.layerenum_from_dict(layers=layers)
-
     s = partial(
         kf.factories.straight.straight_dbu_factory(_kcl),
         width=1000,

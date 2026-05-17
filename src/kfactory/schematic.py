@@ -1710,7 +1710,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 if not ct.check(c, self, resolved_instances, resolved_routes):
                     if ct.on_failure == "show_error":
                         c_ = c.dup()
-                        c_.name = c.kcl.future_cell_name or c.name
+                        c_.name = c.kcl._future_cell_name or c.name
                         c_.show(
                             lyrdb=ct.lyrdb_markers(
                                 c_, self, resolved_instances, resolved_routes
