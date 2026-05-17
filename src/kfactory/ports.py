@@ -22,6 +22,7 @@ from .port import (
     ProtoPort,
     filter_direction,
     filter_layer,
+    filter_layer_info,
     filter_orientation,
     filter_port_type,
     filter_regex,
@@ -42,6 +43,7 @@ def _filter_ports[TPort: ProtoPort[Any]](
     angle: Angle | None = None,
     orientation: float | None = None,
     layer: LayerEnum | int | None = None,
+    layer_info: kdb.LayerInfo | None = None,
     port_type: str | None = None,
     regex: str | None = None,
 ) -> list[TPort]:
@@ -49,6 +51,8 @@ def _filter_ports[TPort: ProtoPort[Any]](
         ports = filter_regex(ports, regex)
     if layer is not None:
         ports = filter_layer(ports, layer)
+    if layer_info is not None:
+        ports = filter_layer_info(ports, layer_info)
     if port_type:
         ports = filter_port_type(ports, port_type)
     if angle is not None:
@@ -196,6 +200,7 @@ class ProtoPorts[T: (int, float)](Protocol):
         angle: Angle | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
         port_type: str | None = None,
         regex: str | None = None,
     ) -> Sequence[ProtoPort[T]]:
@@ -756,6 +761,7 @@ class Ports(ProtoPorts[int], ICreatePort):
         angle: Angle | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
         port_type: str | None = None,
         regex: str | None = None,
     ) -> list[Port]:
@@ -773,6 +779,7 @@ class Ports(ProtoPorts[int], ICreatePort):
             angle,
             orientation,
             layer,
+            layer_info,
             port_type,
             regex,
         )
@@ -877,6 +884,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
         angle: Angle | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
         port_type: str | None = None,
         regex: str | None = None,
     ) -> list[DPort]:
@@ -889,11 +897,14 @@ class DPorts(ProtoPorts[float], DCreatePort):
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
+        if layer is None and layer_info is not None:
+            layer = self.kcl.laeyr(layer_info)
         return _filter_ports(
             (DPort(base=b) for b in self._bases),
             angle,
             orientation,
             layer,
+            layer_info,
             port_type,
             regex,
         )
