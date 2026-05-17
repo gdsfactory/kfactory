@@ -4861,6 +4861,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#kfactory.port.filter_layer_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        filter_layer_info
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kfactory.port.filter_layer_pt_reg" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -6941,6 +6952,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         filter_layer
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kfactory.port.filter_layer_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        filter_layer_info
       </span>
     </span>
   </a>
@@ -13764,15 +13786,15 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1542</span>
-<span class="normal">1543</span>
-<span class="normal">1544</span>
-<span class="normal">1545</span>
-<span class="normal">1546</span>
-<span class="normal">1547</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1547</span>
 <span class="normal">1548</span>
 <span class="normal">1549</span>
-<span class="normal">1550</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_direction</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1550</span>
+<span class="normal">1551</span>
+<span class="normal">1552</span>
+<span class="normal">1553</span>
+<span class="normal">1554</span>
+<span class="normal">1555</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_direction</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">direction</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter iterable/sequence of ports by direction `DIRECTION`.&quot;&quot;&quot;</span>
@@ -13796,7 +13818,7 @@ dcplx transformation</p>
 
 </h3>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">filter_layer</span><span class="p">(</span>
-    <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">layer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LayerEnum</span>
+    <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]</span>
 </code></pre></div>
 
@@ -13807,21 +13829,64 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1575</span>
-<span class="normal">1576</span>
-<span class="normal">1577</span>
-<span class="normal">1578</span>
-<span class="normal">1579</span>
-<span class="normal">1580</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1580</span>
 <span class="normal">1581</span>
 <span class="normal">1582</span>
-<span class="normal">1583</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_layer</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
-    <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">layer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LayerEnum</span>
+<span class="normal">1583</span>
+<span class="normal">1584</span>
+<span class="normal">1585</span>
+<span class="normal">1586</span>
+<span class="normal">1587</span>
+<span class="normal">1588</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_layer</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+    <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter iterable/sequence of ports by layer index / LayerEnum.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">layer_filter</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">TPort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">layer</span> <span class="o">==</span> <span class="n">layer</span>
+
+    <span class="k">return</span> <span class="nb">filter</span><span class="p">(</span><span class="n">layer_filter</span><span class="p">,</span> <span class="n">ports</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="kfactory.port.filter_layer_info" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">filter_layer_info</span>
+
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">filter_layer_info</span><span class="p">(</span>
+    <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">layer_info</span><span class="p">:</span> <span class="n">LayerInfo</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Filter iterable/sequence of ports by kdb.LayerInfo.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>kfactory/port.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1591</span>
+<span class="normal">1592</span>
+<span class="normal">1593</span>
+<span class="normal">1594</span>
+<span class="normal">1595</span>
+<span class="normal">1596</span>
+<span class="normal">1597</span>
+<span class="normal">1598</span>
+<span class="normal">1599</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_layer_info</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+    <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">layer_info</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter iterable/sequence of ports by kdb.LayerInfo.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">layer_filter</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">TPort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">layer_info</span><span class="o">.</span><span class="n">is_equivalent</span><span class="p">(</span><span class="n">layer_info</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="nb">filter</span><span class="p">(</span><span class="n">layer_filter</span><span class="p">,</span> <span class="n">ports</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -13841,6 +13906,7 @@ dcplx transformation</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">filter_layer_pt_reg</span><span class="p">(</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer_info</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">]</span>
@@ -13853,9 +13919,7 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1524</span>
-<span class="normal">1525</span>
-<span class="normal">1526</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1526</span>
 <span class="normal">1527</span>
 <span class="normal">1528</span>
 <span class="normal">1529</span>
@@ -13868,9 +13932,15 @@ dcplx transformation</p>
 <span class="normal">1536</span>
 <span class="normal">1537</span>
 <span class="normal">1538</span>
-<span class="normal">1539</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_layer_pt_reg</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1539</span>
+<span class="normal">1540</span>
+<span class="normal">1541</span>
+<span class="normal">1542</span>
+<span class="normal">1543</span>
+<span class="normal">1544</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_layer_pt_reg</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer_info</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
@@ -13878,6 +13948,8 @@ dcplx transformation</p>
     <span class="n">ports_</span> <span class="o">=</span> <span class="n">ports</span>
     <span class="k">if</span> <span class="n">layer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ports_</span> <span class="o">=</span> <span class="n">filter_layer</span><span class="p">(</span><span class="n">ports_</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">layer_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ports_</span> <span class="o">=</span> <span class="n">filter_layer_info</span><span class="p">(</span><span class="n">ports_</span><span class="p">,</span> <span class="n">layer_info</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">port_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ports_</span> <span class="o">=</span> <span class="n">filter_port_type</span><span class="p">(</span><span class="n">ports_</span><span class="p">,</span> <span class="n">port_type</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">regex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -13910,15 +13982,15 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1553</span>
-<span class="normal">1554</span>
-<span class="normal">1555</span>
-<span class="normal">1556</span>
-<span class="normal">1557</span>
-<span class="normal">1558</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1558</span>
 <span class="normal">1559</span>
 <span class="normal">1560</span>
-<span class="normal">1561</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_orientation</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1561</span>
+<span class="normal">1562</span>
+<span class="normal">1563</span>
+<span class="normal">1564</span>
+<span class="normal">1565</span>
+<span class="normal">1566</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_orientation</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="nb">float</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter iterable/sequence of ports by direction `DIRECTION`.&quot;&quot;&quot;</span>
@@ -13953,15 +14025,15 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1564</span>
-<span class="normal">1565</span>
-<span class="normal">1566</span>
-<span class="normal">1567</span>
-<span class="normal">1568</span>
-<span class="normal">1569</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1569</span>
 <span class="normal">1570</span>
 <span class="normal">1571</span>
-<span class="normal">1572</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_port_type</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1572</span>
+<span class="normal">1573</span>
+<span class="normal">1574</span>
+<span class="normal">1575</span>
+<span class="normal">1576</span>
+<span class="normal">1577</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_port_type</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter iterable/sequence of ports by port_type.&quot;&quot;&quot;</span>
@@ -13996,27 +14068,23 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1586</span>
-<span class="normal">1587</span>
-<span class="normal">1588</span>
-<span class="normal">1589</span>
-<span class="normal">1590</span>
-<span class="normal">1591</span>
-<span class="normal">1592</span>
-<span class="normal">1593</span>
-<span class="normal">1594</span>
-<span class="normal">1595</span>
-<span class="normal">1596</span>
-<span class="normal">1597</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_regex</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1602</span>
+<span class="normal">1603</span>
+<span class="normal">1604</span>
+<span class="normal">1605</span>
+<span class="normal">1606</span>
+<span class="normal">1607</span>
+<span class="normal">1608</span>
+<span class="normal">1609</span>
+<span class="normal">1610</span>
+<span class="normal">1611</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_regex</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter iterable/sequence of ports by port name.&quot;&quot;&quot;</span>
     <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">regex_filter</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">TPort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-        <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="nb">filter</span><span class="p">(</span><span class="n">regex_filter</span><span class="p">,</span> <span class="n">ports</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -14118,24 +14186,24 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1603</span>
-<span class="normal">1604</span>
-<span class="normal">1605</span>
-<span class="normal">1606</span>
-<span class="normal">1607</span>
-<span class="normal">1608</span>
-<span class="normal">1609</span>
-<span class="normal">1610</span>
-<span class="normal">1611</span>
-<span class="normal">1612</span>
-<span class="normal">1613</span>
-<span class="normal">1614</span>
-<span class="normal">1615</span>
-<span class="normal">1616</span>
-<span class="normal">1617</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1617</span>
 <span class="normal">1618</span>
 <span class="normal">1619</span>
-<span class="normal">1620</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">port_polygon</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Polygon</span><span class="p">:</span>
+<span class="normal">1620</span>
+<span class="normal">1621</span>
+<span class="normal">1622</span>
+<span class="normal">1623</span>
+<span class="normal">1624</span>
+<span class="normal">1625</span>
+<span class="normal">1626</span>
+<span class="normal">1627</span>
+<span class="normal">1628</span>
+<span class="normal">1629</span>
+<span class="normal">1630</span>
+<span class="normal">1631</span>
+<span class="normal">1632</span>
+<span class="normal">1633</span>
+<span class="normal">1634</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">port_polygon</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Polygon</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets a polygon representation for a given port width.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">width</span> <span class="ow">in</span> <span class="n">polygon_dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">polygon_dict</span><span class="p">[</span><span class="n">width</span><span class="p">]</span>
@@ -14170,6 +14238,7 @@ dcplx transformation</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">rename_by_direction</span><span class="p">(</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer_info</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dir_names</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -14308,8 +14377,7 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1479</span>
-<span class="normal">1480</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1480</span>
 <span class="normal">1481</span>
 <span class="normal">1482</span>
 <span class="normal">1483</span>
@@ -14350,9 +14418,12 @@ dcplx transformation</p>
 <span class="normal">1518</span>
 <span class="normal">1519</span>
 <span class="normal">1520</span>
-<span class="normal">1521</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_by_direction</span><span class="p">(</span>
+<span class="normal">1521</span>
+<span class="normal">1522</span>
+<span class="normal">1523</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_by_direction</span><span class="p">(</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer_info</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dir_names</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">),</span>
@@ -14379,7 +14450,7 @@ dcplx transformation</p>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">DIRECTION</span><span class="p">:</span>
-        <span class="n">ports_</span> <span class="o">=</span> <span class="n">filter_layer_pt_reg</span><span class="p">(</span><span class="n">ports</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">port_type</span><span class="p">,</span> <span class="n">regex</span><span class="p">)</span>
+        <span class="n">ports_</span> <span class="o">=</span> <span class="n">filter_layer_pt_reg</span><span class="p">(</span><span class="n">ports</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">layer_info</span><span class="p">,</span> <span class="n">port_type</span><span class="p">,</span> <span class="n">regex</span><span class="p">)</span>
         <span class="n">dir_2</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">angle</span> <span class="o">&lt;</span> <span class="n">ANGLE_180</span> <span class="k">else</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">angle</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
 
@@ -14410,6 +14481,7 @@ dcplx transformation</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">rename_clockwise</span><span class="p">(</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer_info</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span>
@@ -14595,9 +14667,11 @@ dcplx transformation</p>
 <span class="normal">1422</span>
 <span class="normal">1423</span>
 <span class="normal">1424</span>
-<span class="normal">1425</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_clockwise</span><span class="p">(</span>
+<span class="normal">1425</span>
+<span class="normal">1426</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_clockwise</span><span class="p">(</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer_info</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span>
@@ -14623,7 +14697,7 @@ dcplx transformation</p>
 <span class="sd">            o8  o7</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ports_</span> <span class="o">=</span> <span class="n">filter_layer_pt_reg</span><span class="p">(</span><span class="n">ports</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">port_type</span><span class="p">,</span> <span class="n">regex</span><span class="p">)</span>
+    <span class="n">ports_</span> <span class="o">=</span> <span class="n">filter_layer_pt_reg</span><span class="p">(</span><span class="n">ports</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">layer_info</span><span class="p">,</span> <span class="n">port_type</span><span class="p">,</span> <span class="n">regex</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">sort_key</span><span class="p">(</span><span class="n">port</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
         <span class="k">match</span> <span class="n">port</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">angle</span><span class="p">:</span>
@@ -14781,8 +14855,7 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1428</span>
-<span class="normal">1429</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1429</span>
 <span class="normal">1430</span>
 <span class="normal">1431</span>
 <span class="normal">1432</span>
@@ -14829,7 +14902,8 @@ dcplx transformation</p>
 <span class="normal">1473</span>
 <span class="normal">1474</span>
 <span class="normal">1475</span>
-<span class="normal">1476</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_clockwise_multi</span><span class="p">(</span>
+<span class="normal">1476</span>
+<span class="normal">1477</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_clockwise_multi</span><span class="p">(</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">layers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
