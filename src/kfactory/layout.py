@@ -1700,9 +1700,11 @@ class KCLayout(
         self.tkcells = {}
 
         if keep_layers:
-            self.layers = self.layerenum_from_dict(layers=self.infos)
+            with contextlib.suppress(AttributeError):
+                del self.layers
+            _ = self.layers  # make sure the layers are computed
         else:
-            self.layers = self.layerenum_from_dict(layers=LayerInfos())
+            self.infos = LayerInfos()
 
     def dup(self, init_cells: bool = True) -> KCLayout:
         """Create a duplication of the `~KCLayout` object.

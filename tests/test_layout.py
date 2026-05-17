@@ -263,3 +263,35 @@ def test_kclayout_assign(kcl: kf.KCLayout, layers: Layers) -> None:
     kcl.assign(kcl2.layout)
     assert len(kcl2.kcells) == 1
     assert len(list(kcl2.layout.each_cell())) == 1
+
+
+def test_kclayout_clear_keep_layers(kcl: kf.KCLayout, layers: Layers) -> None:
+    kf.factories.straight.straight_dbu_factory(kcl)(
+        length=1000, width=1000, layer=layers.WG
+    )
+    assert len(kcl.kcells) == 1
+    assert len(list(kcl.layout.each_cell())) == 1
+    infos_before = kcl.infos
+
+    kcl.clear(keep_layers=True)
+
+    assert len(kcl.kcells) == 0
+    assert len(list(kcl.layout.each_cell())) == 0
+    assert kcl.infos == infos_before
+    assert kcl.layers["WG"].layer == layers.WG.layer
+    assert kcl.layers["WG"].datatype == layers.WG.datatype
+
+
+def test_kclayout_clear_drop_layers(kcl: kf.KCLayout, layers: Layers) -> None:
+    kf.factories.straight.straight_dbu_factory(kcl)(
+        length=1000, width=1000, layer=layers.WG
+    )
+    assert len(kcl.kcells) == 1
+    assert len(list(kcl.layout.each_cell())) == 1
+
+    kcl.clear(keep_layers=False)
+
+    assert len(kcl.kcells) == 0
+    assert len(list(kcl.layout.each_cell())) == 0
+    assert kcl.infos == kf.LayerInfos()
+    assert len(list(kcl.layers)) == 0  # ty:ignore[invalid-argument-type]
