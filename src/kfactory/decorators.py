@@ -456,21 +456,21 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                     name = get_cell_name(basename, **params)
                 else:
                     name = get_cell_name(self.name, **params)
-                old_future_name = kcl.future_cell_name
-                kcl.future_cell_name = name
+                old_future_name = kcl._future_cell_name
+                kcl._future_cell_name = name
                 if layout_cache:
                     if overwrite_existing:
-                        for c in list(kcl.cells(kcl.future_cell_name)):
+                        for c in list(kcl.cells(kcl._future_cell_name)):
                             kcl[c.cell_index()].delete()
                     else:
-                        layout_cell = kcl.layout_cell(kcl.future_cell_name)
+                        layout_cell = kcl.layout_cell(kcl._future_cell_name)
                         if layout_cell is not None:
                             logger.debug(
                                 "Loading {} from layout cache",
-                                kcl.future_cell_name,
+                                kcl._future_cell_name,
                             )
                             return kcl.get_cell(layout_cell.cell_index(), output_type)
-                logger.debug(f"Constructing {kcl.future_cell_name}")
+                logger.debug(f"Constructing {kcl._future_cell_name}")
                 name_: str | None = name
             else:
                 name_ = None
@@ -493,7 +493,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
             if cell.locked:
                 # If the cell is locked, it likely comes
                 # from a cache and should be copied first
-                cell = cell.dup(new_name=kcl.future_cell_name)
+                cell = cell.dup(new_name=kcl._future_cell_name)
             if overwrite_existing:
                 _overwrite_existing(name_, cell, kcl)
             if set_name and name_:
@@ -510,7 +510,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                     raise CellNameError(f"KCell with name {name_} exists already.")
 
                 cell.name = name_
-                kcl.future_cell_name = old_future_name
+                kcl._future_cell_name = old_future_name
             if set_settings:
                 _set_settings(cell, f, drop_params, params, sig_params.units, basename)
             if check_ports:
@@ -724,9 +724,9 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
                     name = get_cell_name(basename, **params)
                 else:
                     name = get_cell_name(self.name, **params)
-                old_future_name = kcl.future_cell_name
-                kcl.future_cell_name = name
-                logger.debug(f"Constructing {kcl.future_cell_name}")
+                old_future_name = kcl._future_cell_name
+                kcl._future_cell_name = name
+                logger.debug(f"Constructing {kcl._future_cell_name}")
                 name_: str | None = name
             else:
                 name_ = None
@@ -749,10 +749,10 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
             if cell.locked:
                 # If the cell is locked, it comes from a cache (most likely)
                 # and should be copied first
-                cell = cell.dup(new_name=kcl.future_cell_name)
+                cell = cell.dup(new_name=kcl._future_cell_name)
             if set_name and name_:
                 cell.name = name_
-                kcl.future_cell_name = old_future_name
+                kcl._future_cell_name = old_future_name
             if set_settings:
                 _set_settings(cell, f, drop_params, params, sig_params.units, basename)
             if check_ports:

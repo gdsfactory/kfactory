@@ -292,7 +292,7 @@ def fill_tiled(
         c.kcl.start_changes()
         try:
             logger.debug(
-                "Filling {} with {}", c.kcl.future_cell_name or c.name, fill_cell.name
+                "Filling {} with {}", c.kcl._future_cell_name or c.name, fill_cell.name
             )
             logger.debug("Fill string: '{}'", queue_str)
             tp.execute(f"Fill {c.name}")
@@ -466,7 +466,7 @@ def add_coverage(
         try:
             logger.debug(
                 "Adding coverage on '{}' with '{}'",
-                c.kcl.future_cell_name or c.name,
+                c.kcl._future_cell_name or c.name,
                 coverage_cell.name,
             )
             logger.debug("Coverage string: '{}'", queue_str)

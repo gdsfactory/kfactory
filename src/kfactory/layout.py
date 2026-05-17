@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import functools
 import inspect
 from collections import defaultdict
@@ -32,7 +33,8 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    model_validator,
+    PrivateAttr,
+    field_validator,
 )
 
 from . import __version__, kdb
@@ -265,7 +267,6 @@ class KCLayout(
     factories: Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]]
     virtual_factories: Factories[WrappedVKCellFunc[Any, VKCell]]
     tkcells: dict[int, TKCell] = Field(default_factory=dict)
-    layers: type[LayerEnum]
     infos: LayerInfos
     layer_stack: LayerStack
     netlist_layer_mapping: dict[LayerEnum | int, LayerEnum | int] = Field(
@@ -280,7 +281,7 @@ class KCLayout(
 
     info: Info = Field(default_factory=Info)
     settings: KCellSettings = Field(frozen=True)
-    future_cell_name: str | None
+    _future_cell_name: str | None = PrivateAttr(default=None)
 
     decorators: Decorators
     default_cell_output_type: type[KCell | DKCell] = KCell
@@ -369,7 +370,6 @@ class KCLayout(
             cross_sections=CrossSectionModel(kcl=self),
             enclosure=KCellEnclosure([]),
             infos=infos_,
-            layers=LayerEnum,
             factories=Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]](),
             virtual_factories=Factories[WrappedVKCellFunc[Any, VKCell]](),
             sparameters_path=sparameters_path,
@@ -380,7 +380,6 @@ class KCLayout(
             layout=layout,
             rename_function=port_rename_function,
             info=Info(**info) if info else Info(),
-            future_cell_name=None,
             settings=KCellSettings(
                 version=__version__,
                 klayout_version=kdb.__version__,  # ty:ignore[unresolved-attribute]
@@ -393,6 +392,10 @@ class KCLayout(
         )
 
         self.library.register(self.name)
+        # Materialize `layers` so LayerEnum.__init__ registers each layer's name
+        # on `self.layout`; otherwise `find_layer(layer, datatype)` called
+        # before any `kcl.layers` access would see an unnamed layer.
+        _ = self.layers
 
         enclosure = KCellEnclosure(
             enclosures=[enc.model_copy() for enc in enclosure.enclosures.enclosures]
@@ -405,14 +408,19 @@ class KCLayout(
 
         kcls[self.name] = self
 
-    @model_validator(mode="before")
+    @field_validator("infos", mode="before")
     @classmethod
-    def _validate_layers(cls, data: dict[str, Any]) -> dict[str, Any]:
-        data["layers"] = layerenum_from_dict(
-            layers=data["infos"], layout=data["library"].layout()
-        )
-        data["library"].register(data["name"])
-        return data
+    def _validate_infos(cls, value: Any) -> LayerInfos:
+        if value is None:
+            return LayerInfos()
+        if isinstance(value, type) and issubclass(value, LayerInfos):
+            return value()
+        return value
+
+    @cached_property
+    def layers(self) -> type[LayerEnum]:
+        """LayerEnum derived from `infos`. Cached; invalidated when `infos` is set."""
+        return layerenum_from_dict(layers=self.infos, layout=self.library.layout())
 
     @functools.cached_property
     def dkcells(self) -> DKCells:
@@ -915,7 +923,7 @@ class KCLayout(
                     ) -> KCell:
                         schematic = f(*args, **kwargs)
                         if set_name:
-                            schematic.name = self.future_cell_name
+                            schematic.name = self._future_cell_name
                         c_ = schematic.create_cell(
                             KCell,
                             factories=factories,
@@ -961,7 +969,7 @@ class KCLayout(
                 ) -> KCell:
                     schematic = f(*args, **kwargs)
                     if set_name:
-                        schematic.name = self.future_cell_name
+                        schematic.name = self._future_cell_name
                     c_ = schematic.create_cell(
                         KCell,
                         factories=factories,
@@ -985,7 +993,7 @@ class KCLayout(
             ) -> KCell:
                 schematic = f(*args, **kwargs)
                 if set_name:
-                    schematic.name = self.future_cell_name
+                    schematic.name = self._future_cell_name
                 c_ = schematic.create_cell(
                     KCell,
                     factories=factories,
@@ -1646,9 +1654,12 @@ class KCLayout(
 
     def __getattr__(self, name: str) -> Any:
         """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
-        if name != "_name" and name not in self.__class__.model_fields:
+        if (
+            name not in self.__class__.model_fields
+            and name not in self.__class__.__private_attributes__
+        ):
             return self.layout.__getattribute__(name)
-        return None
+        return super().__getattr__(name)  # ty:ignore[unresolved-attribute]
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Use a custom setter to automatically set attributes.
@@ -1656,8 +1667,19 @@ class KCLayout(
         If the attribute is not in this object, set it on the
         Layout object.
         """
-        if name in self.__class__.model_fields:
+        if (
+            name in self.__class__.model_fields
+            or name in self.__class__.__private_attributes__
+        ):
             super().__setattr__(name, value)
+            if name == "infos":
+                # Drop the cached `layers` and rebuild it eagerly so the new
+                # LayerEnum members register their names with `self.layout`.
+                # The AttributeError only fires on the construction path where
+                # `layers` hasn't been materialized yet.
+                with contextlib.suppress(AttributeError):
+                    del self.layers
+                _ = self.layers  # make sure the layers are computed
         elif hasattr(self.layout, name):
             self.layout.__setattr__(name, value)
 

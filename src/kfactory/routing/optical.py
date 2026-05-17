@@ -527,7 +527,7 @@ def route_bundle(
                     )
                 if on_placer_error == "show_error":
                     c_: KCell | DKCell = c.dup()
-                    c_.name = c.kcl.future_cell_name or c.name
+                    c_.name = c.kcl._future_cell_name or c.name
                     db = rdb.ReportDatabase("Routing Waypoint Errors")
                     err_cat = db.create_category("Waypoint Error")
                     wp_cat = db.create_category("Waypoints")
@@ -704,7 +704,7 @@ def route_bundle(
                 )
             if on_placer_error == "show_error":
                 c_ = c.dup()
-                c_.name = c.kcl.future_cell_name or c.name
+                c_.name = c.kcl._future_cell_name or c.name
                 db = rdb.ReportDatabase("Routing Waypoint Errors")
                 err_cat = db.create_category("Waypoint Error")
                 wp_cat = db.create_category("Waypoints")
