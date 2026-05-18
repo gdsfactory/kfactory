@@ -155,3 +155,76 @@ def test_info_str() -> None:
 def test_settings_str() -> None:
     settings = KCellSettings(param1=42)
     assert str(settings) == "KCellSettings(param1=42)"
+
+
+def test_info_normalises_length_props_to_float() -> None:
+    """``length``-like Info props are coerced to ``float`` to keep META
+    bytes stable across call-order-sensitive cache hits.
+
+    Repro for the upstream issue: gdsfactory's ``@cell`` cache hashes
+    kwargs by value (``4 == 4.0``), so calling ``foo(length=4)`` and
+    ``bar(length=4.0)`` in the same process collapses onto whichever
+    Python type came first. The cached cell's ``info`` then serialises
+    the wrong type into the ``kfactory:info`` PROPVALUE (``#l4`` vs
+    ``##4``), producing a different GDS byte-stream depending on call
+    order. Normalising these props eliminates the discrepancy.
+    """
+    a = Info(length=4)
+    b = Info(length=4.0)
+    assert a.length == b.length
+    assert isinstance(a.length, float)
+    assert isinstance(b.length, float)
+
+    # Other route_info_* length/weight props too — they all carry the
+    # same length value through gdsfactory's straight() factory.
+    info = Info(
+        length=4,
+        route_info_length=4,
+        route_info_weight=4,
+        route_info_strip_length=4,
+        route_info_metal3_length=4,
+    )
+    assert isinstance(info.length, float)
+    assert isinstance(info.route_info_length, float)
+    assert isinstance(info.route_info_weight, float)
+    assert isinstance(info.route_info_strip_length, float)
+    assert isinstance(info.route_info_metal3_length, float)
+
+
+def test_info_preserves_int_for_non_length_props() -> None:
+    """Only the length/weight allow-list is coerced. Other int values
+    (counts, indices, etc.) keep their Python type.
+    """
+    info = Info(npoints=12, channels=3, layer=4)
+    assert info.npoints == 12 and isinstance(info.npoints, int)
+    assert info.channels == 3 and isinstance(info.channels, int)
+    assert info.layer == 4 and isinstance(info.layer, int)
+
+
+def test_info_preserves_bool_on_length_key() -> None:
+    """``bool`` inherits from ``int`` but carries semantic meaning, so
+    even if the key is in the normalise list, a bool stays a bool.
+    """
+    info = Info(length=True)
+    assert info.length is True
+
+
+def test_info_setitem_coerces_length() -> None:
+    """Per-key assignment (``Info.__setattr__``/``__setitem__``) runs the
+    same coercion as construction.
+    """
+    info = Info()
+    info["length"] = 4
+    assert isinstance(info["length"], float)
+    info.length = 5
+    assert isinstance(info.length, float)
+
+
+def test_kcell_settings_does_not_coerce_length() -> None:
+    """Coercion is scoped to ``Info``. ``KCellSettings`` keeps the
+    caller's Python type — its values are read back by user code (e.g.
+    Schematic netlist comparisons) where ``int`` vs ``float`` semantics
+    matter.
+    """
+    s = KCellSettings(length=4)
+    assert s.length == 4 and isinstance(s.length, int)
