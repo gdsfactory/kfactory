@@ -12,6 +12,39 @@ if TYPE_CHECKING:
 __all__ = ["Info", "KCellSettings", "KCellSettingsUnits", "SettingMixin"]
 
 
+# Info keys that get int → float coerced before being stored. Several
+# gdsfactory factories declare these props as `float` but accept callers
+# passing integer literals (e.g. `coupler_ring(length_x: float = 4)`).
+# Combined with gdsfactory's value-not-type ``@cell`` cache, the first
+# call's Python type wins and kfactory then serialises it literally into
+# the ``kfactory:info`` PROPVALUE — ``#l4`` for int, ``##4`` for float —
+# producing different GDS bytes for what callers reasonably consider the
+# same component. Normalising just these specific length/weight props
+# keeps the on-disk META stable across cache orderings, without touching
+# KCellSettings (which would change the type seen by user code reading
+# back ``cell.settings[...]``).
+_NORMALIZE_TO_FLOAT_KEYS: frozenset[str] = frozenset(
+    {"length", "route_info_length", "route_info_weight"}
+)
+
+
+def _should_normalize_to_float(key: str) -> bool:
+    if key in _NORMALIZE_TO_FLOAT_KEYS:
+        return True
+    # `route_info_<layer>_length` — layer-dependent name, always a length.
+    return key.startswith("route_info_") and key.endswith("_length")
+
+
+def _maybe_normalize_to_float(key: str, value: Any) -> Any:
+    if (
+        _should_normalize_to_float(key)
+        and isinstance(value, int)
+        and not isinstance(value, bool)
+    ):
+        return float(value)
+    return value
+
+
 class SettingMixin:
     """Mixin class for shared settings functionality."""
 
@@ -97,7 +130,7 @@ class Info(SettingMixin, BaseModel, extra="allow"):
     @staticmethod
     def _check_value(name: str, value: MetaData) -> MetaData:
         try:
-            return check_metadata_type(value)
+            return check_metadata_type(_maybe_normalize_to_float(name, value))
         except ValueError as e:
             raise ValueError(
                 "Values of the info dict only support int, float, string, "
