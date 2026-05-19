@@ -141,7 +141,7 @@ def check_collisions(
     if collision_edges or not inter_route_collisions.is_empty():
         if collision_check_layers is None:
             collision_check_layers = list(
-                {p.cross_section.main_layer for p in start_ports}
+                {p.any_cross_section.main_layer for p in start_ports}
             )
         dbu = c.kcl.dbu
         db = rdb.ReportDatabase("Routing Errors")
@@ -482,7 +482,7 @@ def route_bundle(
         else:
             widths = route_width
     else:
-        widths = [p.cross_section.width for p in start_ports]
+        widths = [p.any_cross_section.width for p in start_ports]
 
     routers = routing_function(
         start_ports=start_ports,
@@ -544,7 +544,7 @@ def route_bundle(
                 f" points (dbu): {pts}"
             )
             it.add_value(f"Exception: {error}")
-            path = kdb.Path(pts, width or ps.cross_section.width)
+            path = kdb.Path(pts, width or ps.any_cross_section.width)
             it.add_value(c.kcl.to_um(path.polygon()))
         c.show(lyrdb=db)
     if placer_errors and on_placer_error is not None:

@@ -14,7 +14,6 @@ from typing import (
 import klayout.db as kdb
 
 from .conf import PROPID, config, logger
-from .cross_section import AsymmetricalCrossSection
 from .exceptions import (
     AsymmetricMirrorRequiredError,
     CrossSectionSymmetryMismatchError,
@@ -426,7 +425,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
         assert isinstance(p, Port)
         assert isinstance(op, Port)
 
-        if type(p.base.cross_section) is not type(op.base.cross_section):
+        if p.base.is_symmetric() != op.base.is_symmetric():
             raise CrossSectionSymmetryMismatchError(p, op)
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)
@@ -440,8 +439,8 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
         # This depends on the actual resulting inst.trans (not just the
         # `mirror` flag), so compute the would-be world trans of p and verify.
         same_asym = (
-            isinstance(p.base.cross_section, AsymmetricalCrossSection)
-            and p.base.cross_section == op.base.cross_section
+            p.base.asymmetric_cross_section is not None
+            and p.base.asymmetric_cross_section == op.base.asymmetric_cross_section
         )
         if p.base.dcplx_trans or op.base.dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
@@ -1101,7 +1100,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         assert isinstance(p, Port)
         assert isinstance(op, Port)
 
-        if type(p.base.cross_section) is not type(op.base.cross_section):
+        if p.base.is_symmetric() != op.base.is_symmetric():
             raise CrossSectionSymmetryMismatchError(p, op)
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)
@@ -1110,8 +1109,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatchError(self, other, p, op)
         same_asym = (
-            isinstance(p.base.cross_section, AsymmetricalCrossSection)
-            and p.base.cross_section == op.base.cross_section
+            p.base.asymmetric_cross_section is not None
+            and p.base.asymmetric_cross_section == op.base.asymmetric_cross_section
         )
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
         extra_dmirror_y: float | None = None

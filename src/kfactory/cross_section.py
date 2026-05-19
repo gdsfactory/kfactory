@@ -25,6 +25,8 @@ if TYPE_CHECKING:
     from .layout import KCLayout
 
 __all__ = [
+    "AnyCrossSection",
+    "AnyCrossSectionInput",
     "AsymmetricCrossSection",
     "AsymmetricalCrossSection",
     "CrossSection",
@@ -348,6 +350,12 @@ class DAsymmetricalCrossSection(BaseModel, arbitrary_types_allowed=True):
 
 
 type AnyCrossSection = SymmetricalCrossSection | AsymmetricalCrossSection
+type AnyCrossSectionInput = (
+    SymmetricalCrossSection
+    | AsymmetricalCrossSection
+    | TCrossSection[Any]
+    | TAsymmetricCrossSection[Any]
+)
 
 
 class TAsymmetricCrossSection[T: (int, float)](ABC):

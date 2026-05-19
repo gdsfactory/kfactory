@@ -180,7 +180,7 @@ def test_connect_symmetric_vs_asymmetric_raises() -> None:
     )
     # mutate one cell port's cross_section to be asymmetric to simulate the
     # step-2 plumbing
-    child_b.ports["o1"].base.cross_section = acs
+    child_b.ports["o1"].asymmetric_cross_section = acs
 
     ia = parent << child_a
     ib = parent << child_b
@@ -190,6 +190,76 @@ def test_connect_symmetric_vs_asymmetric_raises() -> None:
     # not bypassable by allow_width_mismatch
     with pytest.raises(CrossSectionSymmetryMismatchError):
         ia.connect("o1", ib, "o1", allow_width_mismatch=True)
+
+
+def test_create_port_with_asymmetric_cross_section() -> None:
+    kcl = kf.KCLayout("CREATE_PORT_ASYM")
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    acs = kcl.get_asymmetrical_cross_section(
+        kf.AsymmetricalCrossSection(width=500, layer=layer, name="cp_asym")
+    )
+    c = kcl.kcell("cp_top")
+    c.create_port(name="o1", trans=kf.kdb.Trans.R0, cross_section=acs)
+
+    p = c.ports["o1"]
+    assert not p.is_symmetric()
+    assert p.asymmetric_cross_section == acs
+    assert p.base.cross_section is None
+    assert p.base.asymmetric_cross_section is acs
+    with pytest.raises(TypeError, match="asymmetric"):
+        _ = p.cross_section
+
+
+def test_port_accessor_setters_route_correctly() -> None:
+    kcl = kf.KCLayout("PORT_SETTER")
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    sym = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(
+            width=500,
+            enclosure=kcl.get_enclosure(
+                kf.LayerEnclosure(
+                    sections=[(kf.kdb.LayerInfo(2, 0, "S"), 500)], main_layer=layer
+                )
+            ),
+            name="setter_sym",
+        )
+    )
+    asym = kcl.get_asymmetrical_cross_section(
+        kf.AsymmetricalCrossSection(width=500, layer=layer, name="setter_asym")
+    )
+    c = kcl.kcell("setter_top")
+    p = c.create_port(name="o1", trans=kf.kdb.Trans.R0, cross_section=sym)
+    assert p.is_symmetric()
+    # Switch to asymmetric via setter
+    p.asymmetric_cross_section = asym
+    assert not p.is_symmetric()
+    assert p.base.cross_section is None
+    # Switch back
+    p.cross_section = sym
+    assert p.is_symmetric()
+    assert p.base.asymmetric_cross_section is None
+
+
+def test_port_gds_roundtrip_preserves_asymmetric_kind() -> None:
+    kcl_w = kf.KCLayout("PORT_GDS_W")
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    acs = kcl_w.get_asymmetrical_cross_section(
+        kf.AsymmetricalCrossSection(width=500, layer=layer, name="rt_asym")
+    )
+    c = kcl_w.kcell("rt_top")
+    c.create_port(name="o1", trans=kf.kdb.Trans.R0, cross_section=acs)
+    c.shapes(kcl_w.layer(layer)).insert(kf.kdb.Box(0, 0, 100, 100))
+
+    with tempfile.TemporaryDirectory() as d:
+        path = Path(d) / "port_rt.gds"
+        kcl_w.write(path)
+        kcl_r = kf.KCLayout("PORT_GDS_R")
+        kcl_r.read(path)
+
+    c_r = kcl_r["rt_top"]
+    p_r = c_r.ports["o1"]
+    assert not p_r.is_symmetric()
+    assert p_r.asymmetric_cross_section.base == acs
 
 
 def test_asymmetric_wrappers_share_base_and_compare_across_units() -> None:
@@ -335,8 +405,8 @@ def test_connect_asym_to_asym_requires_mirror_when_misaligned() -> None:
     acs = kcl.get_asymmetrical_cross_section(
         kf.AsymmetricalCrossSection(width=500, layer=layer, name="asym_r0")
     )
-    a.ports["o1"].base.cross_section = acs
-    b.ports["o1"].base.cross_section = acs
+    a.ports["o1"].asymmetric_cross_section = acs
+    b.ports["o1"].asymmetric_cross_section = acs
 
     ia = parent << a
     ib = parent << b
@@ -360,8 +430,8 @@ def _make_asym_wg(kcl: kf.KCLayout, name: str) -> kf.KCell:
     c.create_port(
         name="o2", width=500, layer_info=layer, trans=kf.kdb.Trans(0, True, 1000, 0)
     )
-    c.ports["o1"].base.cross_section = acs
-    c.ports["o2"].base.cross_section = acs
+    c.ports["o1"].asymmetric_cross_section = acs
+    c.ports["o2"].asymmetric_cross_section = acs
     return c
 
 
@@ -415,10 +485,10 @@ def test_asym_connect_check_ignores_input_mirror_flag_when_use_mirror_false() ->
     parent = kcl.kcell("parent_um")
     a = kcl.kcell("a_um")
     a.create_port(name="o1", width=500, layer_info=layer, trans=kf.kdb.Trans.R0)
-    a.ports["o1"].base.cross_section = acs
+    a.ports["o1"].asymmetric_cross_section = acs
     b = kcl.kcell("b_um")
     b.create_port(name="o1", width=500, layer_info=layer, trans=kf.kdb.Trans.R0)
-    b.ports["o1"].base.cross_section = acs
+    b.ports["o1"].asymmetric_cross_section = acs
 
     ia = parent << a
     ib = parent << b
