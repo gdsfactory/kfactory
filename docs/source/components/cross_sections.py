@@ -353,8 +353,8 @@ print(f"is_symmetric: {acs.is_symmetric()}")
 
 # %%
 @kf.cell
-def asym_bend(cross_section: str = "ASYM_301") -> kf.KCell:
-    """Asymmetric-cross-section straight (stand-in for a bend).
+def asym_straight(cross_section: str = "ASYM_301") -> kf.KCell:
+    """Asymmetric-cross-section straight.
 
     Port convention:
         o1 → R180 at left, faces -x.
@@ -371,10 +371,14 @@ def asym_bend(cross_section: str = "ASYM_301") -> kf.KCell:
     return c
 
 
-bend = asym_bend()
-print(f"o1 trans: {bend['o1'].base.trans}  mirror={bend['o1'].base.trans.mirror}")
-print(f"o2 trans: {bend['o2'].base.trans}  mirror={bend['o2'].base.trans.mirror}")
-bend.plot()
+straight = asym_straight()
+print(
+    f"o1 trans: {straight['o1'].base.trans}  mirror={straight['o1'].base.trans.mirror}"
+)
+print(
+    f"o2 trans: {straight['o2'].base.trans}  mirror={straight['o2'].base.trans.mirror}"
+)
+straight.plot()
 
 # %% [markdown]
 # ### Chaining: `o2 → o1` requires `mirror=True`
@@ -389,8 +393,8 @@ bend.plot()
 
 # %%
 parent_chain = kf.KCell(name="asym_chain_ok")
-ia = parent_chain << bend
-ib = parent_chain << bend
+ia = parent_chain << straight
+ib = parent_chain << straight
 
 # Default (mirror=False) → raises
 try:
@@ -414,8 +418,8 @@ parent_chain.plot()
 
 # %%
 parent_o1o1 = kf.KCell(name="asym_chain_o1o1")
-ia2 = parent_o1o1 << bend
-ib2 = parent_o1o1 << bend
+ia2 = parent_o1o1 << straight
+ib2 = parent_o1o1 << straight
 
 try:
     ib2.connect("o1", ia2, "o1")
@@ -455,7 +459,7 @@ def sym_straight(cross_section: str = "WG_500") -> kf.KCell:
 
 parent_mix = kf.KCell(name="asym_sym_mismatch")
 sym_inst = parent_mix << sym_straight("WG_500")
-asym_inst = parent_mix << bend
+asym_inst = parent_mix << straight
 
 try:
     asym_inst.connect("o1", sym_inst, "o2")
