@@ -12,7 +12,7 @@ from collections import defaultdict
 from shutil import rmtree
 from typing import TYPE_CHECKING
 
-from kfactory.cross_section import SymmetricalCrossSection
+from kfactory.cross_section import AsymmetricalCrossSection, SymmetricalCrossSection
 from kfactory.kcell import ProtoKCell, VKCell
 
 from . import kdb
@@ -159,6 +159,8 @@ def save_session(
             _dump(factory_infos, f)
         with (kcl_dir / "cross_sections.pkl").open("wb") as f:
             pickle.dump(kcl.cross_sections.cross_sections, f)
+        with (kcl_dir / "asymmetrical_cross_sections.pkl").open("wb") as f:
+            pickle.dump(kcl.cross_sections.asymmetrical_cross_sections, f)
 
     with (kcls_dir / "../kcl_dependencies.json").resolve().open("wt") as f:
         json.dump({k: list(v) for k, v in kcl_dependencies.items()}, f)
@@ -222,6 +224,10 @@ def load_kcl(kcl_path: Path) -> None:
     if xs_path.is_file():
         with xs_path.open("rb") as f:
             kcl.cross_sections.cross_sections = pickle.load(f)  # noqa: S301
+    axs_path = kcl_path / "asymmetrical_cross_sections.pkl"
+    if axs_path.is_file():
+        with axs_path.open("rb") as f:
+            kcl.cross_sections.asymmetrical_cross_sections = pickle.load(f)  # noqa: S301
 
     loaded_kcl.read(kcl_path / "cells.gds.gz")
     invalid_factories: set[str] = set()
@@ -403,7 +409,20 @@ def _reduce_symmetrical_cross_section(
     return (_get_symmetrical_cross_section, (obj.model_dump(),))
 
 
+def _get_asymmetrical_cross_section(
+    model_dump: dict[str, Any],
+) -> AsymmetricalCrossSection:
+    return AsymmetricalCrossSection.model_validate(model_dump)
+
+
+def _reduce_asymmetrical_cross_section(
+    obj: AsymmetricalCrossSection,
+) -> tuple[Callable[..., AsymmetricalCrossSection], tuple[dict[str, Any]]]:
+    return (_get_asymmetrical_cross_section, (obj.model_dump(),))
+
+
 for cls in IShapeLike.__value__.__args__:
     copyreg.pickle(cls, _reduce_klayout_shapes)
 copyreg.pickle(kdb.LayerInfo, _reduce_layer_info)
 copyreg.pickle(SymmetricalCrossSection, _reduce_symmetrical_cross_section)
+copyreg.pickle(AsymmetricalCrossSection, _reduce_asymmetrical_cross_section)

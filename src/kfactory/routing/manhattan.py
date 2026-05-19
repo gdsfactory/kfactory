@@ -930,7 +930,8 @@ def route_smart(
             end_port_names[p] = f"{i}_{p.disp}"
     if widths is None:
         widths = [
-            p.cross_section.width if isinstance(p, BasePort) else 0 for p in start_ports
+            p.any_cross_section.width if isinstance(p, BasePort) else 0
+            for p in start_ports
         ]
     box_region = kdb.Region()
     if bboxes:

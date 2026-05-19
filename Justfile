@@ -28,7 +28,7 @@ docs python_version="3.14": docs-build-source
 
 # Serve documentation locally (zensical) from the pre-built source
 docs-serve python_version="3.14": docs-build-source
-    uv run -p {{python_version}} --with . --extra docs --with "{{MIKE}}" --isolated zensical serve -f docs/zensical-built.yml --watch src/kfactory
+    uv run -p {{python_version}} --with . --extra docs --with "{{MIKE}}" --isolated zensical serve -f docs/zensical-built.yml
 
 # Deploy docs to gh-pages as the "dev" version (tracks main)
 docs-deploy-dev python_version="3.14": docs-build-source

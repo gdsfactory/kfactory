@@ -14,10 +14,16 @@ from klayout import rdb
 
 from .conf import config, logger, CheckInstances
 from .cross_section import (
-    SymmetricalCrossSection,
+    AsymmetricCrossSection,
+    AsymmetricalCrossSection,
     CrossSection,
+    CrossSectionLayer,
     CrossSectionSpec,
+    DAsymmetricCrossSection,
+    DAsymmetricalCrossSection,
     DCrossSection,
+    DCrossSectionLayer,
+    SymmetricalCrossSection,
 )
 from .enclosure import KCellEnclosure, LayerEnclosure
 from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
@@ -88,12 +94,18 @@ def __getattr__(name: str) -> ModuleType:
 
 
 __all__ = [
+    "AsymmetricCrossSection",
+    "AsymmetricalCrossSection",
     "BaseKCell",
     "CheckInstances",
     "Constants",
     "CrossSection",
+    "CrossSectionLayer",
     "CrossSectionSpec",
+    "DAsymmetricCrossSection",
+    "DAsymmetricalCrossSection",
     "DCrossSection",
+    "DCrossSectionLayer",
     "DInstance",
     "DInstanceGroup",
     "DInstancePorts",
