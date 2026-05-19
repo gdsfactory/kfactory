@@ -178,8 +178,8 @@ class CrossSectionSymmetryMismatchError(ValueError):
         p2: ProtoPort[Any],
         *args: Any,
     ) -> None:
-        kind1 = type(p1.base.cross_section).__name__
-        kind2 = type(p2.base.cross_section).__name__
+        kind1 = "symmetric" if p1.base.is_symmetric() else "asymmetric"
+        kind2 = "symmetric" if p2.base.is_symmetric() else "asymmetric"
         super().__init__(
             f"Cross section symmetry mismatch between ports {p1.name!r} ({kind1})"
             f" and {p2.name!r} ({kind2}). Symmetric and asymmetric cross sections"

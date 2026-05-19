@@ -58,12 +58,14 @@ def test_port_cross_section(kcl: kf.KCLayout, layers: kf.LayerInfos) -> None:
 
 def _make_asym(name: str = "asym_test") -> kf.AsymmetricalCrossSection:
     return kf.AsymmetricalCrossSection(
-        width=500,
         layer=kf.kdb.LayerInfo(1, 0, "WG"),
-        offset=0,
+        section_min=-250,
+        section_max=250,
         sections=(
             kf.CrossSectionLayer(
-                layer=kf.kdb.LayerInfo(2, 0, "SLAB"), width=1000, offset=400
+                layer=kf.kdb.LayerInfo(2, 0, "SLAB"),
+                section_min=-100,
+                section_max=900,
             ),
         ),
         name=name,
@@ -75,16 +77,51 @@ def test_asymmetrical_cross_section_construction() -> None:
     assert acs.main_layer.layer == 1
     assert acs.width == 500
     assert len(acs.sections) == 1
-    # main strip [-250, 250]; aux strip at offset=400 with width=1000 -> [-100, 900]
+    # main strip [-250, 250]; aux strip [-100, 900]
     assert acs.get_xmin() == -250
     assert acs.get_xmax() == 900
 
 
-def test_asymmetrical_cross_section_invalid_width() -> None:
-    with pytest.raises(ValueError, match="greater than 0"):
-        kf.AsymmetricalCrossSection(width=0, layer=kf.kdb.LayerInfo(1, 0))
-    with pytest.raises(ValueError, match="greater than 0"):
-        kf.CrossSectionLayer(layer=kf.kdb.LayerInfo(1, 0), width=-10)
+def test_asymmetrical_cross_section_invalid_bounds() -> None:
+    with pytest.raises(ValueError, match="section_min"):
+        kf.AsymmetricalCrossSection(
+            layer=kf.kdb.LayerInfo(1, 0), section_min=0, section_max=0
+        )
+    with pytest.raises(ValueError, match="section_min"):
+        kf.CrossSectionLayer(
+            layer=kf.kdb.LayerInfo(1, 0), section_min=10, section_max=5
+        )
+
+
+def test_cross_section_name_conflict_across_kinds() -> None:
+    """Cross section names must be unique across symmetric and asymmetric kinds."""
+    kcl = kf.KCLayout("CONFLICT")
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    enc = kcl.get_enclosure(
+        kf.LayerEnclosure(
+            sections=[(kf.kdb.LayerInfo(2, 0, "S"), 500)], main_layer=layer
+        )
+    )
+    kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="shared")
+    )
+    with pytest.raises(ValueError, match="symmetric"):
+        kcl.get_asymmetrical_cross_section(
+            kf.AsymmetricalCrossSection(
+                layer=layer, section_min=-250, section_max=250, name="shared"
+            )
+        )
+
+    kcl2 = kf.KCLayout("CONFLICT2")
+    kcl2.get_asymmetrical_cross_section(
+        kf.AsymmetricalCrossSection(
+            layer=layer, section_min=-250, section_max=250, name="shared"
+        )
+    )
+    with pytest.raises(ValueError, match="asymmetric"):
+        kcl2.get_symmetrical_cross_section(
+            kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="shared")
+        )
 
 
 def test_asymmetrical_cross_section_registration() -> None:
@@ -97,7 +134,10 @@ def test_asymmetrical_cross_section_registration() -> None:
     assert again is stored
     # different content under the same name → error
     different = kf.AsymmetricalCrossSection(
-        width=600, layer=kf.kdb.LayerInfo(1, 0, "WG"), name="asym_test"
+        layer=kf.kdb.LayerInfo(1, 0, "WG"),
+        section_min=-300,
+        section_max=300,
+        name="asym_test",
     )
     with pytest.raises(ValueError, match="already an asymmetrical cross_section"):
         kcl.get_asymmetrical_cross_section(different)
@@ -116,25 +156,140 @@ def test_asymmetrical_cross_section_equality_normalizes_section_order() -> None:
     layer1 = kf.kdb.LayerInfo(2, 0, "SLAB")
     layer2 = kf.kdb.LayerInfo(3, 0, "OTHER")
     a = kf.AsymmetricalCrossSection(
-        width=500,
         layer=kf.kdb.LayerInfo(1, 0, "WG"),
+        section_min=-250,
+        section_max=250,
         sections=(
-            kf.CrossSectionLayer(layer=layer1, width=100, offset=10),
-            kf.CrossSectionLayer(layer=layer2, width=200, offset=20),
+            kf.CrossSectionLayer(layer=layer1, section_min=-40, section_max=60),
+            kf.CrossSectionLayer(layer=layer2, section_min=-80, section_max=120),
         ),
         name="ord",
     )
     b = kf.AsymmetricalCrossSection(
-        width=500,
         layer=kf.kdb.LayerInfo(1, 0, "WG"),
+        section_min=-250,
+        section_max=250,
         sections=(
-            kf.CrossSectionLayer(layer=layer2, width=200, offset=20),
-            kf.CrossSectionLayer(layer=layer1, width=100, offset=10),
+            kf.CrossSectionLayer(layer=layer2, section_min=-80, section_max=120),
+            kf.CrossSectionLayer(layer=layer1, section_min=-40, section_max=60),
         ),
         name="ord",
     )
     assert a == b
     assert hash(a) == hash(b)
+
+
+def test_asymmetrical_cross_section_sections_dedup() -> None:
+    """Identical sections collapse into one."""
+    layer = kf.kdb.LayerInfo(2, 0, "SLAB")
+    acs = kf.AsymmetricalCrossSection(
+        layer=kf.kdb.LayerInfo(1, 0, "WG"),
+        section_min=-250,
+        section_max=250,
+        sections=(
+            kf.CrossSectionLayer(layer=layer, section_min=-100, section_max=500),
+            kf.CrossSectionLayer(layer=layer, section_min=-100, section_max=500),
+        ),
+        name="dedup",
+    )
+    assert len(acs.sections) == 1
+    assert acs.sections[0].section_min == -100
+    assert acs.sections[0].section_max == 500
+
+
+def test_asymmetrical_cross_section_sections_merge_overlapping() -> None:
+    """Overlapping sections on the same layer are merged into their union."""
+    layer = kf.kdb.LayerInfo(2, 0, "SLAB")
+    acs = kf.AsymmetricalCrossSection(
+        layer=kf.kdb.LayerInfo(1, 0, "WG"),
+        section_min=-250,
+        section_max=250,
+        sections=(
+            kf.CrossSectionLayer(layer=layer, section_min=-100, section_max=500),
+            kf.CrossSectionLayer(layer=layer, section_min=300, section_max=900),
+        ),
+        name="overlap",
+    )
+    assert len(acs.sections) == 1
+    assert acs.sections[0].section_min == -100
+    assert acs.sections[0].section_max == 900
+
+
+def test_asymmetrical_cross_section_sections_merge_touching() -> None:
+    """Touching sections (max == next.min) on the same layer merge."""
+    layer = kf.kdb.LayerInfo(2, 0, "SLAB")
+    acs = kf.AsymmetricalCrossSection(
+        layer=kf.kdb.LayerInfo(1, 0, "WG"),
+        section_min=-250,
+        section_max=250,
+        sections=(
+            kf.CrossSectionLayer(layer=layer, section_min=-100, section_max=300),
+            kf.CrossSectionLayer(layer=layer, section_min=300, section_max=700),
+        ),
+        name="touch",
+    )
+    assert len(acs.sections) == 1
+    assert acs.sections[0].section_min == -100
+    assert acs.sections[0].section_max == 700
+
+
+def test_asymmetrical_cross_section_sections_gap_kept_separate() -> None:
+    """Non-touching sections on the same layer stay separate, sorted."""
+    layer = kf.kdb.LayerInfo(2, 0, "SLAB")
+    acs = kf.AsymmetricalCrossSection(
+        layer=kf.kdb.LayerInfo(1, 0, "WG"),
+        section_min=-250,
+        section_max=250,
+        sections=(
+            kf.CrossSectionLayer(layer=layer, section_min=600, section_max=700),
+            kf.CrossSectionLayer(layer=layer, section_min=-100, section_max=200),
+        ),
+        name="gap",
+    )
+    assert len(acs.sections) == 2
+    assert (acs.sections[0].section_min, acs.sections[0].section_max) == (-100, 200)
+    assert (acs.sections[1].section_min, acs.sections[1].section_max) == (600, 700)
+
+
+def test_asymmetrical_cross_section_sections_different_layers_independent() -> None:
+    """Overlapping sections on different layers are not merged."""
+    l1 = kf.kdb.LayerInfo(2, 0, "A")
+    l2 = kf.kdb.LayerInfo(3, 0, "B")
+    acs = kf.AsymmetricalCrossSection(
+        layer=kf.kdb.LayerInfo(1, 0, "WG"),
+        section_min=-250,
+        section_max=250,
+        sections=(
+            kf.CrossSectionLayer(layer=l1, section_min=-100, section_max=500),
+            kf.CrossSectionLayer(layer=l2, section_min=-200, section_max=400),
+        ),
+        name="multi",
+    )
+    assert len(acs.sections) == 2
+
+
+def test_asymmetrical_cross_section_total_ordering() -> None:
+    """AsymmetricalCrossSection and CrossSectionLayer are sortable."""
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    a = kf.AsymmetricalCrossSection(
+        layer=layer, section_min=-100, section_max=100, name="a"
+    )
+    b = kf.AsymmetricalCrossSection(
+        layer=layer, section_min=-100, section_max=200, name="b"
+    )
+    c = kf.AsymmetricalCrossSection(
+        layer=kf.kdb.LayerInfo(2, 0, "X"), section_min=-100, section_max=100, name="c"
+    )
+    assert a < b  # same layer + min, larger max → greater
+    assert b < c  # WG < X (name)
+    assert sorted([c, b, a]) == [a, b, c]
+    assert b > a
+
+    # CrossSectionLayer sortable too
+    s1 = kf.CrossSectionLayer(layer=layer, section_min=0, section_max=10)
+    s2 = kf.CrossSectionLayer(layer=layer, section_min=0, section_max=20)
+    assert s1 < s2
+    assert sorted([s2, s1]) == [s1, s2]
 
 
 def test_asymmetrical_cross_section_pickle() -> None:
@@ -176,7 +331,9 @@ def test_connect_symmetric_vs_asymmetric_raises() -> None:
     child_b.create_port(name="o1", width=500, layer_info=layer, trans=kf.kdb.Trans.R0)
 
     acs = kcl.get_asymmetrical_cross_section(
-        kf.AsymmetricalCrossSection(width=500, layer=layer, name="asym_conn")
+        kf.AsymmetricalCrossSection(
+            layer=layer, section_min=-250, section_max=250, name="asym_conn"
+        )
     )
     # mutate one cell port's cross_section to be asymmetric to simulate the
     # step-2 plumbing
@@ -196,7 +353,9 @@ def test_create_port_with_asymmetric_cross_section() -> None:
     kcl = kf.KCLayout("CREATE_PORT_ASYM")
     layer = kf.kdb.LayerInfo(1, 0, "WG")
     acs = kcl.get_asymmetrical_cross_section(
-        kf.AsymmetricalCrossSection(width=500, layer=layer, name="cp_asym")
+        kf.AsymmetricalCrossSection(
+            layer=layer, section_min=-250, section_max=250, name="cp_asym"
+        )
     )
     c = kcl.kcell("cp_top")
     c.create_port(name="o1", trans=kf.kdb.Trans.R0, cross_section=acs)
@@ -225,7 +384,9 @@ def test_port_accessor_setters_route_correctly() -> None:
         )
     )
     asym = kcl.get_asymmetrical_cross_section(
-        kf.AsymmetricalCrossSection(width=500, layer=layer, name="setter_asym")
+        kf.AsymmetricalCrossSection(
+            layer=layer, section_min=-250, section_max=250, name="setter_asym"
+        )
     )
     c = kcl.kcell("setter_top")
     p = c.create_port(name="o1", trans=kf.kdb.Trans.R0, cross_section=sym)
@@ -244,7 +405,9 @@ def test_port_gds_roundtrip_preserves_asymmetric_kind() -> None:
     kcl_w = kf.KCLayout("PORT_GDS_W")
     layer = kf.kdb.LayerInfo(1, 0, "WG")
     acs = kcl_w.get_asymmetrical_cross_section(
-        kf.AsymmetricalCrossSection(width=500, layer=layer, name="rt_asym")
+        kf.AsymmetricalCrossSection(
+            layer=layer, section_min=-250, section_max=250, name="rt_asym"
+        )
     )
     c = kcl_w.kcell("rt_top")
     c.create_port(name="o1", trans=kf.kdb.Trans.R0, cross_section=acs)
@@ -265,14 +428,17 @@ def test_port_gds_roundtrip_preserves_asymmetric_kind() -> None:
 def test_asymmetric_wrappers_share_base_and_compare_across_units() -> None:
     kcl = kf.KCLayout("ASYM_WRAP_EQ")
     layer = kf.kdb.LayerInfo(1, 0, "WG")
+    # main strip [-200, 300] (offset=50, width=500); aux strip [-100, 900]
     acs = kcl.get_asymmetrical_cross_section(
         kf.AsymmetricalCrossSection(
-            width=500,
             layer=layer,
-            offset=50,
+            section_min=-200,
+            section_max=300,
             sections=(
                 kf.CrossSectionLayer(
-                    layer=kf.kdb.LayerInfo(2, 0, "S"), width=1000, offset=400
+                    layer=kf.kdb.LayerInfo(2, 0, "S"),
+                    section_min=-100,
+                    section_max=900,
                 ),
             ),
             name="aw",
@@ -293,8 +459,10 @@ def test_asymmetric_wrappers_share_base_and_compare_across_units() -> None:
     # units differ on the public surface
     assert ixs.width == 500
     assert dxs.width == kcl.to_um(500)
-    assert ixs.offset == 50
-    assert dxs.offset == kcl.to_um(50)
+    assert ixs.section_min == -200
+    assert dxs.section_min == kcl.to_um(-200)
+    assert ixs.section_max == 300
+    assert dxs.section_max == kcl.to_um(300)
     assert ixs.get_xmin_xmax() == (-200, 900)
     assert dxs.get_xmin_xmax() == (kcl.to_um(-200), kcl.to_um(900))
 
@@ -304,12 +472,14 @@ def test_asymmetric_wrapper_construct_from_scratch() -> None:
     layer = kf.kdb.LayerInfo(1, 0, "WG")
     ixs = kf.AsymmetricCrossSection(
         kcl,
-        width=500,
+        section_min=-200,
+        section_max=300,
         layer=layer,
-        offset=50,
         sections=(
             kf.CrossSectionLayer(
-                layer=kf.kdb.LayerInfo(2, 0, "S"), width=1000, offset=400
+                layer=kf.kdb.LayerInfo(2, 0, "S"),
+                section_min=-100,
+                section_max=900,
             ),
         ),
         name="acs1",
@@ -333,7 +503,9 @@ def test_get_cross_section_kind_switch() -> None:
         kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="wg1000")
     )
     acs = kcl.get_asymmetrical_cross_section(
-        kf.AsymmetricalCrossSection(width=500, layer=layer, name="aw500")
+        kf.AsymmetricalCrossSection(
+            layer=layer, section_min=-250, section_max=250, name="aw500"
+        )
     )
 
     assert kcl.get_cross_section(scs) is scs
@@ -365,7 +537,9 @@ def test_metadata_uses_separate_prefix_for_asymmetric() -> None:
         kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="wg1000")
     )
     kcl_w.get_asymmetrical_cross_section(
-        kf.AsymmetricalCrossSection(width=500, layer=layer, name="aw500")
+        kf.AsymmetricalCrossSection(
+            layer=layer, section_min=-250, section_max=250, name="aw500"
+        )
     )
     c = kcl_w.kcell("meta_top")
     c.shapes(kcl_w.layer(layer)).insert(kf.kdb.Box(0, 0, 100, 100))
@@ -403,7 +577,9 @@ def test_connect_asym_to_asym_requires_mirror_when_misaligned() -> None:
     b = kcl.kcell("child_b_r0")
     b.create_port(name="o1", width=500, layer_info=layer, trans=kf.kdb.Trans.R0)
     acs = kcl.get_asymmetrical_cross_section(
-        kf.AsymmetricalCrossSection(width=500, layer=layer, name="asym_r0")
+        kf.AsymmetricalCrossSection(
+            layer=layer, section_min=-250, section_max=250, name="asym_r0"
+        )
     )
     a.ports["o1"].asymmetric_cross_section = acs
     b.ports["o1"].asymmetric_cross_section = acs
@@ -421,7 +597,9 @@ def _make_asym_wg(kcl: kf.KCLayout, name: str) -> kf.KCell:
     """Asymmetric waveguide cell with the user's convention: o1=R180, o2=M0."""
     layer = kf.kdb.LayerInfo(1, 0, "WG")
     acs = kcl.get_asymmetrical_cross_section(
-        kf.AsymmetricalCrossSection(width=500, layer=layer, name="aw500")
+        kf.AsymmetricalCrossSection(
+            layer=layer, section_min=-250, section_max=250, name="aw500"
+        )
     )
     c = kcl.kcell(name)
     c.create_port(
@@ -480,7 +658,9 @@ def test_asym_connect_check_ignores_input_mirror_flag_when_use_mirror_false() ->
     kcl = kf.KCLayout("ASYM_USE_MIRROR")
     layer = kf.kdb.LayerInfo(1, 0, "WG")
     acs = kcl.get_asymmetrical_cross_section(
-        kf.AsymmetricalCrossSection(width=500, layer=layer, name="asym_um")
+        kf.AsymmetricalCrossSection(
+            layer=layer, section_min=-250, section_max=250, name="asym_um"
+        )
     )
     parent = kcl.kcell("parent_um")
     a = kcl.kcell("a_um")

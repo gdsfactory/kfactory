@@ -2105,9 +2105,9 @@ class KCLayout(
         for acs in asym_cross_sections:
             self.get_asymmetrical_cross_section(
                 AsymmetricalCrossSection(
-                    width=acs["width"],
                     layer=acs["layer"],
-                    offset=acs.get("offset", 0),
+                    section_min=acs["section_min"],
+                    section_max=acs["section_max"],
                     sections=tuple(
                         CrossSectionLayer(**s) for s in acs.get("sections", ())
                     ),
@@ -2157,11 +2157,15 @@ class KCLayout(
                 kdb.LayoutMetaInfo(
                     f"kfactory:asymmetrical_cross_section:{acs.name}",
                     {
-                        "width": acs.width,
                         "layer": acs.layer,
-                        "offset": acs.offset,
+                        "section_min": acs.section_min,
+                        "section_max": acs.section_max,
                         "sections": [
-                            {"layer": s.layer, "width": s.width, "offset": s.offset}
+                            {
+                                "layer": s.layer,
+                                "section_min": s.section_min,
+                                "section_max": s.section_max,
+                            }
                             for s in acs.sections
                         ],
                         "radius": acs.radius,
@@ -2323,6 +2327,14 @@ class KCLayout(
             return self.get_symmetrical_cross_section(cross_section)
         if kind == "asymmetric":
             return self.get_asymmetrical_cross_section(cross_section)
+        if isinstance(cross_section, str):
+            if cross_section in self.cross_sections.cross_sections:
+                return self.cross_sections.cross_sections[cross_section]
+            if cross_section in self.cross_sections.asymmetrical_cross_sections:
+                return self.cross_sections.asymmetrical_cross_sections[cross_section]
+            raise KeyError(
+                f"No cross section named {cross_section!r} (symmetric or asymmetric)."
+            )
         if isinstance(
             cross_section,
             (
@@ -2332,24 +2344,7 @@ class KCLayout(
             ),
         ):
             return self.get_asymmetrical_cross_section(cross_section)
-        if isinstance(
-            cross_section,
-            (
-                SymmetricalCrossSection,
-                DSymmetricalCrossSection,
-                TCrossSection,
-            ),
-        ):
-            return self.get_symmetrical_cross_section(cross_section)
-        if isinstance(cross_section, str):
-            if cross_section in self.cross_sections.cross_sections:
-                return self.cross_sections.cross_sections[cross_section]
-            if cross_section in self.cross_sections.asymmetrical_cross_sections:
-                return self.cross_sections.asymmetrical_cross_sections[cross_section]
-            raise KeyError(
-                f"No cross section named {cross_section!r} (symmetric or asymmetric)."
-            )
-        # spec dicts (CrossSectionSpec / DCrossSectionSpec) → symmetric
+        # spec dicts (CrossSectionSpec / DCrossSectionSpec) are always symmetric
         return self.get_symmetrical_cross_section(cross_section)
 
     def get_icross_section(

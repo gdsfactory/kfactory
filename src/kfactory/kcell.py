@@ -1617,9 +1617,6 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         "port_type": port.port_type,
                         "info": port.info.model_dump(),
                     }
-                    if not port.is_symmetric():
-                        meta_info["cross_section_kind"] = "asymmetric"
-
                     self.add_meta_info(
                         kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
                     )
@@ -1631,9 +1628,6 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         "port_type": port.port_type,
                         "info": port.info.model_dump(),
                     }
-                    if not port.is_symmetric():
-                        meta_info["cross_section_kind"] = "asymmetric"
-
                     self.add_meta_info(
                         kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
                     )
@@ -1725,15 +1719,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 if not self.is_library_cell():
                     for index in sorted(port_dict.keys()):
                         v = port_dict[index]
-                        kind = v.get("cross_section_kind", "symmetric")
-                        if kind == "asymmetric":
-                            xs = self.kcl.get_asymmetrical_cross_section(
-                                v["cross_section"]
-                            )
-                        else:
-                            xs = self.kcl.get_symmetrical_cross_section(
-                                v["cross_section"]
-                            )
+                        xs = self.kcl.get_cross_section(v["cross_section"], kind="any")
                         trans_: kdb.Trans | None = v.get("trans")
                         if trans_ is not None:
                             ports[index] = self.create_port(
@@ -1768,19 +1754,17 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         v = port_dict[index]
                         trans_ = v.get("trans")
                         lib_kcl = kcls[lib_name]
-                        kind = v.get("cross_section_kind", "symmetric")
+                        lib_xs = lib_kcl.get_cross_section(
+                            v["cross_section"], kind="any"
+                        )
                         cs: SymmetricalCrossSection | AsymmetricalCrossSection
-                        if kind == "asymmetric":
-                            cs = self.kcl.get_asymmetrical_cross_section(
-                                lib_kcl.get_asymmetrical_cross_section(
-                                    v["cross_section"]
-                                ).to_dtype(lib_kcl)
+                        if isinstance(lib_xs, SymmetricalCrossSection):
+                            cs = self.kcl.get_symmetrical_cross_section(
+                                lib_xs.to_dtype(lib_kcl)
                             )
                         else:
-                            cs = self.kcl.get_symmetrical_cross_section(
-                                lib_kcl.get_symmetrical_cross_section(
-                                    v["cross_section"]
-                                ).to_dtype(lib_kcl)
+                            cs = self.kcl.get_asymmetrical_cross_section(
+                                lib_xs.to_dtype(lib_kcl)
                             )
 
                         if trans_ is not None:
