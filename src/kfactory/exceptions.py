@@ -10,7 +10,9 @@ if TYPE_CHECKING:
     from .port import ProtoPort
 
 __all__ = [
+    "AsymmetricMirrorRequiredError",
     "CellNameError",
+    "CrossSectionSymmetryMismatchError",
     "FactoriesLockedError",
     "InvalidLayerError",
     "LockedError",
@@ -138,6 +140,52 @@ class PortTypeMismatchError(ValueError):
                 f' and Port "{p2.name}" ({p1.port_type}/{p2.port_type})',
                 *args,
             )
+
+
+class AsymmetricMirrorRequiredError(ValueError):
+    """Raised when connecting two asymmetric ports without `mirror=True`.
+
+    Two ports carrying the same `AsymmetricalCrossSection` can only be
+    connected via an M90 (mirror) transformation, since R180 would flip the
+    left/right halves of the profile. Pass `mirror=True` to `connect`.
+    """
+
+    def __init__(
+        self,
+        p1: ProtoPort[Any],
+        p2: ProtoPort[Any],
+        *args: Any,
+    ) -> None:
+        super().__init__(
+            f"Cannot connect ports {p1.name!r} and {p2.name!r} carrying the same"
+            " asymmetric cross section without `mirror=True`. Asymmetric profiles"
+            " require an M90 transformation (mirror) — R180 would flip the"
+            " left/right halves. Pass `mirror=True` to `connect`.",
+            *args,
+        )
+
+
+class CrossSectionSymmetryMismatchError(ValueError):
+    """Raised when connecting ports whose cross sections differ in symmetry.
+
+    A symmetric and an asymmetric cross section cannot be connected even with
+    `allow_width_mismatch`, since they are structurally different objects.
+    """
+
+    def __init__(
+        self,
+        p1: ProtoPort[Any],
+        p2: ProtoPort[Any],
+        *args: Any,
+    ) -> None:
+        kind1 = type(p1.base.cross_section).__name__
+        kind2 = type(p2.base.cross_section).__name__
+        super().__init__(
+            f"Cross section symmetry mismatch between ports {p1.name!r} ({kind1})"
+            f" and {p2.name!r} ({kind2}). Symmetric and asymmetric cross sections"
+            " cannot be connected.",
+            *args,
+        )
 
 
 class CellNameError(ValueError):

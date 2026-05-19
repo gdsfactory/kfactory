@@ -20,6 +20,7 @@ from typing_extensions import TypedDict
 from . import kdb, rdb
 from .conf import ANGLE_180, config
 from .cross_section import (
+    AsymmetricalCrossSection,
     CrossSection,
     CrossSectionSpec,
     DCrossSection,
@@ -125,7 +126,7 @@ class BasePortDict(TypedDict):
 
     name: str
     kcl: KCLayout
-    cross_section: SymmetricalCrossSection
+    cross_section: SymmetricalCrossSection | AsymmetricalCrossSection
     trans: kdb.Trans | None
     dcplx_trans: kdb.DCplxTrans | None
     info: Info
@@ -140,7 +141,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
 
     name: str
     kcl: KCLayout
-    cross_section: SymmetricalCrossSection
+    cross_section: SymmetricalCrossSection | AsymmetricalCrossSection
     trans: kdb.Trans | None = None
     dcplx_trans: kdb.DCplxTrans | None = None
     info: Info = Info()
@@ -417,7 +418,7 @@ class ProtoPort[T: (int, float)](ABC):
         index.
         """
         return self.kcl.find_layer(
-            self.cross_section.layer, allow_undefined_layers=True
+            self._base.cross_section.main_layer, allow_undefined_layers=True
         )
 
     @property
@@ -426,7 +427,7 @@ class ProtoPort[T: (int, float)](ABC):
 
         This corresponds to the port's cross section's main layer.
         """
-        return self.cross_section.layer
+        return self._base.cross_section.main_layer
 
     def __eq__(self, other: object) -> bool:
         """Support for `port1 == port2` comparisons."""
@@ -1001,7 +1002,7 @@ class Port(ProtoPort[int]):
     @property
     def cross_section(self) -> CrossSection:
         """Get the cross section of the port."""
-        return CrossSection(kcl=self._base.kcl, base=self._base.cross_section)
+        return CrossSection(kcl=self._base.kcl, base=self._base.cross_section)  # ty:ignore[invalid-argument-type]
 
     @cross_section.setter
     def cross_section(
@@ -1332,7 +1333,7 @@ class DPort(ProtoPort[float]):
     @property
     def cross_section(self) -> DCrossSection:
         """Get the cross section of the port."""
-        return DCrossSection(kcl=self._base.kcl, base=self._base.cross_section)
+        return DCrossSection(kcl=self._base.kcl, base=self._base.cross_section)  # ty:ignore[invalid-argument-type]
 
     @cross_section.setter
     def cross_section(

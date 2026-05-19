@@ -25,9 +25,15 @@ if TYPE_CHECKING:
     from .layout import KCLayout
 
 __all__ = [
+    "AsymmetricCrossSection",
+    "AsymmetricalCrossSection",
     "CrossSection",
+    "CrossSectionLayer",
     "CrossSectionSpec",
+    "DAsymmetricCrossSection",
+    "DAsymmetricalCrossSection",
     "DCrossSection",
+    "DCrossSectionLayer",
     "DCrossSectionSpec",
     "SymmetricalCrossSection",
 ]
@@ -65,6 +71,8 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
     @model_validator(mode="before")
     @classmethod
     def _set_name(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
         data["name"] = data.get("name") or f"{data['enclosure'].name}_{data['width']}"
         return data
 
@@ -139,6 +147,450 @@ class DSymmetricalCrossSection(BaseModel):
             width=kcl.to_dbu(self.width),
             enclosure=kcl.get_enclosure(self.enclosure.to_itype(kcl)),
             name=self.name,
+        )
+
+
+class CrossSectionLayer(BaseModel, frozen=True, arbitrary_types_allowed=True):
+    """Single strip in an asymmetrical cross section.
+
+    A strip of a given layer with a given width, centered at `offset` relative
+    to the port centerline.
+    """
+
+    layer: kdb.LayerInfo
+    width: dbu
+    offset: dbu = 0
+
+    @model_validator(mode="after")
+    def _validate_width(self) -> Self:
+        if self.width <= 0:
+            raise ValueError("Width of a cross section layer must be greater than 0.")
+        return self
+
+
+class DCrossSectionLayer(BaseModel, arbitrary_types_allowed=True):
+    """um based CrossSectionLayer."""
+
+    layer: kdb.LayerInfo
+    width: float
+    offset: float = 0
+
+    @model_validator(mode="after")
+    def _validate_width(self) -> Self:
+        if self.width <= 0:
+            raise ValueError("Width of a cross section layer must be greater than 0.")
+        return self
+
+    def to_itype(self, kcl: KCLayout) -> CrossSectionLayer:
+        return CrossSectionLayer(
+            layer=self.layer,
+            width=kcl.to_dbu(self.width),
+            offset=kcl.to_dbu(self.offset),
+        )
+
+
+def _normalize_sections(
+    sections: Sequence[CrossSectionLayer] | tuple[CrossSectionLayer, ...],
+) -> tuple[CrossSectionLayer, ...]:
+    return tuple(
+        sorted(
+            sections,
+            key=lambda s: (
+                s.layer.name,
+                s.layer.layer,
+                s.layer.datatype,
+                s.offset,
+                s.width,
+            ),
+        )
+    )
+
+
+class AsymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=True):
+    """Cross section composed of independent layer strips at arbitrary offsets.
+
+    Unlike `SymmetricalCrossSection`, each strip carries its own layer, width
+    and signed offset from the port centerline (`offset=0`). The main strip
+    (`layer`, `width`, `offset`) is the port reference; `sections` holds any
+    additional strips.
+    """
+
+    width: dbu
+    layer: kdb.LayerInfo
+    offset: dbu = 0
+    sections: tuple[CrossSectionLayer, ...] = ()
+    name: str = ""
+    radius: dbu | None = None
+    radius_min: dbu | None = None
+    bbox_sections: dict[kdb.LayerInfo, dbu] = Field(default_factory=dict)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        sections = data.get("sections", ())
+        coerced: list[CrossSectionLayer] = []
+        for s in sections:
+            if isinstance(s, CrossSectionLayer):
+                coerced.append(s)
+            else:
+                coerced.append(CrossSectionLayer.model_validate(s))
+        data["sections"] = _normalize_sections(coerced)
+        if not data.get("name"):
+            layer = data["layer"]
+            width = data["width"]
+            offset = data.get("offset", 0)
+            data["name"] = f"asym_{layer.name or layer.layer}_{width}_{offset}"
+        return data
+
+    @model_validator(mode="after")
+    def _validate(self) -> Self:
+        if self.width <= 0:
+            raise ValueError("Width must be greater than 0.")
+        return self
+
+    @property
+    def main_layer(self) -> kdb.LayerInfo:
+        """Main layer of the cross section (parity with SymmetricalCrossSection)."""
+        return self.layer
+
+    def to_dtype(self, kcl: KCLayout) -> DAsymmetricalCrossSection:
+        return DAsymmetricalCrossSection(
+            width=kcl.to_um(self.width),
+            layer=self.layer,
+            offset=kcl.to_um(self.offset),
+            sections=tuple(
+                DCrossSectionLayer(
+                    layer=s.layer,
+                    width=kcl.to_um(s.width),
+                    offset=kcl.to_um(s.offset),
+                )
+                for s in self.sections
+            ),
+            name=self.name,
+            radius=kcl.to_um(self.radius) if self.radius is not None else None,
+            radius_min=kcl.to_um(self.radius_min)
+            if self.radius_min is not None
+            else None,
+            bbox_sections={k: kcl.to_um(v) for k, v in self.bbox_sections.items()},
+        )
+
+    def _all_strips(self) -> tuple[tuple[int, int], ...]:
+        """Return (offset, width) for the main strip and every aux section."""
+        return (
+            (self.offset, self.width),
+            *((s.offset, s.width) for s in self.sections),
+        )
+
+    def get_xmin(self) -> int:
+        return min(off - w // 2 for off, w in self._all_strips())
+
+    def get_xmax(self) -> int:
+        return max(off + w // 2 for off, w in self._all_strips())
+
+    def model_copy(
+        self, *, update: Mapping[str, Any] | None = {"name": None}, deep: bool = False
+    ) -> AsymmetricalCrossSection:
+        return super().model_copy(update=update, deep=deep)
+
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, TAsymmetricCrossSection):
+            return o == self
+        return super().__eq__(o)
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                self.width,
+                self.layer,
+                self.offset,
+                self.sections,
+                self.name,
+                self.radius,
+                self.radius_min,
+                tuple(sorted(self.bbox_sections.items(), key=lambda kv: kv[0].name)),
+            )
+        )
+
+
+class DAsymmetricalCrossSection(BaseModel, arbitrary_types_allowed=True):
+    """um based AsymmetricalCrossSection."""
+
+    width: float
+    layer: kdb.LayerInfo
+    offset: float = 0
+    sections: tuple[DCrossSectionLayer, ...] = ()
+    name: str | None = None
+    radius: float | None = None
+    radius_min: float | None = None
+    bbox_sections: dict[kdb.LayerInfo, float] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _validate_width(self) -> Self:
+        if self.width <= 0:
+            raise ValueError("Width must be greater than 0.")
+        return self
+
+    def to_itype(self, kcl: KCLayout) -> AsymmetricalCrossSection:
+        return AsymmetricalCrossSection(
+            width=kcl.to_dbu(self.width),
+            layer=self.layer,
+            offset=kcl.to_dbu(self.offset),
+            sections=tuple(s.to_itype(kcl) for s in self.sections),
+            name=self.name or "",
+            radius=kcl.to_dbu(self.radius) if self.radius is not None else None,
+            radius_min=kcl.to_dbu(self.radius_min)
+            if self.radius_min is not None
+            else None,
+            bbox_sections={k: kcl.to_dbu(v) for k, v in self.bbox_sections.items()},
+        )
+
+
+type AnyCrossSection = SymmetricalCrossSection | AsymmetricalCrossSection
+
+
+class TAsymmetricCrossSection[T: (int, float)](ABC):
+    """Unit-flavored wrapper around an `AsymmetricalCrossSection` base.
+
+    Mirrors `TCrossSection` for the symmetric case: both the dbu wrapper
+    (`AsymmetricCrossSection`) and the um wrapper (`DAsymmetricCrossSection`)
+    hold the same `AsymmetricalCrossSection` as `_base`, so they compare equal
+    across units via `.base`.
+    """
+
+    _base: AsymmetricalCrossSection = PrivateAttr()
+    kcl: KCLayout
+
+    @property
+    def base(self) -> AsymmetricalCrossSection:
+        return self._base
+
+    @property
+    def name(self) -> str:
+        return self._base.name
+
+    @property
+    def layer(self) -> kdb.LayerInfo:
+        return self._base.layer
+
+    @property
+    def main_layer(self) -> kdb.LayerInfo:
+        return self._base.layer
+
+    @property
+    @abstractmethod
+    def width(self) -> T: ...
+
+    @property
+    @abstractmethod
+    def offset(self) -> T: ...
+
+    @property
+    @abstractmethod
+    def sections(
+        self,
+    ) -> tuple[CrossSectionLayer, ...] | tuple[DCrossSectionLayer, ...]: ...
+
+    @property
+    @abstractmethod
+    def radius(self) -> T | None: ...
+
+    @property
+    @abstractmethod
+    def radius_min(self) -> T | None: ...
+
+    @property
+    @abstractmethod
+    def bbox_sections(self) -> dict[kdb.LayerInfo, T]: ...
+
+    @abstractmethod
+    def get_xmin_xmax(self) -> tuple[T, T]: ...
+
+    def to_itype(self) -> AsymmetricCrossSection:
+        return AsymmetricCrossSection(kcl=self.kcl, base=self._base)
+
+    def to_dtype(self) -> DAsymmetricCrossSection:
+        return DAsymmetricCrossSection(kcl=self.kcl, base=self._base)
+
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, TAsymmetricCrossSection):
+            return self.base == o.base
+        if isinstance(o, AsymmetricalCrossSection):
+            return self.base == o
+        return False
+
+    def __hash__(self) -> int:
+        return hash(self._base)
+
+
+class AsymmetricCrossSection(TAsymmetricCrossSection[int]):
+    """dbu-flavored wrapper around an `AsymmetricalCrossSection`."""
+
+    @overload
+    def __init__(self, kcl: KCLayout, *, base: AsymmetricalCrossSection) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        kcl: KCLayout,
+        width: int,
+        layer: kdb.LayerInfo,
+        offset: int = 0,
+        sections: Sequence[CrossSectionLayer] = (),
+        name: str | None = None,
+        radius: int | None = None,
+        radius_min: int | None = None,
+        bbox_sections: dict[kdb.LayerInfo, int] | None = None,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        kcl: KCLayout,
+        width: int | None = None,
+        layer: kdb.LayerInfo | None = None,
+        offset: int = 0,
+        sections: Sequence[CrossSectionLayer] = (),
+        name: str | None = None,
+        radius: int | None = None,
+        radius_min: int | None = None,
+        bbox_sections: dict[kdb.LayerInfo, int] | None = None,
+        base: AsymmetricalCrossSection | None = None,
+    ) -> None:
+        if base is None:
+            if width is None or layer is None:
+                raise ValueError("If no base is given, width and layer must be defined")
+            base = kcl.get_asymmetrical_cross_section(
+                AsymmetricalCrossSection(
+                    width=width,
+                    layer=layer,
+                    offset=offset,
+                    sections=tuple(sections),
+                    name=name or "",
+                    radius=radius,
+                    radius_min=radius_min,
+                    bbox_sections=bbox_sections or {},
+                )
+            )
+        self.kcl = kcl
+        self._base = base
+
+    @property
+    def width(self) -> int:
+        return self._base.width
+
+    @property
+    def offset(self) -> int:
+        return self._base.offset
+
+    @property
+    def sections(self) -> tuple[CrossSectionLayer, ...]:
+        return self._base.sections
+
+    @property
+    def radius(self) -> int | None:
+        return self._base.radius
+
+    @property
+    def radius_min(self) -> int | None:
+        return self._base.radius_min
+
+    @property
+    def bbox_sections(self) -> dict[kdb.LayerInfo, int]:
+        return self._base.bbox_sections.copy()
+
+    def get_xmin_xmax(self) -> tuple[int, int]:
+        return (self._base.get_xmin(), self._base.get_xmax())
+
+
+class DAsymmetricCrossSection(TAsymmetricCrossSection[float]):
+    """um-flavored wrapper around an `AsymmetricalCrossSection`."""
+
+    @overload
+    def __init__(self, kcl: KCLayout, *, base: AsymmetricalCrossSection) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        kcl: KCLayout,
+        width: float,
+        layer: kdb.LayerInfo,
+        offset: float = 0,
+        sections: Sequence[DCrossSectionLayer] = (),
+        name: str | None = None,
+        radius: float | None = None,
+        radius_min: float | None = None,
+        bbox_sections: dict[kdb.LayerInfo, float] | None = None,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        kcl: KCLayout,
+        width: float | None = None,
+        layer: kdb.LayerInfo | None = None,
+        offset: float = 0,
+        sections: Sequence[DCrossSectionLayer] = (),
+        name: str | None = None,
+        radius: float | None = None,
+        radius_min: float | None = None,
+        bbox_sections: dict[kdb.LayerInfo, float] | None = None,
+        base: AsymmetricalCrossSection | None = None,
+    ) -> None:
+        if base is None:
+            if width is None or layer is None:
+                raise ValueError("If no base is given, width and layer must be defined")
+            base = kcl.get_asymmetrical_cross_section(
+                DAsymmetricalCrossSection(
+                    width=width,
+                    layer=layer,
+                    offset=offset,
+                    sections=tuple(sections),
+                    name=name,
+                    radius=radius,
+                    radius_min=radius_min,
+                    bbox_sections=bbox_sections or {},
+                ).to_itype(kcl)
+            )
+        self.kcl = kcl
+        self._base = base
+
+    @property
+    def width(self) -> float:
+        return self.kcl.to_um(self._base.width)
+
+    @property
+    def offset(self) -> float:
+        return self.kcl.to_um(self._base.offset)
+
+    @property
+    def sections(self) -> tuple[DCrossSectionLayer, ...]:
+        return tuple(
+            DCrossSectionLayer(
+                layer=s.layer,
+                width=self.kcl.to_um(s.width),
+                offset=self.kcl.to_um(s.offset),
+            )
+            for s in self._base.sections
+        )
+
+    @property
+    def radius(self) -> float | None:
+        r = self._base.radius
+        return self.kcl.to_um(r) if r is not None else None
+
+    @property
+    def radius_min(self) -> float | None:
+        r = self._base.radius_min
+        return self.kcl.to_um(r) if r is not None else None
+
+    @property
+    def bbox_sections(self) -> dict[kdb.LayerInfo, float]:
+        return {k: self.kcl.to_um(v) for k, v in self._base.bbox_sections.items()}
+
+    def get_xmin_xmax(self) -> tuple[float, float]:
+        return (
+            self.kcl.to_um(self._base.get_xmin()),
+            self.kcl.to_um(self._base.get_xmax()),
         )
 
 
@@ -480,10 +932,33 @@ class DCrossSectionSpec(TCrossSectionSpec[float]):
 
 class CrossSectionModel(BaseModel):
     cross_sections: dict[str, SymmetricalCrossSection] = Field(default_factory=dict)
+    asymmetrical_cross_sections: dict[str, AsymmetricalCrossSection] = Field(
+        default_factory=dict
+    )
     kcl: KCLayout
 
     def __getitem__(self, name: str) -> SymmetricalCrossSection:
         return self.cross_sections[name]
+
+    def get_asymmetrical_cross_section(
+        self,
+        cross_section: str | AsymmetricalCrossSection | DAsymmetricalCrossSection,
+    ) -> AsymmetricalCrossSection:
+        if isinstance(cross_section, str):
+            return self.asymmetrical_cross_sections[cross_section]
+        if isinstance(cross_section, DAsymmetricalCrossSection):
+            cross_section = cross_section.to_itype(self.kcl)
+        if cross_section.name not in self.asymmetrical_cross_sections:
+            self.asymmetrical_cross_sections[cross_section.name] = cross_section
+            return cross_section
+        xs = self.asymmetrical_cross_sections[cross_section.name]
+        if xs != cross_section:
+            raise ValueError(
+                "There is already an asymmetrical cross_section defined with name "
+                f"{cross_section.name}. Cannot overwrite cross_sections.\n"
+                f"old_xs={xs.model_dump()}\nnew_xs={cross_section.model_dump()}"
+            )
+        return xs
 
     def get_cross_section(
         self,

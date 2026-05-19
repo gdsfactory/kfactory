@@ -40,13 +40,21 @@ from pydantic import (
 from . import __version__, kdb
 from .conf import CheckInstances, CheckUnnamedCells, config, logger
 from .cross_section import (
+    AsymmetricalCrossSection,
+    AsymmetricCrossSection,
     CrossSection,
+    CrossSectionLayer,
     CrossSectionModel,
     CrossSectionSpec,
+    DAsymmetricalCrossSection,
+    DAsymmetricCrossSection,
     DCrossSection,
+    DCrossSectionLayer,
     DCrossSectionSpec,
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
+    TAsymmetricCrossSection,
+    TCrossSection,
 )
 from .decorators import (
     Decorators,
@@ -2057,6 +2065,7 @@ class KCLayout(
         settings: dict[str, Any] = {}
         info: dict[str, Any] = {}
         cross_sections: list[dict[str, Any]] = []
+        asym_cross_sections: list[dict[str, Any]] = []
         for meta in self.layout.each_meta_info():
             if meta.name.startswith("kfactory:info"):
                 info[meta.name.removeprefix("kfactory:info:")] = meta.value
@@ -2067,6 +2076,15 @@ class KCLayout(
                     LayerEnclosure(
                         **meta.value,
                     )
+                )
+            elif meta.name.startswith("kfactory:asymmetrical_cross_section:"):
+                asym_cross_sections.append(
+                    {
+                        "name": meta.name.removeprefix(
+                            "kfactory:asymmetrical_cross_section:"
+                        ),
+                        **meta.value,
+                    }
                 )
             elif meta.name.startswith("kfactory:cross_section:"):
                 cross_sections.append(
@@ -2082,6 +2100,21 @@ class KCLayout(
                     width=cs["width"],
                     enclosure=self.get_enclosure(cs["layer_enclosure"]),
                     name=cs["name"],
+                )
+            )
+        for acs in asym_cross_sections:
+            self.get_asymmetrical_cross_section(
+                AsymmetricalCrossSection(
+                    width=acs["width"],
+                    layer=acs["layer"],
+                    offset=acs.get("offset", 0),
+                    sections=tuple(
+                        CrossSectionLayer(**s) for s in acs.get("sections", ())
+                    ),
+                    name=acs["name"],
+                    radius=acs.get("radius"),
+                    radius_min=acs.get("radius_min"),
+                    bbox_sections=acs.get("bbox_sections", {}),
                 )
             )
 
@@ -2114,6 +2147,26 @@ class KCLayout(
                     {
                         "width": cross_section.width,
                         "layer_enclosure": cross_section.enclosure.name,
+                    },
+                    None,
+                    True,
+                )
+            )
+        for acs in self.cross_sections.asymmetrical_cross_sections.values():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    f"kfactory:asymmetrical_cross_section:{acs.name}",
+                    {
+                        "width": acs.width,
+                        "layer": acs.layer,
+                        "offset": acs.offset,
+                        "sections": [
+                            {"layer": s.layer, "width": s.width, "offset": s.offset}
+                            for s in acs.sections
+                        ],
+                        "radius": acs.radius,
+                        "radius_min": acs.radius_min,
+                        "bbox_sections": acs.bbox_sections,
                     },
                     None,
                     True,
@@ -2203,6 +2256,102 @@ class KCLayout(
         """Get a cross section by name or specification."""
         return self.cross_sections.get_cross_section(cross_section)
 
+    def get_asymmetrical_cross_section(
+        self,
+        cross_section: str
+        | AsymmetricalCrossSection
+        | DAsymmetricalCrossSection
+        | TAsymmetricCrossSection[Any],
+    ) -> AsymmetricalCrossSection:
+        """Get an asymmetrical cross section by name or instance."""
+        if isinstance(cross_section, TAsymmetricCrossSection):
+            cross_section = cross_section.base
+        return self.cross_sections.get_asymmetrical_cross_section(cross_section)
+
+    @overload
+    def get_cross_section(
+        self,
+        cross_section: str
+        | SymmetricalCrossSection
+        | CrossSectionSpec
+        | DCrossSectionSpec
+        | DSymmetricalCrossSection
+        | TCrossSection[Any],
+        kind: Literal["symmetric"] = "symmetric",
+    ) -> SymmetricalCrossSection: ...
+
+    @overload
+    def get_cross_section(
+        self,
+        cross_section: str
+        | AsymmetricalCrossSection
+        | DAsymmetricalCrossSection
+        | TAsymmetricCrossSection[Any],
+        kind: Literal["asymmetric"],
+    ) -> AsymmetricalCrossSection: ...
+
+    @overload
+    def get_cross_section(
+        self,
+        cross_section: str
+        | SymmetricalCrossSection
+        | CrossSectionSpec
+        | DCrossSectionSpec
+        | DSymmetricalCrossSection
+        | TCrossSection[Any]
+        | AsymmetricalCrossSection
+        | DAsymmetricalCrossSection
+        | TAsymmetricCrossSection[Any],
+        kind: Literal["any"],
+    ) -> SymmetricalCrossSection | AsymmetricalCrossSection: ...
+
+    def get_cross_section(
+        self,
+        cross_section: Any,
+        kind: Literal["symmetric", "asymmetric", "any"] = "symmetric",
+    ) -> SymmetricalCrossSection | AsymmetricalCrossSection:
+        """Get a cross section by name or instance.
+
+        Args:
+            cross_section: name, spec, or instance.
+            kind: which container to look up. `"symmetric"` (default) accepts
+                symmetric inputs only. `"asymmetric"` accepts asymmetric inputs
+                only. `"any"` accepts either and dispatches by input type; for
+                string names, symmetric is checked first then asymmetric.
+        """
+        if kind == "symmetric":
+            return self.get_symmetrical_cross_section(cross_section)
+        if kind == "asymmetric":
+            return self.get_asymmetrical_cross_section(cross_section)
+        if isinstance(
+            cross_section,
+            (
+                AsymmetricalCrossSection,
+                DAsymmetricalCrossSection,
+                TAsymmetricCrossSection,
+            ),
+        ):
+            return self.get_asymmetrical_cross_section(cross_section)
+        if isinstance(
+            cross_section,
+            (
+                SymmetricalCrossSection,
+                DSymmetricalCrossSection,
+                TCrossSection,
+            ),
+        ):
+            return self.get_symmetrical_cross_section(cross_section)
+        if isinstance(cross_section, str):
+            if cross_section in self.cross_sections.cross_sections:
+                return self.cross_sections.cross_sections[cross_section]
+            if cross_section in self.cross_sections.asymmetrical_cross_sections:
+                return self.cross_sections.asymmetrical_cross_sections[cross_section]
+            raise KeyError(
+                f"No cross section named {cross_section!r} (symmetric or asymmetric)."
+            )
+        # spec dicts (CrossSectionSpec / DCrossSectionSpec) → symmetric
+        return self.get_symmetrical_cross_section(cross_section)
+
     def get_icross_section(
         self,
         cross_section: str
@@ -2231,6 +2380,30 @@ class KCLayout(
         """Get a cross section by name or specification."""
         return DCrossSection(
             kcl=self, base=self.cross_sections.get_cross_section(cross_section)
+        )
+
+    def get_iasymmetric_cross_section(
+        self,
+        cross_section: str
+        | AsymmetricalCrossSection
+        | DAsymmetricalCrossSection
+        | TAsymmetricCrossSection[Any],
+    ) -> AsymmetricCrossSection:
+        """Get a dbu-flavored asymmetric cross section wrapper."""
+        return AsymmetricCrossSection(
+            kcl=self, base=self.get_asymmetrical_cross_section(cross_section)
+        )
+
+    def get_dasymmetric_cross_section(
+        self,
+        cross_section: str
+        | AsymmetricalCrossSection
+        | DAsymmetricalCrossSection
+        | TAsymmetricCrossSection[Any],
+    ) -> DAsymmetricCrossSection:
+        """Get a um-flavored asymmetric cross section wrapper."""
+        return DAsymmetricCrossSection(
+            kcl=self, base=self.get_asymmetrical_cross_section(cross_section)
         )
 
     def __repr__(self) -> str:
@@ -2265,6 +2438,10 @@ class KCLayout(
 ManhattanRoute.model_rebuild()
 KCLayout.model_rebuild()
 SymmetricalCrossSection.model_rebuild()
+AsymmetricalCrossSection.model_rebuild()
+DAsymmetricalCrossSection.model_rebuild()
+CrossSectionLayer.model_rebuild()
+DCrossSectionLayer.model_rebuild()
 CrossSectionModel.model_rebuild()
 TKCell.model_rebuild()
 TVCell.model_rebuild()
