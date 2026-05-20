@@ -927,17 +927,10 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 logger.warning(
                     "Levels are not supported if the inserted Instance is a KCell."
                 )
-            if isinstance(self.cell, ProtoTKCell):
-                for layer in self.cell.kcl.layer_indexes():
-                    reg = kdb.Region(self.cell.kdb_cell.begin_shapes_rec(layer))
-                    reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
-                    cell.shapes(layer).insert(reg)
-            else:
-                for layer, shapes in self.cell.shapes.items():
-                    for shape in shapes.transform(trans * self.trans):
-                        cell.shapes(layer).insert(shape)
-                for vinst in self.cell.vinsts:
-                    vinst.insert_into_flat(cell, trans=trans * self.trans)
+            for layer in self.cell.kcl.layer_indexes():
+                reg = kdb.Region(self.cell.kdb_cell.begin_shapes_rec(layer))
+                reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
+                cell.shapes(layer).insert(reg)
 
     @overload
     def connect(
