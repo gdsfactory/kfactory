@@ -262,6 +262,7 @@ class Settings(BaseSettings):
     write_timestamps: bool = False
     write_kfactory_settings: bool = True
     """Write kfactory version into the gds/oasis."""
+    multi_xy_records: bool = False
 
     show_function: ShowFunction | None = None
 
