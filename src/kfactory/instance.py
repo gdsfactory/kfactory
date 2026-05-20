@@ -797,14 +797,6 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 cell_.name = cell_name
                 for port in self.cell.ports:
                     cell_.add_port(port=port.copy(trans_))
-                for c_shapes in (
-                    cell_.shapes(layer) for layer in cell_.kcl.layer_indexes()
-                ):
-                    if not c_shapes.is_empty():
-                        r = kdb.Region(c_shapes)
-                        r.merge()
-                        c_shapes.clear()
-                        c_shapes.insert(r)
                 settings = self.cell.settings.model_copy()
                 settings_units = self.cell.settings_units.model_copy()
                 cell_.settings = settings
@@ -845,7 +837,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         if cell.kcl.layout_cell(cell_name) is None:
             tkcell = self.cell.dup()
             tkcell.name = cell_name
-            tkcell.flatten(True)
+            tkcell.flatten(merge=False)
             for layer in tkcell.kcl.layer_indexes():
                 tkcell.shapes(layer).transform(trans_)
             for _port in tkcell.ports:
