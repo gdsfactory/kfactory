@@ -842,16 +842,12 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 tkcell.shapes(layer).transform(trans_)
             for _port in tkcell.ports:
                 _port.dcplx_trans = trans_ * _port.dcplx_trans
-            if trans_ != kdb.DCplxTrans.R0:
-                tkcell._base.vtrans = trans_
-            settings = self.cell.settings.model_copy()
-            settings_units = self.cell.settings_units.model_copy()
-            tkcell.settings = settings
+            tkcell._base.vtrans = trans_
+            tkcell.settings = self.cell.settings.model_copy()
             tkcell.info = self.cell.info.model_copy(deep=True)
-            tkcell.settings_units = settings_units
+            tkcell.settings_units = self.cell.settings_units.model_copy()
             tkcell.function_name = self.cell.function_name
             tkcell.basename = self.cell.basename
-            tkcell._base.vtrans = trans_
         else:
             tkcell = cell.kcl[cell_name]
         inst_ = cell.create_inst(
