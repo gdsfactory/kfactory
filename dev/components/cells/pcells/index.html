@@ -2300,33 +2300,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../utilities/fill/" class="md-nav__link">
         
   
@@ -2551,7 +2524,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5659,7 +5632,7 @@ computed.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../pcells/output_3_0.png" /></p>
+<img alt="png" src="../pcells/output_4_0.png" /></p>
 <h3 id="automatic-naming">Automatic naming</h3>
 <p>The cell name is derived from the function name and its arguments.  Floats are
 formatted with <code>p</code> in place of <code>.</code> to keep the name GDS-legal.</p>
@@ -5729,7 +5702,7 @@ settings: KCellSettings(width=0.5, length=20.0)
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../pcells/output_9_1.png" /></p>
+<img alt="png" src="../pcells/output_10_1.png" /></p>
 <h2 id="3-multi-layer-pcell">3 · Multi-layer PCell</h2>
 <p>PCells can draw on multiple layers.  Here a waveguide with a cladding layer
 (slab) demonstrates layered geometry.</p>
@@ -5780,7 +5753,7 @@ settings: KCellSettings(width=0.5, length=20.0)
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../pcells/output_11_0.png" /></p>
+<img alt="png" src="../pcells/output_12_0.png" /></p>
 <h2 id="4-composing-pcells">4 · Composing PCells</h2>
 <p>PCells can reference other PCells via <code>cell.create_inst(other_cell)</code>.  The inner
 cell is fetched from the cache (or created once and cached), so there is no
@@ -5813,7 +5786,7 @@ duplication even when many parent cells share the same child.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../pcells/output_13_0.png" /></p>
+<img alt="png" src="../pcells/output_14_0.png" /></p>
 <h2 id="5-virtual-cells-kfvcell">5 · Virtual cells — <code>@kf.vcell</code></h2>
 <p>A <code>VKCell</code> (virtual cell) is built like a PCell but is <strong>not</strong> registered in the
 KLayout cell database.  It is useful for intermediate helper geometry that never
@@ -5893,7 +5866,7 @@ kcl:  DEMO_PDK
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../pcells/output_17_1.png" /></p>
+<img alt="png" src="../pcells/output_18_1.png" /></p>
 <h2 id="7-decorator-options">7 · Decorator options</h2>
 <p>The <code>@kf.cell</code> decorator accepts several keyword arguments to control naming,
 caching, and validation.</p>
@@ -5980,7 +5953,7 @@ settings: KCellSettings(width=0.5, length=10.0)
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../pcells/output_19_1.png" /></p>
+<img alt="png" src="../pcells/output_20_1.png" /></p>
 <h2 id="summary">Summary</h2>
 <table>
 <thead>

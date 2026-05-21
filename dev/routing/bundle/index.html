@@ -1751,21 +1751,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-collision-check-layers" class="md-nav__link">
+  <a href="#5-mismatch-tolerance-flags" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        5 · Collision-check layers
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-mismatch-tolerance-flags" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        6 · Mismatch tolerance flags
+        5 · Mismatch tolerance flags
       </span>
     </span>
   </a>
@@ -2246,33 +2235,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2497,7 +2459,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5390,21 +5352,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-collision-check-layers" class="md-nav__link">
+  <a href="#5-mismatch-tolerance-flags" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        5 · Collision-check layers
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-mismatch-tolerance-flags" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        6 · Mismatch tolerance flags
+        5 · Mismatch tolerance flags
       </span>
     </span>
   </a>
@@ -5503,6 +5454,7 @@ avoiding obstacles.  This page covers parameters that are not shown in the
     <span class="n">WG</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">WGCLAD</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">METAL</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">FLOORPLAN</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
 <span class="n">L</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>
@@ -5583,7 +5535,7 @@ end side — eliminating crossings.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../bundle/output_3_0.png" /></p>
+<img alt="png" src="../bundle/output_4_0.png" /></p>
 <p>Without <code>sort_ports=True</code> the same port lists would produce three crossing routes.
 Sorting resolves the crossing by pairing ports at the same relative position.</p>
 <h2 id="2-separation-between-routes">2 · Separation between routes</h2>
@@ -5617,7 +5569,6 @@ near dense arrays where cladding layers would otherwise overlap.</p>
         <span class="n">separation</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">5.0</span><span class="p">),</span>  <span class="c1"># 5 µm — wider than the default 2 µm</span>
         <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
         <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-        <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
@@ -5626,41 +5577,88 @@ near dense arrays where cladding layers would otherwise overlap.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../bundle/output_6_0.png" /></p>
+<img alt="png" src="../bundle/output_7_0.png" /></p>
 <h2 id="3-s-bend-factory-for-compact-fan-in-fan-out">3 · S-bend factory for compact fan-in / fan-out</h2>
-<p>When start and end ports are already colinear (same angle, facing each other),
-ordinary bend-based routing adds large out-of-plane detours.  Passing an
-<code>sbend_factory</code> lets the router use S-bends instead — halving the vertical extent
-and producing a much more compact layout.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sbend_factory</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">factories</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_s_euler_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
+<p>When start and end ports face <strong>each other</strong> (e.g. East-facing starts and
+West-facing ends) but their y-coordinates do not line up, a normal 90°-bend
+router has to insert two right-angle bends per route — producing a large
+vertical detour.  Passing an <code>sbend_factory</code> lets the router substitute a
+compact Euler S-bend for the y mismatch instead.</p>
+<p>The router calls the factory with <code>(c, offset, length, width)</code> and expects
+back an <code>InstanceGroup</code> exposing ports <code>o1</code> (left) and <code>o2</code> (right).  The
+example below wraps <code>kf.cells.euler.bend_s_euler</code> to match that protocol
+and pads with a short straight if the requested <code>length</code> exceeds the
+S-bend's own footprint.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">sbend_factory</span><span class="p">(</span>
+    <span class="n">c</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">InstanceGroup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;SBendFactoryDBU wrapper around `bend_s_euler` + an optional straight.&quot;&quot;&quot;</span>
+    <span class="n">ig</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">InstanceGroup</span><span class="p">()</span>
+
+    <span class="n">sbend</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_s_euler</span><span class="p">(</span>
+        <span class="n">offset</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
+        <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
+        <span class="n">enclosure</span><span class="o">=</span><span class="n">wg_enc</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ig</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sbend</span><span class="p">)</span>
+    <span class="n">ig</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">sbend</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+
+    <span class="n">pad</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="n">sbend</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">pad</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;sbend_factory: requested length=</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2"> dbu is shorter than&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; the S-bend footprint (</span><span class="si">{</span><span class="n">sbend</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2"> dbu) for&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; offset=</span><span class="si">{</span><span class="n">offset</span><span class="si">}</span><span class="s2"> dbu — no room for the S-bend.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">pad</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">wg</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">straight_factory</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pad</span><span class="p">)</span>
+        <span class="n">ig</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">wg</span><span class="p">)</span>
+        <span class="n">wg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">sbend</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+        <span class="n">ig</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">wg</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ig</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">sbend</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">ig</span>
 
 
 <span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bundle_sbend</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Three parallel waveguides with an S-bend-optimised route.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Three routes with mismatched y on each side — forces S-bends.&quot;&quot;&quot;</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="mi">3</span>
-    <span class="n">pitch</span> <span class="o">=</span> <span class="mi">3_000</span>  <span class="c1"># 3 µm pitch, same on both sides</span>
+    <span class="c1"># Start ports face East (angle=0) at x=0.</span>
+    <span class="c1"># End ports face West (angle=2) at x=200 µm.</span>
+    <span class="c1"># Start and end y-coordinates differ by a few µm, so each route needs an</span>
+    <span class="c1"># S-bend to bridge the y mismatch — that is what `sbend_factory` provides.</span>
+    <span class="n">start_y_um</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
+    <span class="n">end_y_um</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span>
 
     <span class="n">start_ports</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">40_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">pitch</span><span class="p">),</span>
+            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">start_y_um</span><span class="p">)</span>
     <span class="p">]</span>
     <span class="n">end_ports</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">40_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">pitch</span><span class="p">),</span>
+            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">200</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">end_y_um</span><span class="p">)</span>
     <span class="p">]</span>
 
     <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_bundle</span><span class="p">(</span>
@@ -5671,7 +5669,6 @@ and producing a much more compact layout.</p>
         <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
         <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
         <span class="n">sbend_factory</span><span class="o">=</span><span class="n">sbend_factory</span><span class="p">,</span>  <span class="c1"># ← enables S-bend optimisation</span>
-        <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
@@ -5680,7 +5677,7 @@ and producing a much more compact layout.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../bundle/output_8_0.png" /></p>
+<img alt="png" src="../bundle/output_9_0.png" /></p>
 <h2 id="4-bounding-box-routing-strategy-bbox_routing">4 · Bounding-box routing strategy — <code>bbox_routing</code></h2>
 <p>When obstacle boxes (<code>bboxes=</code>) are present the router must decide how far around
 them to detour.</p>
@@ -5705,28 +5702,54 @@ them to detour.</p>
 <p><code>'full'</code> produces cleaner layouts when you want the bundle to remain grouped around
 obstacles; <code>'minimal'</code> produces tighter total area when individual routes can fan
 around obstacles independently.</p>
-<div class="highlight"><pre><span></span><code><span class="n">blocker</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="o">-</span><span class="mi">8_000</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8_000</span><span class="p">,</span> <span class="mi">12_000</span><span class="p">)</span>  <span class="c1"># obstacle in DBU</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Each route gets its own obstacle bbox.  An obstacle is treated as a</span>
+<span class="c1"># keep-out region around the port(s) it contains: `route_smart` groups</span>
+<span class="c1"># ports that fall *inside* the bbox and routes those routers as one bundle</span>
+<span class="c1"># around it.  For that to engage, the bbox must extend past the port</span>
+<span class="c1"># column on both sides by at least `bend_radius`:</span>
+<span class="c1"># `xmin &lt; ports.xmin - bend_radius` and `xmax &gt; ports.xmax + bend_radius`.</span>
+<span class="c1">#</span>
+<span class="c1"># The y range of each bbox is kept narrower than the port pitch so each</span>
+<span class="c1"># bbox only contains its own start and end port — adjacent routes&#39; ports</span>
+<span class="c1"># are excluded, demonstrating that `route_smart` can handle per-route</span>
+<span class="c1"># obstacles independently.</span>
+<span class="n">N_BBOX</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">PITCH_BBOX</span> <span class="o">=</span> <span class="mi">3_000</span>
+<span class="n">HALF_Y_BBOX</span> <span class="o">=</span> <span class="mi">1_000</span>  <span class="c1"># &lt; PITCH/2 so the bbox excludes adjacent ports</span>
+<span class="n">blockers</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
+        <span class="o">-</span><span class="mi">80_000</span><span class="p">,</span>
+        <span class="n">i</span> <span class="o">*</span> <span class="n">PITCH_BBOX</span> <span class="o">-</span> <span class="n">HALF_Y_BBOX</span><span class="p">,</span>
+        <span class="mi">80_000</span><span class="p">,</span>
+        <span class="n">i</span> <span class="o">*</span> <span class="n">PITCH_BBOX</span> <span class="o">+</span> <span class="n">HALF_Y_BBOX</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_BBOX</span><span class="p">)</span>
+<span class="p">]</span>
 
 
 <span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bundle_bbox_minimal</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="mi">4</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_BBOX</span><span class="p">):</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">3_000</span><span class="p">),</span>
+            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">PITCH_BBOX</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">3_000</span><span class="p">),</span>
+            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">PITCH_BBOX</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="c1"># Draw each obstacle on the floorplan layer so they are visible alongside</span>
+    <span class="c1"># the routed waveguides.</span>
+    <span class="k">for</span> <span class="n">blocker</span> <span class="ow">in</span> <span class="n">blockers</span><span class="p">:</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">FLOORPLAN</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">blocker</span><span class="p">)</span>
 
     <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_bundle</span><span class="p">(</span>
         <span class="n">c</span><span class="p">,</span>
@@ -5735,9 +5758,8 @@ around obstacles independently.</p>
         <span class="n">separation</span><span class="o">=</span><span class="n">SEP</span><span class="p">,</span>
         <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
         <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-        <span class="n">bboxes</span><span class="o">=</span><span class="p">[</span><span class="n">blocker</span><span class="p">],</span>
+        <span class="n">bboxes</span><span class="o">=</span><span class="n">blockers</span><span class="p">,</span>
         <span class="n">bbox_routing</span><span class="o">=</span><span class="s2">&quot;minimal&quot;</span><span class="p">,</span>
-        <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
@@ -5745,22 +5767,24 @@ around obstacles independently.</p>
 <span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bundle_bbox_full</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="mi">4</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_BBOX</span><span class="p">):</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">3_000</span><span class="p">),</span>
+            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">PITCH_BBOX</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">3_000</span><span class="p">),</span>
+            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">PITCH_BBOX</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">blocker</span> <span class="ow">in</span> <span class="n">blockers</span><span class="p">:</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">FLOORPLAN</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">blocker</span><span class="p">)</span>
 
     <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_bundle</span><span class="p">(</span>
         <span class="n">c</span><span class="p">,</span>
@@ -5769,9 +5793,8 @@ around obstacles independently.</p>
         <span class="n">separation</span><span class="o">=</span><span class="n">SEP</span><span class="p">,</span>
         <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
         <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-        <span class="n">bboxes</span><span class="o">=</span><span class="p">[</span><span class="n">blocker</span><span class="p">],</span>
+        <span class="n">bboxes</span><span class="o">=</span><span class="n">blockers</span><span class="p">,</span>
         <span class="n">bbox_routing</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">,</span>
-        <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
@@ -5780,56 +5803,13 @@ around obstacles independently.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../bundle/output_10_0.png" /></p>
+<img alt="png" src="../bundle/output_11_0.png" /></p>
 <div class="highlight"><pre><span></span><code><span class="n">bundle_bbox_full</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../bundle/output_11_0.png" /></p>
-<h2 id="5-collision-check-layers">5 · Collision-check layers</h2>
-<p>By default kfactory does not check for physical overlaps between routes and existing
-geometry.  Pass <code>collision_check_layers=</code> to enable the check on specific layers.
-Use <code>on_collision=None</code> in scripts or notebooks to suppress the KLayout interactive
-error dialog; use <code>on_collision='error'</code> in CI to fail hard.</p>
-<div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">bundle_collision_check</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="mi">3</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
-        <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">3_000</span><span class="p">),</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">3_000</span><span class="p">),</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-
-    <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_bundle</span><span class="p">(</span>
-        <span class="n">c</span><span class="p">,</span>
-        <span class="n">start_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^in&quot;</span><span class="p">)),</span>
-        <span class="n">end_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^out&quot;</span><span class="p">)),</span>
-        <span class="n">separation</span><span class="o">=</span><span class="n">SEP</span><span class="p">,</span>
-        <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
-        <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-        <span class="n">collision_check_layers</span><span class="o">=</span><span class="p">[</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">],</span>  <span class="c1"># ← layers to check</span>
-        <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># suppress dialog in notebooks; use &#39;error&#39; in CI</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="n">c</span>
-
-
-<span class="n">bundle_collision_check</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-</code></pre></div>
-<p><div class="highlight"><pre><span></span><code>
-</code></pre></div>
-<img alt="png" src="../bundle/output_13_0.png" /></p>
-<h2 id="6-mismatch-tolerance-flags">6 · Mismatch tolerance flags</h2>
+<img alt="png" src="../bundle/output_12_0.png" /></p>
+<h2 id="5-mismatch-tolerance-flags">5 · Mismatch tolerance flags</h2>
 <p><code>route_bundle</code> checks that paired ports share the same width, layer, and port type.
 Relax individual checks when connecting different structures:</p>
 <table>
@@ -5865,18 +5845,20 @@ first (start) port.  Insert explicit <code>taper_cell</code> for mode-converting
     <span class="n">start_ports</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;wg</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">50_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">4_000</span><span class="p">),</span>
+            <span class="c1"># East-facing start ports — routes will head east toward the end ports</span>
+            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">50_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">10_000</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
     <span class="p">]</span>
-    <span class="c1"># End ports have a different port_type</span>
+    <span class="c1"># End ports face West so the bundle goes straight across.  They also carry</span>
+    <span class="c1"># a different `port_type` to exercise `allow_type_mismatch=True`.</span>
     <span class="n">end_ports</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;pin</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">50_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">4_000</span><span class="p">),</span>
+            <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">50_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">10_000</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;pin&quot;</span><span class="p">,</span>
@@ -5892,7 +5874,6 @@ first (start) port.  Insert explicit <code>taper_cell</code> for mode-converting
         <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
         <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
         <span class="n">allow_type_mismatch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># ← suppress port_type equality check</span>
-        <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
@@ -5901,7 +5882,7 @@ first (start) port.  Insert explicit <code>taper_cell</code> for mode-converting
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../bundle/output_15_0.png" /></p>
+<img alt="png" src="../bundle/output_14_0.png" /></p>
 <h2 id="parameter-quick-reference">Parameter quick-reference</h2>
 <table>
 <thead>

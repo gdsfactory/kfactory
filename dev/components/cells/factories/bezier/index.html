@@ -2219,33 +2219,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../../utilities/fill/" class="md-nav__link">
         
   
@@ -2470,7 +2443,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5423,7 +5396,7 @@ longitudinal extent.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../bezier/output_3_1.png" /></p>
+<img alt="png" src="../bezier/output_4_1.png" /></p>
 <h2 id="negative-height">Negative height</h2>
 <p>A negative <code>height</code> flips the offset direction.</p>
 <div class="highlight"><pre><span></span><code><span class="n">b_flip</span> <span class="o">=</span> <span class="n">bend_s</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">height</span><span class="o">=-</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
@@ -5431,7 +5404,7 @@ longitudinal extent.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../bezier/output_5_0.png" /></p>
+<img alt="png" src="../bezier/output_6_0.png" /></p>
 <h2 id="curve-resolution">Curve resolution</h2>
 <p><code>nb_points</code> controls the polygon resolution of the bezier backbone (default 99).
 Lower values trade smoothness for fewer vertices.</p>
@@ -5455,7 +5428,7 @@ hi-res  vertices: 362
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../bezier/output_9_0.png" /></p>
+<img alt="png" src="../bezier/output_10_0.png" /></p>
 <h2 id="adding-metadata">Adding metadata</h2>
 <p>The factory accepts <code>additional_info</code> (a dict or callable returning a dict)
 that gets merged into <code>KCell.info</code>.</p>
@@ -5467,7 +5440,7 @@ that gets merged into <code>KCell.info</code>.</p>
 <span class="n">b_meta</span> <span class="o">=</span> <span class="n">bend_s_meta</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cell info:&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">b_meta</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-05 10:53:00.340[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m700[0m - [31m[1mName conflict in kfactory.kcell::name at line 700
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:58:21.450[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m701[0m - [31m[1mName conflict in kfactory.kcell::name at line 701
 Renaming Unnamed_8 (cell_index=8) to bend_s_bezier_W0p5_H5_L20_LWG_NP99_TS0_TS1_ENone would cause it to be named the same as:
  - bend_s_bezier_W0p5_H5_L20_LWG_NP99_TS0_TS1_ENone (cell_index=0), function_name=bend_s_bezier, basename=None[0m
 

@@ -2246,33 +2246,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2497,7 +2470,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5503,8 +5476,8 @@ Use <code>kf.kcl.to_dbu(x_µm)</code> to convert.</p>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">LAYER</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">LayerInfos</span><span class="p">):</span>
-    <span class="n">METAL1</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">METAL2</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">METAL1</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">METAL2</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">FLOORPLAN</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">99</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
@@ -5555,7 +5528,7 @@ The most common pattern is start facing North (<code>angle=1</code>) and end fac
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../electrical/output_3_0.png" /></p>
+<img alt="png" src="../electrical/output_4_0.png" /></p>
 <h2 id="2-overriding-wire-width-with-route_width">2 · Overriding wire width with <code>route_width</code></h2>
 <p>By default each route inherits the width of its start port.  Pass <code>route_width</code> (in
 DBU) to draw all wires at a uniform width, or pass a list to set per-route widths.
@@ -5597,7 +5570,7 @@ be narrower than the pad.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../electrical/output_5_0.png" /></p>
+<img alt="png" src="../electrical/output_6_0.png" /></p>
 <h2 id="3-entry-and-exit-stubs-starts-and-ends">3 · Entry and exit stubs — <code>starts</code> and <code>ends</code></h2>
 <p><code>starts</code> / <code>ends</code> force each route to travel straight for a given distance before the
 router takes over.  A scalar applies the same stub to all routes; a list provides
@@ -5639,7 +5612,7 @@ per-route control (all values in DBU).</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../electrical/output_7_0.png" /></p>
+<img alt="png" src="../electrical/output_8_0.png" /></p>
 <h2 id="4-waypoints-routing-through-a-fixed-corridor">4 · Waypoints — routing through a fixed corridor</h2>
 <p>Waypoints force all routes to converge at a specific position and direction before
 continuing to their end ports.</p>
@@ -5686,13 +5659,22 @@ end ports.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../electrical/output_9_0.png" /></p>
+<img alt="png" src="../electrical/output_10_0.png" /></p>
 <h2 id="5-obstacle-avoidance">5 · Obstacle avoidance</h2>
 <p>Pass a list of <code>kdb.Box</code> objects as <code>bboxes</code> to mark keep-out regions.
 The router automatically routes around them.</p>
 <p>Obstacle boxes are in DBU and are defined as <code>kdb.Box(left, bottom, right, top)</code>.</p>
+<blockquote>
+<p><strong>Caveat</strong>: the obstacle bbox must overlap (or touch) the bundle's own
+bounding box — an isolated box floating in empty space between the bundles
+is treated as if it weren't there.  Place the obstacle so it covers at
+least one of the start- or end-port regions.</p>
+</blockquote>
 <div class="highlight"><pre><span></span><code><span class="n">c_obs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;elec_obstacle&quot;</span><span class="p">)</span>
 
+<span class="c1"># North-facing start ports at the bottom; East-facing end ports on the right.</span>
+<span class="c1"># The bend the router must make to get from &quot;north&quot; to &quot;east&quot; gives the</span>
+<span class="c1"># obstacle something meaningful to deflect.</span>
 <span class="n">starts_obs</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -5705,19 +5687,21 @@ The router automatically routes around them.</p>
 <span class="n">ends_obs</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">20</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">300</span><span class="p">)),</span>
+        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">120</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">40</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WIRE_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="p">]</span>
 
-<span class="c1"># A keep-out box blocking the centre of the routing area.</span>
+<span class="c1"># Keep-out box covering the left-most start port so the router must detour</span>
+<span class="c1"># around it.  An obstacle floating in the middle (untouched by either port</span>
+<span class="c1"># group) would not affect the route.</span>
 <span class="n">obstacle</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">),</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">),</span>
-    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
-    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">55</span><span class="p">),</span>
-    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">180</span><span class="p">),</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">30</span><span class="p">),</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">60</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="c1"># Draw the obstacle on the floorplan layer for visibility.</span>
 <span class="n">c_obs</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">FLOORPLAN</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">obstacle</span><span class="p">)</span>
@@ -5734,7 +5718,7 @@ The router automatically routes around them.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../electrical/output_11_0.png" /></p>
+<img alt="png" src="../electrical/output_12_0.png" /></p>
 <h2 id="6-dual-rail-routing">6 · Dual-rail routing</h2>
 <p><code>route_bundle_dual_rails</code> draws each wire as two parallel rails with a gap in between
 — a common pattern for coplanar waveguide (CPW) transmission lines or differential
@@ -5797,13 +5781,12 @@ signal pairs.</p>
     <span class="n">place_layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
     <span class="n">width_rails</span><span class="o">=</span><span class="n">DR_TOTAL</span><span class="p">,</span>
     <span class="n">separation_rails</span><span class="o">=</span><span class="n">DR_GAP</span><span class="p">,</span>
-    <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">c_dr</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../electrical/output_13_0.png" /></p>
+<img alt="png" src="../electrical/output_14_0.png" /></p>
 <h2 id="summary">Summary</h2>
 <table>
 <thead>

@@ -2390,33 +2390,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../utilities/fill/" class="md-nav__link">
         
   
@@ -2641,7 +2614,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5829,7 +5802,7 @@ internally. There is also a <code>straight_dbu</code> function for DBU-native co
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_4_0.png" /></p>
+<img alt="png" src="../overview/output_5_0.png" /></p>
 <h3 id="with-cladding-via-layerenclosure">With cladding via LayerEnclosure</h3>
 <p>Wrap the core with an oxide/slab layer using <code>LayerEnclosure</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="n">enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span>
@@ -5842,7 +5815,7 @@ internally. There is also a <code>straight_dbu</code> function for DBU-native co
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_6_0.png" /></p>
+<img alt="png" src="../overview/output_7_0.png" /></p>
 <h3 id="using-the-factory-directly">Using the factory directly</h3>
 <p>For PDK work, bind a straight factory to your <code>KCLayout</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.factories.straight</span><span class="w"> </span><span class="kn">import</span> <span class="n">straight_dbu_factory</span>
@@ -5859,7 +5832,7 @@ internally. There is also a <code>straight_dbu</code> function for DBU-native co
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_8_0.png" /></p>
+<img alt="png" src="../overview/output_9_0.png" /></p>
 <h2 id="euler-bend">Euler bend</h2>
 <p>An <strong>Euler bend</strong> (clothoid bend) has a radius that varies continuously from 0 at the
 input to a maximum value at the midpoint and back to 0 at the output. This minimises
@@ -5876,14 +5849,14 @@ mode mismatch and reflection compared to a circular bend of the same nominal rad
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_10_0.png" /></p>
+<img alt="png" src="../overview/output_11_0.png" /></p>
 <h3 id="euler-bend-custom-angle">Euler bend — custom angle</h3>
 <div class="highlight"><pre><span></span><code><span class="n">bend_45</span> <span class="o">=</span> <span class="n">bend_euler</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
 <span class="n">bend_45</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_12_0.png" /></p>
+<img alt="png" src="../overview/output_13_0.png" /></p>
 <h3 id="euler-s-bend">Euler S-bend</h3>
 <p>An Euler S-bend offsets two ports laterally by <code>offset</code> µm. The backbone consists of
 two Euler quarter-circles joined at their inflection point.</p>
@@ -5894,7 +5867,7 @@ two Euler quarter-circles joined at their inflection point.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_14_0.png" /></p>
+<img alt="png" src="../overview/output_15_0.png" /></p>
 <h3 id="euler-factory-pdk-usage">Euler factory — PDK usage</h3>
 <p>Bind an Euler factory to your layout to create bends that live in your PDK:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.factories.euler</span><span class="w"> </span><span class="kn">import</span> <span class="n">bend_euler_factory</span>
@@ -5905,7 +5878,7 @@ two Euler quarter-circles joined at their inflection point.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_16_0.png" /></p>
+<img alt="png" src="../overview/output_17_0.png" /></p>
 <h2 id="circular-bend">Circular bend</h2>
 <p>A <strong>circular bend</strong> has a <em>constant</em> radius throughout. It is faster to compute than
 an Euler bend but has higher mode mismatch at the junction with a straight waveguide.</p>
@@ -5921,14 +5894,14 @@ an Euler bend but has higher mode mismatch at the junction with a straight waveg
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_18_0.png" /></p>
+<img alt="png" src="../overview/output_19_0.png" /></p>
 <h3 id="circular-bend-180">Circular bend — 180°</h3>
 <div class="highlight"><pre><span></span><code><span class="n">circ_180</span> <span class="o">=</span> <span class="n">bend_circular</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
 <span class="n">circ_180</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_20_0.png" /></p>
+<img alt="png" src="../overview/output_21_0.png" /></p>
 <h2 id="taper">Taper</h2>
 <p>A <strong>linear taper</strong> transitions between two different waveguide widths. Typical uses:
 - Mode-field adapter between a narrow routing waveguide and a wide MMI port.
@@ -5953,7 +5926,7 @@ an Euler bend but has higher mode mismatch at the junction with a straight waveg
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_22_0.png" /></p>
+<img alt="png" src="../overview/output_23_0.png" /></p>
 <h3 id="taper-with-cladding">Taper with cladding</h3>
 <div class="highlight"><pre><span></span><code><span class="n">enc_slab</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">dsections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">SLAB</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
 
@@ -5962,7 +5935,7 @@ an Euler bend but has higher mode mismatch at the junction with a straight waveg
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_24_0.png" /></p>
+<img alt="png" src="../overview/output_25_0.png" /></p>
 <h2 id="bezier-s-bend">Bezier S-bend</h2>
 <p>A <strong>Bezier S-bend</strong> uses a cubic Bezier curve to create a smooth lateral offset. It
 offers more shape control than an Euler S-bend (via <code>t_start</code>/<code>t_stop</code>).</p>
@@ -5978,7 +5951,7 @@ offers more shape control than an Euler S-bend (via <code>t_start</code>/<code>t
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_26_0.png" /></p>
+<img alt="png" src="../overview/output_27_0.png" /></p>
 <h2 id="building-your-own-pdk-components">Building your own PDK components</h2>
 <p>The factory pattern lets you create component functions that are:
 1. <strong>Bound to your layout</strong> — geometry lands in the right <code>KCLayout</code>.
@@ -6034,7 +6007,7 @@ Ports: [&#39;o1&#39;, &#39;o2&#39;]
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_28_1.png" /></p>
+<img alt="png" src="../overview/output_29_1.png" /></p>
 <h3 id="caching-in-action">Caching in action</h3>
 <p>The <code>@kf.cell</code> decorator caches cells by their parameter signature. Calling the same
 function with the same arguments returns the <em>identical</em> cell object:</p>
@@ -6086,7 +6059,7 @@ wg_a is wg_c: False
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_32_0.png" /></p>
+<img alt="png" src="../overview/output_33_0.png" /></p>
 <h2 id="see-also">See Also</h2>
 <table>
 <thead>

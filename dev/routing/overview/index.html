@@ -1616,21 +1616,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-loopback-u-turn-between-parallel-ports" class="md-nav__link">
+  <a href="#5-electrical-routing" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        5 · Loopback (U-turn between parallel ports)
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-electrical-routing" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        6 · Electrical routing
+        5 · Electrical routing
       </span>
     </span>
   </a>
@@ -2246,33 +2235,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2497,7 +2459,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5390,21 +5352,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-loopback-u-turn-between-parallel-ports" class="md-nav__link">
+  <a href="#5-electrical-routing" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        5 · Loopback (U-turn between parallel ports)
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-electrical-routing" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        6 · Electrical routing
+        5 · Electrical routing
       </span>
     </span>
   </a>
@@ -5569,7 +5520,7 @@ a single straight waveguide with no bends.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_3_0.png" /></p>
+<img alt="png" src="../overview/output_4_0.png" /></p>
 <h2 id="2-single-route-with-bends">2 · Single route with bends</h2>
 <p>Start facing North (angle=1), end facing South (angle=3), end above start.  The
 router inserts euler bends to produce an S-shaped path.</p>
@@ -5600,7 +5551,7 @@ router inserts euler bends to produce an S-shaped path.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_5_0.png" /></p>
+<img alt="png" src="../overview/output_6_0.png" /></p>
 <h2 id="3-bundle-routing">3 · Bundle routing</h2>
 <p>Route multiple waveguides in parallel.  kfactory fans the routes apart to maintain
 at least <code>separation</code> between adjacent route edges.</p>
@@ -5638,11 +5589,20 @@ at least <code>separation</code> between adjacent route edges.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_7_0.png" /></p>
+<img alt="png" src="../overview/output_8_0.png" /></p>
 <h2 id="4-obstacle-avoidance">4 · Obstacle avoidance</h2>
 <p>Pass <code>bboxes</code> to mark keep-out zones.  The router automatically detours around them.</p>
+<blockquote>
+<p><strong>Caveat</strong>: the obstacle bbox must overlap (or touch) the bundle's own
+bounding box for the detour to take effect — an isolated box floating in
+empty space between the two port groups is ignored.  In the example below
+the obstacle covers the left-most start port, so the bundle must deflect
+around it.  Rotating the end ports by 90° (East-facing instead of
+South-facing) makes the resulting detour visually obvious.</p>
+</blockquote>
 <div class="highlight"><pre><span></span><code><span class="n">c3</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;obstacle_avoidance&quot;</span><span class="p">)</span>
 
+<span class="c1"># Start ports face North at the bottom; end ports face East on the right.</span>
 <span class="n">start_ports3</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -5655,18 +5615,20 @@ at least <code>separation</code> between adjacent route edges.</p>
 <span class="n">end_ports3</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">30</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">400</span><span class="p">)),</span>
+        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">250</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">80</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">30</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="p">]</span>
 
+<span class="c1"># Obstacle covers the left-most start port — it touches the bundle bbox, so</span>
+<span class="c1"># the router has to route around it.</span>
 <span class="n">obstacle</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="mi">15</span><span class="p">),</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">),</span>
-    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">150</span><span class="p">),</span>
-    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
-    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">220</span><span class="p">),</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">60</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="n">c3</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">FLOORPLAN</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">obstacle</span><span class="p">)</span>
 
@@ -5683,53 +5645,14 @@ at least <code>separation</code> between adjacent route edges.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_9_0.png" /></p>
-<h2 id="5-loopback-u-turn-between-parallel-ports">5 · Loopback (U-turn between parallel ports)</h2>
-<p><code>route_loopback</code> computes backbone waypoints for a U-shaped path between two
-co-directional parallel ports.  Pass the result to <code>place_manhattan</code> to materialise
-the route geometry.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c4</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;loopback_demo&quot;</span><span class="p">)</span>
-
-<span class="n">lb_p1</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;p1&quot;</span><span class="p">,</span>
-    <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-    <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
-    <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">lb_p2</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;p2&quot;</span><span class="p">,</span>
-    <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">30</span><span class="p">)),</span>
-    <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
-    <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="c1"># get_radius returns the effective routing radius for this bend cell (euler bends are</span>
-<span class="c1"># larger than their nominal radius — use get_radius rather than a hard-coded value).</span>
-<span class="n">bend_radius</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">get_radius</span><span class="p">(</span><span class="n">bend90</span><span class="p">)</span>
-
-<span class="n">backbone</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_loopback</span><span class="p">(</span>
-    <span class="n">lb_p1</span><span class="p">,</span>
-    <span class="n">lb_p2</span><span class="p">,</span>
-    <span class="n">bend90_radius</span><span class="o">=</span><span class="n">bend_radius</span><span class="p">,</span>
-    <span class="n">d_loop</span><span class="o">=</span><span class="n">bend_radius</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">place_manhattan</span><span class="p">(</span>
-    <span class="n">c4</span><span class="p">,</span>
-    <span class="n">lb_p1</span><span class="p">,</span>
-    <span class="n">lb_p2</span><span class="p">,</span>
-    <span class="n">backbone</span><span class="p">,</span>
-    <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
-    <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">c4</span>
-</code></pre></div>
-<p><div class="highlight"><pre><span></span><code>
-</code></pre></div>
-<img alt="png" src="../overview/output_11_0.png" /></p>
-<h2 id="6-electrical-routing">6 · Electrical routing</h2>
+<img alt="png" src="../overview/output_10_0.png" /></p>
+<h2 id="5-electrical-routing">5 · Electrical routing</h2>
 <p>Electrical routes are plain Manhattan wires — no bend cells needed.  Use
 <code>kf.routing.electrical.route_bundle</code> with <code>place_layer</code> and <code>route_width</code> (in DBU).</p>
+<p>To make the routing non-trivial we orient the start ports North-facing along
+the bottom edge and the end ports East-facing on the right edge — the
+resulting L-shaped wires demonstrate that the electrical router does insert
+right-angle corners.</p>
 <div class="highlight"><pre><span></span><code><span class="n">METAL_WIDTH</span> <span class="o">=</span> <span class="mi">2_000</span>  <span class="c1"># 2 µm in DBU</span>
 
 <span class="n">ce</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;electrical_bundle&quot;</span><span class="p">)</span>
@@ -5743,10 +5666,12 @@ the route geometry.</p>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="p">]</span>
+<span class="c1"># End ports face East, offset along y so each wire must bend to reach its</span>
+<span class="c1"># target.</span>
 <span class="n">e_end</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;e_out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">30_000</span><span class="p">,</span> <span class="mi">200_000</span><span class="p">),</span>
+        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">150_000</span><span class="p">,</span> <span class="mi">60_000</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">30_000</span><span class="p">),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">METAL_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL</span><span class="p">,</span>
     <span class="p">)</span>
@@ -5764,7 +5689,7 @@ the route geometry.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_13_0.png" /></p>
+<img alt="png" src="../overview/output_12_0.png" /></p>
 <h2 id="summary">Summary</h2>
 <table>
 <thead>
@@ -5783,12 +5708,12 @@ the route geometry.</p>
 <td><code>kf.routing.electrical.route_bundle(c, starts, ends, sep, place_layer=...)</code></td>
 </tr>
 <tr>
-<td>U-turn loopback</td>
-<td><code>kf.routing.optical.route_loopback(p1, p2, bend90_radius=...)</code> → pts, then <code>place_manhattan(c, p1, p2, pts, ...)</code></td>
-</tr>
-<tr>
 <td>Avoid obstacles</td>
 <td>add <code>bboxes=[kdb.Box(...)]</code> to <code>route_bundle</code></td>
+</tr>
+<tr>
+<td>U-turn loopback (with GCs)</td>
+<td>see <a href="../optical/">Routing: Optical § 4</a></td>
 </tr>
 </tbody>
 </table>

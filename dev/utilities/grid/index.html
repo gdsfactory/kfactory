@@ -2268,33 +2268,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../fill/" class="md-nav__link">
         
   
@@ -2519,7 +2492,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5587,7 +5560,7 @@ Placed 6 instances
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../grid/output_6_1.png" /></p>
+<img alt="png" src="../grid/output_7_1.png" /></p>
 <h2 id="3-grid-2d-with-shape">3 · <code>grid</code> — 2D with <code>shape=</code></h2>
 <p>Pass <code>shape=(rows, cols)</code> to reflow a flat list into a 2-D grid.
 The slot size is still uniform (largest component sets the pitch in each axis).</p>
@@ -5603,7 +5576,7 @@ The slot size is still uniform (largest component sets the pitch in each axis).<
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../grid/output_8_1.png" /></p>
+<img alt="png" src="../grid/output_9_1.png" /></p>
 <h2 id="4-grid-explicit-2d-input">4 · <code>grid</code> — Explicit 2D Input</h2>
 <p>You can supply a list-of-lists directly to control exactly which cell goes in
 each position.  This is useful when you want a hand-curated layout rather than
@@ -5623,7 +5596,7 @@ a simple reflow.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../grid/output_10_1.png" /></p>
+<img alt="png" src="../grid/output_11_1.png" /></p>
 <h2 id="5-flexgrid-compact-layout">5 · <code>flexgrid</code> — Compact Layout</h2>
 <p><code>flexgrid</code> gives each <strong>column</strong> its own width (tallest/widest in that column)
 and each <strong>row</strong> its own height, so overall footprint is smaller when
@@ -5651,7 +5624,7 @@ Area saving: 20%
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../grid/output_12_1.png" /></p>
+<img alt="png" src="../grid/output_13_1.png" /></p>
 <h2 id="6-alignment-options">6 · Alignment Options</h2>
 <p>Both <code>grid</code> and <code>flexgrid</code> accept <code>align_x</code> and <code>align_y</code> to control how
 components are positioned within their slot:</p>
@@ -5694,7 +5667,7 @@ components are positioned within their slot:</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../grid/output_14_0.png" /></p>
+<img alt="png" src="../grid/output_15_0.png" /></p>
 <h2 id="7-grid_dbu-dbu-variant">7 · <code>grid_dbu</code> — DBU Variant</h2>
 <p>If you work with <code>KCell</code> (integer DBU coordinates) instead of <code>DKCell</code>,
 use <code>grid_dbu</code> and pass the spacing in DBU.  The API is otherwise identical.</p>
@@ -5719,7 +5692,7 @@ use <code>grid_dbu</code> and pass the spacing in DBU.  The API is otherwise ide
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../grid/output_16_1.png" /></p>
+<img alt="png" src="../grid/output_17_1.png" /></p>
 <h2 id="8-placing-the-grid-in-a-larger-layout">8 · Placing the Grid in a Larger Layout</h2>
 <p>The returned <code>InstanceGroup</code> can be used to move the whole block at once.
 Here we pack two sub-grids and place them side-by-side in a top-level cell.</p>
@@ -5744,7 +5717,7 @@ Here we pack two sub-grids and place them side-by-side in a top-level cell.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../grid/output_18_1.png" /></p>
+<img alt="png" src="../grid/output_19_1.png" /></p>
 <h2 id="quick-reference">Quick Reference</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 

@@ -2252,33 +2252,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../fill/" class="md-nav__link">
         
   
@@ -2503,7 +2476,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5530,27 +5503,30 @@ This keeps memory usage constant regardless of layout size.</p>
 </code></pre></div>
 <h2 id="1-minimum-space-violations">1 · Minimum-Space Violations</h2>
 <h3 id="creating-a-layout-with-violations">Creating a layout with violations</h3>
-<p>We place a grid of ellipses that are intentionally too close together.
-In a real PDK the minimum space rule might be 200 nm (200 dbu at 1 nm/dbu).
-Here we use 1 µm (1000 dbu) as the minimum spacing so the violation is obvious.</p>
+<p>We place a grid of ellipses whose edge-to-edge gap is smaller than the
+minimum space rule.  Each ellipse fits in an 8 µm × 12 µm box; adjacent
+columns are placed 8.5 µm apart, leaving a 500 nm gap — half of the
+1 µm minimum space rule we apply below.</p>
 <div class="highlight"><pre><span></span><code><span class="n">MIN_SPACE_DBU</span> <span class="o">=</span> <span class="mi">1000</span>  <span class="c1"># 1 µm minimum space rule</span>
 
 <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;drc_demo&quot;</span><span class="p">)</span>
 
-<span class="c1"># Place ellipses in a grid — adjacent columns are only 200 nm apart (violates 1 µm rule)</span>
+<span class="c1"># Place ellipses in a grid with a 500 nm gap between columns — violates the</span>
+<span class="c1"># 1 µm min-space rule.</span>
 <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
         <span class="n">ellipse</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Polygon</span><span class="o">.</span><span class="n">ellipse</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">8000</span><span class="p">,</span> <span class="mi">12000</span><span class="p">),</span> <span class="mi">64</span><span class="p">)</span>
-        <span class="c1"># Offset each column by 9000 dbu — less than 8000 + 1000 spacing → violation</span>
+        <span class="c1"># Offset each column by 8500 dbu — gap of 500 dbu violates the</span>
+        <span class="c1"># 1000 dbu min-space rule.</span>
         <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-            <span class="n">ellipse</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">col</span> <span class="o">*</span> <span class="mi">9000</span><span class="p">,</span> <span class="n">row</span> <span class="o">*</span> <span class="mi">14000</span><span class="p">))</span>
+            <span class="n">ellipse</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">col</span> <span class="o">*</span> <span class="mi">8500</span><span class="p">,</span> <span class="n">row</span> <span class="o">*</span> <span class="mi">14000</span><span class="p">))</span>
         <span class="p">)</span>
 
 <span class="n">c</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../drc_fix/output_4_0.png" /></p>
+<img alt="png" src="../drc_fix/output_5_0.png" /></p>
 <h3 id="applying-fix_spacing_tiled">Applying <code>fix_spacing_tiled</code></h3>
 <p><code>fix_spacing_tiled</code> detects pairs of polygons that are closer than <code>min_space</code> and
 merges them.  The function returns a <code>kdb.Region</code> with the corrected geometry.</p>
@@ -5573,7 +5549,7 @@ merges them.  The function returns a <code>kdb.Region</code> with the corrected 
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../drc_fix/output_6_0.png" /></p>
+<img alt="png" src="../drc_fix/output_7_0.png" /></p>
 <p><strong>What happened:</strong> polygons that were too close were merged into a single polygon.
 The <code>WG</code> layer (layer 1) still has the original violating shapes; <code>WG_FIXED</code>
 (layer 2) contains the DRC-clean result.</p>
@@ -5595,11 +5571,11 @@ after the fix (value in dbu).</p>
 
 <span class="n">c</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-12 10:26:41.070[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:58:08.368[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../drc_fix/output_8_1.png" /></p>
+<img alt="png" src="../drc_fix/output_9_1.png" /></p>
 <h2 id="2-choosing-the-right-fixer">2 · Choosing the Right Fixer</h2>
 <table>
 <thead>
@@ -5679,10 +5655,6 @@ Override with <code>n_threads=N</code> when running in a resource-constrained en
 <tr>
 <td>Cell-level enclosures</td>
 <td><a href="../../enclosures/kcell_enclosure/">Enclosures: KCell Enclosure</a></td>
-</tr>
-<tr>
-<td>Layout regression testing</td>
-<td><a href="../difftest/">Utilities: Difftest</a></td>
 </tr>
 </tbody>
 </table>

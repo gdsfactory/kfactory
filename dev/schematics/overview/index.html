@@ -2276,33 +2276,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2527,7 +2500,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5634,7 +5607,7 @@ settings.  <code>inst.place(x, y)</code> sets the origin in dbu.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_7_0.png" /></p>
+<img alt="png" src="../overview/output_8_0.png" /></p>
 <p>The <code>@pdk.schematic_cell</code> decorator caches the result just like <code>@pdk.cell</code>, so calling
 <code>two_straights()</code> a second time returns the same object.</p>
 <h2 id="connectivity-connect">Connectivity: <code>connect</code></h2>
@@ -5678,7 +5651,7 @@ mated with <code>other_port</code>.  This is the schematic equivalent of the imp
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../overview/output_10_0.png" /></p>
+<img alt="png" src="../overview/output_11_0.png" /></p>
 <h2 id="the-schematic-model">The schematic model</h2>
 <p>The <code>schematic</code> attribute on a schematic cell contains the full declarative description
 as a Pydantic model.  This includes instances, placements, nets, and routes.</p>
@@ -5770,7 +5743,7 @@ layout without the schematic machinery.  This is useful for:</p>
 <span class="n">generated</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">code_str</span><span class="p">()</span>
 <span class="n">Code</span><span class="p">(</span><span class="n">generated</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-12 10:26:53.655[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2234[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:58:14.471[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2234[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 

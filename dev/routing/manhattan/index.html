@@ -2246,33 +2246,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2497,7 +2470,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5579,7 +5552,7 @@ straight cells at each waypoint.  The result is placed inside cell <code>c</code
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../manhattan/output_5_0.png" /></p>
+<img alt="png" src="../manhattan/output_6_0.png" /></p>
 <h2 id="3-entry-exit-stubs-with-steps">3 · Entry / exit stubs with Steps</h2>
 <p>Steps let you force a minimum straight section <strong>before</strong> the router takes its
 first bend (<code>start_steps</code>) or <strong>after</strong> the last bend (<code>end_steps</code>).</p>
@@ -5637,7 +5610,7 @@ first bend (<code>start_steps</code>) or <strong>after</strong> the last bend (<
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../manhattan/output_7_1.png" /></p>
+<img alt="png" src="../manhattan/output_8_1.png" /></p>
 <p>Forcing a left turn exit before bending:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Start facing East, then force an immediate left (North) exit stub before routing</span>
 <span class="n">p_east</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
@@ -5673,18 +5646,33 @@ first bend (<code>start_steps</code>) or <strong>after</strong> the last bend (<
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../manhattan/output_9_0.png" /></p>
+<img alt="png" src="../manhattan/output_10_0.png" /></p>
 <h2 id="4-route_manhattan_180-u-turn-routing">4 · <code>route_manhattan_180</code> — U-turn routing</h2>
-<p>When two ports face the <strong>same</strong> direction with one behind the other, a normal
-manhattan route needs a 180° U-turn.  <code>route_manhattan_180</code> calculates this
-backbone efficiently by using a tighter <code>bend180_radius</code> (half the leg spacing).</p>
+<p>When two co-directional ports sit close together with one <strong>behind</strong> the
+other, the route must turn through 180°.  <code>route_manhattan_180</code> produces a
+compact U-shaped backbone whose two parallel legs are spaced
+<code>bend180_radius</code> apart.</p>
+<p>For a real 180° U-turn the second port must be:</p>
+<ul>
+<li><strong>behind</strong> the first port by at least <code>3 × BEND_RADIUS</code> in the port's
+  backward direction (here: <code>-x</code>, since the ports face East), and</li>
+<li>laterally offset by <code>BEND_RADIUS &lt; |y_offset| &lt; 2 × BEND_RADIUS</code> —
+  tight enough that the route cannot route past with a simple S-bend.</li>
+</ul>
+<p>Outside this window the function falls back to a regular Manhattan route
+with no actual 180° turn.</p>
 <p>Parameters (all in <strong>DBU</strong>):</p>
 <ul>
 <li><code>bend90_radius</code> — footprint radius for 90° bends (use <code>get_radius</code>)</li>
-<li><code>bend180_radius</code> — half the gap between the two parallel U-turn legs</li>
+<li><code>bend180_radius</code> — distance between the two parallel U-turn legs</li>
 <li><code>start_straight</code> / <code>end_straight</code> — minimum entry / exit straight lengths</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="c1"># Two East-facing ports on the same horizontal axis — standard U-turn scenario</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Two East-facing ports.  p_b sits behind p_a (negative x) by 3 × BEND_RADIUS</span>
+<span class="c1"># and is offset in y by 1.5 × BEND_RADIUS — within the (BEND_RADIUS,</span>
+<span class="c1"># 2 × BEND_RADIUS) window that forces a real 180° turn.</span>
+<span class="n">y_sep</span> <span class="o">=</span> <span class="n">BEND_RADIUS</span> <span class="o">+</span> <span class="n">BEND_RADIUS</span> <span class="o">//</span> <span class="mi">2</span>
+<span class="n">x_back</span> <span class="o">=</span> <span class="o">-</span><span class="mi">3</span> <span class="o">*</span> <span class="n">BEND_RADIUS</span>
+
 <span class="n">p_a</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span>
     <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># East at origin</span>
@@ -5693,7 +5681,7 @@ backbone efficiently by using a tighter <code>bend180_radius</code> (half the le
 <span class="p">)</span>
 <span class="n">p_b</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
-    <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">40</span><span class="p">)),</span>  <span class="c1"># East, 40 µm above</span>
+    <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">x_back</span><span class="p">,</span> <span class="n">y_sep</span><span class="p">),</span>  <span class="c1"># East, behind and offset</span>
     <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
     <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
 <span class="p">)</span>
@@ -5702,9 +5690,9 @@ backbone efficiently by using a tighter <code>bend180_radius</code> (half the le
     <span class="n">p_a</span><span class="p">,</span>
     <span class="n">p_b</span><span class="p">,</span>
     <span class="n">bend90_radius</span><span class="o">=</span><span class="n">BEND_RADIUS</span><span class="p">,</span>
-    <span class="n">bend180_radius</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">40</span><span class="p">),</span>  <span class="c1"># gap between legs</span>
-    <span class="n">start_straight</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
-    <span class="n">end_straight</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+    <span class="n">bend180_radius</span><span class="o">=</span><span class="n">y_sep</span><span class="p">,</span>  <span class="c1"># gap between the parallel U-turn legs</span>
+    <span class="n">start_straight</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+    <span class="n">end_straight</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;U-turn backbone (µm):&quot;</span><span class="p">,</span> <span class="p">[(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">y</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">backbone_180</span><span class="p">])</span>
 
@@ -5719,11 +5707,11 @@ backbone efficiently by using a tighter <code>bend180_radius</code> (half the le
 <span class="p">)</span>
 <span class="n">c_180</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>U-turn backbone (µm): [(10.0, 0.0), (28.701, 0.0), (28.701, 40.0), (0.0, 40.0)]
+<div class="highlight"><pre><span></span><code>U-turn backbone (µm): [(5.0, 0.0), (23.701, 0.0), (23.701, -37.402), (-13.701, -37.402), (-13.701, 28.051), (-56.103, 28.051)]
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../manhattan/output_11_1.png" /></p>
+<img alt="png" src="../manhattan/output_12_1.png" /></p>
 <h2 id="5-inspecting-manhattanroute">5 · Inspecting <code>ManhattanRoute</code></h2>
 <p><code>place_manhattan</code> returns a <code>ManhattanRoute</code> object.  You can query it for
 inserted instances and length information.</p>
@@ -5762,7 +5750,7 @@ Num instances:  4
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../manhattan/output_13_1.png" /></p>
+<img alt="png" src="../manhattan/output_14_1.png" /></p>
 <h2 id="key-pitfalls">Key pitfalls</h2>
 <table>
 <thead>

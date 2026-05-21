@@ -2294,33 +2294,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../utilities/fill/" class="md-nav__link">
         
   
@@ -2545,7 +2518,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5715,7 +5688,7 @@ Real cell bbox  : (0,-0.25;20,0.25) µm
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../virtual/output_8_1.png" /></p>
+<img alt="png" src="../virtual/output_9_1.png" /></p>
 <h2 id="nesting-vkcells">Nesting VKCells</h2>
 <p>VKCells can contain instances of other VKCells.  The whole hierarchy is flattened
 into real KLayout cells when <code>insert_into</code> is called on the outermost level.</p>
@@ -5745,7 +5718,7 @@ into real KLayout cells when <code>insert_into</code> is called on the outermost
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../virtual/output_10_1.png" /></p>
+<img alt="png" src="../virtual/output_11_1.png" /></p>
 <h2 id="kfvcell-decorator"><code>@kf.vcell</code> decorator</h2>
 <p>For reusable virtual component factories use the <code>@pdk.vcell</code> decorator — it
 works like <code>@pdk.cell</code> but returns a <code>VKCell</code> and caches by parameter hash.</p>
@@ -5859,7 +5832,7 @@ Ports: []
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../virtual/output_16_1.png" /></p>
+<img alt="png" src="../virtual/output_17_1.png" /></p>
 <h2 id="insert_into_flat"><code>insert_into_flat</code></h2>
 <p>Use <code>insert_into_flat</code> when you want the virtual geometry inlined directly into
 the target cell (no sub-cell hierarchy created).</p>
@@ -5890,7 +5863,7 @@ c_flat bbox (µm)    : (0,-0.25;100,40.25)
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../virtual/output_18_1.png" /></p>
+<img alt="png" src="../virtual/output_19_1.png" /></p>
 <p>With <code>insert_into_flat</code> all geometry lands directly in <code>c_flat</code> — no child cells
 are created.</p>
 <h2 id="summary">Summary</h2>

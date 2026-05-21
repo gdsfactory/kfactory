@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://gdsfactory.github.io/dev/utilities/fill/">
       
       
-        <link rel="prev" href="../difftest/">
+        <link rel="prev" href="../packing/">
       
       
         <link rel="next" href="../session_cache/">
@@ -2097,33 +2097,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -2486,7 +2459,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5492,7 +5465,7 @@ tiles cleanly.  Here we use a 1 µm × 1 µm square centred on the origin.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../fill/output_4_0.png" /></p>
+<img alt="png" src="../fill/output_5_0.png" /></p>
 <h2 id="2-basic-layer-fill">2 · Basic Layer Fill</h2>
 <p>Pass <code>fill_layers</code> to fill every polygon on a given layer.  The second
 element of the tuple is the keepout in µm expanded around those shapes
@@ -5526,7 +5499,7 @@ within 2 µm of a waveguide edge are suppressed.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../fill/output_6_0.png" /></p>
+<img alt="png" src="../fill/output_7_0.png" /></p>
 <h2 id="3-explicit-region-fill">3 · Explicit Region Fill</h2>
 <p>Instead of relying on layer shapes you can pass a <code>kdb.Region</code> directly via
 <code>fill_regions</code>.  This is useful when the fill boundary is computed
@@ -5555,7 +5528,7 @@ programmatically rather than stored on a layer.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../fill/output_8_0.png" /></p>
+<img alt="png" src="../fill/output_9_0.png" /></p>
 <h2 id="4-custom-step-vectors">4 · Custom Step Vectors</h2>
 <p>By default fill cells are placed on a rectangular grid aligned to the fill
 cell's bounding box.  Pass <code>row_step</code> and <code>col_step</code> as <code>kdb.DVector</code>
@@ -5582,7 +5555,7 @@ objects (in <strong>µm</strong>) for a custom pitch.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../fill/output_10_0.png" /></p>
+<img alt="png" src="../fill/output_11_0.png" /></p>
 <h2 id="5-multiple-exclusion-layers">5 · Multiple Exclusion Layers</h2>
 <p>Pass multiple <code>(layer, keepout)</code> pairs to <code>exclude_layers</code>.  Each layer can
 have a different keepout distance.</p>
@@ -5613,7 +5586,7 @@ have a different keepout distance.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../fill/output_12_0.png" /></p>
+<img alt="png" src="../fill/output_13_0.png" /></p>
 <h2 id="api-summary">API Summary</h2>
 <div class="highlight"><pre><span></span><code><span class="n">kf</span><span class="o">.</span><span class="n">fill</span><span class="o">.</span><span class="n">fill_tiled</span><span class="p">(</span>
     <span class="n">c</span><span class="p">,</span>                               <span class="c1"># target KCell (must be unlocked)</span>

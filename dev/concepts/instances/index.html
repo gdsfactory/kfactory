@@ -2263,33 +2263,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2514,7 +2487,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5526,7 +5499,7 @@ after creation.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../instances/output_3_0.png" /></p>
+<img alt="png" src="../instances/output_4_0.png" /></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Long form: create_inst</span>
 <span class="n">parent</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;three_instances&quot;</span><span class="p">)</span>
 <span class="n">inst1</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
@@ -5539,7 +5512,7 @@ after creation.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../instances/output_4_0.png" /></p>
+<img alt="png" src="../instances/output_5_0.png" /></p>
 <p>All three instances overlap because they share the same default position.
 We can move them independently without touching the original cell.</p>
 <div class="highlight"><pre><span></span><code><span class="n">inst2</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c1"># rotate 15°</span>
@@ -5548,7 +5521,7 @@ We can move them independently without touching the original cell.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../instances/output_6_0.png" /></p>
+<img alt="png" src="../instances/output_7_0.png" /></p>
 <h2 id="modifying-the-original-propagates-everywhere">Modifying the original propagates everywhere</h2>
 <p>Instances are live pointers.  Adding geometry to <code>poly</code> is immediately visible in
 every instance — without touching <code>parent</code>.</p>
@@ -5564,7 +5537,7 @@ every instance — without touching <code>parent</code>.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../instances/output_8_0.png" /></p>
+<img alt="png" src="../instances/output_9_0.png" /></p>
 <h2 id="transforming-instances">Transforming instances</h2>
 <p>An <code>Instance</code> wraps a KLayout <code>CellInstArray</code>.  You can apply any KLayout
 transformation to reposition it:</p>
@@ -5608,7 +5581,7 @@ transformation to reposition it:</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../instances/output_10_0.png" /></p>
+<img alt="png" src="../instances/output_11_0.png" /></p>
 <h2 id="connecting-instances-by-port">Connecting instances by port</h2>
 <p><code>instance.connect("port_name", target_port)</code> moves and rotates the instance so that
 the named port aligns face-to-face with <code>target_port</code>.  This is the standard way to
@@ -5629,7 +5602,7 @@ assemble photonic circuits.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../instances/output_12_0.png" /></p>
+<img alt="png" src="../instances/output_13_0.png" /></p>
 <h3 id="mirrored-connections">Mirrored connections</h3>
 <p>Pass <code>mirror=True</code> to reflect the instance before alignment.  This is useful when
 two ports face the same direction (e.g. building a U-bend from two 90° bends).</p>
@@ -5647,7 +5620,7 @@ two ports face the same direction (e.g. building a U-bend from two 90° bends).<
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../instances/output_14_0.png" /></p>
+<img alt="png" src="../instances/output_15_0.png" /></p>
 <h2 id="arrays-of-instances">Arrays of instances</h2>
 <p><code>create_inst(cell, na=N, nb=M, a=vec_a, b=vec_b)</code> creates a regular NxM array
 using a single GDS <code>AREF</code> record — very compact in the output file.</p>
@@ -5670,7 +5643,7 @@ when you need per-element port access.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../instances/output_16_0.png" /></p>
+<img alt="png" src="../instances/output_17_0.png" /></p>
 <p>Ports of array elements are accessed via <code>inst[port_name, col, row]</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Port at column 0, row 1:&quot;</span><span class="p">,</span> <span class="n">arr</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Port at column 2, row 0:&quot;</span><span class="p">,</span> <span class="n">arr</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
@@ -5694,7 +5667,7 @@ depth limit — kfactory and KLayout handle deep hierarchy natively.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../instances/output_20_0.png" /></p>
+<img alt="png" src="../instances/output_21_0.png" /></p>
 <h2 id="flattening-non-manhattan-connections">Flattening non-Manhattan connections</h2>
 <p>When you <code>connect</code> at a non-90° angle the sub-cell boundary and the parent boundary
 can produce sub-nanometre gaps at the interface.  Calling <code>instance.flatten()</code> merges
@@ -5708,7 +5681,7 @@ the instance geometry into the parent, eliminating those gaps.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../instances/output_22_0.png" /></p>
+<img alt="png" src="../instances/output_23_0.png" /></p>
 <h2 id="summary">Summary</h2>
 <table>
 <thead>

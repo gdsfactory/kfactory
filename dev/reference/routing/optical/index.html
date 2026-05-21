@@ -2097,33 +2097,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../utilities/fill/" class="md-nav__link">
         
   
@@ -2348,7 +2321,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -7590,7 +7563,15 @@ inside == True
 <span class="normal">1774</span>
 <span class="normal">1775</span>
 <span class="normal">1776</span>
-<span class="normal">1777</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_loopback</span><span class="p">(</span>
+<span class="normal">1777</span>
+<span class="normal">1778</span>
+<span class="normal">1779</span>
+<span class="normal">1780</span>
+<span class="normal">1781</span>
+<span class="normal">1782</span>
+<span class="normal">1783</span>
+<span class="normal">1784</span>
+<span class="normal">1785</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_loopback</span><span class="p">(</span>
     <span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
     <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
     <span class="n">bend90_radius</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
@@ -7635,6 +7616,10 @@ inside == True
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">t1</span> <span class="o">=</span> <span class="n">port1</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port1</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">)</span> <span class="k">else</span> <span class="n">port1</span><span class="o">.</span><span class="n">trans</span>
     <span class="n">t2</span> <span class="o">=</span> <span class="n">port2</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port2</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">)</span> <span class="k">else</span> <span class="n">port2</span><span class="o">.</span><span class="n">trans</span>
+
+    <span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">port1_</span><span class="p">),</span> <span class="p">(</span><span class="n">t2</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="p">[(</span><span class="n">t1</span><span class="p">,</span> <span class="n">port1</span><span class="p">),</span> <span class="p">(</span><span class="n">t2</span><span class="p">,</span> <span class="n">port2</span><span class="p">)],</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="o">-</span><span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">inverted</span><span class="p">()</span> <span class="o">*</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span>
+    <span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">angle</span> <span class="o">!=</span> <span class="n">t2</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
         <span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="n">t2</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">t2</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
@@ -7685,7 +7670,7 @@ inside == True
         <span class="n">t1</span> <span class="o">*=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">start_straight</span> <span class="o">+</span> <span class="n">bend90_radius</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">bend90_radius</span><span class="p">)</span>
         <span class="n">t2</span> <span class="o">*=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">end_straight</span> <span class="o">+</span> <span class="n">bend90_radius</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">bend90_radius</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="p">(</span>
+    <span class="n">pts</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">pts_start</span>
         <span class="o">+</span> <span class="n">route_manhattan</span><span class="p">(</span>
             <span class="n">t1</span><span class="p">,</span>
@@ -7695,6 +7680,10 @@ inside == True
         <span class="p">)</span>
         <span class="o">+</span> <span class="n">pts_end</span>
     <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">port1_</span> <span class="o">==</span> <span class="n">port1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pts</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">pts</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7765,15 +7754,7 @@ inside == True
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/optical.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1780</span>
-<span class="normal">1781</span>
-<span class="normal">1782</span>
-<span class="normal">1783</span>
-<span class="normal">1784</span>
-<span class="normal">1785</span>
-<span class="normal">1786</span>
-<span class="normal">1787</span>
-<span class="normal">1788</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1788</span>
 <span class="normal">1789</span>
 <span class="normal">1790</span>
 <span class="normal">1791</span>
@@ -7788,7 +7769,15 @@ inside == True
 <span class="normal">1800</span>
 <span class="normal">1801</span>
 <span class="normal">1802</span>
-<span class="normal">1803</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">vec_angle</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Vector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="normal">1803</span>
+<span class="normal">1804</span>
+<span class="normal">1805</span>
+<span class="normal">1806</span>
+<span class="normal">1807</span>
+<span class="normal">1808</span>
+<span class="normal">1809</span>
+<span class="normal">1810</span>
+<span class="normal">1811</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">vec_angle</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Vector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine vector angle in increments of 90°.</span>
 
 <span class="sd">    Returns:</span>

@@ -14,7 +14,7 @@
         <link rel="prev" href="../drc_fix/">
       
       
-        <link rel="next" href="../difftest/">
+        <link rel="next" href="../fill/">
       
       
         
@@ -2235,33 +2235,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../fill/" class="md-nav__link">
         
   
@@ -2486,7 +2459,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5511,7 +5484,7 @@ Placed 8 instances
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../packing/output_6_1.png" /></p>
+<img alt="png" src="../packing/output_7_1.png" /></p>
 <p>The packer places all cells without overlap.  The bounding box is much smaller
 than a naive row arrangement would produce.</p>
 <h2 id="3-width-constrained-packing">3 · Width-Constrained Packing</h2>
@@ -5537,7 +5510,7 @@ width — useful for fitting onto a reticle column or a fixed-pitch test array.<
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../packing/output_9_1.png" /></p>
+<img alt="png" src="../packing/output_10_1.png" /></p>
 <p>The layout is now taller and narrower compared to the unconstrained version.</p>
 <h2 id="4-pack_instances-rearranging-existing-instances">4 · <code>pack_instances</code> — Rearranging Existing Instances</h2>
 <p>If instances are already present in a cell (e.g. placed by other routing
@@ -5567,7 +5540,7 @@ After  packing — bbox: 45 µm × 22 µm
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../packing/output_12_1.png" /></p>
+<img alt="png" src="../packing/output_13_1.png" /></p>
 <h2 id="5-using-the-returned-instancegroup">5 · Using the Returned <code>InstanceGroup</code></h2>
 <p>Both functions return an <code>InstanceGroup</code> so you can apply a common
 transformation to the entire packed block — for example, to position it
@@ -5586,7 +5559,7 @@ relative to other structures in a larger layout.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../packing/output_14_0.png" /></p>
+<img alt="png" src="../packing/output_15_0.png" /></p>
 <h2 id="quick-reference">Quick Reference</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 

@@ -2335,33 +2335,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2586,7 +2559,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5733,7 +5706,7 @@ DBU width : 5000 nm
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../geometry/output_6_0.png" /></p>
+<img alt="png" src="../geometry/output_7_0.png" /></p>
 <h3 id="dpolygon-ellipse-helper">DPolygon — ellipse helper</h3>
 <p><code>DPolygon.ellipse(bbox, n_points)</code> inscribes an ellipse inside <code>bbox</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">ellipse</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span><span class="o">.</span><span class="n">ellipse</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="mi">64</span><span class="p">)</span>
@@ -5743,7 +5716,7 @@ DBU width : 5000 nm
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../geometry/output_8_0.png" /></p>
+<img alt="png" src="../geometry/output_9_0.png" /></p>
 <h2 id="inserting-shapes-into-a-cell">Inserting shapes into a cell</h2>
 <p>All shapes live inside a cell on a specific layer.
 <code>cell.shapes(layer_index).insert(shape)</code> adds the shape to that layer.</p>
@@ -5761,7 +5734,7 @@ DBU width : 5000 nm
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../geometry/output_10_0.png" /></p>
+<img alt="png" src="../geometry/output_11_0.png" /></p>
 <h2 id="transformations">Transformations</h2>
 <p>Shapes can be transformed with <code>shape.transformed(trans)</code>.</p>
 <table>
@@ -5806,7 +5779,7 @@ typically disallow it on cell instances.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../geometry/output_12_0.png" /></p>
+<img alt="png" src="../geometry/output_13_0.png" /></p>
 <h2 id="labels-gds-text-annotations">Labels (GDS text annotations)</h2>
 <p>Labels record metadata directly in the GDS file (e.g. port names, cell IDs).
 They are not fabricated — use <code>kf.kdb.Text</code> for labels and polygon-based text
@@ -5830,7 +5803,7 @@ They are not fabricated — use <code>kf.kdb.Text</code> for labels and polygon-
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../geometry/output_14_0.png" /></p>
+<img alt="png" src="../geometry/output_15_0.png" /></p>
 <h2 id="boolean-region-operations">Boolean Region operations</h2>
 <p><code>kf.kdb.Region</code> is a set of DBU polygons that supports boolean algebra.
 Convert a <code>DPolygon</code> to a <code>Region</code> with <code>kcl.to_dbu(poly)</code> first.</p>
@@ -5886,31 +5859,31 @@ Convert a <code>DPolygon</code> to a <code>Region</code> with <code>kcl.to_dbu(p
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../geometry/output_18_0.png" /></p>
+<img alt="png" src="../geometry/output_19_0.png" /></p>
 <h3 id="and-a-b">AND (A ∩ B)</h3>
 <div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">&quot;and_demo&quot;</span><span class="p">,</span> <span class="n">r1</span> <span class="o">&amp;</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../geometry/output_20_0.png" /></p>
+<img alt="png" src="../geometry/output_21_0.png" /></p>
 <h3 id="or-union-a-b">OR / union (A + B)</h3>
 <div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">&quot;or_demo&quot;</span><span class="p">,</span> <span class="n">r1</span> <span class="o">+</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../geometry/output_22_0.png" /></p>
+<img alt="png" src="../geometry/output_23_0.png" /></p>
 <h3 id="or-merged-single-polygon-result-after-merge">OR merged — single-polygon result after <code>.merge()</code></h3>
 <div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">&quot;or_merged_demo&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">r1</span> <span class="o">+</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">merge</span><span class="p">())</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../geometry/output_24_0.png" /></p>
+<img alt="png" src="../geometry/output_25_0.png" /></p>
 <h3 id="xor-a-b">XOR (A ⊕ B)</h3>
 <div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">&quot;xor_demo&quot;</span><span class="p">,</span> <span class="n">r1</span> <span class="o">^</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../geometry/output_26_0.png" /></p>
+<img alt="png" src="../geometry/output_27_0.png" /></p>
 <h2 id="writing-a-gds-file">Writing a GDS file</h2>
 <p>Call <code>cell.write("output.gds")</code> to export to GDSII format.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
@@ -6006,10 +5979,6 @@ Convert a <code>DPolygon</code> to a <code>Region</code> with <code>kcl.to_dbu(p
 <tr>
 <td>Fill tiling with Region exclusions</td>
 <td><a href="../../utilities/fill/">Utilities: Fill</a></td>
-</tr>
-<tr>
-<td>Regression testing with XOR</td>
-<td><a href="../../utilities/difftest/">Utilities: Regression Testing</a></td>
 </tr>
 </tbody>
 </table>

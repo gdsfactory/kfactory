@@ -2297,33 +2297,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2548,7 +2521,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5616,7 +5589,7 @@ geometry API. Coordinates can be expressed in <strong>database units (DBU)</stro
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell/output_4_0.png" /></p>
+<img alt="png" src="../kcell/output_5_0.png" /></p>
 <h3 id="dbu-vs-m">DBU vs µm</h3>
 <p>The same shape expressed in DBU:</p>
 <div class="highlight"><pre><span></span><code><span class="n">c_dbu</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_rect_dbu&quot;</span><span class="p">)</span>
@@ -5626,7 +5599,7 @@ geometry API. Coordinates can be expressed in <strong>database units (DBU)</stro
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell/output_6_0.png" /></p>
+<img alt="png" src="../kcell/output_7_0.png" /></p>
 <p>Both cells are identical — choose whichever unit is most convenient. The <code>D</code>-prefixed
 classes (<code>DBox</code>, <code>DPolygon</code>, …) accept floating-point µm values and are snapped to the
 DBU grid automatically.</p>
@@ -5670,7 +5643,7 @@ or by setting integer positions directly).</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell/output_9_0.png" /></p>
+<img alt="png" src="../kcell/output_10_0.png" /></p>
 <h2 id="the-cell-decorator-parametric-cells-with-automatic-caching">The <code>@cell</code> decorator — parametric cells with automatic caching</h2>
 <p>Writing a function that creates a <code>KCell</code> and decorating it with <code>@kf.cell</code> gives you:</p>
 <ol>
@@ -5724,7 +5697,7 @@ or by setting integer positions directly).</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell/output_11_0.png" /></p>
+<img alt="png" src="../kcell/output_12_0.png" /></p>
 <h3 id="cell-name-encodes-parameters">Cell name encodes parameters</h3>
 <div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div>
@@ -5767,7 +5740,7 @@ carry position/rotation transforms.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell/output_20_0.png" /></p>
+<img alt="png" src="../kcell/output_21_0.png" /></p>
 <h3 id="port-based-connection-with-connect">Port-based connection with <code>connect</code></h3>
 <p><code>instance.connect("port_name", other_instance, "other_port_name")</code> moves and rotates
 <code>instance</code> so that the named port aligns with the other port face-to-face.</p>
@@ -5782,7 +5755,7 @@ carry position/rotation transforms.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell/output_22_0.png" /></p>
+<img alt="png" src="../kcell/output_23_0.png" /></p>
 <h2 id="kcell-variants">KCell variants</h2>
 <p>kfactory ships three cell variants that differ in how geometry is stored:</p>
 <table>
@@ -5831,7 +5804,7 @@ routing or in tests.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell/output_24_1.png" /></p>
+<img alt="png" src="../kcell/output_25_1.png" /></p>
 <h2 id="see-also">See Also</h2>
 <table>
 <thead>

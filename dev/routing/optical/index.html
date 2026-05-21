@@ -1632,10 +1632,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-loopback-inside-variant" class="md-nav__link">
+  <a href="#4-loopback-inside-and-outside-variants-with-gcs" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        4 · Loopback — inside variant
+        4 · Loopback — inside and outside variants (with GCs)
       </span>
     </span>
   </a>
@@ -2235,33 +2235,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2486,7 +2459,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5368,10 +5341,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-loopback-inside-variant" class="md-nav__link">
+  <a href="#4-loopback-inside-and-outside-variants-with-gcs" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        4 · Loopback — inside variant
+        4 · Loopback — inside and outside variants (with GCs)
       </span>
     </span>
   </a>
@@ -5557,7 +5530,7 @@ West-facing end ports.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../optical/output_3_0.png" /></p>
+<img alt="png" src="../optical/output_4_0.png" /></p>
 <h2 id="2-entry-and-exit-stubs-starts-and-ends">2 · Entry and exit stubs — <code>starts</code> and <code>ends</code></h2>
 <p><code>starts</code> / <code>ends</code> control how far each route must travel straight before the router
 takes over.  Supplying a scalar applies the same stub length to all routes; a list
@@ -5575,10 +5548,12 @@ out of a dense array.</p>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="p">]</span>
+<span class="c1"># End ports are offset 40 µm to the right of the start ports so each route</span>
+<span class="c1"># has an S-bend whose entry / exit stubs are clearly visible.</span>
 <span class="n">stub_ends</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">15</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">200</span><span class="p">)),</span>
+        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">40</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">15</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">200</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
     <span class="p">)</span>
@@ -5600,7 +5575,7 @@ out of a dense array.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../optical/output_5_0.png" /></p>
+<img alt="png" src="../optical/output_6_0.png" /></p>
 <h2 id="3-path-length-matching">3 · Path-length matching</h2>
 <p>When routes travel different distances (e.g. fan-outs from an array where starts are
 staggered), <code>kf.PathLengthMatch</code> inserts small "squiggle" loops on the shorter
@@ -5705,37 +5680,104 @@ increase <code>separation</code> or stagger ports as needed.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../optical/output_7_0.png" /></p>
-<h2 id="4-loopback-inside-variant">4 · Loopback — inside variant</h2>
-<p><code>route_loopback</code> supports two topologies controlled by <code>inside</code>:</p>
-<div class="highlight"><pre><span></span><code>inside=False (default)       inside=True
-╭----╮  ╭----╮                  ╭---╮  ╭---╮
-|    |  |    |                  |   |  |   |
-| ----- ----- |              ----- |  | -----
-| p1       p2 |              p1   |    |   p2
-╰─────────────╯                   ╰────╯
-</code></pre></div>
-<p><code>inside=False</code> (default) creates an outer U-turn that travels away from the array.
-<code>inside=True</code> creates an inner U-turn that folds back between adjacent ports — useful
-for compact test structures where the loop must fit within the device footprint.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_lb_inside</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;opt_loopback_inside&quot;</span><span class="p">)</span>
+<img alt="png" src="../optical/output_8_0.png" /></p>
+<h2 id="4-loopback-inside-and-outside-variants-with-gcs">4 · Loopback — inside and outside variants (with GCs)</h2>
+<p>A loopback is a U-shaped waveguide tying two grating-couplers (GCs)
+together so that light injected into one fibre comes out the other —
+the canonical fibre-array alignment / reference structure.  The two
+variants of <code>route_loopback</code> control where the U-turn fold sits
+relative to the GC array:</p>
+<ul>
+<li><code>inside=False</code> (default) places the U-turn fold <em>beyond</em> the array
+  so the loopback hangs behind the GCs.  Use this when the rest of
+  the routing area sits next to the array and the loopback must stay
+  clear of the device footprint.</li>
+<li><code>inside=True</code> folds the U-turn fold <em>between</em> the two GCs, so the
+  loop's horizontal segment lives within the array's horizontal
+  footprint.  Use this for compact reference structures where the
+  loop must not extend past the array.</li>
+</ul>
+<p>The fold needs room: aim for a GC pitch ≥ 4 × <code>bend_radius</code> for the
+<code>inside</code> variant.  Below we use North-facing GCs spaced 150 µm apart
+(≈ 8 × bend_radius) so both topologies render cleanly.</p>
+<div class="highlight"><pre><span></span><code><span class="n">LB_SEP</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">150</span><span class="p">)</span>
 
-<span class="n">lb_p1</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;p1&quot;</span><span class="p">,</span>
-    <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-    <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
-    <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
+
+<span class="c1"># Grating-coupler stand-in: a taper with a single WG port at the narrow</span>
+<span class="c1"># end.  The wide end (fibre side) extends north; the WG port faces south</span>
+<span class="c1"># so the loopback&#39;s U-turn naturally curls *south* of the array.  In a</span>
+<span class="c1"># real PDK this would be replaced by the actual GC component.</span>
+<span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">gc</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
+    <span class="n">wide</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">poly</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">wide</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="p">),</span>
+            <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="n">wide</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># South-facing WG port</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">c</span>
+
+
+<span class="n">gc_cell</span> <span class="o">=</span> <span class="n">gc</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+
+<span class="c1"># Pitch between adjacent GCs in the fibre array.  LB_SEP (defined above)</span>
+<span class="c1"># is the spacing between the OUTERMOST two GCs — the ones the loopback</span>
+<span class="c1"># connects.  The inner two GCs share the same pitch but are left free in</span>
+<span class="c1"># this demo (in a real chip they would connect to devices).</span>
+<span class="n">N_GCS</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">GC_PITCH_UM</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">LB_SEP</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">N_GCS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="c1"># --- inside=False (outside loopback) ---</span>
+<span class="n">c_lb_outside</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;opt_loopback_outside&quot;</span><span class="p">)</span>
+
+<span class="n">gcs_out</span> <span class="o">=</span> <span class="p">[</span><span class="n">c_lb_outside</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="n">gc_cell</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_GCS</span><span class="p">)]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inst</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gcs_out</span><span class="p">):</span>
+    <span class="n">inst</span><span class="o">.</span><span class="n">dmove</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">GC_PITCH_UM</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+<span class="c1"># Loop only the two outermost GCs.</span>
+<span class="n">backbone_outside</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_loopback</span><span class="p">(</span>
+    <span class="n">gcs_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
+    <span class="n">gcs_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
+    <span class="n">bend90_radius</span><span class="o">=</span><span class="n">bend_radius</span><span class="p">,</span>
+    <span class="n">d_loop</span><span class="o">=</span><span class="n">bend_radius</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">inside</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">lb_p2</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;p2&quot;</span><span class="p">,</span>
-    <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">50</span><span class="p">)),</span>
-    <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
-    <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
+
+<span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">place_manhattan</span><span class="p">(</span>
+    <span class="n">c_lb_outside</span><span class="p">,</span>
+    <span class="n">gcs_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
+    <span class="n">gcs_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
+    <span class="n">backbone_outside</span><span class="p">,</span>
+    <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
+    <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="n">c_lb_outside</span>
+</code></pre></div>
+<p><div class="highlight"><pre><span></span><code>
+</code></pre></div>
+<img alt="png" src="../optical/output_10_0.png" /></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># --- inside=True (inner loopback — fold between the two outermost GCs) ---</span>
+<span class="n">c_lb_inside</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;opt_loopback_inside&quot;</span><span class="p">)</span>
+
+<span class="n">gcs_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">c_lb_inside</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="n">gc_cell</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_GCS</span><span class="p">)]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inst</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gcs_in</span><span class="p">):</span>
+    <span class="n">inst</span><span class="o">.</span><span class="n">dmove</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">GC_PITCH_UM</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
 <span class="n">backbone_inside</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_loopback</span><span class="p">(</span>
-    <span class="n">lb_p1</span><span class="p">,</span>
-    <span class="n">lb_p2</span><span class="p">,</span>
+    <span class="n">gcs_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
+    <span class="n">gcs_in</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
     <span class="n">bend90_radius</span><span class="o">=</span><span class="n">bend_radius</span><span class="p">,</span>
     <span class="n">d_loop</span><span class="o">=</span><span class="n">bend_radius</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
     <span class="n">inside</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -5743,8 +5785,8 @@ for compact test structures where the loop must fit within the device footprint.
 
 <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">place_manhattan</span><span class="p">(</span>
     <span class="n">c_lb_inside</span><span class="p">,</span>
-    <span class="n">lb_p1</span><span class="p">,</span>
-    <span class="n">lb_p2</span><span class="p">,</span>
+    <span class="n">gcs_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
+    <span class="n">gcs_in</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
     <span class="n">backbone_inside</span><span class="p">,</span>
     <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
@@ -5753,7 +5795,7 @@ for compact test structures where the loop must fit within the device footprint.
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../optical/output_9_0.png" /></p>
+<img alt="png" src="../optical/output_11_0.png" /></p>
 <h2 id="5-direct-backbone-placement-with-place_manhattan">5 · Direct backbone placement with <code>place_manhattan</code></h2>
 <p><code>route_bundle</code> is the high-level router.  For full control you can build the backbone
 yourself (a list of <code>kdb.Point</code>) and call <code>place_manhattan</code> directly to materialise
@@ -5796,7 +5838,7 @@ routing algorithms can drive the placer.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../optical/output_11_0.png" /></p>
+<img alt="png" src="../optical/output_13_0.png" /></p>
 <h2 id="summary">Summary</h2>
 <table>
 <thead>

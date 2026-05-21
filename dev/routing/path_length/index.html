@@ -2296,33 +2296,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2547,7 +2520,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5648,7 +5621,6 @@ path-length matching the routes reach their end ports at different total lengths
     <span class="n">separation</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
     <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-    <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unmatched lengths (µm):&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes_baseline</span><span class="p">])</span>
@@ -5658,7 +5630,7 @@ path-length matching the routes reach their end ports at different total lengths
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../path_length/output_3_1.png" /></p>
+<img alt="png" src="../path_length/output_4_1.png" /></p>
 <p>The three routes have clearly different lengths.  Path-length matching will bring them
 all to the longest value.</p>
 <h2 id="2-basic-path-length-matching">2 · Basic path-length matching</h2>
@@ -5693,7 +5665,6 @@ backbone segment (<code>element=-1</code>), on the left side, centered in the se
     <span class="n">separation</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
     <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-    <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
             <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_basic&quot;</span><span class="p">],</span>
@@ -5713,7 +5684,7 @@ backbone segment (<code>element=-1</code>), on the left side, centered in the se
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../path_length/output_6_1.png" /></p>
+<img alt="png" src="../path_length/output_7_1.png" /></p>
 <p>All three routes now have equal total length.  The shorter routes received progressively
 taller squiggle loops.</p>
 <h2 id="3-loop_side-which-side-the-loop-protrudes">3 · <code>loop_side</code> — which side the loop protrudes</h2>
@@ -5778,7 +5749,6 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
     <span class="n">separation</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
     <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-    <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
             <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_right&quot;</span><span class="p">],</span>
@@ -5794,7 +5764,7 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../path_length/output_9_0.png" /></p>
+<img alt="png" src="../path_length/output_10_0.png" /></p>
 <h3 id="loop_side-center-symmetric">loop_side = center (symmetric)</h3>
 <div class="highlight"><pre><span></span><code><span class="n">c_center</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;plm_loop_center&quot;</span><span class="p">)</span>
 
@@ -5824,7 +5794,6 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
     <span class="n">separation</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
     <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-    <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
             <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_center&quot;</span><span class="p">],</span>
@@ -5840,7 +5809,7 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../path_length/output_11_0.png" /></p>
+<img alt="png" src="../path_length/output_12_0.png" /></p>
 <h2 id="4-loop_position-where-in-the-segment-the-loop-sits">4 · <code>loop_position</code> — where in the segment the loop sits</h2>
 <table>
 <thead>
@@ -5896,7 +5865,6 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
     <span class="n">separation</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
     <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-    <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
             <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_pos_end&quot;</span><span class="p">],</span>
@@ -5912,7 +5880,7 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../path_length/output_13_0.png" /></p>
+<img alt="png" src="../path_length/output_14_0.png" /></p>
 <h2 id="5-loops-multiple-squiggle-repetitions">5 · <code>loops</code> — multiple squiggle repetitions</h2>
 <p>When the length difference between the shortest and longest route is large, a single
 loop may become very tall.  Increasing <code>loops</code> splits the extra length across multiple
@@ -5946,7 +5914,6 @@ neighbouring structures.</p>
     <span class="n">separation</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
     <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-    <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
             <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_loops_2&quot;</span><span class="p">],</span>
@@ -5966,7 +5933,7 @@ neighbouring structures.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../path_length/output_15_1.png" /></p>
+<img alt="png" src="../path_length/output_16_1.png" /></p>
 <h2 id="6-inspecting-route-lengths">6 · Inspecting route lengths</h2>
 <p><code>route_bundle</code> returns a list of <code>ManhattanRoute</code> objects.  Each route exposes
 several length properties that are useful for diagnostics:</p>
@@ -6028,7 +5995,6 @@ several length properties that are useful for diagnostics:</p>
     <span class="n">separation</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
     <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
-    <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
             <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_inspect&quot;</span><span class="p">],</span>
@@ -6124,8 +6090,6 @@ geometry may become cramped.</p>
   overlap adjacent waveguides.</li>
 <li>For large length differences use <code>loops=2</code> or <code>loops=3</code> to keep loop heights compact.</li>
 <li>Use <code>route.length</code> after routing to verify that all routes are matched.</li>
-<li>Pass <code>on_collision=None</code> in scripts and doc builds to suppress the KLayout error
-  dialog when collision geometry is not critical.</li>
 </ul>
 <h2 id="see-also">See Also</h2>
 <table>

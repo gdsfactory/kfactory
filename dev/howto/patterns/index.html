@@ -2095,33 +2095,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2475,7 +2448,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5504,7 +5477,7 @@ pattern.  Each primitive is created once (cached by <code>@kf.cell</code>) and r
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../patterns/output_3_1.png" /></p>
+<img alt="png" src="../patterns/output_4_1.png" /></p>
 <hr />
 <h2 id="2-port-propagation-through-hierarchy">2 · Port propagation through hierarchy</h2>
 <p>When a cell wraps several children you need to surface the right ports to the
@@ -5599,7 +5572,7 @@ module level instead.</p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cell: </span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;factory bundle type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">factories</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-12 10:26:34.740[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m698[0m - [31m[1mName conflict in kfactory.kcell::name at line 698
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:58:10.662[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m701[0m - [31m[1mName conflict in kfactory.kcell::name at line 701
 Renaming Unnamed_8 (cell_index=8) to straight_W500_L10000_LWG_ENone would cause it to be named the same as:
  - straight_W500_L10000_LWG_ENone (cell_index=1), function_name=straight, basename=None[0m
 
@@ -5722,7 +5695,7 @@ grid bbox (µm): (0,2.75;21,8.75)
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../patterns/output_11_1.png" /></p>
+<img alt="png" src="../patterns/output_12_1.png" /></p>
 <hr />
 <h2 id="6-vkcell-route-kcell-materialise">6 · VKCell route → KCell materialise</h2>
 <p>All-angle routing produces a <strong>virtual</strong> route (a <code>VKCell</code>).  The pattern to
@@ -5777,7 +5750,7 @@ bbox (µm): (0,-0.25;160,60.25)
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../patterns/output_13_1.png" /></p>
+<img alt="png" src="../patterns/output_14_1.png" /></p>
 <h2 id="see-also">See Also</h2>
 <table>
 <thead>

@@ -2248,33 +2248,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2499,7 +2472,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5513,7 +5486,7 @@ that the schematic can reference as a plain string.</p>
 <span class="c1"># cross-section is available there as well.</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_wg1</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>&lt;kfactory.cross_section.CrossSection at 0x7f86cd481f90&gt;
+<div class="highlight"><pre><span></span><code>&lt;kfactory.cross_section.CrossSection at 0x7f2c7d83cb90&gt;
 </code></pre></div>
 <h2 id="the-cross-cell">The <code>cross</code> cell</h2>
 <p>A single 45° crossing: four waveguide arms radiating from the center.</p>
@@ -5911,11 +5884,11 @@ repetitive routing primitives.</p>
 <span class="n">c</span> <span class="o">=</span> <span class="n">crossing45</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG1000&quot;</span><span class="p">)</span>
 <span class="n">c</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-12 10:26:51.123[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m914[0m - [1mStarting minkowski on Unnamed_0[0m
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:58:12.125[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m914[0m - [1mStarting minkowski on Unnamed_0[0m
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../crossing45/output_9_1.png" /></p>
+<img alt="png" src="../crossing45/output_10_1.png" /></p>
 <h2 id="inspecting-the-schematic-model">Inspecting the schematic model</h2>
 <p>The schematic model contains every instance, placement, and connection as a
 serialisable Pydantic structure.</p>
@@ -5943,7 +5916,7 @@ with collaborators or archived for reproducibility.</p>
 
 <span class="n">Code</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">code_str</span><span class="p">())</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-12 10:26:51.543[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2234[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:58:12.447[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2234[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 

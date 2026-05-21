@@ -11,10 +11,6 @@
         <link rel="canonical" href="https://gdsfactory.github.io/dev/utilities/difftest/">
       
       
-        <link rel="prev" href="../packing/">
-      
-      
-        <link rel="next" href="../fill/">
       
       
         
@@ -335,15 +331,13 @@
   
   
   
-    
-  
   
     
       
     
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../grid/" class="md-tabs__link">
           
   
@@ -1963,29 +1957,24 @@
       
   
   
-    
   
   
-  
     
     
     
     
       
-        
-        
-      
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -2002,7 +1991,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2088,207 +2077,6 @@
   
 
       </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="././" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-        
-
-
-<nav class="md-nav md-nav--secondary" aria-label="On this page">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      On this page
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Setup
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#building-two-versions-of-a-component" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Building two versions of a component
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kfutilsxor-in-memory-comparison" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        <code>kf.utils.xor</code> — in-memory comparison
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kfutilsdiff-file-based-comparison" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        <code>kf.utils.diff</code> — file-based comparison
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kfutilsdifftest-pytest-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        <code>kf.utils.difftest</code> — pytest integration
-      </span>
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="kf.utils.difftest — pytest integration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#recommended-project-layout" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Recommended project layout
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-pytest-test" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Example pytest test
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ignore-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Ignore options
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#demonstrating-identical-xor-no-differences" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Demonstrating identical XOR (no differences)
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Summary
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        See Also
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2525,7 +2313,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>

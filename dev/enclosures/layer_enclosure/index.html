@@ -2295,33 +2295,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2546,7 +2519,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5588,8 +5561,8 @@ Common uses include:</p>
     <span class="n">WGCLAD</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">SLAB</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">NPP</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">METAL</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">METALEX</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">METAL</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">METALEX</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 
 <span class="n">L</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>
@@ -5619,7 +5592,7 @@ waveguide core.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../layer_enclosure/output_4_0.png" /></p>
+<img alt="png" src="../layer_enclosure/output_5_0.png" /></p>
 <p>The WG core (layer 1/0) is drawn by the cell itself; the WGCLAD (layer 2/0) is
 automatically computed as the Minkowski expansion of the WG shape.</p>
 <h2 id="2-m-based-sections-with-dsections">2 · µm-based sections with <code>dsections</code></h2>
@@ -5643,7 +5616,7 @@ Use <code>dsections=</code> together with <code>kcl=</code> to specify distances
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../layer_enclosure/output_7_0.png" /></p>
+<img alt="png" src="../layer_enclosure/output_8_0.png" /></p>
 <h2 id="3-multi-layer-enclosures">3 · Multi-layer enclosures</h2>
 <p>A single <code>LayerEnclosure</code> can drive <em>multiple</em> output layers.  Each tuple in
 <code>sections</code> specifies one rule.</p>
@@ -5678,7 +5651,7 @@ edge:</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../layer_enclosure/output_9_0.png" /></p>
+<img alt="png" src="../layer_enclosure/output_10_0.png" /></p>
 <p>Three layers are now present:
 - <strong>WG</strong> (core waveguide)
 - <strong>SLAB</strong> (uniform 2 µm expansion)
@@ -5695,7 +5668,7 @@ edge:</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../layer_enclosure/output_12_0.png" /></p>
+<img alt="png" src="../layer_enclosure/output_13_0.png" /></p>
 <div class="highlight"><pre><span></span><code><span class="n">taper_with_enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">factories</span><span class="o">.</span><span class="n">taper</span><span class="o">.</span><span class="n">taper_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">)(</span>
     <span class="n">width1</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span>
     <span class="n">width2</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span>
@@ -5707,7 +5680,7 @@ edge:</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../layer_enclosure/output_13_0.png" /></p>
+<img alt="png" src="../layer_enclosure/output_14_0.png" /></p>
 <h2 id="5-kcellenclosure-cell-level-enclosures">5 · <code>KCellEnclosure</code> — cell-level enclosures</h2>
 <p>When a cell contains <em>multiple</em> sub-components, applying a <code>LayerEnclosure</code> to each
 sub-component separately leaves gaps at the joins.  <code>KCellEnclosure.apply_minkowski_tiled</code>
@@ -5749,13 +5722,13 @@ enclosure.</p>
 <span class="n">c_two</span> <span class="o">=</span> <span class="n">two_bends</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">enclosure</span><span class="o">=</span><span class="n">kcell_enc</span><span class="p">)</span>
 <span class="n">c_two</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-12 10:26:49.418[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m698[0m - [31m[1mName conflict in kfactory.kcell::name at line 698
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:57:46.753[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m701[0m - [31m[1mName conflict in kfactory.kcell::name at line 701
 Renaming Unnamed_12 (cell_index=12) to bend_euler_W0p5_R10_LWG_ENone_A90_R150 would cause it to be named the same as:
  - bend_euler_W0p5_R10_LWG_ENone_A90_R150 (cell_index=11), function_name=bend_euler, basename=None[0m
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../layer_enclosure/output_15_1.png" /></p>
+<img alt="png" src="../layer_enclosure/output_16_1.png" /></p>
 <p>Notice that the SLAB and NPP layers form a <em>single, continuous</em> region around both
 bends, with no gap between them — this is the key advantage of <code>KCellEnclosure</code> over
 per-component enclosures.</p>

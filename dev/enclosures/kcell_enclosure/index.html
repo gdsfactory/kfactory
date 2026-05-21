@@ -2323,33 +2323,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utilities/difftest/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Regression Testing
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../utilities/fill/" class="md-nav__link">
         
   
@@ -2574,7 +2547,7 @@
   <span class="md-ellipsis">
     
   
-  vs gdsfactory
+  Coming from gdsfactory
 
     
   </span>
@@ -5673,15 +5646,21 @@ tiling parameters, and the directional Minkowski methods.</p>
 
 <span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bend_pair_clad</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Two euler bends with unified cell-level cladding.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Two euler bends placed close together with unified cell-level cladding.&quot;&quot;&quot;</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">bend_fn</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">factories</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_euler_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
 
     <span class="n">b1</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">bend_fn</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
     <span class="n">b2</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">bend_fn</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
 
-    <span class="c1"># Join b2 to b1 so the waveguides share a port</span>
-    <span class="n">b2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="c1"># Mirror b2 so it curves the opposite direction, then offset it by</span>
+    <span class="c1"># 1.5 µm in y.  The two WG cores stay well-separated (1.5 µm apart at</span>
+    <span class="c1"># the closest point) but the 2 µm cladding rings overlap by ~2.5 µm —</span>
+    <span class="c1"># exactly the case `KCellEnclosure` is meant to handle: merging</span>
+    <span class="c1"># interacting claddings into a single continuous region without one</span>
+    <span class="c1"># cancelling the other.</span>
+    <span class="n">b2</span><span class="o">.</span><span class="n">dmirror_y</span><span class="p">()</span>
+    <span class="n">b2</span><span class="o">.</span><span class="n">dmove</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">))</span>
 
     <span class="n">c</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">))</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b2</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">))</span>
@@ -5696,9 +5675,12 @@ tiling parameters, and the directional Minkowski methods.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell_enclosure/output_4_0.png" /></p>
-<p>The WGCLAD forms a single, continuous band around both bends — there is no gap at the
-port where they connect.</p>
+<img alt="png" src="../kcell_enclosure/output_5_0.png" /></p>
+<p>Both bends' cladding rings would normally be drawn separately by
+<code>LayerEnclosure</code> (one per component) and would overlap visibly as two
+distinct annular bands.  <code>KCellEnclosure</code> merges the cell geometry first,
+so the two interacting claddings come out as a single continuous region
+with no spurious gaps where they meet.</p>
 <h2 id="2-multiple-enclosures-in-one-kcellenclosure">2 · Multiple enclosures in one <code>KCellEnclosure</code></h2>
 <p>Pass a list of <code>LayerEnclosure</code> objects to cover several output layers in a single
 <code>apply_minkowski_tiled</code> call.  The processor iterates over them in order.</p>
@@ -5728,7 +5710,9 @@ port where they connect.</p>
 
     <span class="n">b1</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">bend_fn</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
     <span class="n">b2</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">bend_fn</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
-    <span class="n">b2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="c1"># Same close-but-unconnected placement as in section 1.</span>
+    <span class="n">b2</span><span class="o">.</span><span class="n">dmirror_y</span><span class="p">()</span>
+    <span class="n">b2</span><span class="o">.</span><span class="n">dmove</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">))</span>
 
     <span class="n">c</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">))</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b2</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">))</span>
@@ -5740,13 +5724,13 @@ port where they connect.</p>
 
 <span class="n">bend_pair_multi</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-12 10:26:50.242[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m698[0m - [31m[1mName conflict in kfactory.kcell::name at line 698
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:57:46.766[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m701[0m - [31m[1mName conflict in kfactory.kcell::name at line 701
 Renaming Unnamed_4 (cell_index=4) to bend_euler_W0p5_R10_LWG_ENone_A90_R150 would cause it to be named the same as:
  - bend_euler_W0p5_R10_LWG_ENone_A90_R150 (cell_index=1), function_name=bend_euler, basename=None[0m
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell_enclosure/output_7_1.png" /></p>
+<img alt="png" src="../kcell_enclosure/output_8_1.png" /></p>
 <p>Three generated layers are visible:
 - <strong>WGCLAD</strong> — 2 µm uniform cladding
 - <strong>SLAB</strong> — 3 µm uniform slab
@@ -5806,20 +5790,20 @@ The key parameters are:</p>
 <span class="c1"># n_pts=8 → octagonal corners</span>
 <span class="n">single_bend_npts</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">n_pts</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-12 10:26:50.995[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m698[0m - [31m[1mName conflict in kfactory.kcell::name at line 698
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:57:47.337[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m701[0m - [31m[1mName conflict in kfactory.kcell::name at line 701
 Renaming Unnamed_7 (cell_index=7) to bend_euler_W0p5_R10_LWG_ENone_A90_R150 would cause it to be named the same as:
  - bend_euler_W0p5_R10_LWG_ENone_A90_R150 (cell_index=1), function_name=bend_euler, basename=None
  - bend_euler_W0p5_R10_LWG_ENone_A90_R150 (cell_index=4), function_name=bend_euler, basename=None[0m
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell_enclosure/output_10_1.png" /></p>
+<img alt="png" src="../kcell_enclosure/output_11_1.png" /></p>
 <p>With <code>n_pts=8</code> the corners of the WGCLAD are octagonal.  The default <code>n_pts=64</code>
 produces near-circular corners.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># n_pts=64 → smooth circular corners (default)</span>
 <span class="n">single_bend_npts</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">n_pts</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-12 10:26:51.107[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m698[0m - [31m[1mName conflict in kfactory.kcell::name at line 698
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:57:47.430[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m701[0m - [31m[1mName conflict in kfactory.kcell::name at line 701
 Renaming Unnamed_10 (cell_index=10) to bend_euler_W0p5_R10_LWG_ENone_A90_R150 would cause it to be named the same as:
  - bend_euler_W0p5_R10_LWG_ENone_A90_R150 (cell_index=1), function_name=bend_euler, basename=None
  - bend_euler_W0p5_R10_LWG_ENone_A90_R150 (cell_index=4), function_name=bend_euler, basename=None
@@ -5827,7 +5811,7 @@ Renaming Unnamed_10 (cell_index=10) to bend_euler_W0p5_R10_LWG_ENone_A90_R150 wo
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell_enclosure/output_12_1.png" /></p>
+<img alt="png" src="../kcell_enclosure/output_13_1.png" /></p>
 <h3 id="controlling-threads-for-ci-environments">Controlling threads for CI environments</h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Use a fixed thread count for reproducible timing in CI</span>
 <span class="n">kcell_enc</span><span class="o">.</span><span class="n">apply_minkowski_tiled</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">n_threads</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -5871,7 +5855,7 @@ rectangle must match the exact waveguide length.</p>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell_enclosure/output_15_0.png" /></p>
+<img alt="png" src="../kcell_enclosure/output_16_0.png" /></p>
 <p>The WGCLAD (layer 2/0) extends 1.5 µm above and below the waveguide but ends
 exactly at the port faces — no overextension at the ends.</p>
 <h2 id="5-apply_minkowski_x-directional-enclosure-for-vertical-waveguides">5 · <code>apply_minkowski_x</code> — directional enclosure for vertical waveguides</h2>
@@ -5900,13 +5884,13 @@ correct choice for waveguides oriented vertically (angle 90° / 270°).</p>
 
 <span class="n">vertical_straight_clad_x</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-12 10:26:51.411[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m698[0m - [31m[1mName conflict in kfactory.kcell::name at line 698
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:57:47.661[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m701[0m - [31m[1mName conflict in kfactory.kcell::name at line 701
 Renaming Unnamed_16 (cell_index=16) to straight_W500_L20000_LWG_ENone would cause it to be named the same as:
  - straight_W500_L20000_LWG_ENone (cell_index=13), function_name=straight, basename=None[0m
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell_enclosure/output_18_1.png" /></p>
+<img alt="png" src="../kcell_enclosure/output_19_1.png" /></p>
 <h2 id="6-apply_minkowski_custom-custom-kernel-shape">6 · <code>apply_minkowski_custom</code> — custom kernel shape</h2>
 <p>For full control over the expansion shape pass a callable to
 <code>apply_minkowski_custom</code>.  The callable receives the expansion distance <code>d</code> (in DBU)
@@ -5937,7 +5921,9 @@ and must return a <code>kdb.Edge</code>, <code>kdb.Polygon</code>, or <code>kdb.
 
     <span class="n">b1</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">bend_fn</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
     <span class="n">b2</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">bend_fn</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
-    <span class="n">b2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="c1"># Same close-but-unconnected placement as in section 1.</span>
+    <span class="n">b2</span><span class="o">.</span><span class="n">dmirror_y</span><span class="p">()</span>
+    <span class="n">b2</span><span class="o">.</span><span class="n">dmove</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">))</span>
 
     <span class="n">c</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">))</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b2</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">))</span>
@@ -5949,7 +5935,7 @@ and must return a <code>kdb.Edge</code>, <code>kdb.Polygon</code>, or <code>kdb.
 
 <span class="n">bend_pair_diamond</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-12 10:26:51.476[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m698[0m - [31m[1mName conflict in kfactory.kcell::name at line 698
+<div class="highlight"><pre><span></span><code>[32m2026-05-21 06:57:47.756[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m701[0m - [31m[1mName conflict in kfactory.kcell::name at line 701
 Renaming Unnamed_19 (cell_index=19) to bend_euler_W0p5_R10_LWG_ENone_A90_R150 would cause it to be named the same as:
  - bend_euler_W0p5_R10_LWG_ENone_A90_R150 (cell_index=1), function_name=bend_euler, basename=None
  - bend_euler_W0p5_R10_LWG_ENone_A90_R150 (cell_index=4), function_name=bend_euler, basename=None
@@ -5958,7 +5944,7 @@ Renaming Unnamed_19 (cell_index=19) to bend_euler_W0p5_R10_LWG_ENone_A90_R150 wo
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../kcell_enclosure/output_20_1.png" /></p>
+<img alt="png" src="../kcell_enclosure/output_21_1.png" /></p>
 <p>The WGCLAD corners are diamond-shaped (45° chamfers).</p>
 <h2 id="7-method-reference">7 · Method reference</h2>
 <table>
