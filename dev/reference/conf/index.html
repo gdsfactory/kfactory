@@ -6217,7 +6217,8 @@ max_cellname_length: The maximum length of a cell name.</p>
 <span class="normal">341</span>
 <span class="normal">342</span>
 <span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Settings</span><span class="p">(</span><span class="n">BaseSettings</span><span class="p">):</span>
+<span class="normal">344</span>
+<span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Settings</span><span class="p">(</span><span class="n">BaseSettings</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;KFactory settings object.</span>
 
 <span class="sd">    Attrs:</span>
@@ -6284,6 +6285,7 @@ max_cellname_length: The maximum length of a cell name.</p>
     <span class="n">write_timestamps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">write_kfactory_settings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Write kfactory version into the gds/oasis.&quot;&quot;&quot;</span>
+    <span class="n">multi_xy_records</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="n">show_function</span><span class="p">:</span> <span class="n">ShowFunction</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -6555,9 +6557,9 @@ max_cellname_length: The maximum length of a cell name.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/conf.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set log filter and run pydantic.&quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
