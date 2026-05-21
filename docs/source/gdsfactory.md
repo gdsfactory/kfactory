@@ -1,4 +1,4 @@
-# kfactory vs gdsfactory
+# Coming from gdsfactory
 
 kfactory is based on KLayout and therefore has quite a few fundamental differences to gdsfactory.
 

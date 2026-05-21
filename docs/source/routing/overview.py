@@ -197,10 +197,18 @@ c2
 # ## 4 · Obstacle avoidance
 #
 # Pass `bboxes` to mark keep-out zones.  The router automatically detours around them.
+#
+# > **Caveat**: the obstacle bbox must overlap (or touch) the bundle's own
+# > bounding box for the detour to take effect — an isolated box floating in
+# > empty space between the two port groups is ignored.  In the example below
+# > the obstacle covers the left-most start port, so the bundle must deflect
+# > around it.  Rotating the end ports by 90° (East-facing instead of
+# > South-facing) makes the resulting detour visually obvious.
 
 # %%
 c3 = kf.KCell("obstacle_avoidance")
 
+# Start ports face North at the bottom; end ports face East on the right.
 start_ports3 = [
     kf.Port(
         name=f"in_{i}",
@@ -213,18 +221,20 @@ start_ports3 = [
 end_ports3 = [
     kf.Port(
         name=f"out_{i}",
-        trans=kf.kdb.Trans(3, False, kf.kcl.to_dbu(i * 30), kf.kcl.to_dbu(400)),
+        trans=kf.kdb.Trans(0, False, kf.kcl.to_dbu(250), kf.kcl.to_dbu(80 + i * 30)),
         width=WG_WIDTH,
         layer_info=L.WG,
     )
     for i in range(3)
 ]
 
+# Obstacle covers the left-most start port — it touches the bundle bbox, so
+# the router has to route around it.
 obstacle = kf.kdb.Box(
+    kf.kcl.to_dbu(-15),
     kf.kcl.to_dbu(-10),
-    kf.kcl.to_dbu(150),
-    kf.kcl.to_dbu(100),
-    kf.kcl.to_dbu(220),
+    kf.kcl.to_dbu(20),
+    kf.kcl.to_dbu(60),
 )
 c3.shapes(kf.kcl.find_layer(L.FLOORPLAN)).insert(obstacle)
 
@@ -240,54 +250,15 @@ kf.routing.optical.route_bundle(
 c3
 
 # %% [markdown]
-# ## 5 · Loopback (U-turn between parallel ports)
-#
-# `route_loopback` computes backbone waypoints for a U-shaped path between two
-# co-directional parallel ports.  Pass the result to `place_manhattan` to materialise
-# the route geometry.
-
-# %%
-c4 = kf.KCell("loopback_demo")
-
-lb_p1 = kf.Port(
-    name="p1",
-    trans=kf.kdb.Trans(0, False, 0, 0),
-    width=WG_WIDTH,
-    layer_info=L.WG,
-)
-lb_p2 = kf.Port(
-    name="p2",
-    trans=kf.kdb.Trans(0, False, 0, kf.kcl.to_dbu(30)),
-    width=WG_WIDTH,
-    layer_info=L.WG,
-)
-
-# get_radius returns the effective routing radius for this bend cell (euler bends are
-# larger than their nominal radius — use get_radius rather than a hard-coded value).
-bend_radius = kf.routing.optical.get_radius(bend90)
-
-backbone = kf.routing.optical.route_loopback(
-    lb_p1,
-    lb_p2,
-    bend90_radius=bend_radius,
-    d_loop=bend_radius * 4,
-)
-
-kf.routing.optical.place_manhattan(
-    c4,
-    lb_p1,
-    lb_p2,
-    backbone,
-    straight_factory=straight_factory,
-    bend90_cell=bend90,
-)
-c4
-
-# %% [markdown]
-# ## 6 · Electrical routing
+# ## 5 · Electrical routing
 #
 # Electrical routes are plain Manhattan wires — no bend cells needed.  Use
 # `kf.routing.electrical.route_bundle` with `place_layer` and `route_width` (in DBU).
+#
+# To make the routing non-trivial we orient the start ports North-facing along
+# the bottom edge and the end ports East-facing on the right edge — the
+# resulting L-shaped wires demonstrate that the electrical router does insert
+# right-angle corners.
 
 # %%
 METAL_WIDTH = 2_000  # 2 µm in DBU
@@ -303,10 +274,12 @@ e_start = [
     )
     for i in range(3)
 ]
+# End ports face East, offset along y so each wire must bend to reach its
+# target.
 e_end = [
     kf.Port(
         name=f"e_out_{i}",
-        trans=kf.kdb.Trans(3, False, i * 30_000, 200_000),
+        trans=kf.kdb.Trans(0, False, 150_000, 60_000 + i * 30_000),
         width=METAL_WIDTH,
         layer_info=L.METAL,
     )
@@ -329,8 +302,8 @@ ce
 # |---|---|
 # | Route *N* optical waveguides | `kf.routing.optical.route_bundle(c, starts, ends, sep, straight_factory=..., bend90_cell=...)` |
 # | Route *N* metal wires | `kf.routing.electrical.route_bundle(c, starts, ends, sep, place_layer=...)` |
-# | U-turn loopback | `kf.routing.optical.route_loopback(p1, p2, bend90_radius=...)` → pts, then `place_manhattan(c, p1, p2, pts, ...)` |
 # | Avoid obstacles | add `bboxes=[kdb.Box(...)]` to `route_bundle` |
+# | U-turn loopback (with GCs) | see [Routing: Optical § 4](optical.py) |
 #
 # All coordinates in `KCell`-based APIs are in **DBU** (1 nm = 1 DBU with default `dbu = 0.001`).
 # Use `kf.kcl.to_dbu(x_um)` to convert from µm.  For a purely µm-native workflow use

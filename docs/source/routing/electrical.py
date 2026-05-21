@@ -44,8 +44,8 @@ import kfactory as kf
 
 
 class LAYER(kf.LayerInfos):
-    METAL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
-    METAL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(11, 0)
+    METAL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(11, 0)
+    METAL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(12, 0)
     FLOORPLAN: kf.kdb.LayerInfo = kf.kdb.LayerInfo(99, 0)
 
 
@@ -241,10 +241,18 @@ c_wp
 # The router automatically routes around them.
 #
 # Obstacle boxes are in DBU and are defined as `kdb.Box(left, bottom, right, top)`.
+#
+# > **Caveat**: the obstacle bbox must overlap (or touch) the bundle's own
+# > bounding box — an isolated box floating in empty space between the bundles
+# > is treated as if it weren't there.  Place the obstacle so it covers at
+# > least one of the start- or end-port regions.
 
 # %%
 c_obs = kf.KCell("elec_obstacle")
 
+# North-facing start ports at the bottom; East-facing end ports on the right.
+# The bend the router must make to get from "north" to "east" gives the
+# obstacle something meaningful to deflect.
 starts_obs = [
     kf.Port(
         name=f"in_{i}",
@@ -257,19 +265,21 @@ starts_obs = [
 ends_obs = [
     kf.Port(
         name=f"out_{i}",
-        trans=kf.kdb.Trans(3, False, kf.kcl.to_dbu(i * 20), kf.kcl.to_dbu(300)),
+        trans=kf.kdb.Trans(0, False, kf.kcl.to_dbu(120), kf.kcl.to_dbu(40 + i * 20)),
         width=WIRE_WIDTH,
         layer_info=L.METAL1,
     )
     for i in range(3)
 ]
 
-# A keep-out box blocking the centre of the routing area.
+# Keep-out box covering the left-most start port so the router must detour
+# around it.  An obstacle floating in the middle (untouched by either port
+# group) would not affect the route.
 obstacle = kf.kdb.Box(
+    kf.kcl.to_dbu(-10),
     kf.kcl.to_dbu(-5),
-    kf.kcl.to_dbu(100),
-    kf.kcl.to_dbu(55),
-    kf.kcl.to_dbu(180),
+    kf.kcl.to_dbu(30),
+    kf.kcl.to_dbu(60),
 )
 # Draw the obstacle on the floorplan layer for visibility.
 c_obs.shapes(kf.kcl.find_layer(L.FLOORPLAN)).insert(obstacle)
@@ -336,7 +346,6 @@ kf.routing.electrical.route_bundle_dual_rails(
     place_layer=L.METAL1,
     width_rails=DR_TOTAL,
     separation_rails=DR_GAP,
-    on_collision=None,
 )
 c_dr
 

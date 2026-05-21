@@ -146,10 +146,12 @@ stub_starts = [
     )
     for i in range(3)
 ]
+# End ports are offset 40 µm to the right of the start ports so each route
+# has an S-bend whose entry / exit stubs are clearly visible.
 stub_ends = [
     kf.Port(
         name=f"out_{i}",
-        trans=kf.kdb.Trans(3, False, kf.kcl.to_dbu(i * 15), kf.kcl.to_dbu(200)),
+        trans=kf.kdb.Trans(3, False, kf.kcl.to_dbu(40 + i * 15), kf.kcl.to_dbu(200)),
         width=WG_WIDTH,
         layer_info=L.WG,
     )
@@ -240,42 +242,104 @@ kf.routing.optical.route_bundle(
 c_plm
 
 # %% [markdown]
-# ## 4 · Loopback — inside variant
+# ## 4 · Loopback — inside and outside variants (with GCs)
 #
-# `route_loopback` supports two topologies controlled by `inside`:
+# A loopback is a U-shaped waveguide tying two grating-couplers (GCs)
+# together so that light injected into one fibre comes out the other —
+# the canonical fibre-array alignment / reference structure.  The two
+# variants of `route_loopback` control where the U-turn fold sits
+# relative to the GC array:
 #
-# ```
-# inside=False (default)       inside=True
-# ╭----╮  ╭----╮                  ╭---╮  ╭---╮
-# |    |  |    |                  |   |  |   |
-# | ----- ----- |              ----- |  | -----
-# | p1       p2 |              p1   |    |   p2
-# ╰─────────────╯                   ╰────╯
-# ```
+# - `inside=False` (default) places the U-turn fold *beyond* the array
+#   so the loopback hangs behind the GCs.  Use this when the rest of
+#   the routing area sits next to the array and the loopback must stay
+#   clear of the device footprint.
+# - `inside=True` folds the U-turn fold *between* the two GCs, so the
+#   loop's horizontal segment lives within the array's horizontal
+#   footprint.  Use this for compact reference structures where the
+#   loop must not extend past the array.
 #
-# `inside=False` (default) creates an outer U-turn that travels away from the array.
-# `inside=True` creates an inner U-turn that folds back between adjacent ports — useful
-# for compact test structures where the loop must fit within the device footprint.
+# The fold needs room: aim for a GC pitch ≥ 4 × `bend_radius` for the
+# `inside` variant.  Below we use North-facing GCs spaced 150 µm apart
+# (≈ 8 × bend_radius) so both topologies render cleanly.
 
 # %%
+LB_SEP = kf.kcl.to_dbu(150)
+
+
+# Grating-coupler stand-in: a taper with a single WG port at the narrow
+# end.  The wide end (fibre side) extends north; the WG port faces south
+# so the loopback's U-turn naturally curls *south* of the array.  In a
+# real PDK this would be replaced by the actual GC component.
+@kf.cell
+def gc(width: int, length: int) -> kf.KCell:
+    c = kf.KCell()
+    wide = kf.kcl.to_dbu(10)
+    poly = kf.kdb.Polygon(
+        [
+            kf.kdb.Point(-width // 2, 0),
+            kf.kdb.Point(width // 2, 0),
+            kf.kdb.Point(wide // 2, length),
+            kf.kdb.Point(-wide // 2, length),
+        ]
+    )
+    c.shapes(c.kcl.layer(L.WG)).insert(poly)
+    c.create_port(
+        name="o1",
+        trans=kf.kdb.Trans(3, False, 0, 0),  # South-facing WG port
+        width=width,
+        layer_info=L.WG,
+    )
+    return c
+
+
+gc_cell = gc(width=WG_WIDTH, length=kf.kcl.to_dbu(20))
+
+# Pitch between adjacent GCs in the fibre array.  LB_SEP (defined above)
+# is the spacing between the OUTERMOST two GCs — the ones the loopback
+# connects.  The inner two GCs share the same pitch but are left free in
+# this demo (in a real chip they would connect to devices).
+N_GCS = 4
+GC_PITCH_UM = kf.kcl.to_um(LB_SEP) / (N_GCS - 1)
+
+
+# --- inside=False (outside loopback) ---
+c_lb_outside = kf.KCell("opt_loopback_outside")
+
+gcs_out = [c_lb_outside.create_inst(gc_cell) for _ in range(N_GCS)]
+for i, inst in enumerate(gcs_out):
+    inst.dmove((0, 0), (i * GC_PITCH_UM, 0))
+
+# Loop only the two outermost GCs.
+backbone_outside = kf.routing.optical.route_loopback(
+    gcs_out[0].ports["o1"],
+    gcs_out[-1].ports["o1"],
+    bend90_radius=bend_radius,
+    d_loop=bend_radius * 3,
+    inside=False,
+)
+
+kf.routing.optical.place_manhattan(
+    c_lb_outside,
+    gcs_out[0].ports["o1"],
+    gcs_out[-1].ports["o1"],
+    backbone_outside,
+    straight_factory=straight_factory,
+    bend90_cell=bend90,
+)
+c_lb_outside
+
+# %%
+# --- inside=True (inner loopback — fold between the two outermost GCs) ---
 c_lb_inside = kf.KCell("opt_loopback_inside")
 
-lb_p1 = kf.Port(
-    name="p1",
-    trans=kf.kdb.Trans(0, False, 0, 0),
-    width=WG_WIDTH,
-    layer_info=L.WG,
-)
-lb_p2 = kf.Port(
-    name="p2",
-    trans=kf.kdb.Trans(0, False, 0, kf.kcl.to_dbu(50)),
-    width=WG_WIDTH,
-    layer_info=L.WG,
-)
+gcs_in = [c_lb_inside.create_inst(gc_cell) for _ in range(N_GCS)]
+for i, inst in enumerate(gcs_in):
+    inst.dmove((0, 0), (i * GC_PITCH_UM, 0))
 
 backbone_inside = kf.routing.optical.route_loopback(
-    lb_p1,
-    lb_p2,
+    gcs_in[0].ports["o1"],
+    gcs_in[-1].ports["o1"],
     bend90_radius=bend_radius,
     d_loop=bend_radius * 2,
     inside=True,
@@ -283,8 +347,8 @@ backbone_inside = kf.routing.optical.route_loopback(
 
 kf.routing.optical.place_manhattan(
     c_lb_inside,
-    lb_p1,
-    lb_p2,
+    gcs_in[0].ports["o1"],
+    gcs_in[-1].ports["o1"],
     backbone_inside,
     straight_factory=straight_factory,
     bend90_cell=bend90,

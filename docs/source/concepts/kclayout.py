@@ -195,5 +195,4 @@ with tempfile.TemporaryDirectory() as tmp:
 # |-------|-------|
 # | Building a full PDK with a custom KCLayout | [PDK: Creating a PDK](../pdk/creating_pdk.py) |
 # | Session save/load to speed up rebuilds | [Utilities: Session Cache](../utilities/session_cache.py) |
-# | GDS/OASIS regression testing | [Utilities: Regression Testing](../utilities/difftest.py) |
 # | Layer definitions and LayerInfos | [Core Concepts: Layers](layers.py) |
