@@ -49,6 +49,55 @@ from traitlets.config import Config
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
+# Path to the layer-styles YAML and the generated .lyp.  The YAML follows
+# kfactory.technology.layer_map.LypModel; we convert it once at build time
+# and have every executed notebook load it via `as_png_data`'s
+# `layer_properties` parameter.
+DOC_STYLES_YAML = REPO_ROOT / "docs" / "source" / "_static" / "doc_styles.yaml"
+DOC_STYLES_LYP = REPO_ROOT / "docs" / "source-built" / "_static" / "doc_styles.lyp"
+
+
+def build_doc_styles_lyp() -> Path | None:
+    """Convert docs/source/_static/doc_styles.yaml → .lyp.
+
+    Returns the .lyp path on success, ``None`` if the YAML file is missing.
+    """
+    if not DOC_STYLES_YAML.exists():
+        return None
+    DOC_STYLES_LYP.parent.mkdir(parents=True, exist_ok=True)
+    from kfactory.technology.layer_map import yaml_to_lyp
+
+    yaml_to_lyp(DOC_STYLES_YAML, DOC_STYLES_LYP)
+    return DOC_STYLES_LYP
+
+
+# Setup cell injected at the top of every notebook.  Monkey-patches
+# `kfactory.utilities.as_png_data` (and the re-export in
+# `kfactory.widgets.interactive`) so it loads our generated .lyp by default.
+# The .lyp matches each shape by (layer, datatype) — see the layer
+# convention documented in `_static/doc_styles.yaml`.
+_DOC_STYLE_SETUP = """\
+def _kf_apply_doc_styles() -> None:
+    from pathlib import Path
+    import kfactory.utilities
+    import kfactory.widgets.interactive
+
+    _lyp = Path({lyp_path!r})
+    if not _lyp.is_file():
+        return
+    _original = kfactory.utilities.as_png_data
+
+    def _styled_as_png_data(c, layer_properties=None, **kwargs):
+        return _original(c, layer_properties=layer_properties or str(_lyp), **kwargs)
+
+    kfactory.utilities.as_png_data = _styled_as_png_data
+    kfactory.widgets.interactive.as_png_data = _styled_as_png_data
+
+
+_kf_apply_doc_styles()
+"""
+
+
 def file_hash(path: Path) -> str:
     h = hashlib.sha256()
     h.update(path.read_bytes())
@@ -74,6 +123,51 @@ def cache_save(cache_dir: Path, manifest: dict[str, str]) -> None:
 
 def cache_key(input_path: Path, *output_paths: Path) -> str:
     return f"{input_path}::{':'.join(str(p) for p in output_paths)}"
+
+
+def compute_source_fingerprint(repo_root: Path) -> dict[str, str | None]:
+    """Snapshot identifying the current `src/kfactory/` source-tree state.
+
+    Returns ``{"head_oid": ..., "src_hash": ...}``.  ``head_oid`` is the
+    SHA of the current git HEAD or ``None`` if pygit2 can't open the
+    working tree as a git repo (source tarball, CI checkout without
+    ``.git``, unborn HEAD, …).  ``src_hash`` is an order-independent
+    SHA256 over every ``.py`` file under ``src/kfactory/`` so working-tree
+    edits invalidate the notebook cache even on a clean HEAD.
+    """
+    head_oid: str | None = None
+    try:
+        import pygit2
+
+        repo = pygit2.Repository(str(repo_root))
+        head_oid = str(repo.head.target)
+    except Exception:
+        head_oid = None
+
+    src_root = repo_root / "src" / "kfactory"
+    src_h = hashlib.sha256()
+    if src_root.exists():
+        for path in sorted(src_root.rglob("*.py")):
+            src_h.update(str(path.relative_to(repo_root)).encode())
+            src_h.update(b"\0")
+            src_h.update(path.read_bytes())
+            src_h.update(b"\0")
+    return {"head_oid": head_oid, "src_hash": src_h.hexdigest()}
+
+
+def fingerprint_load(cache_dir: Path) -> dict[str, str | None]:
+    f = cache_dir / "fingerprint.json"
+    if not f.exists():
+        return {}
+    try:
+        return json.loads(f.read_text())
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def fingerprint_save(cache_dir: Path, fp: dict[str, str | None]) -> None:
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    (cache_dir / "fingerprint.json").write_text(json.dumps(fp, indent=2))
 
 
 _PY_LINK_RE = re.compile(r"(\]\((?!https?://)[^)]+?)\.py(#[^)]*)?\)")
@@ -198,6 +292,15 @@ def convert_notebook(
             "language": "python",
             "name": "python3",
         }
+
+    # Inject a hidden setup cell at the top that points
+    # `kfactory.utilities.as_png_data` at our generated .lyp so every
+    # rendered notebook PNG picks up the documentation layer styles.
+    setup_cell = nbformat.v4.new_code_cell(
+        _DOC_STYLE_SETUP.format(lyp_path=str(DOC_STYLES_LYP))
+    )
+    setup_cell.metadata["tags"] = ["hide-input", "hide-output", "hide"]
+    nb.cells.insert(0, setup_cell)
 
     if execute:
         ep = ExecutePreprocessor(timeout=timeout, kernel_name="python3")
@@ -470,6 +573,23 @@ def main(argv: list[str] | None = None) -> int:
     manifest = cache_load(cache_dir)
     new_manifest = dict(manifest)
 
+    # Invalidate the notebook cache if the source tree has moved since it
+    # was built — either a different git HEAD or any edit to
+    # `src/kfactory/**/*.py` in the working tree.  Without this, source
+    # edits don't trigger a notebook re-execution.
+    current_fp = compute_source_fingerprint(REPO_ROOT)
+    cached_fp = fingerprint_load(cache_dir)
+    if (
+        cached_fp.get("head_oid") != current_fp["head_oid"]
+        or cached_fp.get("src_hash") != current_fp["src_hash"]
+    ):
+        if cached_fp:
+            print(
+                "[cache] git HEAD or src/kfactory changed → invalidating notebook cache"
+            )
+        manifest = {}
+        new_manifest = {}
+
     # Stage 1: copy .md files
     md_count = 0
     for md in src_root.rglob("*.md"):
@@ -482,6 +602,12 @@ def main(argv: list[str] | None = None) -> int:
         if static_dir.is_dir():
             rel = static_dir.relative_to(src_root)
             copy_static(static_dir, out_root / rel)
+
+    # Stage 1c: generate the layer-styles .lyp from YAML.  Must run AFTER
+    # Stage 1b because copy_static wipes the destination _static/ tree.
+    lyp = build_doc_styles_lyp()
+    if lyp is not None:
+        print(f"[stage1c] doc layer styles → {lyp.relative_to(REPO_ROOT)}")
 
     # Stage 2: jupytext .py → .md + .ipynb
     notebooks = [p for p in src_root.rglob("*.py") if is_jupytext_notebook(p)]
@@ -556,6 +682,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  wrote {len(diag_files)} diagram(s)", flush=True)
 
     cache_save(cache_dir, new_manifest)
+    fingerprint_save(cache_dir, current_fp)
 
     if failures:
         print(f"\n{len(failures)} notebook(s) failed:", file=sys.stderr)

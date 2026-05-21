@@ -23,7 +23,7 @@
 # - Inspect the `Netlist` object (instances, nets, ports)
 # - Serialize a schematic to JSON/YAML and reload it with `kf.read_schematic`
 # - Compare netlists and sort them for stable equality checks
-# - Handle electrically-equivalent ports (pads, bumps) with `lvs_equivalent`
+# - Dump a netlist directly to JSON via `Netlist.to_json`
 #
 # For the schematic-first design workflow itself (placement, `connect`, LVS basics) see
 # the [Schematic-Driven Design](overview.py) page.
@@ -229,107 +229,114 @@ with tempfile.TemporaryDirectory() as tmpdir:
 # would materialise an identical physical cell.
 
 # %% [markdown]
-# ## LVS with electrically-equivalent ports
+# ## Netlist as JSON
 #
-# Some components — pads, bumps, redistribution-layer vias — have multiple ports that
-# are **electrically equivalent**: they all connect to the same metal plane.  A naive LVS
-# comparison would fail because the extracted netlist tracks every individual port, while
-# the schematic may only declare one logical connection.
+# `Netlist.to_json()` serialises a netlist directly to a JSON string.  This is
+# the canonical wire format for handing a netlist to external tools or storing
+# it in a regression-test fixture.
 #
-# `Netlist.lvs_equivalent` folds equivalent ports into a single canonical name so that
-# the two netlists can be compared meaningfully.
-
-# %% [markdown]
-# ### Defining a pad component with two equivalent ports
+# Below we build a small layout with the **smallest available crossing
+# primitive** — a `cross` cell — connected to a second crossing through a
+# straight waveguide.  We annotate each instance with a text label so that the
+# rendered layout matches the names that appear in the JSON output.
 
 
 # %%
 @pdk.cell
-def pad(port_width: int, size: int) -> kf.KCell:
-    """Square metal pad with two optical connections for demo purposes.
+def cross(width: int, length: int) -> kf.KCell:
+    """Minimal 4-port waveguide crossing.
 
-    In a real PDK this might be a bump or redistribution via where
-    port 'p1' and 'p2' land on the same metal island.
+    Two perpendicular rectangles meeting at the origin.  Real PDK crossings
+    use tapered arms and an enclosure (see the `crossing45.py` tutorial) but
+    this minimal version is sufficient for demonstrating the netlist format.
 
     Args:
-        port_width: Width of each connecting port in dbu (must match the waveguide).
-        size: Side length of the square pad body in dbu.
+        width: Waveguide width in dbu.
+        length: Arm length in dbu (also the cell footprint).
     """
     c = pdk.kcell()
-    c.shapes(L.WG).insert(kf.kdb.Box(0, 0, size, size))
-    # Two ports on opposite edges — electrically the same metal
+    c.shapes(L.WG).insert(
+        kf.kdb.Box(-length // 2, -width // 2, length // 2, width // 2)
+    )
+    c.shapes(L.WG).insert(
+        kf.kdb.Box(-width // 2, -length // 2, width // 2, length // 2)
+    )
     c.create_port(
-        name="p1",
-        width=port_width,
-        trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=size // 2),
+        name="o1",
+        width=width,
+        trans=kf.kdb.Trans(rot=0, mirrx=False, x=length // 2, y=0),
         layer_info=L.WG,
     )
     c.create_port(
-        name="p2",
-        width=port_width,
-        trans=kf.kdb.Trans(x=size, y=size // 2),
+        name="o2",
+        width=width,
+        trans=kf.kdb.Trans(rot=1, mirrx=False, x=0, y=length // 2),
+        layer_info=L.WG,
+    )
+    c.create_port(
+        name="o3",
+        width=width,
+        trans=kf.kdb.Trans(rot=2, mirrx=False, x=-length // 2, y=0),
+        layer_info=L.WG,
+    )
+    c.create_port(
+        name="o4",
+        width=width,
+        trans=kf.kdb.Trans(rot=3, mirrx=False, x=0, y=-length // 2),
         layer_info=L.WG,
     )
     return c
 
 
-# %% [markdown]
-# ### Building and extracting a netlist that contains the pad
+@pdk.cell
+def crossing_demo() -> kf.KCell:
+    """Two crossings connected by a straight, with instance-name labels."""
+    c = pdk.kcell()
 
+    x1 = c.create_inst(cross(width=500, length=10_000))
+    x1.name = "x1"
+
+    s_inst = c.create_inst(straight(width=500, length=15_000))
+    s_inst.name = "s1"
+    s_inst.connect("o1", x1.ports["o1"])
+
+    x2_inst = c.create_inst(cross(width=500, length=10_000))
+    x2_inst.name = "x2"
+    x2_inst.connect("o3", s_inst.ports["o2"])
+
+    # Annotate each instance with its name so the rendered layout matches the
+    # JSON output below.
+    for inst in c.insts:
+        center = inst.ibbox().center()
+        c.shapes(c.kcl.layer(L.WGEX)).insert(
+            kf.kdb.Text(inst.name, kf.kdb.Trans(center.x, center.y))
+        )
+
+    return c
+
+
+crossing_cell = crossing_demo()
+crossing_cell
+
+# %% [markdown]
+# Extract the netlist and dump it to JSON.  Calling `sort()` first keeps the
+# instance ordering stable so the JSON output is reproducible.
 
 # %%
-@pdk.schematic_cell
-def pad_circuit() -> kf.Schematic:
-    schematic = kf.Schematic(kcl=pdk)
+nl = crossing_cell.netlist()[crossing_cell.name]
+nl.sort()
 
-    s1 = schematic.create_inst("s1", "straight", {"width": 500, "length": 10_000})
-    pad_inst = schematic.create_inst("pad1", "pad", {"port_width": 500, "size": 5_000})
-
-    s1.place(x=0, y=0)
-    pad_inst.connect("p1", s1.ports["o2"])
-
-    return schematic
-
-
-pad_cell = pad_circuit()
-
-extracted = pad_cell.netlist()[pad_cell.name]
-extracted.sort()
-
-print("Extracted nets (before equivalence mapping):")
-for i, net in enumerate(extracted.nets):
-    parts = [
-        f"{p.instance}.{p.port}" if isinstance(p, PortRef) else p.name for p in net
-    ]
-    print(f"  net[{i}]: {parts}")
+print(nl.to_json())
 
 # %% [markdown]
-# Notice that `pad1.p1` and `pad1.p2` appear in separate nets even though they are the
-# same metal island.  `lvs_equivalent` merges them:
-
-# %%
-# equivalent_ports maps component-name → list-of-equivalent-port-groups
-# Each group is a list of port names that should be treated as one.
-equivalent_ports = {
-    "pad": [["p1", "p2"]],  # p1 and p2 on any "pad" cell are the same
-}
-
-equiv_netlist = extracted.lvs_equivalent(
-    cell_name=pad_cell.name,
-    equivalent_ports=equivalent_ports,
-)
-equiv_netlist.sort()
-
-print("Nets after equivalence mapping:")
-for i, net in enumerate(equiv_netlist.nets):
-    parts = [
-        f"{p.instance}.{p.port}" if isinstance(p, PortRef) else p.name for p in net
-    ]
-    print(f"  net[{i}]: {parts}")
-
-# %% [markdown]
-# After mapping, `pad1.p2` is folded into `pad1.p1` so the net now contains both the
-# straight waveguide endpoint *and* the canonical pad port in a single net.
+# The JSON contains three top-level keys:
+#
+# - `instances` — each instance's `component`, `kcl` (the owning KCLayout name),
+#   and `settings` (the constructor kwargs).
+# - `nets` — each net is a list of `{"instance": ..., "port": ...}` entries
+#   that are electrically tied together.
+# - `ports` — the top-level cell-exposed ports (empty here because
+#   `crossing_demo` doesn't expose any ports).
 
 # %% [markdown]
 # ## Building a Netlist programmatically
@@ -384,7 +391,7 @@ for i, net in enumerate(manual_nl.nets):
 # | Sort for stable comparison | `nl.sort()` |
 # | Export schematic to JSON | `schematic.model_dump_json()` |
 # | Load schematic from YAML/JSON file | `kf.read_schematic(path, unit="dbu")` |
-# | Fold equivalent ports for LVS | `nl.lvs_equivalent(cell_name, equivalent_ports)` |
+# | Dump a netlist to JSON | `nl.to_json()` |
 # | Build a netlist without a schematic | `Netlist(); nl.create_inst(...); nl.create_net(...)` |
 
 # %% [markdown]

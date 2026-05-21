@@ -209,18 +209,34 @@ c_left
 # %% [markdown]
 # ## 4 · `route_manhattan_180` — U-turn routing
 #
-# When two ports face the **same** direction with one behind the other, a normal
-# manhattan route needs a 180° U-turn.  `route_manhattan_180` calculates this
-# backbone efficiently by using a tighter `bend180_radius` (half the leg spacing).
+# When two co-directional ports sit close together with one **behind** the
+# other, the route must turn through 180°.  `route_manhattan_180` produces a
+# compact U-shaped backbone whose two parallel legs are spaced
+# `bend180_radius` apart.
+#
+# For a real 180° U-turn the second port must be:
+#
+# - **behind** the first port by at least `3 × BEND_RADIUS` in the port's
+#   backward direction (here: `-x`, since the ports face East), and
+# - laterally offset by `BEND_RADIUS < |y_offset| < 2 × BEND_RADIUS` —
+#   tight enough that the route cannot route past with a simple S-bend.
+#
+# Outside this window the function falls back to a regular Manhattan route
+# with no actual 180° turn.
 #
 # Parameters (all in **DBU**):
 #
 # - `bend90_radius` — footprint radius for 90° bends (use `get_radius`)
-# - `bend180_radius` — half the gap between the two parallel U-turn legs
+# - `bend180_radius` — distance between the two parallel U-turn legs
 # - `start_straight` / `end_straight` — minimum entry / exit straight lengths
 
 # %%
-# Two East-facing ports on the same horizontal axis — standard U-turn scenario
+# Two East-facing ports.  p_b sits behind p_a (negative x) by 3 × BEND_RADIUS
+# and is offset in y by 1.5 × BEND_RADIUS — within the (BEND_RADIUS,
+# 2 × BEND_RADIUS) window that forces a real 180° turn.
+y_sep = BEND_RADIUS + BEND_RADIUS // 2
+x_back = -3 * BEND_RADIUS
+
 p_a = kf.Port(
     name="a",
     trans=kf.kdb.Trans(0, False, 0, 0),  # East at origin
@@ -229,7 +245,7 @@ p_a = kf.Port(
 )
 p_b = kf.Port(
     name="b",
-    trans=kf.kdb.Trans(0, False, 0, kf.kcl.to_dbu(40)),  # East, 40 µm above
+    trans=kf.kdb.Trans(0, False, x_back, y_sep),  # East, behind and offset
     width=WG_WIDTH,
     layer_info=L.WG,
 )
@@ -238,9 +254,9 @@ backbone_180 = kf.routing.manhattan.route_manhattan_180(
     p_a,
     p_b,
     bend90_radius=BEND_RADIUS,
-    bend180_radius=kf.kcl.to_dbu(40),  # gap between legs
-    start_straight=kf.kcl.to_dbu(10),
-    end_straight=kf.kcl.to_dbu(10),
+    bend180_radius=y_sep,  # gap between the parallel U-turn legs
+    start_straight=kf.kcl.to_dbu(5),
+    end_straight=kf.kcl.to_dbu(5),
 )
 print("U-turn backbone (µm):", [(p.x / 1000, p.y / 1000) for p in backbone_180])
 

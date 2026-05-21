@@ -255,6 +255,5 @@ shutil.rmtree(tmpdir, ignore_errors=True)
 #
 # | Topic | Where |
 # |-------|-------|
-# | Layout regression testing | [Utilities: Difftest](difftest.py) |
 # | Creating a full PDK | [PDK: Creating a PDK](../pdk/creating_pdk.py) |
 # | KCLayout (owns the cell DB) | [Core Concepts: KCLayout](../concepts/kclayout.py) |

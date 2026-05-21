@@ -47,8 +47,8 @@ class LAYER(kf.LayerInfos):
     WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
     SLAB: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
     NPP: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4, 0)
-    METAL: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
-    METALEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 1)
+    METAL: kf.kdb.LayerInfo = kf.kdb.LayerInfo(20, 0)
+    METALEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(20, 1)
 
 
 L = LAYER()
