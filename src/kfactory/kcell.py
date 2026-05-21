@@ -3304,7 +3304,8 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         if self.locked:
             raise LockedError(self)
         for inst in self.insts:
-            inst.insert_into_flat(self, inst.trans)
+            inst.insert_into_flat(self)
+        self._base.vinsts = VInstances()
 
     def draw_ports(self) -> None:
         """Draw all the ports on their respective layer."""
