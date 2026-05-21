@@ -927,9 +927,13 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     "Levels are not supported if the inserted Instance is a KCell."
                 )
             if isinstance(cell, ProtoTKCell):
+                assert self.cell.kcl is cell.kcl, (
+                    "Inserting a KCell into a KCell across different KCLayouts"
+                    " is currently not supported"
+                )
                 for layer in self.cell.kcl.layer_indexes():
                     reg = kdb.Region(self.cell.kdb_cell.begin_shapes_rec(layer))
-                    reg.transform(kdb.ICplxTrans(trans_, cell.kcl.dbu))
+                    reg.transform(kdb.ICplxTrans(trans_, self.cell.kcl.dbu))
                     cell.shapes(layer).insert(reg)
             else:
                 for layer in self.cell.kcl.layer_indexes():
