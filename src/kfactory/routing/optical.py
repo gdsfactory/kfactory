@@ -1716,6 +1716,10 @@ def route_loopback(
     t1 = port1 if isinstance(port1, kdb.Trans) else port1.trans
     t2 = port2 if isinstance(port2, kdb.Trans) else port2.trans
 
+    (t1, port1_), (t2, _) = sorted(
+        [(t1, port1), (t2, port2)], key=lambda t: -(t1.inverted() * t[0]).disp.y
+    )
+
     if (t1.angle != t2.angle) and (
         (t1.disp.x == t2.disp.x) or (t1.disp.y == t2.disp.y)
     ):
@@ -1765,7 +1769,7 @@ def route_loopback(
         t1 *= kdb.Trans(2, False, start_straight + bend90_radius, 2 * bend90_radius)
         t2 *= kdb.Trans(2, False, end_straight + bend90_radius, -2 * bend90_radius)
 
-    return (
+    pts = (
         pts_start
         + route_manhattan(
             t1,
@@ -1775,6 +1779,10 @@ def route_loopback(
         )
         + pts_end
     )
+
+    if port1_ == port1:
+        return pts
+    return list(reversed(pts))
 
 
 def vec_angle(v: kdb.Vector) -> int:

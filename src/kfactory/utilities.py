@@ -51,6 +51,7 @@ def save_layout_options(**attributes: Any) -> kdb.SaveLayoutOptions:
     save.gds2_write_file_properties = config.write_file_properties
     save.gds2_write_timestamps = config.write_timestamps
     save.gds2_max_cellname_length = config.max_cellname_length
+    save.gds2_multi_xy_records = config.multi_xy_records
 
     for k, v in attributes.items():
         setattr(save, k, v)

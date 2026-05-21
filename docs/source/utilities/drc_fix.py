@@ -59,9 +59,10 @@ kf.kcl.infos = L
 #
 # ### Creating a layout with violations
 #
-# We place a grid of ellipses that are intentionally too close together.
-# In a real PDK the minimum space rule might be 200 nm (200 dbu at 1 nm/dbu).
-# Here we use 1 µm (1000 dbu) as the minimum spacing so the violation is obvious.
+# We place a grid of ellipses whose edge-to-edge gap is smaller than the
+# minimum space rule.  Each ellipse fits in an 8 µm × 12 µm box; adjacent
+# columns are placed 8.5 µm apart, leaving a 500 nm gap — half of the
+# 1 µm minimum space rule we apply below.
 
 # %%
 
@@ -69,13 +70,15 @@ MIN_SPACE_DBU = 1000  # 1 µm minimum space rule
 
 c = kf.KCell(name="drc_demo")
 
-# Place ellipses in a grid — adjacent columns are only 200 nm apart (violates 1 µm rule)
+# Place ellipses in a grid with a 500 nm gap between columns — violates the
+# 1 µm min-space rule.
 for row in range(4):
     for col in range(5):
         ellipse = kf.kdb.Polygon.ellipse(kf.kdb.Box(8000, 12000), 64)
-        # Offset each column by 9000 dbu — less than 8000 + 1000 spacing → violation
+        # Offset each column by 8500 dbu — gap of 500 dbu violates the
+        # 1000 dbu min-space rule.
         c.shapes(c.kcl.layer(L.WG)).insert(
-            ellipse.transformed(kf.kdb.Trans(col * 9000, row * 14000))
+            ellipse.transformed(kf.kdb.Trans(col * 8500, row * 14000))
         )
 
 c
@@ -194,4 +197,3 @@ c
 # | Boolean / region operations | [Core Concepts: Geometry](../concepts/geometry.py) |
 # | Tile-based fill | [Utilities: Fill](fill.py) |
 # | Cell-level enclosures | [Enclosures: KCell Enclosure](../enclosures/kcell_enclosure.py) |
-# | Layout regression testing | [Utilities: Difftest](difftest.py) |
