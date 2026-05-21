@@ -899,10 +899,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
 
         if trans is None:
             trans = kdb.DCplxTrans()
+        trans_ = trans * self.trans
 
         if isinstance(self.cell, VKCell):
             for layer, shapes in self.cell.shapes().items():
-                for shape in shapes.transform(trans * self.trans):
+                for shape in shapes.transform(trans_):
                     if isinstance(cell, ProtoTKCell) and isinstance(
                         shape, kdb.DPolygon | kdb.DSimplePolygon
                     ):
@@ -912,14 +913,12 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             for inst in self.cell.insts:
                 if levels is not None:
                     if levels > 0:
-                        inst.insert_into_flat(
-                            cell, trans=trans * self.trans, levels=levels - 1
-                        )
+                        inst.insert_into_flat(cell, trans=trans_, levels=levels - 1)
                     else:
                         assert isinstance(cell, ProtoTKCell)
-                        inst.insert_into(cell, trans=trans * self.trans)
+                        inst.insert_into(cell, trans=trans_)
                 else:
-                    inst.insert_into_flat(cell, trans=trans * self.trans)
+                    inst.insert_into_flat(cell, trans=trans_)
 
         else:
             assert isinstance(self.cell, ProtoTKCell)
@@ -929,7 +928,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 )
             for layer in self.cell.kcl.layer_indexes():
                 reg = kdb.Region(self.cell.kdb_cell.begin_shapes_rec(layer))
-                reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
+                reg.transform(kdb.ICplxTrans(trans_, cell.kcl.dbu))
                 cell.shapes(layer).insert(reg)
 
     @overload
