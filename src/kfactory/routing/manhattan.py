@@ -1283,43 +1283,62 @@ def route_smart(
                 )
             )
 
-    router_bboxes: list[kdb.Box] = [
-        kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p()).enlarged(
-            router.width // 2
+    # ── Retry loop for bundle-overlap correction ─────────────────────
+    # After running the bundling + routing logic, check whether any two
+    # bundles' actual routed paths overlap.  If they do, the initial
+    # bundling (which only inspects the straight-line bbox between start
+    # and end ports) missed that their routes share territory.  Force them
+    # to merge by extending the affected routers' bboxes with the overlap
+    # region, reset the routers, and retry.
+    _saved_router_state: list[
+        tuple[kdb.Trans, list[kdb.Point], kdb.Trans, list[kdb.Point], bool]
+    ] = [
+        (
+            r.start.t.dup(),
+            list(r.start.pts),
+            r.end.t.dup(),
+            list(r.end.pts),
+            r.finished,
         )
-        for router in all_routers
+        for r in all_routers
     ]
-    complete_bbox = router_bboxes[0].dup()
-    bundled_bboxes: list[kdb.Box] = []
-    bundled_routers: list[list[ManhattanRouter]] = [[all_routers[0]]]
-    bundle = bundled_routers[0]
-    bundle_bbox = complete_bbox.dup()
+    _router_extra_bbox: list[kdb.Box | None] = [None] * len(all_routers)
+    _max_overlap_retries = 5
+    for _retry_attempt in range(_max_overlap_retries):
+        if _retry_attempt > 0:
+            for _r, (_st, _spts, _et, _epts, _fin) in zip(
+                all_routers, _saved_router_state, strict=False
+            ):
+                _r.start.t = _st
+                _r.start.pts = list(_spts)
+                _r.end.t = _et
+                _r.end.pts = list(_epts)
+                _r.finished = _fin
+        router_bboxes: list[kdb.Box] = [
+            kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p()).enlarged(
+                router.width // 2
+            )
+            for router in all_routers
+        ]
+        # Inflate router_bboxes with any forced-merge bboxes accumulated
+        # from a previous retry due to detected bundle-path overlaps.
+        for _i in range(len(router_bboxes)):
+            _extra = _router_extra_bbox[_i]
+            if _extra is not None:
+                router_bboxes[_i] = router_bboxes[_i] + _extra
+        complete_bbox = router_bboxes[0].dup()
+        bundled_bboxes: list[kdb.Box] = []
+        bundled_routers: list[list[ManhattanRouter]] = [[all_routers[0]]]
+        bundle = bundled_routers[0]
+        bundle_bbox = complete_bbox.dup()
 
-    for router, bbox in zip(all_routers[1:], router_bboxes[1:], strict=False):
-        dbrbox = bbox.enlarged(separation + router.width // 2)
-        overlap_box = dbrbox & bundle_bbox
+        for router, bbox in zip(all_routers[1:], router_bboxes[1:], strict=False):
+            dbrbox = bbox.enlarged(separation + router.width // 2)
+            overlap_box = dbrbox & bundle_bbox
 
-        if overlap_box.empty():
-            overlap_complete = dbrbox & complete_bbox
-            if overlap_complete.empty():
-                bundled_bboxes.append(bundle_bbox)
-                bundle_bbox = bbox.dup()
-                bundle_region = kdb.Region(bundle_bbox)
-                if not (bundle_region & box_region).is_empty():
-                    bundle_bbox += box_region.interacting(bundle_region).bbox()
-                bundle = [router]
-                bundled_routers.append(bundle)
-            else:
-                for i in range(len(bundled_bboxes)):
-                    bundled_bbox = bundled_bboxes[i]
-                    if not (dbrbox & bundled_bbox).empty():
-                        bb = bundled_bboxes[i]
-                        bundled_routers[i].append(router)
-                        bundled_bboxes[i] = bb + bbox
-                        bundle_bbox = bundled_bboxes[i]
-                        bundle = bundled_routers[i]
-                        break
-                else:
+            if overlap_box.empty():
+                overlap_complete = dbrbox & complete_bbox
+                if overlap_complete.empty():
                     bundled_bboxes.append(bundle_bbox)
                     bundle_bbox = bbox.dup()
                     bundle_region = kdb.Region(bundle_bbox)
@@ -1327,216 +1346,261 @@ def route_smart(
                         bundle_bbox += box_region.interacting(bundle_region).bbox()
                     bundle = [router]
                     bundled_routers.append(bundle)
-                    continue
-        else:
-            bundle.append(router)
-            bundle_bbox += bbox
-        complete_bbox += bbox
-    bundled_bboxes.append(bundle_bbox)
+                else:
+                    for i in range(len(bundled_bboxes)):
+                        bundled_bbox = bundled_bboxes[i]
+                        if not (dbrbox & bundled_bbox).empty():
+                            bb = bundled_bboxes[i]
+                            bundled_routers[i].append(router)
+                            bundled_bboxes[i] = bb + bbox
+                            bundle_bbox = bundled_bboxes[i]
+                            bundle = bundled_routers[i]
+                            break
+                    else:
+                        bundled_bboxes.append(bundle_bbox)
+                        bundle_bbox = bbox.dup()
+                        bundle_region = kdb.Region(bundle_bbox)
+                        if not (bundle_region & box_region).is_empty():
+                            bundle_bbox += box_region.interacting(bundle_region).bbox()
+                        bundle = [router]
+                        bundled_routers.append(bundle)
+                        continue
+            else:
+                bundle.append(router)
+                bundle_bbox += bbox
+            complete_bbox += bbox
+        bundled_bboxes.append(bundle_bbox)
 
-    merge_bboxes: list[tuple[int, int]] = []
-    for i in range(len(bundled_bboxes)):
-        for j in range(i):
-            if not (bundled_bboxes[j] & bundled_bboxes[i]).empty():
-                merge_bboxes.append((i, j))
-                break
-    for i, j in reversed(merge_bboxes):
-        bundled_bboxes[j] = bundled_bboxes[i] + bundled_bboxes[j]
-        bundled_routers[j] = bundled_routers[i] + bundled_routers[j]
-    for i, _ in reversed(merge_bboxes):
-        del bundled_bboxes[i]
-        del bundled_routers[i]
-    for router_bundle in bundled_routers:
-        sorted_routers = _sort_routers(router_bundle)
+        merge_bboxes: list[tuple[int, int]] = []
+        for i in range(len(bundled_bboxes)):
+            for j in range(i):
+                if not (bundled_bboxes[j] & bundled_bboxes[i]).empty():
+                    merge_bboxes.append((i, j))
+                    break
+        for i, j in reversed(merge_bboxes):
+            bundled_bboxes[j] = bundled_bboxes[i] + bundled_bboxes[j]
+            bundled_routers[j] = bundled_routers[i] + bundled_routers[j]
+        for i, _ in reversed(merge_bboxes):
+            del bundled_bboxes[i]
+            del bundled_routers[i]
+        for router_bundle in bundled_routers:
+            sorted_routers = _sort_routers(router_bundle)
 
-        # simple (maybe error-prone) way to determine the ideal routing angle
-        # this would need to be expanded in order to allow for automatic single
-        # waypoint router (without transformation or similar)
-        angle = router_bundle[0].end.t.angle
+            # simple (maybe error-prone) way to determine the ideal routing angle
+            # this would need to be expanded in order to allow for automatic single
+            # waypoint router (without transformation or similar)
+            angle = router_bundle[0].end.t.angle
 
-        r = router_bundle[0]
-        end_angle = r.end.t.angle
-        re = router_bundle[-1]
-        start_bbox = kdb.Box(r.start.pts[0], re.start.t * _p)
-        end_bbox = kdb.Box(r.end.pts[0], re.end.t * _p)
-        start_bbox += re.start.t * kdb.Point(-1, 0)
-        end_bbox += re.end.t * kdb.Point(-1, 0)
+            r = router_bundle[0]
+            end_angle = r.end.t.angle
+            re = router_bundle[-1]
+            start_bbox = kdb.Box(r.start.pts[0], re.start.t * _p)
+            end_bbox = kdb.Box(r.end.pts[0], re.end.t * _p)
+            start_bbox += re.start.t * kdb.Point(-1, 0)
+            end_bbox += re.end.t * kdb.Point(-1, 0)
 
-        _route_p(
-            sorted_routers=sorted_routers,
-            start_bbox=start_bbox,
-            separation=separation,
-        )
+            _route_p(
+                sorted_routers=sorted_routers,
+                start_bbox=start_bbox,
+                separation=separation,
+            )
 
-        for r in router_bundle:
-            start_bbox += kdb.Box(r.start.pts[0], r.start.t.disp.to_p()) + kdb.Box(
-                0, -r.width // 2, 0, r.width // 2
-            ).transformed(r.start.t)
-            end_bbox += kdb.Box(r.end.pts[0], r.end.t.disp.to_p()) + kdb.Box(
-                0, -r.width // 2, 0, r.width // 2
-            ).transformed(r.end.t)
-            if r.end.t.angle != end_angle:
-                raise ValueError(
-                    "All ports at the target (end) must have the same angle. "
-                    f"{r.start.t=}/{r.end.t=}"
+            for r in router_bundle:
+                start_bbox += kdb.Box(r.start.pts[0], r.start.t.disp.to_p()) + kdb.Box(
+                    0, -r.width // 2, 0, r.width // 2
+                ).transformed(r.start.t)
+                end_bbox += kdb.Box(r.end.pts[0], r.end.t.disp.to_p()) + kdb.Box(
+                    0, -r.width // 2, 0, r.width // 2
+                ).transformed(r.end.t)
+                if r.end.t.angle != end_angle:
+                    raise ValueError(
+                        "All ports at the target (end) must have the same angle. "
+                        f"{r.start.t=}/{r.end.t=}"
+                    )
+            if bbox_routing == "minimal":
+                route_to_bbox(
+                    (router.start for router in sorted_routers),
+                    start_bbox,
+                    bbox_routing="full",
+                    separation=separation,
                 )
-        if bbox_routing == "minimal":
+                route_to_bbox(
+                    (router.end for router in sorted_routers),
+                    end_bbox,
+                    bbox_routing="full",
+                    separation=separation,
+                )
+
+            if box_region:
+                start_bbox = (
+                    box_region.interacting(kdb.Region(start_bbox)).bbox() + start_bbox
+                )
+                end_bbox = (
+                    box_region.interacting(kdb.Region(end_bbox)).bbox() + end_bbox
+                )
             route_to_bbox(
                 (router.start for router in sorted_routers),
                 start_bbox,
-                bbox_routing="full",
+                bbox_routing=bbox_routing,
                 separation=separation,
             )
             route_to_bbox(
                 (router.end for router in sorted_routers),
                 end_bbox,
-                bbox_routing="full",
-                separation=separation,
-            )
-
-        if box_region:
-            start_bbox = (
-                box_region.interacting(kdb.Region(start_bbox)).bbox() + start_bbox
-            )
-            end_bbox = box_region.interacting(kdb.Region(end_bbox)).bbox() + end_bbox
-        route_to_bbox(
-            (router.start for router in sorted_routers),
-            start_bbox,
-            bbox_routing=bbox_routing,
-            separation=separation,
-        )
-        route_to_bbox(
-            (router.end for router in sorted_routers),
-            end_bbox,
-            bbox_routing=bbox_routing,
-            separation=separation,
-        )
-        bb_start2end = kdb.Trans(-angle, False, 0, 0) * start_bbox
-        bb_end2start = kdb.Trans(-angle, False, 0, 0) * end_bbox
-
-        if bb_start2end.left - bb_end2start.right > bend90_radius + sum(widths):
-            target_angle = (angle - 2) % 4
-        else:
-            target_angle = angle
-            avg = kdb.Vector()
-            end_routers = [r.end for r in sorted_routers]
-            for rs in end_routers:
-                avg += rs.tv
-            route_to_bbox(
-                end_routers, end_bbox, separation=separation, bbox_routing=bbox_routing
-            )
-            _route_to_side(
-                end_routers,
-                clockwise=avg.y > 0,
-                bbox=end_bbox,
-                separation=separation,
                 bbox_routing=bbox_routing,
-            )
-            _route_to_side(
-                end_routers,
-                clockwise=avg.y > 0,
-                bbox=end_bbox,
                 separation=separation,
-                bbox_routing=bbox_routing,
             )
-        router_groups: list[tuple[int, list[ManhattanRouter]]] = []
-        group_angle: int | None = None
-        current_group: list[ManhattanRouter] = []
-        for router in sorted_routers:
-            ang = router.start.t.angle
-            if ang != group_angle:
-                if group_angle is not None:
-                    router_groups.append(
-                        ((group_angle - target_angle) % 4, current_group)
-                    )
-                group_angle = ang
-                current_group = []
-            current_group.append(router)
-        if group_angle is not None:
-            router_groups.append(((group_angle - target_angle) % 4, current_group))
+            bb_start2end = kdb.Trans(-angle, False, 0, 0) * start_bbox
+            bb_end2start = kdb.Trans(-angle, False, 0, 0) * end_bbox
 
-        total_bbox = start_bbox
-
-        if len(router_groups) > 1:
-            i = 0
-            rg_angles = [rg[0] for rg in router_groups]
-            traverses0 = False
-            a = rg_angles[0]
-
-            for _a in rg_angles[1:]:
-                if _a == 0:
-                    continue
-                if _a <= a:
-                    traverses0 = True
-                a = _a
-            angle = rg_angles[0]
-
-            # Find out whether we are passing the angle where no side routing is
-            # necessary and if we do, we need to start routing clockwise until we
-            # pass 0. Otherwise test on which side of the bounding box we land
-
-            # Routing clock-wise (the order of the routers, the actual routings are
-            # anti-clockwise and vice-versa)
-
-            if traverses0 or rg_angles[-1] in {0, 3}:
-                routers_clockwise: list[ManhattanRouter] = router_groups[0][1].copy()
-                for i in range(1, len(router_groups)):
-                    new_angle, new_routers = router_groups[i]
-                    a = angle
-                    if routers_clockwise:
-                        if traverses0:
-                            while a not in {new_angle, 0}:
-                                a = (a + 1) % 4
-                                total_bbox += _route_to_side(
-                                    routers=[
-                                        router.start for router in routers_clockwise
-                                    ],
-                                    clockwise=True,
-                                    bbox=start_bbox,
-                                    separation=separation,
-                                    allow_sbends=a == 0 and allow_sbend,
-                                )
-                        else:
-                            while a != new_angle:
-                                a = (a + 1) % 4
-                                total_bbox += _route_to_side(
-                                    routers=[
-                                        router.start for router in routers_clockwise
-                                    ],
-                                    clockwise=True,
-                                    bbox=start_bbox,
-                                    separation=separation,
-                                    allow_sbends=a == 0 and allow_sbend,
-                                )
-                    if new_angle <= angle:
-                        if new_angle != 0:
-                            i -= 1  # noqa: PLW2901
-                        break
-                    routers_clockwise.extend(new_routers)
-                    angle = new_angle
-                else:
-                    a = angle
-                    while a != 0:
-                        a = (a + 1) % 4
-                        total_bbox += _route_to_side(
-                            routers=[router.start for router in routers_clockwise],
-                            clockwise=True,
-                            bbox=start_bbox,
-                            separation=separation,
+            if bb_start2end.left - bb_end2start.right > bend90_radius + sum(widths):
+                target_angle = (angle - 2) % 4
+            else:
+                target_angle = angle
+                avg = kdb.Vector()
+                end_routers = [r.end for r in sorted_routers]
+                for rs in end_routers:
+                    avg += rs.tv
+                route_to_bbox(
+                    end_routers,
+                    end_bbox,
+                    separation=separation,
+                    bbox_routing=bbox_routing,
+                )
+                _route_to_side(
+                    end_routers,
+                    clockwise=avg.y > 0,
+                    bbox=end_bbox,
+                    separation=separation,
+                    bbox_routing=bbox_routing,
+                )
+                _route_to_side(
+                    end_routers,
+                    clockwise=avg.y > 0,
+                    bbox=end_bbox,
+                    separation=separation,
+                    bbox_routing=bbox_routing,
+                )
+            router_groups: list[tuple[int, list[ManhattanRouter]]] = []
+            group_angle: int | None = None
+            current_group: list[ManhattanRouter] = []
+            for router in sorted_routers:
+                ang = router.start.t.angle
+                if ang != group_angle:
+                    if group_angle is not None:
+                        router_groups.append(
+                            ((group_angle - target_angle) % 4, current_group)
                         )
+                    group_angle = ang
+                    current_group = []
+                current_group.append(router)
+            if group_angle is not None:
+                router_groups.append(((group_angle - target_angle) % 4, current_group))
 
-            # Route the rest of the groups anti-clockwise
-            if i < len(router_groups) - 1:
-                angle = rg_angles[-1]
-                routers_anticlockwise: list[ManhattanRouter] = router_groups[-1][
-                    1
-                ].copy()
-                n = i
-                for i in reversed(range(n, len(router_groups) - 1)):
-                    new_angle, new_routers = router_groups[i]
-                    a = angle
-                    if routers_anticlockwise:
-                        while a not in {new_angle, 0}:
+            total_bbox = start_bbox
+
+            if len(router_groups) > 1:
+                i = 0
+                rg_angles = [rg[0] for rg in router_groups]
+                traverses0 = False
+                a = rg_angles[0]
+
+                for _a in rg_angles[1:]:
+                    if _a == 0:
+                        continue
+                    if _a <= a:
+                        traverses0 = True
+                    a = _a
+                angle = rg_angles[0]
+
+                # Find out whether we are passing the angle where no side routing is
+                # necessary and if we do, we need to start routing clockwise until we
+                # pass 0. Otherwise test on which side of the bounding box we land
+
+                # Routing clock-wise (the order of the routers, the actual routings are
+                # anti-clockwise and vice-versa)
+
+                if traverses0 or rg_angles[-1] in {0, 3}:
+                    routers_clockwise: list[ManhattanRouter] = router_groups[0][
+                        1
+                    ].copy()
+                    for i in range(1, len(router_groups)):
+                        new_angle, new_routers = router_groups[i]
+                        a = angle
+                        if routers_clockwise:
+                            if traverses0:
+                                while a not in {new_angle, 0}:
+                                    a = (a + 1) % 4
+                                    total_bbox += _route_to_side(
+                                        routers=[
+                                            router.start for router in routers_clockwise
+                                        ],
+                                        clockwise=True,
+                                        bbox=start_bbox,
+                                        separation=separation,
+                                        allow_sbends=a == 0 and allow_sbend,
+                                    )
+                            else:
+                                while a != new_angle:
+                                    a = (a + 1) % 4
+                                    total_bbox += _route_to_side(
+                                        routers=[
+                                            router.start for router in routers_clockwise
+                                        ],
+                                        clockwise=True,
+                                        bbox=start_bbox,
+                                        separation=separation,
+                                        allow_sbends=a == 0 and allow_sbend,
+                                    )
+                        if new_angle <= angle:
+                            if new_angle != 0:
+                                i -= 1  # noqa: PLW2901
+                            break
+                        routers_clockwise.extend(new_routers)
+                        angle = new_angle
+                    else:
+                        a = angle
+                        while a != 0:
+                            a = (a + 1) % 4
+                            total_bbox += _route_to_side(
+                                routers=[router.start for router in routers_clockwise],
+                                clockwise=True,
+                                bbox=start_bbox,
+                                separation=separation,
+                            )
+
+                # Route the rest of the groups anti-clockwise
+                if i < len(router_groups) - 1:
+                    angle = rg_angles[-1]
+                    routers_anticlockwise: list[ManhattanRouter] = router_groups[-1][
+                        1
+                    ].copy()
+                    n = i
+                    for i in reversed(range(n, len(router_groups) - 1)):
+                        new_angle, new_routers = router_groups[i]
+                        a = angle
+                        if routers_anticlockwise:
+                            while a not in {new_angle, 0}:
+                                a = (a - 1) % 4
+                                total_bbox += _route_to_side(
+                                    routers=[
+                                        router.start for router in routers_anticlockwise
+                                    ],
+                                    clockwise=False,
+                                    bbox=start_bbox,
+                                    separation=separation,
+                                    allow_sbends=a == 0 and allow_sbend,
+                                )
+                        if new_angle == 0:
+                            routers_anticlockwise.extend(new_routers)
+                            break
+                        if new_angle >= angle:
+                            break
+                        routers_anticlockwise.extend(new_routers)
+                        angle = new_angle
+                    else:
+                        a = angle
+                        while a != 0:
                             a = (a - 1) % 4
                             total_bbox += _route_to_side(
                                 routers=[
@@ -1547,72 +1611,84 @@ def route_smart(
                                 separation=separation,
                                 allow_sbends=a == 0 and allow_sbend,
                             )
-                    if new_angle == 0:
-                        routers_anticlockwise.extend(new_routers)
-                        break
-                    if new_angle >= angle:
-                        break
-                    routers_anticlockwise.extend(new_routers)
-                    angle = new_angle
-                else:
-                    a = angle
-                    while a != 0:
-                        a = (a - 1) % 4
-                        total_bbox += _route_to_side(
-                            routers=[router.start for router in routers_anticlockwise],
-                            clockwise=False,
-                            bbox=start_bbox,
+                route_to_bbox(
+                    [router.start for router in sorted_routers],
+                    total_bbox,
+                    bbox_routing=bbox_routing,
+                    separation=separation,
+                )
+                route_loosely(
+                    sorted_routers,
+                    separation=separation,
+                    start_bbox=total_bbox,
+                    end_bbox=end_bbox,
+                    bbox_routing=bbox_routing,
+                    allow_sbend=allow_sbend,
+                )
+            else:
+                routers = router_groups[0][1]
+                r = routers[0]
+                match (target_angle - r.start.t.angle) % 4:
+                    case 2:
+                        total_bbox = _route_to_side(
+                            [r.start for r in routers],
+                            clockwise=routers[0].start.tv.y > 0,
+                            bbox=total_bbox,
                             separation=separation,
-                            allow_sbends=a == 0 and allow_sbend,
                         )
-            route_to_bbox(
-                [router.start for router in sorted_routers],
-                total_bbox,
-                bbox_routing=bbox_routing,
-                separation=separation,
-            )
-            route_loosely(
-                sorted_routers,
-                separation=separation,
-                start_bbox=total_bbox,
-                end_bbox=end_bbox,
-                bbox_routing=bbox_routing,
-                allow_sbend=allow_sbend,
-            )
-        else:
-            routers = router_groups[0][1]
-            r = routers[0]
-            match (target_angle - r.start.t.angle) % 4:
-                case 2:
-                    total_bbox = _route_to_side(
-                        [r.start for r in routers],
-                        clockwise=routers[0].start.tv.y > 0,
-                        bbox=total_bbox,
-                        separation=separation,
-                    )
-                    total_bbox = _route_to_side(
-                        [r.start for r in routers],
-                        clockwise=routers[0].start.tv.y > 0,
-                        bbox=total_bbox,
-                        separation=separation,
-                        allow_sbends=allow_sbend,
-                    )
-                case _:
-                    ...
-            route_to_bbox(
-                [router.start for router in router_bundle],
-                total_bbox,
-                bbox_routing=bbox_routing,
-                separation=separation,
-            )
-            route_loosely(
-                routers,
-                separation=separation,
-                start_bbox=total_bbox,
-                end_bbox=end_bbox,
-                bbox_routing=bbox_routing,
-                allow_sbend=allow_sbend,
-            )
+                        total_bbox = _route_to_side(
+                            [r.start for r in routers],
+                            clockwise=routers[0].start.tv.y > 0,
+                            bbox=total_bbox,
+                            separation=separation,
+                            allow_sbends=allow_sbend,
+                        )
+                    case _:
+                        ...
+                route_to_bbox(
+                    [router.start for router in router_bundle],
+                    total_bbox,
+                    bbox_routing=bbox_routing,
+                    separation=separation,
+                )
+                route_loosely(
+                    routers,
+                    separation=separation,
+                    start_bbox=total_bbox,
+                    end_bbox=end_bbox,
+                    bbox_routing=bbox_routing,
+                    allow_sbend=allow_sbend,
+                )
+
+        # Check whether any two bundles' routed paths overlap.  If so,
+        # extend the affected routers' router_bbox via _router_extra_bbox
+        # so the next attempt will bundle them together.
+        _bundle_regions: list[kdb.Region] = []
+        for _bundle in bundled_routers:
+            _region = kdb.Region()
+            for _router in _bundle:
+                _pts = list(_router.start.pts) + list(reversed(_router.end.pts))
+                if len(_pts) >= 2:
+                    _path = kdb.Path(_pts, _router.width)
+                    _region.insert(_path.polygon())
+            _bundle_regions.append(_region)
+        _found_overlap = False
+        for _bi in range(len(_bundle_regions)):
+            for _bj in range(_bi + 1, len(_bundle_regions)):
+                _inter = _bundle_regions[_bi] & _bundle_regions[_bj]
+                if not _inter.is_empty():
+                    _overlap_bbox = _inter.bbox()
+                    for _router in bundled_routers[_bi] + bundled_routers[_bj]:
+                        _idx = all_routers.index(_router)
+                        _existing = _router_extra_bbox[_idx]
+                        if _existing is None:
+                            _router_extra_bbox[_idx] = _overlap_bbox.dup()
+                        else:
+                            _router_extra_bbox[_idx] = _existing + _overlap_bbox
+                    _found_overlap = True
+        if not _found_overlap:
+            break
+
     if route_debug is not None:
         for router in all_routers:
             p_end_t = router.end.t.disp.to_p()

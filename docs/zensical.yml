@@ -54,7 +54,6 @@ nav:
       - Grid Layout: utilities/grid.md
       - DRC Fixing: utilities/drc_fix.md
       - Packing: utilities/packing.md
-      - Regression Testing: utilities/difftest.md
       - Fill: utilities/fill.md
       - Session Cache: utilities/session_cache.md
   - Guides:
@@ -62,7 +61,7 @@ nav:
       - Common Patterns: howto/patterns.md
       - FAQ: howto/faq.md
       - Contributing: howto/contributing.md
-      - vs gdsfactory: gdsfactory.md
+      - Coming from gdsfactory: gdsfactory.md
   - Reference:
       # The "API" sub-tree is auto-generated and spliced in at build time
       # by docs/scripts/build_docs_source.py — DO NOT enumerate modules

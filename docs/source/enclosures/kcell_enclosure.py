@@ -78,15 +78,21 @@ kcell_enc = kf.KCellEnclosure([clad_enc])
 
 @kf.cell
 def bend_pair_clad(radius: float, width: float) -> kf.KCell:
-    """Two euler bends with unified cell-level cladding."""
+    """Two euler bends placed close together with unified cell-level cladding."""
     c = kf.KCell()
     bend_fn = kf.factories.euler.bend_euler_factory(kcl=kf.kcl)
 
     b1 = c << bend_fn(width=width, radius=radius, layer=L.WG, angle=90)
     b2 = c << bend_fn(width=width, radius=radius, layer=L.WG, angle=90)
 
-    # Join b2 to b1 so the waveguides share a port
-    b2.connect("o1", b1.ports["o2"])
+    # Mirror b2 so it curves the opposite direction, then offset it by
+    # 1.5 µm in y.  The two WG cores stay well-separated (1.5 µm apart at
+    # the closest point) but the 2 µm cladding rings overlap by ~2.5 µm —
+    # exactly the case `KCellEnclosure` is meant to handle: merging
+    # interacting claddings into a single continuous region without one
+    # cancelling the other.
+    b2.dmirror_y()
+    b2.dmove((0, 0), (0, -1.5))
 
     c.add_ports(b1.ports.filter(port_type="optical"))
     c.add_ports(b2.ports.filter(port_type="optical"))
@@ -100,8 +106,11 @@ def bend_pair_clad(radius: float, width: float) -> kf.KCell:
 bend_pair_clad(radius=10, width=0.5).plot()
 
 # %% [markdown]
-# The WGCLAD forms a single, continuous band around both bends — there is no gap at the
-# port where they connect.
+# Both bends' cladding rings would normally be drawn separately by
+# `LayerEnclosure` (one per component) and would overlap visibly as two
+# distinct annular bands.  `KCellEnclosure` merges the cell geometry first,
+# so the two interacting claddings come out as a single continuous region
+# with no spurious gaps where they meet.
 
 # %% [markdown]
 # ## 2 · Multiple enclosures in one `KCellEnclosure`
@@ -136,7 +145,9 @@ def bend_pair_multi(radius: float, width: float) -> kf.KCell:
 
     b1 = c << bend_fn(width=width, radius=radius, layer=L.WG, angle=90)
     b2 = c << bend_fn(width=width, radius=radius, layer=L.WG, angle=90)
-    b2.connect("o1", b1.ports["o2"])
+    # Same close-but-unconnected placement as in section 1.
+    b2.dmirror_y()
+    b2.dmove((0, 0), (0, -1.5))
 
     c.add_ports(b1.ports.filter(port_type="optical"))
     c.add_ports(b2.ports.filter(port_type="optical"))
@@ -320,7 +331,9 @@ def bend_pair_diamond(radius: float, width: float) -> kf.KCell:
 
     b1 = c << bend_fn(width=width, radius=radius, layer=L.WG, angle=90)
     b2 = c << bend_fn(width=width, radius=radius, layer=L.WG, angle=90)
-    b2.connect("o1", b1.ports["o2"])
+    # Same close-but-unconnected placement as in section 1.
+    b2.dmirror_y()
+    b2.dmove((0, 0), (0, -1.5))
 
     c.add_ports(b1.ports.filter(port_type="optical"))
     c.add_ports(b2.ports.filter(port_type="optical"))

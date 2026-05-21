@@ -118,7 +118,6 @@ routes_baseline = kf.routing.optical.route_bundle(
     separation=kf.kcl.to_dbu(10),
     straight_factory=straight_factory,
     bend90_cell=bend90,
-    on_collision=None,
 )
 
 print("Unmatched lengths (µm):", [round(r.length / 1000, 1) for r in routes_baseline])
@@ -164,7 +163,6 @@ routes_plm = kf.routing.optical.route_bundle(
     separation=kf.kcl.to_dbu(10),
     straight_factory=straight_factory,
     bend90_cell=bend90,
-    on_collision=None,
     constraints=[
         kf.PathLengthMatch(
             route_names=["plm_basic"],
@@ -232,7 +230,6 @@ kf.routing.optical.route_bundle(
     separation=kf.kcl.to_dbu(10),
     straight_factory=straight_factory,
     bend90_cell=bend90,
-    on_collision=None,
     constraints=[
         kf.PathLengthMatch(
             route_names=["plm_right"],
@@ -278,7 +275,6 @@ kf.routing.optical.route_bundle(
     separation=kf.kcl.to_dbu(10),
     straight_factory=straight_factory,
     bend90_cell=bend90,
-    on_collision=None,
     constraints=[
         kf.PathLengthMatch(
             route_names=["plm_center"],
@@ -330,7 +326,6 @@ kf.routing.optical.route_bundle(
     separation=kf.kcl.to_dbu(10),
     straight_factory=straight_factory,
     bend90_cell=bend90,
-    on_collision=None,
     constraints=[
         kf.PathLengthMatch(
             route_names=["plm_pos_end"],
@@ -381,7 +376,6 @@ routes_l2 = kf.routing.optical.route_bundle(
     separation=kf.kcl.to_dbu(10),
     straight_factory=straight_factory,
     bend90_cell=bend90,
-    on_collision=None,
     constraints=[
         kf.PathLengthMatch(
             route_names=["plm_loops_2"],
@@ -440,7 +434,6 @@ routes_ins = kf.routing.optical.route_bundle(
     separation=kf.kcl.to_dbu(10),
     straight_factory=straight_factory,
     bend90_cell=bend90,
-    on_collision=None,
     constraints=[
         kf.PathLengthMatch(
             route_names=["plm_inspect"],
@@ -501,8 +494,6 @@ for i, r in enumerate(routes_ins):
 #   overlap adjacent waveguides.
 # - For large length differences use `loops=2` or `loops=3` to keep loop heights compact.
 # - Use `route.length` after routing to verify that all routes are matched.
-# - Pass `on_collision=None` in scripts and doc builds to suppress the KLayout error
-#   dialog when collision geometry is not critical.
 
 # %% [markdown]
 # ## See Also

@@ -283,4 +283,3 @@ with tempfile.TemporaryDirectory() as tmp:
 # | DRC spacing fixes (Region-based) | [Utilities: DRC Fixing](../utilities/drc_fix.py) |
 # | Auto-cladding via Minkowski sum | [Enclosures: Layer Enclosure](../enclosures/layer_enclosure.py) |
 # | Fill tiling with Region exclusions | [Utilities: Fill](../utilities/fill.py) |
-# | Regression testing with XOR | [Utilities: Regression Testing](../utilities/difftest.py) |
