@@ -761,12 +761,12 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
 
     name: str | None = None
     instances: dict[str, SchematicInstance[TUnit]] = Field(default_factory=dict)
-    placements: dict[str, MirrorPlacement | Placement[TUnit]] = Field(
+    placements: dict[str, Placement[TUnit] | MirrorPlacement] = Field(
         default_factory=dict
     )
     connections: list[Connection[TUnit]] = Field(default_factory=list)
     routes: dict[str, Route[TUnit]] = Field(default_factory=dict)
-    ports: dict[str, Port[TUnit] | PortRef | PortArrayRef] = Field(default_factory=dict)
+    ports: dict[str, Port[TUnit] | PortArrayRef | PortRef] = Field(default_factory=dict)
     kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
     unit: Literal["dbu", "um"]
     info: dict[str, JSONSerializable] = Field(default_factory=dict)
