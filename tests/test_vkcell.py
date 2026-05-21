@@ -106,3 +106,22 @@ def test_vkcell_attributes() -> None:
     assert c.size_info.nc == (5, 10)
     assert c.size_info.cc == (5, 5)
     assert c.size_info.center == (5, 5)
+
+
+def test_insert_kcell_into_vkcell() -> None:
+    kcl = kf.KCLayout("test_insert_kcell_into_vkcell")
+    layer = kcl.layer(kdb.LayerInfo(1, 0))
+    trans = kdb.DCplxTrans(1.0, 90, False, 5.0, 5.0)
+
+    src = kcl.kcell("src")
+    src.shapes(layer).insert(kdb.Box(0, 0, 10_000, 10_000))
+
+    dst = kcl.kcell("dst")
+    kf.VInstance(src, trans=trans).insert_into_flat(dst)
+
+    vk_dst = kcl.vkcell("vk")
+    kf.VInstance(src, trans=trans).insert_into_flat(vk_dst)
+
+    assert vk_dst.shapes(layer).size() == 1
+    assert vk_dst.dbbox() == dst.dbbox() == kdb.DBox(-5, 5, 5, 15)
+    assert all(isinstance(s, kdb.DPolygon) for s in vk_dst.shapes(layer))
