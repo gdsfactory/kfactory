@@ -235,9 +235,9 @@ class Placement[T: (int, float)](MirrorPlacement, extra="forbid"):
         mirror: Whether the instance is to be mirrored or not.
     """
 
-    x: int | T | PortRef | PortArrayRef | AnchorRefX = 0
+    x: int | T | PortArrayRef | PortRef | AnchorRefX = 0
     dx: int | T = 0
-    y: int | T | PortRef | PortArrayRef | AnchorRefY = 0
+    y: int | T | PortArrayRef | PortRef | AnchorRefY = 0
     dy: int | T = 0
     orientation: float | PortRef = 0
     anchor: FixedAnchor | PortAnchor | None = None
@@ -1012,7 +1012,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         default_factory=list
     )
     routes: dict[str, Route[T]] = Field(default_factory=dict)
-    ports: dict[str, Port[T] | PortRef | PortArrayRef] = Field(default_factory=dict)
+    ports: dict[str, Port[T] | PortArrayRef | PortRef] = Field(default_factory=dict)
     pins: dict[str, Pin | PinRef] = Field(default_factory=dict)
     constraints: list[Constraint] = Field(default_factory=list)
     kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
