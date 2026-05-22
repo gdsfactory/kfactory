@@ -1,65 +1,56 @@
-# KFactory 3.0.0rc2
+# KFactory
 
 [![codecov](https://codecov.io/gh/gdsfactory/kfactory/graph/badge.svg?token=dArcfnQE4w)](https://codecov.io/gh/gdsfactory/kfactory)
 
-Kfactory is the backend for [gdsfactory](https://github.com/gdsfactory/gdsfactory). It is built upon [KLayout](https://klayout.de).
-It offers basic operations like gdsfactory, so it can be used on its own as a layout tool as well.
+KFactory is a Python framework for photonic and electronic chip layout, built on [KLayout](https://klayout.de)'s C++ geometry engine.
+It provides parametric cells with caching, optical and electrical routing, enclosures via Minkowski sums, and schematic-driven design with LVS.
 
-It is recommended to pin the version of KFactory in `requirements.txt` or `pyproject.toml` with `kfactory==3.0.0rc2` for example.
+## Key Features
 
-Features similar to gdsfactory:
-
-- [x] Cells & decorator for caching & storing cells
-- [x] Simple routing (point to point and simpl bundle routes for electrical routes)
-- [x] Basic cells like euler/circular bends, taper, waveguide
-- [x] Path extrusion (no interface with CrossSections)
-- [x] Jupyter integration
-- [x] PDK/package configuration
-- [x] Plugin system (simulations etc.) - Check [kplugins](https://github.com/gdsfactory/kplugins)
-- [x] Generic PDK example - Check [kgeneric](https://github.com/gdsfactory/kgeneric)
-- [x] CrossSection
-- [x] Netlist/Schematics and LVS
-
-Notable missing Features:
-
-- [ ] More advanced routing
-
-
-New/Improved Features:
-
-- Fully hierarchical bi-directional conversion to YAML
-- Automatic snapping to grid thanks to KLayout
-- More features for vector geometries due to concept of Point/Edge/Vector/Polygon from Klayout
-- Easy booleans thanks to KLayout Regions
-- Enclosures: use the concept of enclosures, similar to cross sections, to allow automatic
-  calculation of boolean layers for structures based on [minkowski sum](https://en.wikipedia.org/wiki/Minkowski_addition),
-  which are built into KLayout
-
+- **Cell caching** — the `@kf.cell` decorator deduplicates identical components automatically
+- **Routing** — optical and electrical bundle routing, Manhattan primitives, all-angle routing, and path-length matching
+- **Cross-sections & enclosures** — define waveguide profiles and automatic boolean cladding layers via Minkowski sums
+- **Schematics** — place-and-connect workflow with netlist extraction and layout-vs-schematic verification
+- **Virtual cells** — hierarchical logical containers for schematic-driven design
+- **Dual coordinate systems** — `KCell` (integer DBU) and `DKCell` (float µm) work side by side
+- **KLayout integration** — full access to `kdb.Region`, `kdb.Polygon`, DRC, and GDS/OASIS I/O
+- **Jupyter & KLive** — live preview in KLayout while editing notebooks
+- **PDK system** — bundle layers, factories, cross-sections, and technology into reusable packages
 
 ## Getting Started
 
 ### Installation
 
-kfactory is available as [`kfactory`](https://pypi.org/project/kfactory/) on PyPI
-
-Install kfactory with `uv`, or `pip`:
+KFactory is available on [PyPI](https://pypi.org/project/kfactory/) and requires Python 3.12+.
 
 ```bash
-# Add kfactory to your project.
 uv add kfactory
 
-# With pip.
+# or with pip
 pip install kfactory
 ```
 
-At the moment kfactory works only on python 3.11 and above
-
-### Development Installation
-
-A development environment can be installed with
+### Development
 
 ```bash
 just dev
 ```
 
-For committing `pre-commit` should be installed with `pre-commit install` (this is done with `just dev`).
+This installs the development environment and sets up pre-commit hooks.
+
+## Ecosystem
+
+| Package | Description |
+|---|---|
+| [gdsfactory](https://github.com/gdsfactory/gdsfactory) | Full-featured chip design framework — KFactory is its layout backend |
+| [kfnetlist](https://github.com/gdsfactory/kfnetlist) | Standalone netlist extraction and generation |
+
+## Documentation
+
+Full documentation is available at [gdsfactory.github.io/kfactory](https://gdsfactory.github.io/kfactory).
+
+Upgrading from an earlier version? See the [migration guide](migration.md).
+
+## License
+
+[MIT](LICENSE)
