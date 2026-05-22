@@ -195,7 +195,6 @@ file = [
   # For each file to patch, add a [[file]] config
   # section containing the path of the file, relative to the
   # tbump.toml location.
-  { src = "README.md" },
   { src = "pyproject.toml", search = 'version = "{current_version}"' },
   { src = "pyproject.toml", search = 'current = "{current_version}"' },
   { src = "src/kfactory/__init__.py" },
