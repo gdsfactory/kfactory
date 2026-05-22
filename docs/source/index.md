@@ -1,10 +1,4 @@
-# KFactory
-
-**KFactory** is a Python layout framework built on [KLayout](https://klayout.de).
-It is the backend for [gdsfactory](https://github.com/gdsfactory/gdsfactory) and can be used as a
-standalone photonic/electronic layout tool.
-
-KFactory exposes KLayout's full geometry engine (boolean regions, Minkowski expansions, DRC) through a clean Python API while adding cell caching, enclosures, all-angle routing, and schematic-driven design.
+--8<-- "README.md"
 
 ---
 
@@ -109,20 +103,3 @@ KFactory exposes KLayout's full geometry engine (boolean regions, Minkowski expa
     [:octicons-arrow-right-24: FAQ](howto/faq.md)
 
 </div>
-
----
-
-## Key Features
-
-- **Cell caching** — `@kf.cell` deduplicates identical components automatically
-- **DBU + µm APIs** — `KCell` (integer DBU) and `DKCell` (float µm) work side by side
-- **Enclosures** — Minkowski-sum cladding and annular boolean layers, tile-parallelised
-- **Bundle routing** — optical and electrical, all-angle, path-length matching, obstacle avoidance
-- **Cross-sections** — registered per `KCLayout`; composable with enclosures
-- **Schematics** — place-and-connect workflow with netlist extraction and LVS
-- **KLayout integration** — full access to `kdb.Region`, `kdb.Polygon`, DRC, and GDS/OASIS I/O
-- **klive** — live preview in KLayout while editing notebooks
-
-## Comparison with gdsfactory
-
-See [gdsfactory.md](gdsfactory.md) for a side-by-side feature comparison and migration notes.
