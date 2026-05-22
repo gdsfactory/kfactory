@@ -955,10 +955,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
 
         if trans is None:
             trans = kdb.DCplxTrans()
+        trans_ = trans * self.trans
 
         if isinstance(self.cell, VKCell):
             for layer, shapes in self.cell.shapes().items():
-                for shape in shapes.transform(trans * self.trans):
+                for shape in shapes.transform(trans_):
                     if isinstance(cell, ProtoTKCell) and isinstance(
                         shape, kdb.DPolygon | kdb.DSimplePolygon
                     ):
@@ -968,14 +969,12 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             for inst in self.cell.insts:
                 if levels is not None:
                     if levels > 0:
-                        inst.insert_into_flat(
-                            cell, trans=trans * self.trans, levels=levels - 1
-                        )
+                        inst.insert_into_flat(cell, trans=trans_, levels=levels - 1)
                     else:
                         assert isinstance(cell, ProtoTKCell)
-                        inst.insert_into(cell, trans=trans * self.trans)
+                        inst.insert_into(cell, trans=trans_)
                 else:
-                    inst.insert_into_flat(cell, trans=trans * self.trans)
+                    inst.insert_into_flat(cell, trans=trans_)
 
         else:
             assert isinstance(self.cell, ProtoTKCell)
@@ -983,17 +982,21 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 logger.warning(
                     "Levels are not supported if the inserted Instance is a KCell."
                 )
-            if isinstance(self.cell, ProtoTKCell):
+            if isinstance(cell, ProtoTKCell):
+                assert self.cell.kcl is cell.kcl, (
+                    "Inserting a KCell into a KCell across different KCLayouts"
+                    " is currently not supported"
+                )
                 for layer in self.cell.kcl.layer_indexes():
                     reg = kdb.Region(self.cell.kdb_cell.begin_shapes_rec(layer))
-                    reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
+                    reg.transform(kdb.ICplxTrans(trans_, self.cell.kcl.dbu))
                     cell.shapes(layer).insert(reg)
             else:
-                for layer, shapes in self.cell.shapes.items():
-                    for shape in shapes.transform(trans * self.trans):
-                        cell.shapes(layer).insert(shape)
-                for vinst in self.cell.vinsts:
-                    vinst.insert_into_flat(cell, trans=trans * self.trans)
+                for layer in self.cell.kcl.layer_indexes():
+                    for poly in kdb.Region(self.cell.kdb_cell.begin_shapes_rec(layer)):
+                        cell.shapes(layer).insert(
+                            poly.to_dtype(self.cell.kcl.dbu).transformed(trans_)
+                        )
 
     @overload
     def connect(
