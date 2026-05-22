@@ -6106,6 +6106,8 @@ too, but the result has one of the two instances flipped.</p>
 <span class="n">parent_o1o1</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>WITHOUT mirror=True, o1↔o1 raises:
+
+
   AsymmetricMirrorRequiredError: Cannot connect ports &#39;o1&#39; and &#39;o1&#39; carrying the same asymmetric cross section without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
 
 WITH mirror=True (one instance mirrored):
@@ -6114,7 +6116,7 @@ WITH mirror=True (one instance mirrored):
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../cross_sections/output_26_1.png" /></p>
+<img alt="png" src="../cross_sections/output_26_2.png" /></p>
 <h3 id="connecting-symmetric-asymmetric-structural-mismatch">Connecting symmetric ↔ asymmetric: structural mismatch</h3>
 <p>A port carrying a <code>SymmetricalCrossSection</code> cannot connect to one carrying an
 <code>AsymmetricalCrossSection</code> — the two are structurally different objects.
@@ -6145,6 +6147,8 @@ checks, and it's not bypassable by <code>allow_width_mismatch=True</code>.</p>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  CrossSectionSymmetryMismatchError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Symmetric ↔ asymmetric connect raises:
+
+
   CrossSectionSymmetryMismatchError: Cross section symmetry mismatch between ports &#39;o1&#39; (asymmetric) and &#39;o2&#39; (symmetric). Symmetric and asymmetric cross sections cannot be connected.
 </code></pre></div>
 <h3 id="summary-of-asymmetric-port-behavior">Summary of asymmetric port behavior</h3>

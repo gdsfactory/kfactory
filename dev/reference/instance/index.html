@@ -10312,7 +10312,10 @@ else pull the polygons. None will always flatten all levels.</p>
 <span class="normal">1169</span>
 <span class="normal">1170</span>
 <span class="normal">1171</span>
-<span class="normal">1172</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">VInstance</span><span class="p">(</span><span class="n">ProtoInstance</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">UMGeometricObject</span><span class="p">):</span>
+<span class="normal">1172</span>
+<span class="normal">1173</span>
+<span class="normal">1174</span>
+<span class="normal">1175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">VInstance</span><span class="p">(</span><span class="n">ProtoInstance</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">UMGeometricObject</span><span class="p">):</span>
     <span class="n">_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">cell</span><span class="p">:</span> <span class="n">AnyKCell</span>
     <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span>
@@ -10553,10 +10556,11 @@ else pull the polygons. None will always flatten all levels.</p>
 
         <span class="k">if</span> <span class="n">trans</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">trans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">()</span>
+        <span class="n">trans_</span> <span class="o">=</span> <span class="n">trans</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">layer</span><span class="p">,</span> <span class="n">shapes</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">shapes</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">trans</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">shapes</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">trans_</span><span class="p">):</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
                         <span class="n">shape</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DSimplePolygon</span>
                     <span class="p">):</span>
@@ -10566,14 +10570,12 @@ else pull the polygons. None will always flatten all levels.</p>
             <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">insts</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">levels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">levels</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">inst</span><span class="o">.</span><span class="n">insert_into_flat</span><span class="p">(</span>
-                            <span class="n">cell</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">trans</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="n">levels</span> <span class="o">-</span> <span class="mi">1</span>
-                        <span class="p">)</span>
+                        <span class="n">inst</span><span class="o">.</span><span class="n">insert_into_flat</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">trans_</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="n">levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">)</span>
-                        <span class="n">inst</span><span class="o">.</span><span class="n">insert_into</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">trans</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="p">)</span>
+                        <span class="n">inst</span><span class="o">.</span><span class="n">insert_into</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">trans_</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">inst</span><span class="o">.</span><span class="n">insert_into_flat</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">trans</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="p">)</span>
+                    <span class="n">inst</span><span class="o">.</span><span class="n">insert_into_flat</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">trans_</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">)</span>
@@ -10581,17 +10583,21 @@ else pull the polygons. None will always flatten all levels.</p>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="s2">&quot;Levels are not supported if the inserted Instance is a KCell.&quot;</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">kcl</span> <span class="ow">is</span> <span class="n">cell</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="p">(</span>
+                    <span class="s2">&quot;Inserting a KCell into a KCell across different KCLayouts&quot;</span>
+                    <span class="s2">&quot; is currently not supported&quot;</span>
+                <span class="p">)</span>
                 <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer_indexes</span><span class="p">():</span>
                     <span class="n">reg</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">kdb_cell</span><span class="o">.</span><span class="n">begin_shapes_rec</span><span class="p">(</span><span class="n">layer</span><span class="p">))</span>
-                    <span class="n">reg</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">ICplxTrans</span><span class="p">((</span><span class="n">trans</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="p">),</span> <span class="n">cell</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">))</span>
+                    <span class="n">reg</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">ICplxTrans</span><span class="p">(</span><span class="n">trans_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">))</span>
                     <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">layer</span><span class="p">,</span> <span class="n">shapes</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">shapes</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">trans</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="p">):</span>
-                        <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">vinst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">vinsts</span><span class="p">:</span>
-                    <span class="n">vinst</span><span class="o">.</span><span class="n">insert_into_flat</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">trans</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer_indexes</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">poly</span> <span class="ow">in</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">kdb_cell</span><span class="o">.</span><span class="n">begin_shapes_rec</span><span class="p">(</span><span class="n">layer</span><span class="p">)):</span>
+                        <span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                            <span class="n">poly</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">trans_</span><span class="p">)</span>
+                        <span class="p">)</span>
 
     <span class="nd">@overload</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span>
@@ -11198,10 +11204,7 @@ instance will be mirrored and connected.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/instance.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1042</span>
-<span class="normal">1043</span>
-<span class="normal">1044</span>
-<span class="normal">1045</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1045</span>
 <span class="normal">1046</span>
 <span class="normal">1047</span>
 <span class="normal">1048</span>
@@ -11305,7 +11308,10 @@ instance will be mirrored and connected.</p>
 <span class="normal">1146</span>
 <span class="normal">1147</span>
 <span class="normal">1148</span>
-<span class="normal">1149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span>
+<span class="normal">1149</span>
+<span class="normal">1150</span>
+<span class="normal">1151</span>
+<span class="normal">1152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">other</span><span class="p">:</span> <span class="n">ProtoInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
