@@ -2,9 +2,36 @@
 
 ## kfactory 3.0
 
-With kfactory 3.0, several modules, functions, and interfaces have changed.
+### What's New in 3.0
 
-### 3.0 Change Summary
+#### New Features
+
+- **Routing constraints & path-length matching** — the new `PathLengthMatch` constraint API enables length-matched bundle routing directly.
+  See [Path-Length Matching](routing/path_length.md).
+- **Asymmetrical cross-sections** — `AsymmetricCrossSection` allows non-symmetric waveguide profiles.
+  See [Cross-Sections](components/cross_sections.md).
+- **Netlist extraction as a separate package** — netlist generation now lives in [kfnetlist](https://github.com/gdsfactory/kfnetlist), a standalone package.
+  See [Netlist & I/O](schematics/netlist.md).
+
+#### Improved Features
+
+- **Schematics** — tighter pin integration, virtual schematic connections, and the `@kcl.routing_strategy` registry for schematic-driven routing.
+  See [Schematics Overview](schematics/overview.md).
+- **Bundle routing** — expanded documentation and tutorial.
+  See [Bundle Routing Tutorial](routing/bundle.md).
+
+#### Infrastructure
+
+- **Python 3.12+** is now required (up from 3.11).
+- Complete **documentation overhaul** — new zensical-based build, restructured navigation, and auto-generated API reference.
+
+---
+
+### Migrating from 2.5.x
+
+The sections below cover breaking changes and how to update your code.
+
+#### Change Summary
 
 | Area | What changed | Before (2.x) | After (3.0) |
 |---|---|---|---|
@@ -16,7 +43,7 @@ With kfactory 3.0, several modules, functions, and interfaces have changed.
 | **Parameters** | `end_straights` deprecated | `end_straights=100` | `ends=100` |
 | **Schematics** | Routing via `KCLayout` registry | — | `@kcl.routing_strategy` + `schematic.add_route(...)` |
 
-### Module Reorganization
+#### Module Reorganization
 
 - `kfactory.factories.virtual.utils` has been moved to `kfactory.factories.utils` to unify it with other factory utilities.
 
@@ -28,7 +55,7 @@ from kfactory.factories.virtual.utils import extrude_backbone, extrude_backbone_
 from kfactory.factories.utils import extrude_backbone, extrude_backbone_dynamic
 ```
 
-### Removed Routing Functions
+#### Removed Routing Functions
 
 The following routing functions have been removed. Use `route_bundle` instead.
 
@@ -61,7 +88,7 @@ route_bundle(
 )
 ```
 
-### Deprecated Parameters in `route_bundle`
+#### Deprecated Parameters in `route_bundle`
 
 In both `routing.optical.route_bundle` and `routing.electrical.route_bundle`:
 
@@ -76,7 +103,7 @@ route_bundle(cell, start_ports, end_ports, separation=..., start_straights=100, 
 route_bundle(cell, start_ports, end_ports, separation=..., starts=100, ends=100, ...)
 ```
 
-### Deprecated `place90`
+#### Deprecated `place90`
 
 `routing.optical.place90` is deprecated. Use `place_manhattan` instead.
 
@@ -90,13 +117,13 @@ from kfactory.routing.optical import place_manhattan
 place_manhattan(cell, p1, p2, pts, ...)
 ```
 
-### Routing Interface for Schematics
+#### Routing Interface for Schematics
 
 In order to enable routing in schematics, routing strategy functions must be registered
 on the `KCLayout` instance. Registered strategies can then be referenced by name in
 `Schematic.add_route`.
 
-#### Registering a Routing Strategy
+##### Registering a Routing Strategy
 
 Use the `@kcl.routing_strategy` decorator or assign directly to `kcl.routing_strategies`:
 
@@ -113,7 +140,7 @@ def route_bundle(cell, start_ports, end_ports, **kwargs):
 kcl.routing_strategies["my_custom_route"] = my_routing_function
 ```
 
-#### Using Routes in a Schematic
+##### Using Routes in a Schematic
 
 The `Schematic.add_route` method creates a route bundle connecting start and end ports
 using a named routing strategy:
@@ -146,3 +173,9 @@ cell = schematic.create_cell(output_type=kf.KCell)
 When `create_cell` is called, the schematic looks up the routing strategy by name from
 `kcl.routing_strategies` (or from the `routing_strategies` argument to `create_cell`)
 and calls it with the resolved ports and settings.
+
+---
+
+## kfactory 2.0
+
+kfactory 2.0 was a full rewrite of the library on top of [KLayout](https://klayout.de), replacing the earlier 1.x codebase. There is no supported migration path from 1.x to 2.0.

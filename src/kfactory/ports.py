@@ -9,11 +9,16 @@ from pydantic import ValidationError
 from . import kdb
 from .conf import config
 from .cross_section import (
+    AsymmetricalCrossSection,
+    AsymmetricCrossSection,
     CrossSection,
     CrossSectionSpec,
+    DAsymmetricalCrossSection,
+    DAsymmetricCrossSection,
     DCrossSection,
     DCrossSectionSpec,
     SymmetricalCrossSection,
+    TAsymmetricCrossSection,
 )
 from .port import (
     BasePort,
@@ -270,7 +275,10 @@ class ICreatePort(ABC):
         | DCrossSectionSpec
         | CrossSection
         | DCrossSection
-        | SymmetricalCrossSection,
+        | SymmetricalCrossSection
+        | AsymmetricalCrossSection
+        | AsymmetricCrossSection
+        | DAsymmetricCrossSection,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
@@ -347,7 +355,10 @@ class ICreatePort(ABC):
         | DCrossSectionSpec
         | CrossSection
         | DCrossSection
-        | SymmetricalCrossSection,
+        | SymmetricalCrossSection
+        | AsymmetricalCrossSection
+        | AsymmetricCrossSection
+        | DAsymmetricCrossSection,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
@@ -361,7 +372,10 @@ class ICreatePort(ABC):
         | DCrossSectionSpec
         | CrossSection
         | DCrossSection
-        | SymmetricalCrossSection,
+        | SymmetricalCrossSection
+        | AsymmetricalCrossSection
+        | AsymmetricCrossSection
+        | DAsymmetricCrossSection,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
@@ -384,11 +398,20 @@ class ICreatePort(ABC):
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection
+        | AsymmetricalCrossSection
+        | DAsymmetricalCrossSection
+        | AsymmetricCrossSection
+        | DAsymmetricCrossSection
         | None = None,
         info: dict[str, MetaData] | None = None,
     ) -> Port:
         """Create a port."""
-
+        xs: (
+            CrossSection
+            | AsymmetricCrossSection
+            | SymmetricalCrossSection
+            | AsymmetricalCrossSection
+        )
         if cross_section is None:
             if width is None:
                 raise ValueError(
@@ -412,6 +435,15 @@ class ICreatePort(ABC):
                     "and greater than 0"
                     f". 1 DBU is {self.kcl.dbu} um."
                 ) from e
+        elif isinstance(
+            cross_section,
+            (
+                AsymmetricalCrossSection,
+                DAsymmetricalCrossSection,
+                TAsymmetricCrossSection,
+            ),
+        ):
+            xs = self.kcl.get_iasymmetric_cross_section(cross_section)
         else:
             xs = self.kcl.get_icross_section(cross_section)
         if trans is not None:
@@ -550,7 +582,10 @@ class DCreatePort(ABC):
         | DCrossSectionSpec
         | CrossSection
         | DCrossSection
-        | SymmetricalCrossSection,
+        | SymmetricalCrossSection
+        | AsymmetricalCrossSection
+        | AsymmetricCrossSection
+        | DAsymmetricCrossSection,
         name: str,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
@@ -564,7 +599,10 @@ class DCreatePort(ABC):
         | DCrossSectionSpec
         | CrossSection
         | DCrossSection
-        | SymmetricalCrossSection,
+        | SymmetricalCrossSection
+        | AsymmetricalCrossSection
+        | AsymmetricCrossSection
+        | DAsymmetricCrossSection,
         name: str,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
@@ -588,10 +626,20 @@ class DCreatePort(ABC):
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection
+        | AsymmetricalCrossSection
+        | DAsymmetricalCrossSection
+        | AsymmetricCrossSection
+        | DAsymmetricCrossSection
         | None = None,
         info: dict[str, MetaData] | None = None,
     ) -> DPort:
         """Create a port."""
+        xs: (
+            DCrossSection
+            | DAsymmetricCrossSection
+            | SymmetricalCrossSection
+            | AsymmetricalCrossSection
+        )
         if cross_section is None:
             if width is None:
                 raise ValueError(
@@ -616,6 +664,15 @@ class DCreatePort(ABC):
                     f". 1 DBU is {self.kcl.dbu} um. Port width must be a "
                     f"multiple of {2 * self.kcl.dbu} um."
                 ) from e
+        elif isinstance(
+            cross_section,
+            (
+                AsymmetricalCrossSection,
+                DAsymmetricalCrossSection,
+                TAsymmetricCrossSection,
+            ),
+        ):
+            xs = self.kcl.get_dasymmetric_cross_section(cross_section)
         else:
             xs = self.kcl.get_dcross_section(cross_section)
         if trans is not None:
@@ -712,9 +769,16 @@ class Ports(ProtoPorts[int], ICreatePort):
             base.trans = kdb.Trans.R0
             base.dcplx_trans = None
             base.kcl = self.kcl
-            base.cross_section = self.kcl.get_symmetrical_cross_section(
-                port.cross_section.base.to_dtype(port.kcl)
-            )
+            if port.is_symmetric():
+                base.cross_section = self.kcl.get_symmetrical_cross_section(
+                    port.cross_section.base.to_dtype(port.kcl)
+                )
+                base.asymmetric_cross_section = None
+            else:
+                base.asymmetric_cross_section = self.kcl.get_asymmetrical_cross_section(
+                    port.asymmetric_cross_section.base.to_dtype(port.kcl)
+                )
+                base.cross_section = None
             if name is not None:
                 base.name = name
             port_ = Port(base=base)
@@ -837,9 +901,16 @@ class DPorts(ProtoPorts[float], DCreatePort):
             base.trans = kdb.Trans.R0
             base.dcplx_trans = None
             base.kcl = self.kcl
-            base.cross_section = self.kcl.get_symmetrical_cross_section(
-                port.cross_section.base.to_dtype(port.kcl)
-            )
+            if port.is_symmetric():
+                base.cross_section = self.kcl.get_symmetrical_cross_section(
+                    port.cross_section.base.to_dtype(port.kcl)
+                )
+                base.asymmetric_cross_section = None
+            else:
+                base.asymmetric_cross_section = self.kcl.get_asymmetrical_cross_section(
+                    port.asymmetric_cross_section.base.to_dtype(port.kcl)
+                )
+                base.cross_section = None
             port_ = DPort(base=base)
             port_.dcplx_trans = dcplx_trans
             self._bases.append(port_.base)
