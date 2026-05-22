@@ -300,6 +300,188 @@ arm.plot()
 # See [Routing Overview](../routing/overview.py) for full routing examples.
 
 # %% [markdown]
+# ## 9 · Asymmetric cross sections
+#
+# `SymmetricalCrossSection` rejects odd widths (`width % 2 == 0`) and centers the
+# profile on the port axis. For non-symmetric profiles — angled ribs, slot
+# waveguides, strip-loaded waveguides, or just any odd-width strip —
+# `AsymmetricalCrossSection` is the way.
+#
+# It describes each layer strip as a signed `[section_min, section_max]` interval
+# in dbu relative to the port centerline. Both bounds are integers, so edges are
+# always on the dbu grid regardless of width parity. The strip's width is the
+# derived property `section_max - section_min`.
+#
+# Asymmetric cross sections live in a separate registry on `KCLayout`
+# (`asymmetrical_cross_sections`) and have their own getters.
+
+# %%
+from kfactory.exceptions import (
+    AsymmetricMirrorRequiredError,
+    CrossSectionSymmetryMismatchError,
+)
+
+# A 301-dbu-wide strip shifted toward +y of the port centerline.
+# Width is ODD (would be rejected by SymmetricalCrossSection) and the strip is
+# off-center — [-100, 201] rather than [-150, 151].
+acs = kf.kcl.get_asymmetrical_cross_section(
+    kf.AsymmetricalCrossSection(
+        layer=L.WG,
+        section_min=-100,
+        section_max=201,
+        name="ASYM_301",
+    )
+)
+print(f"width:       {acs.width} DBU  (odd!)")
+print(f"main strip:  [{acs.section_min}, {acs.section_max}]")
+print(f"xmin/xmax:   ({acs.get_xmin()}, {acs.get_xmax()})")
+print(f"is_symmetric: {acs.is_symmetric()}")
+
+# %% [markdown]
+# ### Cell convention for asymmetric profiles
+#
+# For an asymmetric strip to chain correctly between cells, the cell's two ports
+# must have matching profile orientation in cell-local coordinates. With a
+# straight-like cell, the standard convention is:
+#
+# - `o1 = R180` at the left edge (faces -x, no mirror).
+# - `o2 = M0`  at the right edge (faces +x with `mirror=True`).
+#
+# The mirror flag on `o2` flips the port-local frame so that "right side of
+# profile" maps to the same world-y direction at both ports.
+
+
+# %%
+@kf.cell
+def asym_straight(cross_section: str = "ASYM_301") -> kf.KCell:
+    """Asymmetric-cross-section straight.
+
+    Port convention:
+        o1 → R180 at left, faces -x.
+        o2 → M0   at right, faces +x with mirror (asymmetric requirement).
+    """
+    c = kf.KCell()
+    xs = kf.kcl.get_asymmetrical_cross_section(cross_section)
+    length = 5_000  # 5 µm
+    c.shapes(kf.kcl.find_layer(xs.layer)).insert(
+        kf.kdb.Box(0, xs.section_min, length, xs.section_max)
+    )
+    c.create_port(name="o1", trans=kf.kdb.Trans(2, False, 0, 0), cross_section=xs)
+    c.create_port(name="o2", trans=kf.kdb.Trans(0, True, length, 0), cross_section=xs)
+    return c
+
+
+straight = asym_straight()
+print(
+    f"o1 trans: {straight['o1'].base.trans}  mirror={straight['o1'].base.trans.mirror}"
+)
+print(
+    f"o2 trans: {straight['o2'].base.trans}  mirror={straight['o2'].base.trans.mirror}"
+)
+straight.plot()
+
+# %% [markdown]
+# ### Chaining: `o2 → o1` requires `mirror=True`
+#
+# Connecting `inst_b.o1` to `inst_a.o2` is the natural chain. But with
+# asymmetric ports the connect transform must be M90 (mirror) — R180 would
+# flip the left/right halves of the profile.
+#
+# kfactory checks this **geometrically** by computing the to-be-applied trans
+# and comparing the world-frame "right" direction of both ports. If they don't
+# match, it raises `AsymmetricMirrorRequiredError`.
+
+# %%
+parent_chain = kf.KCell(name="asym_chain_ok")
+ia = parent_chain << straight
+ib = parent_chain << straight
+
+# Default (mirror=False) → raises
+try:
+    ib.connect("o1", ia, "o2")
+except AsymmetricMirrorRequiredError as e:
+    print("WITHOUT mirror=True, default connect raises:")
+    print(f"  AsymmetricMirrorRequiredError: {e}\n")
+
+# With mirror=True → succeeds, neither instance ends up with a mirror flag
+ib.connect("o1", ia, "o2", mirror=True)
+print("WITH mirror=True:")
+print(f"  ia.trans: {ia.trans}  (mirror={ia.trans.mirror})")
+print(f"  ib.trans: {ib.trans}  (mirror={ib.trans.mirror})")
+parent_chain.plot()
+
+# %% [markdown]
+# ### `o1 ↔ o1`: still possible, but one instance ends up mirrored
+#
+# Connecting two of the same kind of end (both `R180`) needs `mirror=True`
+# too, but the result has one of the two instances flipped.
+
+# %%
+parent_o1o1 = kf.KCell(name="asym_chain_o1o1")
+ia2 = parent_o1o1 << straight
+ib2 = parent_o1o1 << straight
+
+try:
+    ib2.connect("o1", ia2, "o1")
+except AsymmetricMirrorRequiredError as e:
+    print("WITHOUT mirror=True, o1↔o1 raises:")
+    print(f"  AsymmetricMirrorRequiredError: {e}\n")
+
+ib2.connect("o1", ia2, "o1", mirror=True)
+print("WITH mirror=True (one instance mirrored):")
+print(f"  ia2.trans: {ia2.trans}  (mirror={ia2.trans.mirror})")
+print(f"  ib2.trans: {ib2.trans}  (mirror={ib2.trans.mirror})")
+parent_o1o1.plot()
+
+# %% [markdown]
+# ### Connecting symmetric ↔ asymmetric: structural mismatch
+#
+# A port carrying a `SymmetricalCrossSection` cannot connect to one carrying an
+# `AsymmetricalCrossSection` — the two are structurally different objects.
+# This raises `CrossSectionSymmetryMismatchError` **before** the width/layer
+# checks, and it's not bypassable by `allow_width_mismatch=True`.
+
+
+# %%
+@kf.cell
+def sym_straight(cross_section: str = "WG_500") -> kf.KCell:
+    """Plain symmetric straight for the mismatch demo."""
+    c = kf.KCell()
+    xs = kf.kcl.get_icross_section(cross_section)
+    length = 5_000
+    c.shapes(kf.kcl.find_layer(xs.layer)).insert(
+        kf.kdb.Box(0, -xs.width // 2, length, xs.width // 2)
+    )
+    c.create_port(name="o1", trans=kf.kdb.Trans(2, False, 0, 0), cross_section=xs)
+    c.create_port(name="o2", trans=kf.kdb.Trans(0, False, length, 0), cross_section=xs)
+    return c
+
+
+parent_mix = kf.KCell(name="asym_sym_mismatch")
+sym_inst = parent_mix << sym_straight("WG_500")
+asym_inst = parent_mix << straight
+
+try:
+    asym_inst.connect("o1", sym_inst, "o2")
+except CrossSectionSymmetryMismatchError as e:
+    print("Symmetric ↔ asymmetric connect raises:")
+    print(f"  CrossSectionSymmetryMismatchError: {e}")
+
+# %% [markdown]
+# ### Summary of asymmetric port behavior
+#
+# | Scenario | Default `connect()` | `connect(mirror=True)` |
+# |---|---|---|
+# | sym ↔ sym | works | works |
+# | asym o2 → asym o1 (chain) | `AsymmetricMirrorRequiredError` | works, no instance mirrored |
+# | asym o1 ↔ asym o1 | `AsymmetricMirrorRequiredError` | works, one instance mirrored |
+# | sym ↔ asym | `CrossSectionSymmetryMismatchError` (not bypassable) | same error |
+#
+# The check is a **geometric** one: kfactory computes the would-be instance
+# trans, derives the world-frame "right" direction of both ports' profiles, and
+# raises if they don't align.
+
+# %% [markdown]
 # ## Summary
 #
 # | Need | Use |
