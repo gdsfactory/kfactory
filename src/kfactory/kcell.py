@@ -60,6 +60,7 @@ from .checks import (
 )
 from .conf import DEFAULT_TRANS, CheckInstances, ShowFunction, config, logger
 from .cross_section import (
+    AsymmetricalCrossSection,
     CrossSection,
     DCrossSection,
     SymmetricalCrossSection,
@@ -1017,12 +1018,21 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 kcell.base.virtual = cell.virtual
                 if cell.kcl.dbu != self.kcl.dbu:
                     for port, lib_port in zip(kcell.ports, cell.ports, strict=False):
-                        port.cross_section = CrossSection(
-                            kcl=kcell.kcl,
-                            base=cell.kcl.get_symmetrical_cross_section(
-                                lib_port.cross_section.base.to_dtype(cell.kcl)
-                            ),
-                        )
+                        if lib_port.is_symmetric():
+                            port.cross_section = CrossSection(
+                                kcl=kcell.kcl,
+                                base=cell.kcl.get_symmetrical_cross_section(
+                                    lib_port.cross_section.base.to_dtype(cell.kcl)
+                                ),
+                            )
+                        else:
+                            port.asymmetric_cross_section = (
+                                cell.kcl.get_asymmetrical_cross_section(
+                                    lib_port.asymmetric_cross_section.base.to_dtype(
+                                        cell.kcl
+                                    )
+                                )
+                            )
             return ci
         return lib_ci
 
@@ -1598,27 +1608,26 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         self.clear_meta_info()
         if not self.is_library_cell():
             for i, port in enumerate(self.ports):
+                xs_name = port.base.any_cross_section.name
                 if port.base.trans is not None:
                     meta_info: dict[str, MetaData] = {
                         "name": port.name,
-                        "cross_section": port.cross_section.name,
+                        "cross_section": xs_name,
                         "trans": port.base.trans,
                         "port_type": port.port_type,
                         "info": port.info.model_dump(),
                     }
-
                     self.add_meta_info(
                         kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
                     )
                 else:
                     meta_info = {
                         "name": port.name,
-                        "cross_section": port.cross_section.name,
+                        "cross_section": xs_name,
                         "dcplx_trans": port.dcplx_trans,
                         "port_type": port.port_type,
                         "info": port.info.model_dump(),
                     }
-
                     self.add_meta_info(
                         kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
                     )
@@ -1710,14 +1719,13 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 if not self.is_library_cell():
                     for index in sorted(port_dict.keys()):
                         v = port_dict[index]
+                        xs = self.kcl.get_cross_section(v["cross_section"], kind="any")
                         trans_: kdb.Trans | None = v.get("trans")
                         if trans_ is not None:
                             ports[index] = self.create_port(
                                 name=v.get("name"),
                                 trans=trans_,
-                                cross_section=self.kcl.get_symmetrical_cross_section(
-                                    v["cross_section"]
-                                ),
+                                cross_section=xs,
                                 port_type=v["port_type"],
                                 info=v["info"],
                             )
@@ -1725,9 +1733,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                             ports[index] = self.create_port(
                                 name=v.get("name"),
                                 dcplx_trans=v["dcplx_trans"],
-                                cross_section=self.kcl.get_symmetrical_cross_section(
-                                    v["cross_section"]
-                                ),
+                                cross_section=xs,
                                 port_type=v["port_type"],
                                 info=v["info"],
                             )
@@ -1748,11 +1754,18 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         v = port_dict[index]
                         trans_ = v.get("trans")
                         lib_kcl = kcls[lib_name]
-                        cs = self.kcl.get_symmetrical_cross_section(
-                            lib_kcl.get_symmetrical_cross_section(
-                                v["cross_section"]
-                            ).to_dtype(lib_kcl)
+                        lib_xs = lib_kcl.get_cross_section(
+                            v["cross_section"], kind="any"
                         )
+                        cs: SymmetricalCrossSection | AsymmetricalCrossSection
+                        if isinstance(lib_xs, SymmetricalCrossSection):
+                            cs = self.kcl.get_symmetrical_cross_section(
+                                lib_xs.to_dtype(lib_kcl)
+                            )
+                        else:
+                            cs = self.kcl.get_asymmetrical_cross_section(
+                                lib_xs.to_dtype(lib_kcl)
+                            )
 
                         if trans_ is not None:
                             ports[index] = self.create_port(

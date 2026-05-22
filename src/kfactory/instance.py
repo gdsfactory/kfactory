@@ -15,6 +15,8 @@ import klayout.db as kdb
 
 from .conf import PROPID, config, logger
 from .exceptions import (
+    AsymmetricMirrorRequiredError,
+    CrossSectionSymmetryMismatchError,
     PortLayerMismatchError,
     PortTypeMismatchError,
     PortWidthMismatchError,
@@ -43,6 +45,23 @@ if TYPE_CHECKING:
     from .layout import KCLayout
 
 __all__ = ["DInstance", "Instance", "ProtoInstance", "ProtoTInstance", "VInstance"]
+
+
+def _right_dir_trans(t: kdb.Trans) -> tuple[int, int]:
+    """Return the port's "right" unit direction in world coords.
+
+    A port faces +x in its local frame; its profile extends in y, with `+y`
+    being the "right" side. Applying `t` to the unit `+y` vector gives the
+    world-frame right direction.
+    """
+    v = t.trans(kdb.Point(0, 1)) - t.trans(kdb.Point(0, 0))
+    return (v.x, v.y)
+
+
+def _right_dir_dcplx(t: kdb.DCplxTrans) -> tuple[float, float]:
+    """DCplxTrans equivalent of `_right_dir_trans`. See its docstring."""
+    v = t.trans(kdb.DPoint(0, 1)) - t.trans(kdb.DPoint(0, 0))
+    return (v.x, v.y)
 
 
 class ProtoInstance[T: (int, float)](GeometricObject[T]):
@@ -406,20 +425,29 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
         assert isinstance(p, Port)
         assert isinstance(op, Port)
 
+        if p.base.is_symmetric() != op.base.is_symmetric():
+            raise CrossSectionSymmetryMismatchError(p, op)
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
             raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatchError(self, other, p, op)
+        # For two ports carrying the same asymmetric cross section, the
+        # profile asymmetry must align in world coordinates after the
+        # connection — i.e. both ports' world "right" direction must match.
+        # This depends on the actual resulting inst.trans (not just the
+        # `mirror` flag), so compute the would-be world trans of p and verify.
+        same_asym = (
+            p.base.asymmetric_cross_section is not None
+            and p.base.asymmetric_cross_section == op.base.asymmetric_cross_section
+        )
         if p.base.dcplx_trans or op.base.dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
+            extra_dmirror_y: float | None = None
             match (use_mirror, use_angle):
                 case True, True:
-                    dcplx_trans = (
-                        op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
-                    )
-                    self._instance.dcplx_trans = dcplx_trans
+                    candidate = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
                 case False, True:
                     dconn_trans = (
                         kdb.DCplxTrans.M90
@@ -428,41 +456,69 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
                     )
                     opt = op.dcplx_trans
                     opt.mirror = False
-                    dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
-                    self._instance.dcplx_trans = dcplx_trans
+                    candidate = opt * dconn_trans * p.dcplx_trans.inverted()
                 case False, False:
-                    self._instance.dcplx_trans = kdb.DCplxTrans(
-                        op.dcplx_trans.disp - p.dcplx_trans.disp
-                    )
+                    candidate = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
                 case True, False:
-                    self._instance.dcplx_trans = kdb.DCplxTrans(
-                        op.dcplx_trans.disp - p.dcplx_trans.disp
-                    )
-                    self.dmirror_y(op.dcplx_trans.disp.y)
+                    candidate = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+                    extra_dmirror_y = op.dcplx_trans.disp.y
                 case _:
                     raise NotImplementedError("This shouldn't happen")
 
+            if same_asym:
+                final = candidate
+                if extra_dmirror_y is not None:
+                    final = kdb.DCplxTrans(1, 0, True, 0, 2 * extra_dmirror_y) * final
+                p_world = final * p.dcplx_trans
+                if _right_dir_dcplx(p_world) != _right_dir_dcplx(op.dcplx_trans):
+                    raise AsymmetricMirrorRequiredError(p, op)
+
+            self._instance.dcplx_trans = candidate
+            if extra_dmirror_y is not None:
+                self.dmirror_y(extra_dmirror_y)
+
         else:
             conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
+            extra_dmirror_y_t: float | None = None
             match (use_mirror, use_angle):
                 case True, True:
-                    trans = op.trans * conn_trans * p.trans.inverted()
-                    self._instance.trans = trans
+                    candidate_t = op.trans * conn_trans * p.trans.inverted()
                 case False, True:
                     conn_trans = (
                         kdb.Trans.M90 if mirror ^ self.trans.mirror else kdb.Trans.R180
                     )
                     op = op.copy()
                     op.trans.mirror = False
-                    trans = op.trans * conn_trans * p.trans.inverted()
-                    self._instance.trans = trans
+                    candidate_t = op.trans * conn_trans * p.trans.inverted()
                 case False, False:
-                    self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
+                    candidate_t = kdb.Trans(op.trans.disp - p.trans.disp)
                 case True, False:
-                    self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
-                    self.dmirror_y(op.dcplx_trans.disp.y)
+                    candidate_t = kdb.Trans(op.trans.disp - p.trans.disp)
+                    extra_dmirror_y_t = op.dcplx_trans.disp.y
                 case _:
                     raise NotImplementedError("This shouldn't happen")
+
+            if same_asym:
+                if extra_dmirror_y_t is not None:
+                    # dmirror_y converts inst trans to DCplxTrans; model that.
+                    final_dcplx = kdb.DCplxTrans(
+                        1, 0, True, 0, 2 * extra_dmirror_y_t
+                    ) * kdb.DCplxTrans(candidate_t.to_dtype(self.cell.kcl.dbu))
+                    p_world_d = final_dcplx * kdb.DCplxTrans(
+                        p.trans.to_dtype(self.cell.kcl.dbu)
+                    )
+                    if _right_dir_dcplx(p_world_d) != _right_dir_dcplx(
+                        kdb.DCplxTrans(op.trans.to_dtype(self.cell.kcl.dbu))
+                    ):
+                        raise AsymmetricMirrorRequiredError(p, op)
+                else:
+                    p_world_t = candidate_t * p.trans
+                    if _right_dir_trans(p_world_t) != _right_dir_trans(op.trans):
+                        raise AsymmetricMirrorRequiredError(p, op)
+
+            self._instance.trans = candidate_t
+            if extra_dmirror_y_t is not None:
+                self.dmirror_y(extra_dmirror_y_t)
 
         return self
 
@@ -1047,17 +1103,23 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         assert isinstance(p, Port)
         assert isinstance(op, Port)
 
+        if p.base.is_symmetric() != op.base.is_symmetric():
+            raise CrossSectionSymmetryMismatchError(p, op)
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
             raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatchError(self, other, p, op)
+        same_asym = (
+            p.base.asymmetric_cross_section is not None
+            and p.base.asymmetric_cross_section == op.base.asymmetric_cross_section
+        )
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
+        extra_dmirror_y: float | None = None
         match (use_mirror, use_angle):
             case True, True:
-                trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
-                self.trans = trans
+                candidate = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
             case False, True:
                 dconn_trans = (
                     kdb.DCplxTrans.M90
@@ -1066,15 +1128,26 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 )
                 opt = op.dcplx_trans
                 opt.mirror = False
-                dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
-                self.trans = dcplx_trans
+                candidate = opt * dconn_trans * p.dcplx_trans.inverted()
             case False, False:
-                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+                candidate = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
             case True, False:
-                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
-                self.mirror_y(op.dcplx_trans.disp.y)
+                candidate = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+                extra_dmirror_y = op.dcplx_trans.disp.y
             case _:
-                ...
+                raise NotImplementedError("This shouldn't happen")
+
+        if same_asym:
+            final = candidate
+            if extra_dmirror_y is not None:
+                final = kdb.DCplxTrans(1, 0, True, 0, 2 * extra_dmirror_y) * final
+            p_world = final * p.dcplx_trans
+            if _right_dir_dcplx(p_world) != _right_dir_dcplx(op.dcplx_trans):
+                raise AsymmetricMirrorRequiredError(p, op)
+
+        self.trans = candidate
+        if extra_dmirror_y is not None:
+            self.mirror_y(extra_dmirror_y)
 
         return self
 
