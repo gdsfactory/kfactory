@@ -537,10 +537,71 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#comparison-with-gdsfactory" class="md-nav__link">
+  <a href="#getting-started" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Comparison with gdsfactory
+        Getting Started
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Installation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Development
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ecosystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Ecosystem
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Documentation
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        License
       </span>
     </span>
   </a>
@@ -5235,10 +5296,71 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#comparison-with-gdsfactory" class="md-nav__link">
+  <a href="#getting-started" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Comparison with gdsfactory
+        Getting Started
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Installation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Development
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ecosystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Ecosystem
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Documentation
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        License
       </span>
     </span>
   </a>
@@ -5267,10 +5389,57 @@
 
 
 <h1 id="kfactory">KFactory</h1>
-<p><strong>KFactory</strong> is a Python layout framework built on <a href="https://klayout.de">KLayout</a>.
-It is the backend for <a href="https://github.com/gdsfactory/gdsfactory">gdsfactory</a> and can be used as a
-standalone photonic/electronic layout tool.</p>
-<p>KFactory exposes KLayout's full geometry engine (boolean regions, Minkowski expansions, DRC) through a clean Python API while adding cell caching, enclosures, all-angle routing, and schematic-driven design.</p>
+<p><a href="https://codecov.io/gh/gdsfactory/kfactory"><img alt="codecov" src="https://codecov.io/gh/gdsfactory/kfactory/graph/badge.svg?token=dArcfnQE4w" /></a></p>
+<p>KFactory is a Python framework for photonic and electronic chip layout, built on <a href="https://klayout.de">KLayout</a>'s C++ geometry engine.
+It provides parametric cells with caching, optical and electrical routing, enclosures via Minkowski sums, and schematic-driven design with LVS.</p>
+<h2 id="key-features">Key Features</h2>
+<ul>
+<li><strong>Cell caching</strong> — the <code>@kf.cell</code> decorator deduplicates identical components automatically</li>
+<li><strong>Routing</strong> — optical and electrical bundle routing, Manhattan primitives, all-angle routing, and path-length matching</li>
+<li><strong>Cross-sections &amp; enclosures</strong> — define waveguide profiles and automatic boolean cladding layers via Minkowski sums</li>
+<li><strong>Schematics</strong> — place-and-connect workflow with netlist extraction and layout-vs-schematic verification</li>
+<li><strong>Virtual cells</strong> — hierarchical logical containers for schematic-driven design</li>
+<li><strong>Dual coordinate systems</strong> — <code>KCell</code> (integer DBU) and <code>DKCell</code> (float µm) work side by side</li>
+<li><strong>KLayout integration</strong> — full access to <code>kdb.Region</code>, <code>kdb.Polygon</code>, DRC, and GDS/OASIS I/O</li>
+<li><strong>Jupyter &amp; KLive</strong> — live preview in KLayout while editing notebooks</li>
+<li><strong>PDK system</strong> — bundle layers, factories, cross-sections, and technology into reusable packages</li>
+</ul>
+<h2 id="getting-started">Getting Started</h2>
+<h3 id="installation">Installation</h3>
+<p>KFactory is available on <a href="https://pypi.org/project/kfactory/">PyPI</a> and requires Python 3.12+.</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>kfactory
+
+<span class="c1"># or with pip</span>
+pip<span class="w"> </span>install<span class="w"> </span>kfactory
+</code></pre></div>
+<h3 id="development">Development</h3>
+<div class="highlight"><pre><span></span><code>just<span class="w"> </span>dev
+</code></pre></div>
+<p>This installs the development environment and sets up pre-commit hooks.</p>
+<h2 id="ecosystem">Ecosystem</h2>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/gdsfactory/gdsfactory">gdsfactory</a></td>
+<td>Full-featured chip design framework — KFactory is its layout backend</td>
+</tr>
+<tr>
+<td><a href="https://github.com/gdsfactory/kfnetlist">kfnetlist</a></td>
+<td>Standalone netlist extraction and generation</td>
+</tr>
+</tbody>
+</table>
+<h2 id="documentation">Documentation</h2>
+<p>Full documentation is available at <a href="https://gdsfactory.github.io/kfactory">gdsfactory.github.io/kfactory</a>.</p>
+<p>Upgrading from an earlier version? See the <a href="migration/">migration guide</a>.</p>
+<h2 id="license">License</h2>
+<p><a href="LICENSE">MIT</a></p>
 <hr />
 <div class="grid cards">
 <ul>
@@ -5356,20 +5525,6 @@ standalone photonic/electronic layout tool.</p>
 </li>
 </ul>
 </div>
-<hr />
-<h2 id="key-features">Key Features</h2>
-<ul>
-<li><strong>Cell caching</strong> — <code>@kf.cell</code> deduplicates identical components automatically</li>
-<li><strong>DBU + µm APIs</strong> — <code>KCell</code> (integer DBU) and <code>DKCell</code> (float µm) work side by side</li>
-<li><strong>Enclosures</strong> — Minkowski-sum cladding and annular boolean layers, tile-parallelised</li>
-<li><strong>Bundle routing</strong> — optical and electrical, all-angle, path-length matching, obstacle avoidance</li>
-<li><strong>Cross-sections</strong> — registered per <code>KCLayout</code>; composable with enclosures</li>
-<li><strong>Schematics</strong> — place-and-connect workflow with netlist extraction and LVS</li>
-<li><strong>KLayout integration</strong> — full access to <code>kdb.Region</code>, <code>kdb.Polygon</code>, DRC, and GDS/OASIS I/O</li>
-<li><strong>klive</strong> — live preview in KLayout while editing notebooks</li>
-</ul>
-<h2 id="comparison-with-gdsfactory">Comparison with gdsfactory</h2>
-<p>See <a href="gdsfactory/">gdsfactory.md</a> for a side-by-side feature comparison and migration notes.</p>
 
 
 

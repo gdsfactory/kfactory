@@ -5140,10 +5140,72 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#30-change-summary" class="md-nav__link">
+  <a href="#whats-new-in-30" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        3.0 Change Summary
+        What's New in 3.0
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What&#x27;s New in 3.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improved-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Improved Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Infrastructure
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migrating-from-25x" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Migrating from 2.5.x
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migrating from 2.5.x">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#change-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Change Summary
       </span>
     </span>
   </a>
@@ -5235,6 +5297,22 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kfactory-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        kfactory 2.0
+      </span>
+    </span>
+  </a>
   
 </li>
       
@@ -5334,10 +5412,72 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#30-change-summary" class="md-nav__link">
+  <a href="#whats-new-in-30" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        3.0 Change Summary
+        What's New in 3.0
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What&#x27;s New in 3.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improved-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Improved Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Infrastructure
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migrating-from-25x" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Migrating from 2.5.x
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migrating from 2.5.x">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#change-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Change Summary
       </span>
     </span>
   </a>
@@ -5431,6 +5571,22 @@
     </nav>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kfactory-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        kfactory 2.0
+      </span>
+    </span>
+  </a>
+  
+</li>
       
     </ul>
   
@@ -5455,8 +5611,32 @@
 
 <h1 id="migration">Migration</h1>
 <h2 id="kfactory-30">kfactory 3.0</h2>
-<p>With kfactory 3.0, several modules, functions, and interfaces have changed.</p>
-<h3 id="30-change-summary">3.0 Change Summary</h3>
+<h3 id="whats-new-in-30">What's New in 3.0</h3>
+<h4 id="new-features">New Features</h4>
+<ul>
+<li><strong>Routing constraints &amp; path-length matching</strong> — the new <code>PathLengthMatch</code> constraint API enables length-matched bundle routing directly.
+  See <a href="../routing/path_length/">Path-Length Matching</a>.</li>
+<li><strong>Asymmetrical cross-sections</strong> — <code>AsymmetricCrossSection</code> allows non-symmetric waveguide profiles.
+  See <a href="../components/cross_sections/">Cross-Sections</a>.</li>
+<li><strong>Netlist extraction as a separate package</strong> — netlist generation now lives in <a href="https://github.com/gdsfactory/kfnetlist">kfnetlist</a>, a standalone package.
+  See <a href="../schematics/netlist/">Netlist &amp; I/O</a>.</li>
+</ul>
+<h4 id="improved-features">Improved Features</h4>
+<ul>
+<li><strong>Schematics</strong> — tighter pin integration, virtual schematic connections, and the <code>@kcl.routing_strategy</code> registry for schematic-driven routing.
+  See <a href="../schematics/overview/">Schematics Overview</a>.</li>
+<li><strong>Bundle routing</strong> — expanded documentation and tutorial.
+  See <a href="../routing/bundle/">Bundle Routing Tutorial</a>.</li>
+</ul>
+<h4 id="infrastructure">Infrastructure</h4>
+<ul>
+<li><strong>Python 3.12+</strong> is now required (up from 3.11).</li>
+<li>Complete <strong>documentation overhaul</strong> — new zensical-based build, restructured navigation, and auto-generated API reference.</li>
+</ul>
+<hr />
+<h3 id="migrating-from-25x">Migrating from 2.5.x</h3>
+<p>The sections below cover breaking changes and how to update your code.</p>
+<h4 id="change-summary">Change Summary</h4>
 <table>
 <thead>
 <tr>
@@ -5511,7 +5691,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="module-reorganization">Module Reorganization</h3>
+<h4 id="module-reorganization">Module Reorganization</h4>
 <ul>
 <li><code>kfactory.factories.virtual.utils</code> has been moved to <code>kfactory.factories.utils</code> to unify it with other factory utilities.</li>
 </ul>
@@ -5521,7 +5701,7 @@
 <span class="c1"># After (3.0)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.factories.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">extrude_backbone</span><span class="p">,</span> <span class="n">extrude_backbone_dynamic</span>
 </code></pre></div>
-<h3 id="removed-routing-functions">Removed Routing Functions</h3>
+<h4 id="removed-routing-functions">Removed Routing Functions</h4>
 <p>The following routing functions have been removed. Use <code>route_bundle</code> instead.</p>
 <ul>
 <li><code>routing.electrical.route_L</code> — removed</li>
@@ -5551,7 +5731,7 @@
     <span class="n">bend90_cell</span><span class="o">=...</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
-<h3 id="deprecated-parameters-in-route_bundle">Deprecated Parameters in <code>route_bundle</code></h3>
+<h4 id="deprecated-parameters-in-route_bundle">Deprecated Parameters in <code>route_bundle</code></h4>
 <p>In both <code>routing.optical.route_bundle</code> and <code>routing.electrical.route_bundle</code>:</p>
 <ul>
 <li><code>start_straights</code> is deprecated — use <code>starts</code> instead</li>
@@ -5563,7 +5743,7 @@
 <span class="c1"># After (3.0)</span>
 <span class="n">route_bundle</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">start_ports</span><span class="p">,</span> <span class="n">end_ports</span><span class="p">,</span> <span class="n">separation</span><span class="o">=...</span><span class="p">,</span> <span class="n">starts</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">ends</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="deprecated-place90">Deprecated <code>place90</code></h3>
+<h4 id="deprecated-place90">Deprecated <code>place90</code></h4>
 <p><code>routing.optical.place90</code> is deprecated. Use <code>place_manhattan</code> instead.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Before (2.x)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.routing.optical</span><span class="w"> </span><span class="kn">import</span> <span class="n">place90</span>
@@ -5573,11 +5753,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.routing.optical</span><span class="w"> </span><span class="kn">import</span> <span class="n">place_manhattan</span>
 <span class="n">place_manhattan</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">pts</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="routing-interface-for-schematics">Routing Interface for Schematics</h3>
+<h4 id="routing-interface-for-schematics">Routing Interface for Schematics</h4>
 <p>In order to enable routing in schematics, routing strategy functions must be registered
 on the <code>KCLayout</code> instance. Registered strategies can then be referenced by name in
 <code>Schematic.add_route</code>.</p>
-<h4 id="registering-a-routing-strategy">Registering a Routing Strategy</h4>
+<h5 id="registering-a-routing-strategy">Registering a Routing Strategy</h5>
 <p>Use the <code>@kcl.routing_strategy</code> decorator or assign directly to <code>kcl.routing_strategies</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 
@@ -5590,7 +5770,7 @@ on the <code>KCLayout</code> instance. Registered strategies can then be referen
 <span class="c1"># Or register directly:</span>
 <span class="n">kcl</span><span class="o">.</span><span class="n">routing_strategies</span><span class="p">[</span><span class="s2">&quot;my_custom_route&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">my_routing_function</span>
 </code></pre></div>
-<h4 id="using-routes-in-a-schematic">Using Routes in a Schematic</h4>
+<h5 id="using-routes-in-a-schematic">Using Routes in a Schematic</h5>
 <p>The <code>Schematic.add_route</code> method creates a route bundle connecting start and end ports
 using a named routing strategy:</p>
 <div class="highlight"><pre><span></span><code><span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
@@ -5619,6 +5799,9 @@ using a named routing strategy:</p>
 <p>When <code>create_cell</code> is called, the schematic looks up the routing strategy by name from
 <code>kcl.routing_strategies</code> (or from the <code>routing_strategies</code> argument to <code>create_cell</code>)
 and calls it with the resolved ports and settings.</p>
+<hr />
+<h2 id="kfactory-20">kfactory 2.0</h2>
+<p>kfactory 2.0 was a full rewrite of the library on top of <a href="https://klayout.de">KLayout</a>, replacing the earlier 1.x codebase. There is no supported migration path from 1.x to 2.0.</p>
 
 
 
