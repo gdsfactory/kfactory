@@ -1492,6 +1492,78 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#9-asymmetric-cross-sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        9 · Asymmetric cross sections
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9 · Asymmetric cross sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cell-convention-for-asymmetric-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Cell convention for asymmetric profiles
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chaining-o2-o1-requires-mirrortrue" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Chaining: <code>o2 → o1</code> requires <code>mirror=True</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#o1-o1-still-possible-but-one-instance-ends-up-mirrored" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>o1 ↔ o1</code>: still possible, but one instance ends up mirrored
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connecting-symmetric-asymmetric-structural-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Connecting symmetric ↔ asymmetric: structural mismatch
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary-of-asymmetric-port-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Summary of asymmetric port behavior
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#summary" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -5475,6 +5547,78 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#9-asymmetric-cross-sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        9 · Asymmetric cross sections
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9 · Asymmetric cross sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cell-convention-for-asymmetric-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Cell convention for asymmetric profiles
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chaining-o2-o1-requires-mirrortrue" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Chaining: <code>o2 → o1</code> requires <code>mirror=True</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#o1-o1-still-possible-but-one-instance-ends-up-mirrored" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>o1 ↔ o1</code>: still possible, but one instance ends up mirrored
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connecting-symmetric-asymmetric-structural-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Connecting symmetric ↔ asymmetric: structural mismatch
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary-of-asymmetric-port-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Summary of asymmetric port behavior
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#summary" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -5826,6 +5970,218 @@ the router reads <code>xs.radius</code> and <code>xs.radius_min</code> to choose
     <span class="o">...</span>
 </code></pre></div>
 <p>See <a href="../../routing/overview/">Routing Overview</a> for full routing examples.</p>
+<h2 id="9-asymmetric-cross-sections">9 · Asymmetric cross sections</h2>
+<p><code>SymmetricalCrossSection</code> rejects odd widths (<code>width % 2 == 0</code>) and centers the
+profile on the port axis. For non-symmetric profiles — angled ribs, slot
+waveguides, strip-loaded waveguides, or just any odd-width strip —
+<code>AsymmetricalCrossSection</code> is the way.</p>
+<p>It describes each layer strip as a signed <code>[section_min, section_max]</code> interval
+in dbu relative to the port centerline. Both bounds are integers, so edges are
+always on the dbu grid regardless of width parity. The strip's width is the
+derived property <code>section_max - section_min</code>.</p>
+<p>Asymmetric cross sections live in a separate registry on <code>KCLayout</code>
+(<code>asymmetrical_cross_sections</code>) and have their own getters.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AsymmetricMirrorRequiredError</span><span class="p">,</span>
+    <span class="n">CrossSectionSymmetryMismatchError</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># A 301-dbu-wide strip shifted toward +y of the port centerline.</span>
+<span class="c1"># Width is ODD (would be rejected by SymmetricalCrossSection) and the strip is</span>
+<span class="c1"># off-center — [-100, 201] rather than [-150, 151].</span>
+<span class="n">acs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">AsymmetricalCrossSection</span><span class="p">(</span>
+        <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
+        <span class="n">section_min</span><span class="o">=-</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">section_max</span><span class="o">=</span><span class="mi">201</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ASYM_301&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;width:       </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2"> DBU  (odd!)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;main strip:  [</span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;xmin/xmax:   (</span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">get_xmin</span><span class="p">()</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">get_xmax</span><span class="p">()</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;is_symmetric: </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>width:       301 DBU  (odd!)
+main strip:  [-100, 201]
+xmin/xmax:   (-100, 201)
+is_symmetric: False
+</code></pre></div>
+<h3 id="cell-convention-for-asymmetric-profiles">Cell convention for asymmetric profiles</h3>
+<p>For an asymmetric strip to chain correctly between cells, the cell's two ports
+must have matching profile orientation in cell-local coordinates. With a
+straight-like cell, the standard convention is:</p>
+<ul>
+<li><code>o1 = R180</code> at the left edge (faces -x, no mirror).</li>
+<li><code>o2 = M0</code>  at the right edge (faces +x with <code>mirror=True</code>).</li>
+</ul>
+<p>The mirror flag on <code>o2</code> flips the port-local frame so that "right side of
+profile" maps to the same world-y direction at both ports.</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">asym_straight</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ASYM_301&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Asymmetric-cross-section straight.</span>
+
+<span class="sd">    Port convention:</span>
+<span class="sd">        o1 → R180 at left, faces -x.</span>
+<span class="sd">        o2 → M0   at right, faces +x with mirror (asymmetric requirement).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="mi">5_000</span>  <span class="c1"># 5 µm</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">layer</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+        <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">section_min</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">section_max</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">c</span>
+
+
+<span class="n">straight</span> <span class="o">=</span> <span class="n">asym_straight</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;o1 trans: </span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">&#39;o1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  mirror=</span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">&#39;o1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;o2 trans: </span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">&#39;o2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  mirror=</span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">&#39;o2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="n">straight</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>o1 trans: r180 0,0  mirror=False
+o2 trans: m0 5000,0  mirror=True
+</code></pre></div>
+<p><div class="highlight"><pre><span></span><code>
+</code></pre></div>
+<img alt="png" src="../cross_sections/output_22_1.png" /></p>
+<h3 id="chaining-o2-o1-requires-mirrortrue">Chaining: <code>o2 → o1</code> requires <code>mirror=True</code></h3>
+<p>Connecting <code>inst_b.o1</code> to <code>inst_a.o2</code> is the natural chain. But with
+asymmetric ports the connect transform must be M90 (mirror) — R180 would
+flip the left/right halves of the profile.</p>
+<p>kfactory checks this <strong>geometrically</strong> by computing the to-be-applied trans
+and comparing the world-frame "right" direction of both ports. If they don't
+match, it raises <code>AsymmetricMirrorRequiredError</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="n">parent_chain</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;asym_chain_ok&quot;</span><span class="p">)</span>
+<span class="n">ia</span> <span class="o">=</span> <span class="n">parent_chain</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
+<span class="n">ib</span> <span class="o">=</span> <span class="n">parent_chain</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
+
+<span class="c1"># Default (mirror=False) → raises</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ib</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">ia</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">AsymmetricMirrorRequiredError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WITHOUT mirror=True, default connect raises:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  AsymmetricMirrorRequiredError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># With mirror=True → succeeds, neither instance ends up with a mirror flag</span>
+<span class="n">ib</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">ia</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">mirror</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WITH mirror=True:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ia.trans: </span><span class="si">{</span><span class="n">ia</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ia</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ib.trans: </span><span class="si">{</span><span class="n">ib</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ib</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">parent_chain</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>WITHOUT mirror=True, default connect raises:
+  AsymmetricMirrorRequiredError: Cannot connect ports &#39;o1&#39; and &#39;o2&#39; carrying the same asymmetric cross section without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
+
+WITH mirror=True:
+  ia.trans: r0 0,0  (mirror=False)
+  ib.trans: r0 5000,0  (mirror=False)
+</code></pre></div>
+<p><div class="highlight"><pre><span></span><code>
+</code></pre></div>
+<img alt="png" src="../cross_sections/output_24_1.png" /></p>
+<h3 id="o1-o1-still-possible-but-one-instance-ends-up-mirrored"><code>o1 ↔ o1</code>: still possible, but one instance ends up mirrored</h3>
+<p>Connecting two of the same kind of end (both <code>R180</code>) needs <code>mirror=True</code>
+too, but the result has one of the two instances flipped.</p>
+<div class="highlight"><pre><span></span><code><span class="n">parent_o1o1</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;asym_chain_o1o1&quot;</span><span class="p">)</span>
+<span class="n">ia2</span> <span class="o">=</span> <span class="n">parent_o1o1</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
+<span class="n">ib2</span> <span class="o">=</span> <span class="n">parent_o1o1</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ib2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">ia2</span><span class="p">,</span> <span class="s2">&quot;o1&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">AsymmetricMirrorRequiredError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WITHOUT mirror=True, o1↔o1 raises:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  AsymmetricMirrorRequiredError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">ib2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">ia2</span><span class="p">,</span> <span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">mirror</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WITH mirror=True (one instance mirrored):&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ia2.trans: </span><span class="si">{</span><span class="n">ia2</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ia2</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ib2.trans: </span><span class="si">{</span><span class="n">ib2</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ib2</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">parent_o1o1</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>WITHOUT mirror=True, o1↔o1 raises:
+  AsymmetricMirrorRequiredError: Cannot connect ports &#39;o1&#39; and &#39;o1&#39; carrying the same asymmetric cross section without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
+
+WITH mirror=True (one instance mirrored):
+  ia2.trans: r0 0,0  (mirror=False)
+  ib2.trans: m90 0,0  (mirror=True)
+</code></pre></div>
+<p><div class="highlight"><pre><span></span><code>
+</code></pre></div>
+<img alt="png" src="../cross_sections/output_26_1.png" /></p>
+<h3 id="connecting-symmetric-asymmetric-structural-mismatch">Connecting symmetric ↔ asymmetric: structural mismatch</h3>
+<p>A port carrying a <code>SymmetricalCrossSection</code> cannot connect to one carrying an
+<code>AsymmetricalCrossSection</code> — the two are structurally different objects.
+This raises <code>CrossSectionSymmetryMismatchError</code> <strong>before</strong> the width/layer
+checks, and it's not bypassable by <code>allow_width_mismatch=True</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sym_straight</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WG_500&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plain symmetric straight for the mismatch demo.&quot;&quot;&quot;</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="mi">5_000</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">layer</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+        <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">xs</span><span class="o">.</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">c</span>
+
+
+<span class="n">parent_mix</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;asym_sym_mismatch&quot;</span><span class="p">)</span>
+<span class="n">sym_inst</span> <span class="o">=</span> <span class="n">parent_mix</span> <span class="o">&lt;&lt;</span> <span class="n">sym_straight</span><span class="p">(</span><span class="s2">&quot;WG_500&quot;</span><span class="p">)</span>
+<span class="n">asym_inst</span> <span class="o">=</span> <span class="n">parent_mix</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">asym_inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">sym_inst</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">CrossSectionSymmetryMismatchError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Symmetric ↔ asymmetric connect raises:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  CrossSectionSymmetryMismatchError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>Symmetric ↔ asymmetric connect raises:
+  CrossSectionSymmetryMismatchError: Cross section symmetry mismatch between ports &#39;o1&#39; (asymmetric) and &#39;o2&#39; (symmetric). Symmetric and asymmetric cross sections cannot be connected.
+</code></pre></div>
+<h3 id="summary-of-asymmetric-port-behavior">Summary of asymmetric port behavior</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Default <code>connect()</code></th>
+<th><code>connect(mirror=True)</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sym ↔ sym</td>
+<td>works</td>
+<td>works</td>
+</tr>
+<tr>
+<td>asym o2 → asym o1 (chain)</td>
+<td><code>AsymmetricMirrorRequiredError</code></td>
+<td>works, no instance mirrored</td>
+</tr>
+<tr>
+<td>asym o1 ↔ asym o1</td>
+<td><code>AsymmetricMirrorRequiredError</code></td>
+<td>works, one instance mirrored</td>
+</tr>
+<tr>
+<td>sym ↔ asym</td>
+<td><code>CrossSectionSymmetryMismatchError</code> (not bypassable)</td>
+<td>same error</td>
+</tr>
+</tbody>
+</table>
+<p>The check is a <strong>geometric</strong> one: kfactory computes the would-be instance
+trans, derives the world-frame "right" direction of both ports' profiles, and
+raises if they don't align.</p>
 <h2 id="summary">Summary</h2>
 <table>
 <thead>

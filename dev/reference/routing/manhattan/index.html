@@ -7314,8 +7314,7 @@ routing.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2786</span>
-<span class="normal">2787</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2787</span>
 <span class="normal">2788</span>
 <span class="normal">2789</span>
 <span class="normal">2790</span>
@@ -7344,7 +7343,8 @@ routing.</p>
 <span class="normal">2813</span>
 <span class="normal">2814</span>
 <span class="normal">2815</span>
-<span class="normal">2816</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clean_points</span><span class="p">(</span>
+<span class="normal">2816</span>
+<span class="normal">2817</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clean_points</span><span class="p">(</span>
     <span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove useless points from a manhattan type of list.</span>
@@ -8263,8 +8263,7 @@ choose the shortest path.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1932</span>
-<span class="normal">1933</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1933</span>
 <span class="normal">1934</span>
 <span class="normal">1935</span>
 <span class="normal">1936</span>
@@ -8426,7 +8425,8 @@ choose the shortest path.</p>
 <span class="normal">2092</span>
 <span class="normal">2093</span>
 <span class="normal">2094</span>
-<span class="normal">2095</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_loosely</span><span class="p">(</span>
+<span class="normal">2095</span>
+<span class="normal">2096</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_loosely</span><span class="p">(</span>
     <span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span>
     <span class="n">separation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">bbox_routing</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;minimal&quot;</span><span class="p">,</span> <span class="s2">&quot;full&quot;</span><span class="p">],</span>
@@ -10447,7 +10447,8 @@ Returns:
 <span class="normal">1745</span>
 <span class="normal">1746</span>
 <span class="normal">1747</span>
-<span class="normal">1748</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_smart</span><span class="p">(</span>
+<span class="normal">1748</span>
+<span class="normal">1749</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_smart</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">start_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">BasePort</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">],</span>
     <span class="n">end_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">BasePort</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">],</span>
@@ -10543,7 +10544,8 @@ Returns:
             <span class="n">end_port_names</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">disp</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="k">if</span> <span class="n">widths</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">cross_section</span><span class="o">.</span><span class="n">width</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">BasePort</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">start_ports</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">any_cross_section</span><span class="o">.</span><span class="n">width</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">BasePort</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">start_ports</span>
         <span class="p">]</span>
     <span class="n">box_region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">bboxes</span><span class="p">:</span>

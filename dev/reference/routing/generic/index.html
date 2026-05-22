@@ -6252,7 +6252,7 @@ ports will be used.</p>
     <span class="k">if</span> <span class="n">collision_edges</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">inter_route_collisions</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">collision_check_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">collision_check_layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">cross_section</span><span class="o">.</span><span class="n">main_layer</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">start_ports</span><span class="p">}</span>
+                <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">any_cross_section</span><span class="o">.</span><span class="n">main_layer</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">start_ports</span><span class="p">}</span>
             <span class="p">)</span>
         <span class="n">dbu</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">rdb</span><span class="o">.</span><span class="n">ReportDatabase</span><span class="p">(</span><span class="s2">&quot;Routing Errors&quot;</span><span class="p">)</span>
@@ -7535,7 +7535,7 @@ is not manhattan or the elements cannot be fitted.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">widths</span> <span class="o">=</span> <span class="n">route_width</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">cross_section</span><span class="o">.</span><span class="n">width</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">start_ports</span><span class="p">]</span>
+        <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">any_cross_section</span><span class="o">.</span><span class="n">width</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">start_ports</span><span class="p">]</span>
 
     <span class="n">routers</span> <span class="o">=</span> <span class="n">routing_function</span><span class="p">(</span>
         <span class="n">start_ports</span><span class="o">=</span><span class="n">start_ports</span><span class="p">,</span>
@@ -7597,7 +7597,7 @@ is not manhattan or the elements cannot be fitted.</p>
                 <span class="sa">f</span><span class="s2">&quot; points (dbu): </span><span class="si">{</span><span class="n">pts</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
             <span class="n">it</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exception: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">width</span> <span class="ow">or</span> <span class="n">ps</span><span class="o">.</span><span class="n">cross_section</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">width</span> <span class="ow">or</span> <span class="n">ps</span><span class="o">.</span><span class="n">any_cross_section</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
             <span class="n">it</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">polygon</span><span class="p">()))</span>
         <span class="n">c</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">lyrdb</span><span class="o">=</span><span class="n">db</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">placer_errors</span> <span class="ow">and</span> <span class="n">on_placer_error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

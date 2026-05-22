@@ -3199,10 +3199,32 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#kfactory.exceptions.AsymmetricMirrorRequiredError" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        AsymmetricMirrorRequiredError
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kfactory.exceptions.CellNameError" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
         CellNameError
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kfactory.exceptions.CrossSectionSymmetryMismatchError" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        CrossSectionSymmetryMismatchError
       </span>
     </span>
   </a>
@@ -5390,10 +5412,32 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#kfactory.exceptions.AsymmetricMirrorRequiredError" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        AsymmetricMirrorRequiredError
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kfactory.exceptions.CellNameError" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
         CellNameError
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kfactory.exceptions.CrossSectionSymmetryMismatchError" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        CrossSectionSymmetryMismatchError
       </span>
     </span>
   </a>
@@ -5608,6 +5652,102 @@
 
 
 
+<h3 id="kfactory.exceptions.AsymmetricMirrorRequiredError" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">AsymmetricMirrorRequiredError</span>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="ValueError">ValueError</span></code></p>
+
+
+
+        <p>Raised when connecting two asymmetric ports without <code>mirror=True</code>.</p>
+<p>Two ports carrying the same <code>AsymmetricalCrossSection</code> can only be
+connected via an M90 (mirror) transformation, since R180 would flip the
+left/right halves of the profile. Pass <code>mirror=True</code> to <code>connect</code>.</p>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>kfactory/exceptions.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AsymmetricMirrorRequiredError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when connecting two asymmetric ports without `mirror=True`.</span>
+
+<span class="sd">    Two ports carrying the same `AsymmetricalCrossSection` can only be</span>
+<span class="sd">    connected via an M90 (mirror) transformation, since R180 would flip the</span>
+<span class="sd">    left/right halves of the profile. Pass `mirror=True` to `connect`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">p1</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+        <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Cannot connect ports </span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> carrying the same&quot;</span>
+            <span class="s2">&quot; asymmetric cross section without `mirror=True`. Asymmetric profiles&quot;</span>
+            <span class="s2">&quot; require an M90 transformation (mirror) — R180 would flip the&quot;</span>
+            <span class="s2">&quot; left/right halves. Pass `mirror=True` to `connect`.&quot;</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
 <h3 id="kfactory.exceptions.CellNameError" class="doc doc-heading">
             <span class="doc doc-object-name doc-class-name">CellNameError</span>
 
@@ -5632,11 +5772,106 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">143</span>
-<span class="normal">144</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CellNameError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">191</span>
+<span class="normal">192</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CellNameError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised if a KCell is created and the automatic assigned name is taken.&quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
               </details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="kfactory.exceptions.CrossSectionSymmetryMismatchError" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">CrossSectionSymmetryMismatchError</span>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="ValueError">ValueError</span></code></p>
+
+
+
+        <p>Raised when connecting ports whose cross sections differ in symmetry.</p>
+<p>A symmetric and an asymmetric cross section cannot be connected even with
+<code>allow_width_mismatch</code>, since they are structurally different objects.</p>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>kfactory/exceptions.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CrossSectionSymmetryMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when connecting ports whose cross sections differ in symmetry.</span>
+
+<span class="sd">    A symmetric and an asymmetric cross section cannot be connected even with</span>
+<span class="sd">    `allow_width_mismatch`, since they are structurally different objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">p1</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+        <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kind1</span> <span class="o">=</span> <span class="s2">&quot;symmetric&quot;</span> <span class="k">if</span> <span class="n">p1</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;asymmetric&quot;</span>
+        <span class="n">kind2</span> <span class="o">=</span> <span class="s2">&quot;symmetric&quot;</span> <span class="k">if</span> <span class="n">p2</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;asymmetric&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Cross section symmetry mismatch between ports </span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> (</span><span class="si">{</span><span class="n">kind1</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; and </span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> (</span><span class="si">{</span><span class="n">kind2</span><span class="si">}</span><span class="s2">). Symmetric and asymmetric cross sections&quot;</span>
+            <span class="s2">&quot; cannot be connected.&quot;</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
 
     </div>
 
@@ -5670,8 +5905,8 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
-<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FactoriesLockedError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">39</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FactoriesLockedError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when trying to add a factory to a locked Factories collection.&quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -5708,8 +5943,8 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">147</span>
-<span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InvalidLayerError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">195</span>
+<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InvalidLayerError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a layer is not valid.&quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -5746,9 +5981,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
 <span class="normal">29</span>
@@ -5756,7 +5989,9 @@
 <span class="normal">31</span>
 <span class="normal">32</span>
 <span class="normal">33</span>
-<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LockedError</span><span class="p">(</span><span class="ne">AttributeError</span><span class="p">):</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LockedError</span><span class="p">(</span><span class="ne">AttributeError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a locked cell is being modified.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcell</span><span class="p">:</span> <span class="n">AnyKCell</span> <span class="o">|</span> <span class="n">BaseKCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -5801,14 +6036,14 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
 <span class="normal">30</span>
 <span class="normal">31</span>
 <span class="normal">32</span>
 <span class="normal">33</span>
-<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcell</span><span class="p">:</span> <span class="n">AnyKCell</span> <span class="o">|</span> <span class="n">BaseKCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcell</span><span class="p">:</span> <span class="n">AnyKCell</span> <span class="o">|</span> <span class="n">BaseKCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Throw _locked error.&quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">kcell</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is locked and likely stored in cache. Modifications are &quot;</span>
@@ -5858,8 +6093,8 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
-<span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MergeError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">43</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MergeError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised if two layout&#39;s have conflicting cell definitions.&quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -5896,9 +6131,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 76</span>
 <span class="normal"> 77</span>
 <span class="normal"> 78</span>
 <span class="normal"> 79</span>
@@ -5933,7 +6166,9 @@
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
-<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortLayerMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortLayerMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Error thrown when two ports don&#39;t have a matching `layer`.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -6014,9 +6249,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 79</span>
 <span class="normal"> 80</span>
 <span class="normal"> 81</span>
 <span class="normal"> 82</span>
@@ -6048,7 +6281,9 @@
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
-<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
     <span class="n">inst</span><span class="p">:</span> <span class="n">ProtoInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoInstanceGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
@@ -6125,9 +6360,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
@@ -6151,7 +6384,9 @@
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span>
-<span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortTypeMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortTypeMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Error thrown when two ports don&#39;t have a matching `port_type`.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -6220,9 +6455,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">119</span>
 <span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span>
@@ -6243,7 +6476,9 @@
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span>
-<span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">inst</span><span class="p">:</span> <span class="n">ProtoInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoInstanceGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">other_inst</span><span class="p">:</span> <span class="n">ProtoInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoInstanceGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
@@ -6309,9 +6544,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span>
 <span class="normal">50</span>
@@ -6335,7 +6568,9 @@
 <span class="normal">68</span>
 <span class="normal">69</span>
 <span class="normal">70</span>
-<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortWidthMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortWidthMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Error thrown when two ports don&#39;t have a matching `width`.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -6404,9 +6639,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
@@ -6427,7 +6660,9 @@
 <span class="normal">68</span>
 <span class="normal">69</span>
 <span class="normal">70</span>
-<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">inst</span><span class="p">:</span> <span class="n">ProtoInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoInstanceGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">other_inst</span><span class="p">:</span> <span class="n">ProtoInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoInstanceGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
