@@ -41,7 +41,7 @@ optional-dependencies.ci = [
   "pytest-cov>=7.1,<7.2",
   "pytest-datadir>=1.8,<1.9",
   "pytest-randomly>=4.1,<4.2",
-  "pytest-regressions>=2.10,<2.11",
+  "pytest-regressions>=2.10,<2.12",
   "pytest-xdist>=3.8,<3.9",
   "types-cachetools>=7.0.0.20260503,<7.1",
   "types-requests>=2.33.0.20260503,<2.34",
@@ -95,7 +95,7 @@ scripts.kf = "kfactory.cli:app"
 [dependency-groups]
 dev = [
   "pytest>=9.0.3,<9.1",
-  "pytest-regressions>=2.10,<2.11",
+  "pytest-regressions>=2.10,<2.12",
 ]
 
 [tool.setuptools]
