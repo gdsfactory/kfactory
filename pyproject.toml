@@ -34,7 +34,7 @@ dependencies = [
   "scipy>=1.17.1,<2",
   "semver>=3.0.4,<4",
   "toolz>=1.1,<2",
-  "typer>=0.25.1,<0.26",
+  "typer>=0.25.1,<0.27",
 ]
 optional-dependencies.ci = [
   "pytest>=9.0.3,<9.1",
