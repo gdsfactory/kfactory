@@ -219,6 +219,10 @@ def convert_metadata_type(value: Any) -> MetaData:
     """Recursively clean up a MetaData for KCellSettings."""
     if value is None:
         return None
+    if isinstance(value, float):
+        if value.is_integer():
+            return int(value)
+        return value
     if serializible_value_or_shape_guard(value):
         return value
     if isinstance(value, tuple):
@@ -234,6 +238,8 @@ def check_metadata_type(value: Any) -> MetaData:
     """Recursively check an info value whether it can be stored."""
     if value is None:
         return None
+    if isinstance(value, float) and value.is_integer():
+        value = int(value)
     if serializible_value_or_shape_guard(value):
         return value
     if isinstance(value, tuple):

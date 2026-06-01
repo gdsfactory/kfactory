@@ -70,6 +70,13 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
             radius_min=radius_min,
         )
 
+    def auto_name(self) -> str:
+        return f"{self.enclosure.name}_{self.width}"
+
+    @property
+    def extent(self) -> dbu:
+        return 0
+
     @model_validator(mode="before")
     @classmethod
     def _set_name(cls, data: Any) -> Any:

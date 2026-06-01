@@ -20,7 +20,7 @@ dependencies = [
   "aenum>=3.1.17,<4",
   "cachetools>=7.1.1,<7.2",
   "kfnetlist>=0.1.3",
-  "klayout>=0.30.8,<0.31",
+  "klayout>=0.30.9,<0.31",
   "loguru>=0.7.3,<0.8",
   "pydantic>=2.13.3,<2.14",
   "pydantic-extra-types>=2.11.1,<2.12",
@@ -165,13 +165,13 @@ ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem,
 skip = "pyproject.toml, uv.lock"
 
 [tool.ty]
+src.exclude = [ "docs", "src/kfactory/widgets/interactive.py", "tests/gdsfactory-yaml-pics" ]
 src.include = [ "docs", "src", "tests" ]
-src.exclude = [ "src/kfactory/widgets/interactive.py", "tests/gdsfactory-yaml-pics", "docs" ]
 
 [tool.pytest]
 ini_options.testpaths = [ "src", "tests" ]
-ini_options.addopts = "--tb=short"
 ini_options.norecursedirs = [ "extra/*.py" ]
+ini_options.addopts = "--tb=short"
 
 [tool.coverage]
 run.omit = [ "src/kfactory/cli/**/*.py" ]

@@ -558,7 +558,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                     for port in cell.ports:
                         mapped: Direction = Direction(mapping[port.trans.angle])
                         if mapped not in received_ports:
-                            received_ports[mapped]: list[str] = []  # ty:ignore[invalid-key]
+                            received_ports[mapped] = []  # ty:ignore[invalid-key]
                         received_ports[mapped].append(port.name)  # ty:ignore[invalid-key]
                     raise ValueError(
                         "The `@cell` decorator defines ports, but they do not match"
@@ -581,7 +581,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                         for port in cell.ports:
                             mapped = Direction(mapping[port.trans.angle])
                             if mapped not in received_ports:
-                                received_ports[mapped]: list[str] = []  # ty:ignore[invalid-key]
+                                received_ports[mapped] = []  # ty:ignore[invalid-key]
                             received_ports[mapped].append(port.name)  # ty:ignore[invalid-key]
                         raise ValueError(
                             "The `@cell` decorator defines ports, but they do not"
