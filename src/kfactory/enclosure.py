@@ -560,7 +560,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                         (
                             section[0],
                             kcl.to_dbu(section[1]),
-                            kcl.to_dbu(section[2]),  # ty:ignore[index-out-of-bounds]
+                            kcl.to_dbu(section[2]),
                         )
                     )
 
