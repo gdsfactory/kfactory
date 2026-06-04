@@ -20,7 +20,7 @@ docs-clean:
 # button), generate mkdocstrings API reference stubs into docs/source-built/.
 # Cached: re-runs only re-execute notebooks whose source hash changed.
 docs-build-source python_version="3.14":
-    uv run -p {{python_version}} --extra notebooks --with . python docs/scripts/build_docs_source.py
+    uv run -p {{python_version}} --extra notebooks --with-editable . python docs/scripts/build_docs_source.py
 
 # Build documentation (zensical) from the pre-built source
 docs python_version="3.14": docs-build-source
