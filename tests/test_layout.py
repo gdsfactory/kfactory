@@ -294,4 +294,4 @@ def test_kclayout_clear_drop_layers(kcl: kf.KCLayout, layers: Layers) -> None:
     assert len(kcl.kcells) == 0
     assert len(list(kcl.layout.each_cell())) == 0
     assert kcl.infos == kf.LayerInfos()
-    assert len(list(kcl.layers)) == 0  # ty:ignore[invalid-argument-type]
+    assert len(list(kcl.layers)) == 0

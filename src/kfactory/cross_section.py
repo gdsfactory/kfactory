@@ -1218,7 +1218,7 @@ class CrossSectionModel(BaseModel):
                             else (
                                 section[0],
                                 self.kcl.to_dbu(section[1]),
-                                self.kcl.to_dbu(section[2]),  # ty:ignore[index-out-of-bounds]
+                                self.kcl.to_dbu(section[2]),
                             )
                             for section in cross_section.get("sections", [])
                         ],

@@ -766,7 +766,7 @@ def test_netlist_equivalent(
         ignore_unnamed=True, connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)]
     )
     assert (
-        nl.lvs_equivalent(
+        nl.normalize(
             cell_name=c.name, equivalent_ports={"pad_m1": [["e1", "e2", "e3", "e4"]]}
         )
         == nl2[c.name]

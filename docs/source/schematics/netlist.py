@@ -136,7 +136,7 @@ cell
 
 # %%
 netlists = cell.netlist()
-nl = netlists[cell.name]
+nl = netlists[cell.name].normalize()
 
 print(f"Instances ({len(nl.instances)}):")
 for name, inst in nl.instances.items():

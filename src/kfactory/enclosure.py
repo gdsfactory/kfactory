@@ -237,14 +237,14 @@ def extrude_path_dynamic_points(
     if callable(widths):
         length = sum(((p2 - p1).abs() for p2, p1 in itertools.pairwise(path)))
         z: float = 0
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable]
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable, unsupported-operator]
         vector_top = [start_trans * ref_vector]
         vector_bot = [start_trans * kdb.DCplxTrans.R180 * ref_vector]
         p_old = path[0]
         p = path[1]
         z += (p - p_old).abs()
         for point in path[2:]:
-            ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable]
+            ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable, unsupported-operator]
             p_new = point
             v = p_new - p_old
             angle = np.rad2deg(np.arctan2(v.y, v.x))
@@ -254,7 +254,7 @@ def extrude_path_dynamic_points(
             z += (p_new - p).abs()
             p_old = p
             p = p_new
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable]
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable, unsupported-operator]
     else:
         ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[0] / 2))
         vector_top = [start_trans * ref_vector]
@@ -560,7 +560,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                         (
                             section[0],
                             kcl.to_dbu(section[1]),
-                            kcl.to_dbu(section[2]),  # ty:ignore[index-out-of-bounds]
+                            kcl.to_dbu(section[2]),
                         )
                     )
 

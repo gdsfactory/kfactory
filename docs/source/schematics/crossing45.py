@@ -509,8 +509,8 @@ with warnings.catch_warnings():
 # netlist (derived from physical geometry), we can verify they match.
 
 # %%
-schematic_netlist = c.schematic.netlist()
-extracted_netlist = c.netlist()[c.name]
+schematic_netlist = c.schematic.netlist().normalize()
+extracted_netlist = c.netlist()[c.name].normalize()
 
 assert schematic_netlist == extracted_netlist, "LVS failed!"
 print("LVS passed: schematic and extracted netlists match.")

@@ -2572,7 +2572,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
             return DCrossSection(kcl=self.kcl, base=cross_section)
         if callable(cross_section):
             any_cross_section = cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
-            return DCrossSection(kcl=self.kcl, base=any_cross_section._base)
+            return DCrossSection(kcl=self.kcl, base=any_cross_section._base)  # ty:ignore[unresolved-attribute]
         if isinstance(cross_section, dict):
             return DCrossSection(
                 kcl=self.kcl,
@@ -3045,7 +3045,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
             return CrossSection(kcl=self.kcl, base=cross_section)
         if callable(cross_section):
             any_cross_section = cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
-            return CrossSection(kcl=self.kcl, base=any_cross_section._base)
+            return CrossSection(kcl=self.kcl, base=any_cross_section._base)  # ty:ignore[unresolved-attribute]
         if isinstance(cross_section, dict):
             return CrossSection(
                 kcl=self.kcl,
