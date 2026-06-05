@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.42">
+      <meta name="generator" content="zensical-0.0.44">
     
     
       
@@ -5486,7 +5486,7 @@ that the schematic can reference as a plain string.</p>
 <span class="c1"># cross-section is available there as well.</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_wg1</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>&lt;kfactory.cross_section.CrossSection at 0x7f9b47481090&gt;
+<div class="highlight"><pre><span></span><code>&lt;kfactory.cross_section.CrossSection at 0x7fb4113b1950&gt;
 </code></pre></div>
 <h2 id="the-cross-cell">The <code>cross</code> cell</h2>
 <p>A single 45° crossing: four waveguide arms radiating from the center.</p>
@@ -5884,7 +5884,7 @@ repetitive routing primitives.</p>
 <span class="n">c</span> <span class="o">=</span> <span class="n">crossing45</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG1000&quot;</span><span class="p">)</span>
 <span class="n">c</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-22 12:17:46.409[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m914[0m - [1mStarting minkowski on Unnamed_0[0m
+<div class="highlight"><pre><span></span><code>[32m2026-06-05 00:00:39.164[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m914[0m - [1mStarting minkowski on Unnamed_0[0m
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
@@ -5900,8 +5900,8 @@ serialisable Pydantic structure.</p>
 <h2 id="lvs-schematic-vs-extracted-netlist">LVS: schematic vs extracted netlist</h2>
 <p>With both a schematic netlist (derived from declared connections) and an extracted
 netlist (derived from physical geometry), we can verify they match.</p>
-<div class="highlight"><pre><span></span><code><span class="n">schematic_netlist</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">netlist</span><span class="p">()</span>
-<span class="n">extracted_netlist</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">netlist</span><span class="p">()[</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><span class="n">schematic_netlist</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">netlist</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+<span class="n">extracted_netlist</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">netlist</span><span class="p">()[</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
 
 <span class="k">assert</span> <span class="n">schematic_netlist</span> <span class="o">==</span> <span class="n">extracted_netlist</span><span class="p">,</span> <span class="s2">&quot;LVS failed!&quot;</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LVS passed: schematic and extracted netlists match.&quot;</span><span class="p">)</span>
@@ -5916,7 +5916,7 @@ with collaborators or archived for reproducibility.</p>
 
 <span class="n">Code</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">code_str</span><span class="p">())</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-05-22 12:17:46.695[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2234[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+<div class="highlight"><pre><span></span><code>[32m2026-06-05 00:00:39.729[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2234[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 

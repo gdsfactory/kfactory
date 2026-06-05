@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.42">
+      <meta name="generator" content="zensical-0.0.44">
     
     
       
@@ -8299,7 +8299,7 @@ passed to the GDS and therefore not reversible.</p>
         <span class="n">nb</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">libcell_as_static</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">static_name_separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;__&quot;</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DInstance</span><span class="p">:</span>  <span class="c1"># ty:ignore[invalid-method-override]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DInstance</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">DInstance</span><span class="p">(</span>
             <span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
             <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dcreate_inst</span><span class="p">(</span>
@@ -8330,7 +8330,7 @@ passed to the GDS and therefore not reversible.</p>
             <span class="k">return</span> <span class="n">DCrossSection</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">cross_section</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">cross_section</span><span class="p">):</span>
             <span class="n">any_cross_section</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">(</span><span class="o">**</span><span class="n">cross_section_kwargs</span><span class="p">)</span>  <span class="c1"># ty:ignore[call-top-callable]</span>
-            <span class="k">return</span> <span class="n">DCrossSection</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">any_cross_section</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">DCrossSection</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">any_cross_section</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>  <span class="c1"># ty:ignore[unresolved-attribute]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">DCrossSection</span><span class="p">(</span>
                 <span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
@@ -9569,7 +9569,7 @@ if <code>None</code> create an empty one.</p>
         <span class="n">nb</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">libcell_as_static</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">static_name_separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;__&quot;</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instance</span><span class="p">:</span>  <span class="c1"># ty:ignore[invalid-method-override]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instance</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Instance</span><span class="p">(</span>
             <span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
             <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">icreate_inst</span><span class="p">(</span>
@@ -9867,7 +9867,7 @@ if <code>None</code> create an empty one.</p>
             <span class="k">return</span> <span class="n">CrossSection</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">cross_section</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">cross_section</span><span class="p">):</span>
             <span class="n">any_cross_section</span> <span class="o">=</span> <span class="n">cross_section</span><span class="p">(</span><span class="o">**</span><span class="n">cross_section_kwargs</span><span class="p">)</span>  <span class="c1"># ty:ignore[call-top-callable]</span>
-            <span class="k">return</span> <span class="n">CrossSection</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">any_cross_section</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">CrossSection</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">any_cross_section</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>  <span class="c1"># ty:ignore[unresolved-attribute]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">CrossSection</span><span class="p">(</span>
                 <span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>

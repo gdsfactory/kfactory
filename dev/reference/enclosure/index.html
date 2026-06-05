@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.42">
+      <meta name="generator" content="zensical-0.0.44">
     
     
       
@@ -9693,7 +9693,7 @@ the minkowski and take the inverse again.</p>
                         <span class="p">(</span>
                             <span class="n">section</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                             <span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">section</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-                            <span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">section</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>  <span class="c1"># ty:ignore[index-out-of-bounds]</span>
+                            <span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">section</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
 
@@ -10502,7 +10502,7 @@ if copying to another layout and not all layers used are LayerInfos.</p>
                     <span class="p">(</span>
                         <span class="n">section</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                         <span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">section</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-                        <span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">section</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>  <span class="c1"># ty:ignore[index-out-of-bounds]</span>
+                        <span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">section</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
 
@@ -15398,14 +15398,14 @@ autocalculated from the last two elements</p>
     <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">widths</span><span class="p">):</span>
         <span class="n">length</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(((</span><span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span> <span class="k">for</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p1</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">pairwise</span><span class="p">(</span><span class="n">path</span><span class="p">)))</span>
         <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">ref_vector</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DVector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">widths</span><span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="n">length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># ty:ignore[call-top-callable]</span>
+        <span class="n">ref_vector</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DVector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">widths</span><span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="n">length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># ty:ignore[call-top-callable, unsupported-operator]</span>
         <span class="n">vector_top</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_trans</span> <span class="o">*</span> <span class="n">ref_vector</span><span class="p">]</span>
         <span class="n">vector_bot</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_trans</span> <span class="o">*</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="o">.</span><span class="n">R180</span> <span class="o">*</span> <span class="n">ref_vector</span><span class="p">]</span>
         <span class="n">p_old</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">z</span> <span class="o">+=</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">p_old</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">path</span><span class="p">[</span><span class="mi">2</span><span class="p">:]:</span>
-            <span class="n">ref_vector</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DVector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">widths</span><span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="n">length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># ty:ignore[call-top-callable]</span>
+            <span class="n">ref_vector</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DVector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">widths</span><span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="n">length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># ty:ignore[call-top-callable, unsupported-operator]</span>
             <span class="n">p_new</span> <span class="o">=</span> <span class="n">point</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">p_new</span> <span class="o">-</span> <span class="n">p_old</span>
             <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
@@ -15415,7 +15415,7 @@ autocalculated from the last two elements</p>
             <span class="n">z</span> <span class="o">+=</span> <span class="p">(</span><span class="n">p_new</span> <span class="o">-</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
             <span class="n">p_old</span> <span class="o">=</span> <span class="n">p</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">p_new</span>
-        <span class="n">ref_vector</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DVector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">widths</span><span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="n">length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># ty:ignore[call-top-callable]</span>
+        <span class="n">ref_vector</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DVector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">widths</span><span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="n">length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># ty:ignore[call-top-callable, unsupported-operator]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ref_vector</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DVector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">widths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
         <span class="n">vector_top</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_trans</span> <span class="o">*</span> <span class="n">ref_vector</span><span class="p">]</span>
