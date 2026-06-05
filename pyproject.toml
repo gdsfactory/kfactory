@@ -18,49 +18,49 @@ classifiers = [
 ]
 dependencies = [
   "aenum>=3.1.17,<4",
-  "cachetools>=7.1.1,<7.2",
+  "cachetools>=7.1.4,<7.2",
   "kfnetlist>=0.2",
   "klayout>=0.30.9,<0.31",
   "loguru>=0.7.3,<0.8",
-  "pydantic>=2.13.3,<2.14",
+  "pydantic>=2.13.4,<2.14",
   "pydantic-extra-types>=2.11.1,<2.12",
-  "pydantic-settings>=2.14,<3",
+  "pydantic-settings>=2.14.1,<3",
   "pygit2>=1.19.2,<2",
   "rapidfuzz>=3.14.5,<4",
   "rectangle-packer>=2.1,<3",
-  "requests>=2.33.1,<3",
+  "requests>=2.34.2,<3",
   "ruamel-yaml>=0.19.1,<0.20",
   "ruamel-yaml-string>=0.1.1,<0.2",
   "scipy>=1.17.1,<2",
   "semver>=3.0.4,<4",
   "toolz>=1.1,<2",
-  "typer>=0.25.1,<0.26",
+  "typer>=0.26.7,<0.27",
 ]
 optional-dependencies.ci = [
   "pytest>=9.0.3,<9.1",
   "pytest-cov>=7.1,<7.2",
   "pytest-datadir>=1.8,<1.9",
   "pytest-randomly>=4.1,<4.2",
-  "pytest-regressions>=2.10,<2.11",
+  "pytest-regressions>=2.11,<2.12",
   "pytest-xdist>=3.8,<3.9",
-  "types-cachetools>=7.0.0.20260503,<7.1",
-  "types-requests>=2.33.0.20260503,<2.34",
-  "uv>=0.11.9,<0.12",
+  "types-cachetools>=7.0.0.20260518,<7.1",
+  "types-requests>=2.33.0.20260518,<2.34",
+  "uv>=0.11.19,<0.12",
 ]
 optional-dependencies.dev = [
   "kfactory[ci]",
   "pre-commit>=4.6,<4.7",
   "python-lsp-server[all]>=1.14,<1.15",
-  "ruff>=0.15.12,<0.16",
+  "ruff>=0.15.16,<0.16",
   "rust-just~=1.51.0",
-  "scipy-stubs>=1.17.1.4,<1.18",
+  "scipy-stubs>=1.17.1.5,<1.18",
   "tbump>=6.11,<6.12",
-  "ty>=0.0.34,<0.1",
-  "types-cachetools>=7.0.0.20260503,<7.1",
-  "types-docutils>=0.22.3.20260408,<0.23",
-  "types-pygments>=2.20.0.20260408,<2.21",
-  "types-requests>=2.33.0.20260503,<2.34",
-  "types-setuptools>=82.0.0.20260408,<82.1",
+  "ty>=0.0.43,<0.1",
+  "types-cachetools>=7.0.0.20260518,<7.1",
+  "types-docutils>=0.22.3.20260518,<0.23",
+  "types-pygments>=2.20.0.20260518,<2.21",
+  "types-requests>=2.33.0.20260518,<2.34",
+  "types-setuptools>=82.0.0.20260518,<82.1",
 ]
 optional-dependencies.docs = [
   "erdantic>=1.2.1,<1.3",
@@ -71,19 +71,19 @@ optional-dependencies.docs = [
   "mkdocs-literate-nav>=0.6.3,<0.7",
   "mkdocs-video>=1.5,<1.6",
   "mkdocstrings[python]>=1.0.4,<1.1",
-  "pymdown-extensions>=10.21.2,<10.22",
-  "ruff>=0.15.12,<0.16",
-  "zensical>=0.0.40,<0.1",
+  "pymdown-extensions>=10.21.3,<10.22",
+  "ruff>=0.15.16,<0.16",
+  "zensical>=0.0.44,<0.1",
 ]
 optional-dependencies.ipy = [
   "ipyevents>=2.0.4,<2.1",
-  "ipython>=9.13,<9.14",
+  "ipython>=9.14,<9.15",
   "ipytree>=0.2.2,<0.3",
   "ipywidgets>=8.1.8,<8.2",
 ]
 optional-dependencies.notebooks = [
   "ipykernel>=7.2,<7.3",
-  "jupytext>=1.19.1,<1.20",
+  "jupytext>=1.19.3,<1.20",
   # Notebook conversion needs the IPython display helpers
   # (`c.plot()` lazy-imports kfactory.widgets.interactive, which
   # pulls in ipyevents/ipywidgets/ipytree from the [ipy] extra).
@@ -95,7 +95,7 @@ scripts.kf = "kfactory.cli:app"
 [dependency-groups]
 dev = [
   "pytest>=9.0.3,<9.1",
-  "pytest-regressions>=2.10,<2.11",
+  "pytest-regressions>=2.11,<2.12",
 ]
 
 [tool.setuptools]
