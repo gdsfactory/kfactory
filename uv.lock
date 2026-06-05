@@ -710,7 +710,7 @@ wheels = [
 
 [[package]]
 name = "ipython"
-version = "9.13.0"
+version = "9.14.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
@@ -720,14 +720,14 @@ dependencies = [
     { name = "matplotlib-inline" },
     { name = "pexpect", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
     { name = "prompt-toolkit" },
-    { name = "psutil" },
+    { name = "psutil", marker = "sys_platform != 'emscripten'" },
     { name = "pygments" },
     { name = "stack-data" },
     { name = "traitlets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cd/c4/87cda5842cf5c31837c06ddb588e11c3c35d8ece89b7a0108c06b8c9b00a/ipython-9.13.0.tar.gz", hash = "sha256:7e834b6afc99f020e3f05966ced34792f40267d64cb1ea9043886dab0dde5967", size = 4430549, upload-time = "2026-04-24T12:24:55.221Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/21/c2/c0064cf15d026501a1ef70e42efd9c3f818663089399aacc5e37a82901c1/ipython-9.14.0.tar.gz", hash = "sha256:6f27ff0f1d9ea050e0551f71568bc4b34d8aba579e8f111c5b4175f44ac6b4aa", size = 4432601, upload-time = "2026-05-29T15:13:24.611Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b9/86/3060e8029b7cc505cce9a0137431dda81d0a3fde93a8f0f50ee0bf37a795/ipython-9.13.0-py3-none-any.whl", hash = "sha256:57f9d4639e20818d328d287c7b549af3d05f12486ea8f2e7f73e52a36ec4d201", size = 627274, upload-time = "2026-04-24T12:24:53.038Z" },
+    { url = "https://files.pythonhosted.org/packages/14/a3/9e59340f02c1dc8f8c0a05b09244712b8609eb5439f9996e887e2b82f452/ipython-9.14.0-py3-none-any.whl", hash = "sha256:8fd984a3372c14b12790b084ba6b5cff5678c0cb063244a0034f06a51f20d6c2", size = 627457, upload-time = "2026-05-29T15:13:22.942Z" },
 ]
 
 [[package]]
@@ -995,21 +995,21 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aenum", specifier = ">=3.1.17,<4" },
-    { name = "cachetools", specifier = ">=7.1.1,<7.2" },
+    { name = "cachetools", specifier = ">=7.1.4,<7.2" },
     { name = "erdantic", marker = "extra == 'docs'", specifier = ">=1.2.1,<1.3" },
     { name = "griffe-inherited-docstrings", marker = "extra == 'docs'", specifier = ">=1.1.3,<1.2" },
     { name = "griffe-pydantic", marker = "extra == 'docs'", specifier = ">=1.3.1,<1.4" },
     { name = "griffe-warnings-deprecated", marker = "extra == 'docs'", specifier = ">=1.1.1,<1.2" },
     { name = "ipyevents", marker = "extra == 'ipy'", specifier = ">=2.0.4,<2.1" },
     { name = "ipykernel", marker = "extra == 'notebooks'", specifier = ">=7.2,<7.3" },
-    { name = "ipython", marker = "extra == 'ipy'", specifier = ">=9.13,<9.14" },
+    { name = "ipython", marker = "extra == 'ipy'", specifier = ">=9.14,<9.15" },
     { name = "ipytree", marker = "extra == 'ipy'", specifier = ">=0.2.2,<0.3" },
     { name = "ipywidgets", marker = "extra == 'ipy'", specifier = ">=8.1.8,<8.2" },
-    { name = "jupytext", marker = "extra == 'notebooks'", specifier = ">=1.19.1,<1.20" },
+    { name = "jupytext", marker = "extra == 'notebooks'", specifier = ">=1.19.3,<1.20" },
     { name = "kfactory", extras = ["ci"], marker = "extra == 'dev'" },
     { name = "kfactory", extras = ["ipy"], marker = "extra == 'notebooks'" },
     { name = "kfactory", extras = ["notebooks"], marker = "extra == 'docs'" },
-    { name = "kfnetlist", specifier = ">=0.2.0" },
+    { name = "kfnetlist", specifier = ">=0.2" },
     { name = "klayout", specifier = ">=0.30.9,<0.31" },
     { name = "loguru", specifier = ">=0.7.3,<0.8" },
     { name = "mkdocs-literate-nav", marker = "extra == 'docs'", specifier = ">=0.6.3,<0.7" },
@@ -1017,49 +1017,49 @@ requires-dist = [
     { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'", specifier = ">=1.0.4,<1.1" },
     { name = "nbconvert", marker = "extra == 'notebooks'", specifier = ">=7.17.1,<7.18" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.6,<4.7" },
-    { name = "pydantic", specifier = ">=2.13.3,<2.14" },
+    { name = "pydantic", specifier = ">=2.13.4,<2.14" },
     { name = "pydantic-extra-types", specifier = ">=2.11.1,<2.12" },
-    { name = "pydantic-settings", specifier = ">=2.14,<3" },
+    { name = "pydantic-settings", specifier = ">=2.14.1,<3" },
     { name = "pygit2", specifier = ">=1.19.2,<2" },
-    { name = "pymdown-extensions", marker = "extra == 'docs'", specifier = ">=10.21.2,<10.22" },
+    { name = "pymdown-extensions", marker = "extra == 'docs'", specifier = ">=10.21.3,<10.22" },
     { name = "pytest", marker = "extra == 'ci'", specifier = ">=9.0.3,<9.1" },
     { name = "pytest-cov", marker = "extra == 'ci'", specifier = ">=7.1,<7.2" },
     { name = "pytest-datadir", marker = "extra == 'ci'", specifier = ">=1.8,<1.9" },
     { name = "pytest-randomly", marker = "extra == 'ci'", specifier = ">=4.1,<4.2" },
-    { name = "pytest-regressions", marker = "extra == 'ci'", specifier = ">=2.10,<2.11" },
+    { name = "pytest-regressions", marker = "extra == 'ci'", specifier = ">=2.11,<2.12" },
     { name = "pytest-xdist", marker = "extra == 'ci'", specifier = ">=3.8,<3.9" },
     { name = "python-lsp-server", extras = ["all"], marker = "extra == 'dev'", specifier = ">=1.14,<1.15" },
     { name = "rapidfuzz", specifier = ">=3.14.5,<4" },
     { name = "rectangle-packer", specifier = ">=2.1,<3" },
-    { name = "requests", specifier = ">=2.33.1,<3" },
+    { name = "requests", specifier = ">=2.34.2,<3" },
     { name = "ruamel-yaml", specifier = ">=0.19.1,<0.20" },
     { name = "ruamel-yaml-string", specifier = ">=0.1.1,<0.2" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.12,<0.16" },
-    { name = "ruff", marker = "extra == 'docs'", specifier = ">=0.15.12,<0.16" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.16,<0.16" },
+    { name = "ruff", marker = "extra == 'docs'", specifier = ">=0.15.16,<0.16" },
     { name = "rust-just", marker = "extra == 'dev'", specifier = "~=1.51.0" },
     { name = "scipy", specifier = ">=1.17.1,<2" },
-    { name = "scipy-stubs", marker = "extra == 'dev'", specifier = ">=1.17.1.4,<1.18" },
+    { name = "scipy-stubs", marker = "extra == 'dev'", specifier = ">=1.17.1.5,<1.18" },
     { name = "semver", specifier = ">=3.0.4,<4" },
     { name = "tbump", marker = "extra == 'dev'", specifier = ">=6.11,<6.12" },
     { name = "toolz", specifier = ">=1.1,<2" },
-    { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.34,<0.1" },
-    { name = "typer", specifier = ">=0.25.1,<0.26" },
-    { name = "types-cachetools", marker = "extra == 'ci'", specifier = ">=7.0.0.20260503,<7.1" },
-    { name = "types-cachetools", marker = "extra == 'dev'", specifier = ">=7.0.0.20260503,<7.1" },
-    { name = "types-docutils", marker = "extra == 'dev'", specifier = ">=0.22.3.20260408,<0.23" },
-    { name = "types-pygments", marker = "extra == 'dev'", specifier = ">=2.20.0.20260408,<2.21" },
-    { name = "types-requests", marker = "extra == 'ci'", specifier = ">=2.33.0.20260503,<2.34" },
-    { name = "types-requests", marker = "extra == 'dev'", specifier = ">=2.33.0.20260503,<2.34" },
-    { name = "types-setuptools", marker = "extra == 'dev'", specifier = ">=82.0.0.20260408,<82.1" },
-    { name = "uv", marker = "extra == 'ci'", specifier = ">=0.11.9,<0.12" },
-    { name = "zensical", marker = "extra == 'docs'", specifier = ">=0.0.40,<0.1" },
+    { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.43,<0.1" },
+    { name = "typer", specifier = ">=0.26.7,<0.27" },
+    { name = "types-cachetools", marker = "extra == 'ci'", specifier = ">=7.0.0.20260518,<7.1" },
+    { name = "types-cachetools", marker = "extra == 'dev'", specifier = ">=7.0.0.20260518,<7.1" },
+    { name = "types-docutils", marker = "extra == 'dev'", specifier = ">=0.22.3.20260518,<0.23" },
+    { name = "types-pygments", marker = "extra == 'dev'", specifier = ">=2.20.0.20260518,<2.21" },
+    { name = "types-requests", marker = "extra == 'ci'", specifier = ">=2.33.0.20260518,<2.34" },
+    { name = "types-requests", marker = "extra == 'dev'", specifier = ">=2.33.0.20260518,<2.34" },
+    { name = "types-setuptools", marker = "extra == 'dev'", specifier = ">=82.0.0.20260518,<82.1" },
+    { name = "uv", marker = "extra == 'ci'", specifier = ">=0.11.19,<0.12" },
+    { name = "zensical", marker = "extra == 'docs'", specifier = ">=0.0.44,<0.1" },
 ]
 provides-extras = ["ci", "dev", "docs", "ipy", "notebooks"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "pytest", specifier = ">=9.0.3,<9.1" },
-    { name = "pytest-regressions", specifier = ">=2.10,<2.11" },
+    { name = "pytest-regressions", specifier = ">=2.11,<2.12" },
 ]
 
 [[package]]
@@ -2105,16 +2105,16 @@ wheels = [
 
 [[package]]
 name = "pytest-regressions"
-version = "2.10.0"
+version = "2.11.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pytest" },
     { name = "pytest-datadir" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/15/d7/6d7525320538d59c1763ebb9f9fdde957966fea607236b2c905ded6f8c98/pytest_regressions-2.10.0.tar.gz", hash = "sha256:5239d29ffe5760acb4a37d95d575383473a2e62c55ede2e89cff735d3bbd2ac9", size = 115513, upload-time = "2026-02-10T13:37:08.21Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ba/0f/1d6b8cc851596be52c401af53fd0d844e72921b0b11866b88995673cd320/pytest_regressions-2.11.0.tar.gz", hash = "sha256:d4a86092f979eb25d2403c51b2b61039781c4c7c7a364a56b9fa838872a650f7", size = 117474, upload-time = "2026-05-25T12:09:01.796Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/de/f0/32b0a304563e42693049e31be097427f05451aa42c04e3819b4a5c0afe78/pytest_regressions-2.10.0-py3-none-any.whl", hash = "sha256:e40b98fd1e26435bf694fbd497ac74f4580cbda3b794562faab3dcea2300c0eb", size = 25087, upload-time = "2026-02-10T13:37:06.661Z" },
+    { url = "https://files.pythonhosted.org/packages/97/61/fe772eda66bb8e2ee72da2937382aa4f803ca1e41092ca8d59953e96262c/pytest_regressions-2.11.0-py3-none-any.whl", hash = "sha256:fcb2bbcfb2fda256624d434c88cb1e4003667b7e078ee4084887cf839bbdf831", size = 25556, upload-time = "2026-05-25T12:09:00.292Z" },
 ]
 
 [[package]]
@@ -3008,17 +3008,17 @@ wheels = [
 
 [[package]]
 name = "typer"
-version = "0.25.1"
+version = "0.26.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "annotated-doc" },
-    { name = "click" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "rich" },
     { name = "shellingham" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e4/51/9aed62104cea109b820bbd6c14245af756112017d309da813ef107d42e7e/typer-0.25.1.tar.gz", hash = "sha256:9616eb8853a09ffeabab1698952f33c6f29ffdbceb4eaeecf571880e8d7664cc", size = 122276, upload-time = "2026-04-30T19:32:16.964Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5e/ed/ef06584ccdd5c410df0837951ecd7e15d9a6144ea1bd4c73cecab1a89891/typer-0.26.7.tar.gz", hash = "sha256:e314a34c617e419c091b2830dda3ea1f257134ff593061a8f5b9717ab8dddb3a", size = 201709, upload-time = "2026-06-03T07:18:06.843Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/f9/2b3ff4e56e5fa7debfaf9eb135d0da96f3e9a1d5b27222223c7296336e5f/typer-0.25.1-py3-none-any.whl", hash = "sha256:75caa44ed46a03fb2dab8808753ffacdbfea88495e74c85a28c5eefcf5f39c89", size = 58409, upload-time = "2026-04-30T19:32:18.271Z" },
+    { url = "https://files.pythonhosted.org/packages/24/25/2201973529af2c954de0bb725323c3aaed6d7f0ceee8f550dec9185df013/typer-0.26.7-py3-none-any.whl", hash = "sha256:5c87cfbc5d34491c5346ebf49c23e18d56ccb863268d3a8d592b26087c2f5e58", size = 122456, upload-time = "2026-06-03T07:18:05.732Z" },
 ]
 
 [[package]]
