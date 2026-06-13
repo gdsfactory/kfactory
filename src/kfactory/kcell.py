@@ -1719,7 +1719,9 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 if not self.is_library_cell():
                     for index in sorted(port_dict.keys()):
                         v = port_dict[index]
-                        xs = self.kcl.get_cross_section(v["cross_section"], kind="any")
+                        xs = self.kcl.get_cross_section(
+                            v["cross_section"], symmetrical=None
+                        )
                         trans_: kdb.Trans | None = v.get("trans")
                         if trans_ is not None:
                             ports[index] = self.create_port(
@@ -1755,7 +1757,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         trans_ = v.get("trans")
                         lib_kcl = kcls[lib_name]
                         lib_xs = lib_kcl.get_cross_section(
-                            v["cross_section"], kind="any"
+                            v["cross_section"], symmetrical=None
                         )
                         cs: SymmetricalCrossSection | AsymmetricalCrossSection
                         if isinstance(lib_xs, SymmetricalCrossSection):
@@ -2566,7 +2568,8 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
     ) -> DCrossSection:
         if isinstance(cross_section, str):
             return DCrossSection(
-                kcl=self.kcl, base=self.kcl.cross_sections[cross_section]
+                kcl=self.kcl,
+                base=self.kcl.cross_sections.get_cross_section(cross_section),
             )
         if isinstance(cross_section, SymmetricalCrossSection):
             return DCrossSection(kcl=self.kcl, base=cross_section)
@@ -3039,7 +3042,8 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
     ) -> CrossSection:
         if isinstance(cross_section, str):
             return CrossSection(
-                kcl=self.kcl, base=self.kcl.cross_sections[cross_section]
+                kcl=self.kcl,
+                base=self.kcl.cross_sections.get_cross_section(cross_section),
             )
         if isinstance(cross_section, SymmetricalCrossSection):
             return CrossSection(kcl=self.kcl, base=cross_section)

@@ -865,7 +865,7 @@ def test_schematic_function_get_port_positions(
         """
         c = kcl.kcell()
 
-        xs = c.kcl.get_icross_section(cross_section)
+        xs = c.kcl.get_icross_section(cross_section, symmetrical=True)
         width = c.kcl.to_um(xs.width)
         radius = c.kcl.to_um(xs.radius)
         assert radius is not None, "Radius of cross section must not be None"
@@ -945,7 +945,7 @@ def test_schematic_function_get_port_positions(
             resolution: Angle resolution for the backbone.
         """
         c = kcl.kcell()
-        xs = c.kcl.get_icross_section(cross_section)
+        xs = c.kcl.get_icross_section(cross_section, symmetrical=True)
 
         width = c.kcl.to_um(xs.width)
         radius = c.kcl.to_um(xs.radius)
@@ -1015,7 +1015,7 @@ def test_schematic_function_get_port_positions(
             enclosure: Definition of slab/excludes. [dbu]
         """
         c = kcl.kcell()
-        xs = c.kcl.get_icross_section(cross_section)
+        xs = c.kcl.get_icross_section(cross_section, symmetrical=True)
 
         length_ = c.kcl.to_dbu(length)
 

@@ -1,5 +1,6 @@
 import pickle
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -7,6 +8,7 @@ import pytest
 import kfactory as kf
 from kfactory.exceptions import (
     AsymmetricMirrorRequiredError,
+    CrossSectionNamingConflictError,
     CrossSectionSymmetryMismatchError,
 )
 
@@ -105,7 +107,7 @@ def test_cross_section_name_conflict_across_kinds() -> None:
     kcl.get_symmetrical_cross_section(
         kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="shared")
     )
-    with pytest.raises(ValueError, match="symmetric"):
+    with pytest.raises(ValueError, match="different structural signature"):
         kcl.get_asymmetrical_cross_section(
             kf.AsymmetricalCrossSection(
                 layer=layer, section_min=-250, section_max=250, name="shared"
@@ -118,7 +120,7 @@ def test_cross_section_name_conflict_across_kinds() -> None:
             layer=layer, section_min=-250, section_max=250, name="shared"
         )
     )
-    with pytest.raises(ValueError, match="asymmetric"):
+    with pytest.raises(ValueError, match="different structural signature"):
         kcl2.get_symmetrical_cross_section(
             kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="shared")
         )
@@ -139,7 +141,7 @@ def test_asymmetrical_cross_section_registration() -> None:
         section_max=300,
         name="asym_test",
     )
-    with pytest.raises(ValueError, match="already an asymmetrical cross_section"):
+    with pytest.raises(ValueError, match="different structural signature"):
         kcl.get_asymmetrical_cross_section(different)
 
 
@@ -315,7 +317,7 @@ def test_asymmetrical_cross_section_gds_roundtrip() -> None:
         kcl_r = kf.KCLayout("ASYM_GDS_R")
         kcl_r.read(path)
 
-    assert "asym_test" in kcl_r.cross_sections.asymmetrical_cross_sections
+    assert "asym_test" in kcl_r.cross_sections.cross_sections
     restored = kcl_r.get_asymmetrical_cross_section("asym_test")
     assert restored == acs
 
@@ -485,7 +487,7 @@ def test_asymmetric_wrapper_construct_from_scratch() -> None:
         name="acs1",
     )
     # builds and registers a base under the hood
-    assert "acs1" in kcl.cross_sections.asymmetrical_cross_sections
+    assert "acs1" in kcl.cross_sections.cross_sections
     # constructing a second wrapper with the same args returns equal wrapper
     ixs2 = kf.AsymmetricCrossSection(kcl=kcl, base=ixs.base)
     assert ixs == ixs2
@@ -510,19 +512,19 @@ def test_get_cross_section_kind_switch() -> None:
 
     assert kcl.get_cross_section(scs) is scs
     assert kcl.get_cross_section("wg1000") is scs
-    assert kcl.get_cross_section(scs, kind="symmetric") is scs
-    assert kcl.get_cross_section(acs, kind="asymmetric") is acs
-    assert kcl.get_cross_section("aw500", kind="asymmetric") is acs
-    assert kcl.get_cross_section(scs, kind="any") is scs
-    assert kcl.get_cross_section(acs, kind="any") is acs
-    assert kcl.get_cross_section("wg1000", kind="any") is scs
-    assert kcl.get_cross_section("aw500", kind="any") is acs
+    assert kcl.get_cross_section(scs, symmetrical=True) is scs
+    assert kcl.get_cross_section(acs, symmetrical=False) is acs
+    assert kcl.get_cross_section("aw500", symmetrical=False) is acs
+    assert kcl.get_cross_section(scs, symmetrical=None) is scs
+    assert kcl.get_cross_section(acs, symmetrical=None) is acs
+    assert kcl.get_cross_section("wg1000", symmetrical=None) is scs
+    assert kcl.get_cross_section("aw500", symmetrical=None) is acs
     # any with a wrapper resolves to its base
     ixs = kcl.get_iasymmetric_cross_section(acs)
-    assert kcl.get_cross_section(ixs, kind="any") is acs
+    assert kcl.get_cross_section(ixs, symmetrical=None) is acs
     # unknown name under "any" raises
     with pytest.raises(KeyError):
-        kcl.get_cross_section("does_not_exist", kind="any")
+        kcl.get_cross_section("does_not_exist", symmetrical=None)
 
 
 def test_metadata_uses_separate_prefix_for_asymmetric() -> None:
@@ -557,7 +559,7 @@ def test_metadata_uses_separate_prefix_for_asymmetric() -> None:
         kcl_r.read(path)
 
     assert "wg1000" in kcl_r.cross_sections.cross_sections
-    assert "aw500" in kcl_r.cross_sections.asymmetrical_cross_sections
+    assert "aw500" in kcl_r.cross_sections.cross_sections
 
 
 def test_connect_asym_to_asym_requires_mirror_when_misaligned() -> None:
@@ -680,3 +682,148 @@ def test_asym_connect_check_ignores_input_mirror_flag_when_use_mirror_false() ->
         ia.connect("o1", ib, "o1", mirror=True, use_mirror=False)
     # With existing mirror=True and mirror=False, effective is M90 — passes.
     ia.connect("o1", ib, "o1", mirror=False, use_mirror=False)
+
+
+# --- Named/unnamed canonicalization ---------------------------------------
+
+
+def test_symmetric_unnamed_resolves_to_named(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    enc = kcl.get_enclosure(sym_enc("wgenc"))
+    named = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="A")
+    )
+    assert named.is_named
+    unnamed = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc)
+    )
+    assert unnamed is named
+    assert unnamed.name == "A"
+
+
+def test_symmetric_named_promotes_unnamed(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    enc = kcl.get_enclosure(sym_enc("wgenc"))
+    unnamed = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc)
+    )
+    assert not unnamed.is_named
+    auto_name = unnamed.name
+    named = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="B")
+    )
+    assert named.name == "B"
+    again = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc)
+    )
+    assert again is named
+    # The canonical (auto) name now aliases the promoted named entry.
+    assert kcl.cross_sections.cross_sections[auto_name] is named
+
+
+def test_symmetric_naming_conflict(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    enc = kcl.get_enclosure(sym_enc("wgenc"))
+    a1 = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="A")
+    )
+    # Idempotent re-registration of the same named cross section.
+    a2 = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="A")
+    )
+    assert a1 is a2
+    # A second, different name for the same signature raises.
+    with pytest.raises(CrossSectionNamingConflictError):
+        kcl.get_symmetrical_cross_section(
+            kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="C")
+        )
+
+
+def test_enclosure_unnamed_resolves_to_named(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    named = kcl.get_enclosure(sym_enc("encA"))
+    unnamed = kcl.get_enclosure(sym_enc())
+    assert unnamed is named
+    # Addressable by the structural (unnamed) key string too.
+    assert kcl.get_enclosure(named.unnamed_key) is named
+
+
+def test_enclosure_named_promotes_unnamed(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    unnamed = kcl.get_enclosure(sym_enc())
+    assert not unnamed.is_named
+    auto_key = unnamed.name
+    named = kcl.get_enclosure(sym_enc("encB"))
+    assert named.is_named
+    assert named.name == "encB"
+    again = kcl.get_enclosure(sym_enc())
+    assert again is named
+    assert auto_key not in kcl.layer_enclosures.root
+
+
+def test_enclosure_naming_conflict(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    kcl.get_enclosure(sym_enc("encA"))
+    with pytest.raises(CrossSectionNamingConflictError):
+        kcl.get_enclosure(sym_enc("encC"))
+
+
+def test_cross_section_enclosure_resolution_unifies(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    # With the enclosure canonicalized (named), a cross section built on the named
+    # enclosure and one built on a fresh, structurally-identical unnamed enclosure
+    # resolve to the same canonical cross section (the unnamed enclosure
+    # canonicalizes to the named one first).
+    enc_named = kcl.get_enclosure(sym_enc("encN"))
+    xs_named_enc = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc_named)
+    )
+    xs_via_unnamed = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=sym_enc())
+    )
+    assert xs_via_unnamed is xs_named_enc
+
+
+def test_radius_excluded_from_name_but_conflicts_on_registration(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    # radius is excluded from the structural name/identity ...
+    a = kf.SymmetricalCrossSection(width=1000, enclosure=sym_enc(), radius=10_000)
+    b = kf.SymmetricalCrossSection(width=1000, enclosure=sym_enc(), radius=5_000)
+    assert a == b  # geometry-equal; radius is metadata
+    assert a.auto_name() == b.auto_name()
+
+    enc = kcl.get_enclosure(sym_enc("wgenc"))
+    first = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc, radius=10_000)
+    )
+    # Same radius → idempotent.
+    assert (
+        kcl.get_symmetrical_cross_section(
+            kf.SymmetricalCrossSection(width=1000, enclosure=enc, radius=10_000)
+        )
+        is first
+    )
+    # ... but re-registering the same profile with a *different* radius conflicts
+    # (override the radius at route time instead).
+    with pytest.raises(CrossSectionNamingConflictError):
+        kcl.get_symmetrical_cross_section(
+            kf.SymmetricalCrossSection(width=1000, enclosure=enc, radius=5_000)
+        )
+
+
+def test_asymmetric_unnamed_resolves_to_named(kcl: kf.KCLayout) -> None:
+    named = kcl.get_asymmetrical_cross_section(_make_asym("named_asym"))
+    assert named.is_named
+    # Same structure, no explicit name (auto-named) → resolves to the named one.
+    unnamed = _make_asym(name="")
+    assert not unnamed.is_named
+    resolved = kcl.get_asymmetrical_cross_section(unnamed)
+    assert resolved is named

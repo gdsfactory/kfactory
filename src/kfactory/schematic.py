@@ -75,7 +75,12 @@ if TYPE_CHECKING:
 
     from klayout import rdb
 
-    from .cross_section import CrossSection, DCrossSection
+    from .cross_section import (
+        AsymmetricCrossSection,
+        CrossSection,
+        DAsymmetricCrossSection,
+        DCrossSection,
+    )
 
 __all__ = [
     "Constraint",
@@ -1120,7 +1125,13 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         self,
         name: str,
         cell: KCell,
-        cross_sections: Mapping[str, CrossSection | DCrossSection],
+        cross_sections: Mapping[
+            str,
+            CrossSection
+            | DCrossSection
+            | AsymmetricCrossSection
+            | DAsymmetricCrossSection,
+        ],
     ) -> BasePort:
         """Materialize a schematic-level port on `cell`.
 
@@ -1550,7 +1561,14 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
         ]
         | None = None,
-        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
+        cross_sections: Mapping[
+            str,
+            CrossSection
+            | DCrossSection
+            | AsymmetricCrossSection
+            | DAsymmetricCrossSection,
+        ]
+        | None = None,
         routing_strategies: dict[
             str,
             Callable[
@@ -2256,7 +2274,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             if isinstance(factory, WrappedKCellFunc):
                 is_schematic_inst = factory.schematic_driven()
                 if is_schematic_inst:
-                    _schematic = factory._f_schematic(**settings)  # ty:ignore[call-top-callable, call-non-callable]
+                    _schematic = factory._f_schematic(**settings)  # ty:ignore[call-non-callable]
                     port_positions = _schematic.get_port_positions(factories=factories)
                     port_directions: dict[str | None, float] = {}
                     for port_name in port_positions["right"]:
@@ -2287,7 +2305,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     if isinstance(factory, WrappedKCellFunc):
                         is_schematic_inst = factory.schematic_driven()
                         if is_schematic_inst:
-                            _schematic = factory._f_schematic(**inst.settings)  # ty:ignore[call-top-callable, call-non-callable]
+                            _schematic = factory._f_schematic(**inst.settings)  # ty:ignore[call-non-callable]
                             inst_ports = _schematic.get_port_positions(
                                 factories=factories
                             )
@@ -2362,7 +2380,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 if isinstance(factory, WrappedKCellFunc):
                     is_schematic_inst = factory.schematic_driven()
                     if is_schematic_inst:
-                        _schematic = factory._f_schematic(**inst.settings)  # ty:ignore[call-non-callable, call-top-callable]
+                        _schematic = factory._f_schematic(**inst.settings)  # ty:ignore[call-non-callable]
                         inst_ports = _schematic.get_port_positions(factories=factories)
                         found = False
 
@@ -2525,10 +2543,10 @@ def _get_instance_orientation[T: (int, float)](
             continue
         orientation = _get_instance_orientation(
             inst,
-            schematic,
+            schematic,  # ty:ignore[invalid-argument-type]
             visited_instances_,
             get_port_orientation_f=get_port_orientation_f,
-            instance_connections=instance_connections,
+            instance_connections=instance_connections,  # ty:ignore[invalid-argument-type]
         )
         if orientation is not None:
             for connection in instance_connections[instance]:
@@ -2810,7 +2828,10 @@ def _place_island[T: (int, float)](
     placed_insts: set[str],
     placed_ports: set[str],
     schematic: TSchematic[T],
-    cross_sections: Mapping[str, CrossSection | DCrossSection],
+    cross_sections: Mapping[
+        str,
+        CrossSection | DCrossSection | AsymmetricCrossSection | DAsymmetricCrossSection,
+    ],
     factories: Mapping[
         str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
     ]
@@ -3068,7 +3089,10 @@ def _get_and_place_insts_and_ports[T: (int, float)](
     schematic: TSchematic[T],
     instances: dict[str, Instance | VInstance],
     placed_island_insts: set[str],
-    cross_sections: Mapping[str, CrossSection | DCrossSection],
+    cross_sections: Mapping[
+        str,
+        CrossSection | DCrossSection | AsymmetricCrossSection | DAsymmetricCrossSection,
+    ],
 ) -> bool:
     placeable_insts, placeable_ports = _get_placeable(
         placed_insts=placed_insts,

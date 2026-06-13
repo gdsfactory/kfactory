@@ -157,10 +157,15 @@ def save_session(
         }
         with (kcl_dir / "factories.pkl").open("wb") as f:
             _dump(factory_infos, f)
+        _xs = set(kcl.cross_sections.cross_sections.values())
         with (kcl_dir / "cross_sections.pkl").open("wb") as f:
-            pickle.dump(kcl.cross_sections.cross_sections, f)
+            pickle.dump(
+                {x.name: x for x in _xs if isinstance(x, SymmetricalCrossSection)}, f
+            )
         with (kcl_dir / "asymmetrical_cross_sections.pkl").open("wb") as f:
-            pickle.dump(kcl.cross_sections.asymmetrical_cross_sections, f)
+            pickle.dump(
+                {x.name: x for x in _xs if isinstance(x, AsymmetricalCrossSection)}, f
+            )
 
     with (kcls_dir / "../kcl_dependencies.json").resolve().open("wt") as f:
         json.dump({k: list(v) for k, v in kcl_dependencies.items()}, f)
@@ -223,11 +228,13 @@ def load_kcl(kcl_path: Path) -> None:
     xs_path = kcl_path / "cross_sections.pkl"
     if xs_path.is_file():
         with xs_path.open("rb") as f:
-            kcl.cross_sections.cross_sections = pickle.load(f)  # noqa: S301
+            for xs in pickle.load(f).values():  # noqa: S301
+                kcl.cross_sections.get_cross_section(xs)
     axs_path = kcl_path / "asymmetrical_cross_sections.pkl"
     if axs_path.is_file():
         with axs_path.open("rb") as f:
-            kcl.cross_sections.asymmetrical_cross_sections = pickle.load(f)  # noqa: S301
+            for axs in pickle.load(f).values():  # noqa: S301
+                kcl.cross_sections.get_asymmetrical_cross_section(axs)
 
     loaded_kcl.read(kcl_path / "cells.gds.gz")
     invalid_factories: set[str] = set()
