@@ -27,7 +27,15 @@ from typing import (
 from cachetools import Cache, cached
 from cachetools.keys import hashkey
 
-from . import CrossSection, DCrossSection, SymmetricalCrossSection, kdb
+from . import (
+    AsymmetricalCrossSection,
+    AsymmetricCrossSection,
+    CrossSection,
+    DAsymmetricCrossSection,
+    DCrossSection,
+    SymmetricalCrossSection,
+    kdb,
+)
 from .conf import CheckInstances, CheckUnnamedCells, logger
 from .exceptions import CellNameError
 from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
@@ -398,7 +406,12 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
         schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
         type_serializers: Sequence[tuple[type | UnionType, Callable[[Any], Any]]] = (
             (
-                SymmetricalCrossSection | CrossSection | DCrossSection,
+                SymmetricalCrossSection
+                | CrossSection
+                | DCrossSection
+                | AsymmetricalCrossSection
+                | AsymmetricCrossSection
+                | DAsymmetricCrossSection,
                 attrgetter("name"),
             ),
         ),

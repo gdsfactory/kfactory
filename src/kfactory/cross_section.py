@@ -142,6 +142,10 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
             for s in sections.sections
         )
 
+    def get_xmin(self) -> int:
+        # Symmetric by construction: the full extent is mirrored about the center line.
+        return -self.get_xmax()
+
     def model_copy(
         self, *, update: Mapping[str, Any] | None = {"name": None}, deep: bool = False
     ) -> SymmetricalCrossSection:
@@ -1074,8 +1078,7 @@ class CrossSection(TCrossSection[int]):
         return self._base.radius_min
 
     def get_xmin_xmax(self) -> tuple[int, int]:
-        xmax = self._base.get_xmax()
-        return (xmax, xmax)
+        return (self._base.get_xmin(), self._base.get_xmax())
 
     def model_copy(
         self, *, update: Mapping[str, Any] = {"name": None}, deep: bool
@@ -1191,8 +1194,10 @@ class DCrossSection(TCrossSection[float]):
         return self.kcl.to_um(self._base.radius_min)
 
     def get_xmin_xmax(self) -> tuple[float, float]:
-        xmax = self.kcl.to_um(self._base.get_xmax())
-        return (xmax, xmax)
+        return (
+            self.kcl.to_um(self._base.get_xmin()),
+            self.kcl.to_um(self._base.get_xmax()),
+        )
 
     def model_copy(
         self, *, update: Mapping[str, Any] = {"name": None}, deep: bool

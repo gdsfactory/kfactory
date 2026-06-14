@@ -2103,6 +2103,8 @@ class KCLayout(
                     width=cs["width"],
                     enclosure=self.get_enclosure(cs["layer_enclosure"]),
                     name=cs["name"],
+                    radius=cs.get("radius"),
+                    radius_min=cs.get("radius_min"),
                 )
             )
         for acs in asym_cross_sections:
@@ -2175,6 +2177,12 @@ class KCLayout(
                         {
                             "width": xs.width,
                             "layer_enclosure": xs.enclosure.name,
+                            **({"radius": xs.radius} if xs.radius is not None else {}),
+                            **(
+                                {"radius_min": xs.radius_min}
+                                if xs.radius_min is not None
+                                else {}
+                            ),
                         },
                         None,
                         True,
