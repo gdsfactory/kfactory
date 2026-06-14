@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from hashlib import sha1
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -16,6 +17,7 @@ from typing import (
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
 from .enclosure import DLayerEnclosure, LayerEnclosure, LayerEnclosureSpec
+from .exceptions import CrossSectionNamingConflictError
 from .typings import dbu  # noqa: TC001
 
 if TYPE_CHECKING:
@@ -49,29 +51,39 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
     name: str = ""
     radius: dbu | None = None
     radius_min: dbu | None = None
-    bbox_sections: dict[kdb.LayerInfo, dbu]
 
     def __init__(
         self,
         width: dbu,
         enclosure: LayerEnclosure,
         name: str | None = None,
-        bbox_sections: dict[kdb.LayerInfo, dbu] | None = None,
         radius: dbu | None = None,
         radius_min: dbu | None = None,
     ) -> None:
-        """Initialized the CrossSection."""
+        """Initialized the CrossSection.
+
+        `bbox_sections` live on the `enclosure` — build the enclosure with them.
+        """
         super().__init__(
             width=width,
             enclosure=enclosure,
             name=name or f"{enclosure.name}_{width}",
-            bbox_sections=bbox_sections or {},
             radius=radius,
             radius_min=radius_min,
         )
 
+    @property
+    def bbox_sections(self) -> dict[kdb.LayerInfo, dbu]:
+        """Bounding-box sections (owned by the enclosure)."""
+        return self.enclosure.bbox_sections
+
     def auto_name(self) -> str:
         return f"{self.enclosure.name}_{self.width}"
+
+    @property
+    def is_named(self) -> bool:
+        """Whether an explicit name was given (vs. the enclosure-derived name)."""
+        return self.name != self.auto_name()
 
     @property
     def extent(self) -> dbu:
@@ -136,9 +148,21 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
         return super().model_copy(update=update, deep=deep)
 
     def __eq__(self, o: object) -> bool:
+        if isinstance(o, (AsymmetricalCrossSection, TAsymmetricCrossSection)):
+            return False
         if isinstance(o, TCrossSection):
-            return o == self
-        return super().__eq__(o)
+            return self == o.base
+        if isinstance(o, SymmetricalCrossSection):
+            # radius/radius_min are non-identifying metadata.
+            return (
+                self.width == o.width
+                and self.enclosure == o.enclosure
+                and self.name == o.name
+            )
+        return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash((self.width, self.enclosure, self.name))
 
 
 class DSymmetricalCrossSection(BaseModel):
@@ -259,6 +283,51 @@ def _layer_sort_key(layer: kdb.LayerInfo) -> tuple[str, int, int]:
     return (layer.name, layer.layer, layer.datatype)
 
 
+def _asym_auto_name(
+    layer: kdb.LayerInfo,
+    section_min: int,
+    section_max: int,
+    sections: Sequence[CrossSectionLayer],
+    bbox_sections: Mapping[kdb.LayerInfo, int],
+) -> str:
+    """Deterministic structural name for an asymmetric cross section.
+
+    Hashes the geometry (layer, bounds, aux sections, bbox), excluding radius.
+    """
+    parts: list[Any] = [
+        str(layer),
+        section_min,
+        section_max,
+        [(str(s.layer), s.section_min, s.section_max) for s in sections],
+        sorted((str(k), v) for k, v in bbox_sections.items()),
+    ]
+    return "asym_" + sha1(str(parts).encode("UTF-8")).hexdigest()[-8:]  # noqa: S324
+
+
+def _resolve_radius(
+    canonical: SymmetricalCrossSection | AsymmetricalCrossSection,
+    incoming: SymmetricalCrossSection | AsymmetricalCrossSection,
+) -> SymmetricalCrossSection | AsymmetricalCrossSection:
+    """Resolve a re-registration of an already-registered profile.
+
+    Radius is excluded from the structural name, but a registered cross section is
+    a single source of truth: re-registering the same profile with a *different*
+    radius is a conflict and raises. To use a different bend radius for a specific
+    route, override it at the route/bend call — do not register a second profile.
+    """
+    if (incoming.radius is not None and incoming.radius != canonical.radius) or (
+        incoming.radius_min is not None and incoming.radius_min != canonical.radius_min
+    ):
+        raise CrossSectionNamingConflictError(
+            f"Cross section {canonical.name!r} is already registered with "
+            f"radius={canonical.radius}, radius_min={canonical.radius_min}; refusing "
+            f"to re-register the same profile with radius={incoming.radius}, "
+            f"radius_min={incoming.radius_min}. Override the radius at the route/bend "
+            "call instead."
+        )
+    return canonical
+
+
 def _normalize_sections(
     sections: Sequence[CrossSectionLayer] | tuple[CrossSectionLayer, ...],
 ) -> tuple[CrossSectionLayer, ...]:
@@ -335,12 +404,29 @@ class AsymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=T
                 coerced.append(CrossSectionLayer.model_validate(s))
         data["sections"] = _normalize_sections(coerced)
         if not data.get("name"):
-            layer = data["layer"]
-            data["name"] = (
-                f"asym_{layer.name or layer.layer}"
-                f"_{data['section_min']}_{data['section_max']}"
+            data["name"] = _asym_auto_name(
+                data["layer"],
+                data["section_min"],
+                data["section_max"],
+                data["sections"],
+                data.get("bbox_sections") or {},
             )
         return data
+
+    def auto_name(self) -> str:
+        """Deterministic structural name (hash of geometry, excluding radius)."""
+        return _asym_auto_name(
+            self.layer,
+            self.section_min,
+            self.section_max,
+            self.sections,
+            self.bbox_sections,
+        )
+
+    @property
+    def is_named(self) -> bool:
+        """Whether an explicit name was given (vs. the derived structural name)."""
+        return self.name != self.auto_name()
 
     @model_validator(mode="after")
     def _validate(self) -> Self:
@@ -406,9 +492,21 @@ class AsymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=T
         return super().model_copy(update=update, deep=deep)
 
     def __eq__(self, o: object) -> bool:
+        if isinstance(o, (SymmetricalCrossSection, TCrossSection)):
+            return False
         if isinstance(o, TAsymmetricCrossSection):
-            return o == self
-        return super().__eq__(o)
+            return self == o.base
+        if isinstance(o, AsymmetricalCrossSection):
+            # radius/radius_min are non-identifying metadata.
+            return (
+                self.layer == o.layer
+                and self.section_min == o.section_min
+                and self.section_max == o.section_max
+                and self.sections == o.sections
+                and self.name == o.name
+                and self.bbox_sections == o.bbox_sections
+            )
+        return NotImplemented
 
     def __hash__(self) -> int:
         return hash(
@@ -418,8 +516,6 @@ class AsymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=T
                 self.section_max,
                 self.sections,
                 self.name,
-                self.radius,
-                self.radius_min,
                 tuple(sorted(self.bbox_sections.items(), key=lambda kv: kv[0].name)),
             )
         )
@@ -938,12 +1034,14 @@ class CrossSection(TCrossSection[int]):
             base = kcl.get_symmetrical_cross_section(
                 SymmetricalCrossSection(
                     width=width,
-                    enclosure=LayerEnclosure(sections=sections, main_layer=layer),
+                    enclosure=LayerEnclosure(
+                        sections=sections,
+                        main_layer=layer,
+                        bbox_sections=list(
+                            zip(bbox_layers, bbox_offsets)  # noqa: B905
+                        ),
+                    ),
                     name=name,
-                    bbox_sections={
-                        s[0]: s[1]
-                        for s in zip(bbox_layers, bbox_offsets)  # noqa: B905
-                    },
                     radius=radius,
                     radius_min=radius_min,
                 )
@@ -1047,12 +1145,12 @@ class DCrossSection(TCrossSection[float]):
                             for s in sections
                         ],
                         main_layer=layer,
+                        bbox_sections=[
+                            (s[0], kcl.to_dbu(s[1]))
+                            for s in zip(bbox_layers, bbox_offsets)  # noqa: B905
+                        ],
                     ),
                     name=name,
-                    bbox_sections={
-                        s[0]: kcl.to_dbu(s[1])
-                        for s in zip(bbox_layers, bbox_offsets)  # noqa: B905
-                    },
                     radius=kcl.to_dbu(radius) if radius else None,
                     radius_min=kcl.to_dbu(radius_min) if radius_min else None,
                 )
@@ -1122,13 +1220,14 @@ class DCrossSectionSpec(TCrossSectionSpec[float]):
 
 
 class CrossSectionModel(BaseModel):
-    cross_sections: dict[str, SymmetricalCrossSection] = Field(default_factory=dict)
-    asymmetrical_cross_sections: dict[str, AsymmetricalCrossSection] = Field(
-        default_factory=dict
+    cross_sections: dict[str, SymmetricalCrossSection | AsymmetricalCrossSection] = (
+        Field(default_factory=dict)
     )
     kcl: KCLayout
 
-    def __getitem__(self, name: str) -> SymmetricalCrossSection:
+    def __getitem__(
+        self, name: str
+    ) -> SymmetricalCrossSection | AsymmetricalCrossSection:
         return self.cross_sections[name]
 
     def get_asymmetrical_cross_section(
@@ -1136,26 +1235,54 @@ class CrossSectionModel(BaseModel):
         cross_section: str | AsymmetricalCrossSection | DAsymmetricalCrossSection,
     ) -> AsymmetricalCrossSection:
         if isinstance(cross_section, str):
-            return self.asymmetrical_cross_sections[cross_section]
+            xs = self.cross_sections[cross_section]
+            if not isinstance(xs, AsymmetricalCrossSection):
+                raise TypeError(
+                    f"Cross section {cross_section!r} is symmetric; use "
+                    "get_(symmetrical_)cross_section."
+                )
+            return xs
         if isinstance(cross_section, DAsymmetricalCrossSection):
             cross_section = cross_section.to_itype(self.kcl)
-        if cross_section.name in self.cross_sections:
-            raise ValueError(
-                f"Name {cross_section.name!r} is already used by a symmetric"
-                " cross section. Cross section names must be unique across"
-                " symmetric and asymmetric kinds."
-            )
-        if cross_section.name not in self.asymmetrical_cross_sections:
-            self.asymmetrical_cross_sections[cross_section.name] = cross_section
+        registered = self._register(cross_section)
+        assert isinstance(registered, AsymmetricalCrossSection)
+        return registered
+
+    def _register(
+        self, cross_section: SymmetricalCrossSection | AsymmetricalCrossSection
+    ) -> SymmetricalCrossSection | AsymmetricalCrossSection:
+        """Register/resolve a cross section by its canonical (structural) name.
+
+        Entries are keyed by their `auto_name()` and, when named, additionally by
+        the explicit name. Existence is a single `get(auto_name())`.
+        """
+        auto = cross_section.auto_name()
+        canonical = self.cross_sections.get(auto)
+        if canonical is None:
+            if cross_section.is_named and cross_section.name in self.cross_sections:
+                raise CrossSectionNamingConflictError(
+                    f"Cross section name {cross_section.name!r} is already "
+                    "registered for a different structural signature."
+                )
+            self.cross_sections[auto] = cross_section
+            if cross_section.is_named:
+                self.cross_sections[cross_section.name] = cross_section
             return cross_section
-        xs = self.asymmetrical_cross_sections[cross_section.name]
-        if xs != cross_section:
-            raise ValueError(
-                "There is already an asymmetrical cross_section defined with name "
-                f"{cross_section.name}. Cannot overwrite cross_sections.\n"
-                f"old_xs={xs.model_dump()}\nnew_xs={cross_section.model_dump()}"
+        if not cross_section.is_named:
+            return _resolve_radius(canonical, cross_section)
+        if canonical.is_named:
+            if canonical.name == cross_section.name:
+                return _resolve_radius(canonical, cross_section)
+            raise CrossSectionNamingConflictError(
+                f"Cannot register cross section {cross_section.name!r}: the same "
+                f"structural signature is already registered as {canonical.name!r}."
+                " A structure can have at most one name."
             )
-        return xs
+        # Promote the unnamed canonical to the named one (radius must match).
+        _resolve_radius(canonical, cross_section)
+        self.cross_sections[auto] = cross_section
+        self.cross_sections[cross_section.name] = cross_section
+        return cross_section
 
     def get_cross_section(
         self,
@@ -1168,27 +1295,27 @@ class CrossSectionModel(BaseModel):
         | DCrossSection,
     ) -> SymmetricalCrossSection:
         if isinstance(cross_section, str):
-            return self.cross_sections[cross_section]
+            xs = self.cross_sections[cross_section]
+            if not isinstance(xs, SymmetricalCrossSection):
+                raise TypeError(
+                    f"Cross section {cross_section!r} is asymmetric; use "
+                    "get_asymmetrical_cross_section."
+                )
+            return xs
         if isinstance(cross_section, TCrossSection):
             cross_section = cross_section.base
         if isinstance(cross_section, SymmetricalCrossSection):
-            if cross_section.enclosure != self.kcl.get_enclosure(
-                cross_section.enclosure
-            ):
+            canonical_enc = self.kcl.get_enclosure(cross_section.enclosure)
+            if cross_section.enclosure != canonical_enc:
                 return self.get_cross_section(
                     SymmetricalCrossSection(
-                        enclosure=self.kcl.layer_enclosures.get_enclosure(
-                            LayerEnclosureSpec(
-                                sections=cross_section.enclosure.model_dump()[
-                                    "sections"
-                                ],
-                                main_layer=cross_section.main_layer,
-                                name=cross_section.enclosure._name,
-                            ),
-                            kcl=self.kcl,
-                        ),
-                        name=cross_section.name,
+                        enclosure=canonical_enc,
+                        # Preserve named/unnamed provenance: re-derive the auto
+                        # name from the canonical enclosure when unnamed.
+                        name=cross_section.name if cross_section.is_named else None,
                         width=cross_section.width,
+                        radius=cross_section.radius,
+                        radius_min=cross_section.radius_min,
                     )
                 )
         elif isinstance(cross_section, DSymmetricalCrossSection):
@@ -1229,23 +1356,9 @@ class CrossSectionModel(BaseModel):
                 ),
                 name=cross_section.get("name", None),
             )
-        if cross_section.name in self.asymmetrical_cross_sections:
-            raise ValueError(
-                f"Name {cross_section.name!r} is already used by an asymmetric"
-                " cross section. Cross section names must be unique across"
-                " symmetric and asymmetric kinds."
-            )
-        if cross_section.name not in self.cross_sections:
-            self.cross_sections[cross_section.name] = cross_section
-            return cross_section
-        xs = self.cross_sections[cross_section.name]
-        if not xs == cross_section:
-            raise ValueError(
-                "There is already a cross_section defined with name "
-                f"{cross_section.name}. Cannot overwrite cross_sections.\n"
-                f"old_xs={xs.model_dump()}\nnew_xs={cross_section.model_dump()}"
-            )
-        return xs
+        registered = self._register(cross_section)
+        assert isinstance(registered, SymmetricalCrossSection)
+        return registered
 
     def __repr__(self) -> str:
         return repr(self.cross_sections)

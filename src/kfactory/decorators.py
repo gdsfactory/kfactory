@@ -19,6 +19,7 @@ from typing import (
     Protocol,
     TypedDict,
     Unpack,
+    final,
     get_origin,
     overload,
 )
@@ -355,6 +356,7 @@ def _post_process[K: ProtoKCell[Any, Any]](
         pp(cell)
 
 
+@final
 class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
     _f: Callable[KCellParams, KC]
     _f_orig: Callable[KCellParams, ProtoTKCell[Any]]
@@ -655,6 +657,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
         return self._f_schematic(*args, **kwargs)
 
 
+@final
 class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
     _f: Callable[VKCellParams, VK]
     _f_orig: Callable[VKCellParams, VKCell]

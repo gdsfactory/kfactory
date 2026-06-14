@@ -35,6 +35,7 @@ from typing_extensions import TypedDict
 
 from . import kdb
 from .conf import config, logger
+from .exceptions import CrossSectionNamingConflictError
 
 if TYPE_CHECKING:
     from collections.abc import (
@@ -621,6 +622,28 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         """Get name of the Enclosure."""
         return self.__str__()
 
+    @property
+    def is_named(self) -> bool:
+        """Whether an explicit name was given (vs. a derived structural name)."""
+        return self._name is not None
+
+    @property
+    def unnamed_key(self) -> str:
+        """Deterministic structural key, independent of the explicit name.
+
+        This is the same hash an unnamed enclosure is named after. Exposing it on
+        named enclosures as well lets the registry alias the structural signature
+        to a named enclosure.
+        """
+        list_to_hash: list[tuple[str, ...]] = [(str(self.main_layer),)]
+        for layer, layer_section in self.layer_sections.items():
+            list_to_hash.append((str(layer), str(layer_section.sections)))
+        for layer, offset in sorted(
+            self.bbox_sections.items(), key=lambda kv: str(kv[0])
+        ):
+            list_to_hash.append((str(layer), "bbox", str(offset)))
+        return sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]  # noqa: S324
+
     def minkowski_region(
         self,
         r: kdb.Region,
@@ -986,10 +1009,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         """
         if self._name is not None:
             return self._name
-        list_to_hash: list[tuple[str, ...]] = [(str(self.main_layer),)]
-        for layer, layer_section in self.layer_sections.items():
-            list_to_hash.append((str(layer), str(layer_section.sections)))
-        return sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]  # noqa: S324
+        return self.unnamed_key
 
     def extrude_path(
         self,
@@ -1635,13 +1655,26 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
         """Add a new LayerEnclosure."""
         self.root[__key] = __val
 
+    def _canonical_for_unnamed_key(self, unnamed_key: str) -> LayerEnclosure | None:
+        """Return the registered enclosure whose structural signature matches."""
+        for enc in self.root.values():
+            if enc.unnamed_key == unnamed_key:
+                return enc
+        return None
+
     def get_enclosure(
         self,
         enclosure: str | LayerEnclosure | LayerEnclosureSpec,
         kcl: KCLayout,
     ) -> LayerEnclosure:
         if isinstance(enclosure, str):
-            return self[enclosure]
+            if enclosure in self.root:
+                return self.root[enclosure]
+            # Also addressable by the structural (unnamed) key.
+            existing = self._canonical_for_unnamed_key(enclosure)
+            if existing is not None:
+                return existing
+            return self.root[enclosure]
         if isinstance(enclosure, dict):
             if "dsections" in enclosure:
                 enclosure = LayerEnclosure(
@@ -1658,10 +1691,35 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
                     kcl=kcl,
                 )
         enclosure = cast("LayerEnclosure", enclosure)
-        if enclosure.name not in self.root:
+        key = enclosure.unnamed_key
+        existing = self._canonical_for_unnamed_key(key)
+
+        if not enclosure.is_named:
+            # Unnamed request: reuse the canonical entry if the signature is known.
+            if existing is not None:
+                return existing
             self.root[enclosure.name] = enclosure
             return enclosure
-        return self.root[enclosure.name]
+
+        # Named request.
+        name = enclosure.name
+        if name in self.root:
+            # The name is already claimed: preserve the existing (lenient) name-keyed
+            # behavior and return the registered enclosure.
+            return self.root[name]
+        if existing is None:
+            self.root[name] = enclosure
+            return enclosure
+        if existing.is_named:
+            raise CrossSectionNamingConflictError(
+                f"Cannot register enclosure {name!r}: an enclosure with the same "
+                f"structural signature is already registered as {existing.name!r}. "
+                "A structure can have at most one name."
+            )
+        # Promote: the named enclosure replaces the existing unnamed one.
+        self.root.pop(existing.name, None)
+        self.root[name] = enclosure
+        return enclosure
 
 
 def _add_section(

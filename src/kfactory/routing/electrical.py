@@ -869,7 +869,8 @@ def place_rf_rails(
         SymmetricalCrossSection(
             width=p1.width,
             enclosure=enclosure or LayerEnclosure(sections=[], main_layer=layer_info),
-        )
+        ),
+        symmetrical=True,
     )
     route_start_port = p1.copy()
     route_start_port.name = "route_start"

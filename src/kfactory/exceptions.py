@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 __all__ = [
     "AsymmetricMirrorRequiredError",
     "CellNameError",
+    "CrossSectionNamingConflictError",
     "CrossSectionSymmetryMismatchError",
     "FactoriesLockedError",
     "InvalidLayerError",
@@ -42,6 +43,16 @@ class FactoriesLockedError(RuntimeError):
 
 class MergeError(ValueError):
     """Raised if two layout's have conflicting cell definitions."""
+
+
+class CrossSectionNamingConflictError(ValueError):
+    """Raised when a second name is registered for an existing structural signature.
+
+    Cross sections and enclosures are canonicalized by their name-independent
+    structural signature. A given signature may have at most one *named* canonical
+    entry; attempting to register a second, differently-named entry for the same
+    signature (or to reuse a name for a different signature) raises this error.
+    """
 
 
 class PortWidthMismatchError(ValueError):

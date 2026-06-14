@@ -73,6 +73,20 @@ def wg_enc(kcl: kf.KCLayout, layers: Layers) -> kf.LayerEnclosure:
 
 
 @pytest.fixture
+def sym_enc() -> Callable[..., kf.LayerEnclosure]:
+    """Build a fixed-structure enclosure, optionally named."""
+
+    def _make(name: str | None = None) -> kf.LayerEnclosure:
+        return kf.LayerEnclosure(
+            sections=[(kf.kdb.LayerInfo(2, 0, "S"), 500)],
+            main_layer=kf.kdb.LayerInfo(1, 0, "WG"),
+            name=name,
+        )
+
+    return _make
+
+
+@pytest.fixture
 def straight_factory_dbu(
     layers: Layers, wg_enc: kf.LayerEnclosure, kcl: kf.KCLayout
 ) -> Callable[..., kf.KCell]:
