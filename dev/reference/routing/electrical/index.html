@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.44">
+      <meta name="generator" content="zensical-0.0.45">
     
     
       
@@ -6388,7 +6388,8 @@ placer.</p>
 <span class="normal">1105</span>
 <span class="normal">1106</span>
 <span class="normal">1107</span>
-<span class="normal">1108</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">place_rf_rails</span><span class="p">(</span>
+<span class="normal">1108</span>
+<span class="normal">1109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">place_rf_rails</span><span class="p">(</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
     <span class="n">p1</span><span class="p">:</span> <span class="n">Port</span><span class="p">,</span>
     <span class="n">p2</span><span class="p">:</span> <span class="n">Port</span><span class="p">,</span>
@@ -6464,7 +6465,8 @@ placer.</p>
         <span class="n">SymmetricalCrossSection</span><span class="p">(</span>
             <span class="n">width</span><span class="o">=</span><span class="n">p1</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
             <span class="n">enclosure</span><span class="o">=</span><span class="n">enclosure</span> <span class="ow">or</span> <span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">sections</span><span class="o">=</span><span class="p">[],</span> <span class="n">main_layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">),</span>
-        <span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">symmetrical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">route_start_port</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">route_start_port</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;route_start&quot;</span>
@@ -9656,8 +9658,7 @@ value. Not set if None.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/electrical.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1111</span>
-<span class="normal">1112</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1112</span>
 <span class="normal">1113</span>
 <span class="normal">1114</span>
 <span class="normal">1115</span>
@@ -9863,7 +9864,8 @@ value. Not set if None.</p>
 <span class="normal">1315</span>
 <span class="normal">1316</span>
 <span class="normal">1317</span>
-<span class="normal">1318</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_bundle_rf</span><span class="p">(</span>
+<span class="normal">1318</span>
+<span class="normal">1319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_bundle_rf</span><span class="p">(</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
     <span class="n">start_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Port</span><span class="p">]</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPort</span><span class="p">],</span>
     <span class="n">end_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Port</span><span class="p">]</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPort</span><span class="p">],</span>
