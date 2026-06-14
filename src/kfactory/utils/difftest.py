@@ -498,5 +498,5 @@ def read_top_cell(arg0: pathlib.Path) -> kf.DKCell:
 
     if hasattr(kcl, "cross_sections"):
         for cross_section in set(kcl.cross_sections.cross_sections.values()):
-            kf.kcl.get_cross_section(cross_section, symmetrical=None)
+            kf.kcl.get_base_cross_section(cross_section, symmetrical=None)
     return kcell

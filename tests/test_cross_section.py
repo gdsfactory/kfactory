@@ -510,21 +510,21 @@ def test_get_cross_section_kind_switch() -> None:
         )
     )
 
-    assert kcl.get_cross_section(scs) is scs
-    assert kcl.get_cross_section("wg1000") is scs
-    assert kcl.get_cross_section(scs, symmetrical=True) is scs
-    assert kcl.get_cross_section(acs, symmetrical=False) is acs
-    assert kcl.get_cross_section("aw500", symmetrical=False) is acs
-    assert kcl.get_cross_section(scs, symmetrical=None) is scs
-    assert kcl.get_cross_section(acs, symmetrical=None) is acs
-    assert kcl.get_cross_section("wg1000", symmetrical=None) is scs
-    assert kcl.get_cross_section("aw500", symmetrical=None) is acs
+    assert kcl.get_base_cross_section(scs) is scs
+    assert kcl.get_base_cross_section("wg1000") is scs
+    assert kcl.get_base_cross_section(scs, symmetrical=True) is scs
+    assert kcl.get_base_cross_section(acs, symmetrical=False) is acs
+    assert kcl.get_base_cross_section("aw500", symmetrical=False) is acs
+    assert kcl.get_base_cross_section(scs, symmetrical=None) is scs
+    assert kcl.get_base_cross_section(acs, symmetrical=None) is acs
+    assert kcl.get_base_cross_section("wg1000", symmetrical=None) is scs
+    assert kcl.get_base_cross_section("aw500", symmetrical=None) is acs
     # any with a wrapper resolves to its base
     ixs = kcl.get_iasymmetric_cross_section(acs)
-    assert kcl.get_cross_section(ixs, symmetrical=None) is acs
+    assert kcl.get_base_cross_section(ixs, symmetrical=None) is acs
     # unknown name under "any" raises
     with pytest.raises(KeyError):
-        kcl.get_cross_section("does_not_exist", symmetrical=None)
+        kcl.get_base_cross_section("does_not_exist", symmetrical=None)
 
 
 def test_metadata_uses_separate_prefix_for_asymmetric() -> None:

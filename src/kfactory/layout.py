@@ -2277,7 +2277,7 @@ class KCLayout(
         return self.cross_sections.get_asymmetrical_cross_section(cross_section)
 
     @overload
-    def get_cross_section(
+    def get_base_cross_section(
         self,
         cross_section: str
         | SymmetricalCrossSection
@@ -2289,7 +2289,7 @@ class KCLayout(
     ) -> SymmetricalCrossSection: ...
 
     @overload
-    def get_cross_section(
+    def get_base_cross_section(
         self,
         cross_section: str
         | AsymmetricalCrossSection
@@ -2299,13 +2299,13 @@ class KCLayout(
     ) -> AsymmetricalCrossSection: ...
 
     @overload
-    def get_cross_section(
+    def get_base_cross_section(
         self,
         cross_section: Any,
         symmetrical: None = None,
     ) -> SymmetricalCrossSection | AsymmetricalCrossSection: ...
 
-    def get_cross_section(
+    def get_base_cross_section(
         self,
         cross_section: Any,
         symmetrical: bool | None = None,
@@ -2379,7 +2379,7 @@ class KCLayout(
             return AsymmetricCrossSection(
                 kcl=self, base=self.get_asymmetrical_cross_section(cross_section)
             )
-        xs = self.get_cross_section(cross_section)
+        xs = self.get_base_cross_section(cross_section)
         if isinstance(xs, AsymmetricalCrossSection):
             return AsymmetricCrossSection(kcl=self, base=xs)
         return CrossSection(kcl=self, base=xs)
@@ -2421,7 +2421,7 @@ class KCLayout(
             return DAsymmetricCrossSection(
                 kcl=self, base=self.get_asymmetrical_cross_section(cross_section)
             )
-        xs = self.get_cross_section(cross_section)
+        xs = self.get_base_cross_section(cross_section)
         if isinstance(xs, AsymmetricalCrossSection):
             return DAsymmetricCrossSection(kcl=self, base=xs)
         return DCrossSection(kcl=self, base=xs)

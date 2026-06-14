@@ -61,9 +61,12 @@ from .checks import (
 from .conf import DEFAULT_TRANS, CheckInstances, ShowFunction, config, logger
 from .cross_section import (
     AsymmetricalCrossSection,
+    AsymmetricCrossSection,
     CrossSection,
+    DAsymmetricCrossSection,
     DCrossSection,
     SymmetricalCrossSection,
+    TAsymmetricCrossSection,
     TCrossSection,
 )
 from .exceptions import LockedError, MergeError
@@ -1719,7 +1722,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 if not self.is_library_cell():
                     for index in sorted(port_dict.keys()):
                         v = port_dict[index]
-                        xs = self.kcl.get_cross_section(
+                        xs = self.kcl.get_base_cross_section(
                             v["cross_section"], symmetrical=None
                         )
                         trans_: kdb.Trans | None = v.get("trans")
@@ -1756,7 +1759,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         v = port_dict[index]
                         trans_ = v.get("trans")
                         lib_kcl = kcls[lib_name]
-                        lib_xs = lib_kcl.get_cross_section(
+                        lib_xs = lib_kcl.get_base_cross_section(
                             v["cross_section"], symmetrical=None
                         )
                         cs: SymmetricalCrossSection | AsymmetricalCrossSection
@@ -2363,9 +2366,10 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         cross_section: str
         | dict[str, Any]
         | Callable[..., CrossSection | DCrossSection]
-        | SymmetricalCrossSection,
+        | SymmetricalCrossSection
+        | AsymmetricalCrossSection,
         **cross_section_kwargs: Any,
-    ) -> TCrossSection[T]: ...
+    ) -> TCrossSection[T] | TAsymmetricCrossSection[T]: ...
 
     @property
     def lvs_equivalent_ports(self) -> list[list[str]] | None:
@@ -2563,29 +2567,21 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         cross_section: str
         | dict[str, Any]
         | Callable[..., CrossSection | DCrossSection]
-        | SymmetricalCrossSection,
+        | SymmetricalCrossSection
+        | AsymmetricalCrossSection,
         **cross_section_kwargs: Any,
-    ) -> DCrossSection:
-        if isinstance(cross_section, str):
-            return DCrossSection(
-                kcl=self.kcl,
-                base=self.kcl.cross_sections.get_cross_section(cross_section),
-            )
-        if isinstance(cross_section, SymmetricalCrossSection):
-            return DCrossSection(kcl=self.kcl, base=cross_section)
+    ) -> DCrossSection | DAsymmetricCrossSection:
         if callable(cross_section):
-            any_cross_section = cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
-            return DCrossSection(kcl=self.kcl, base=any_cross_section._base)  # ty:ignore[unresolved-attribute]
-        if isinstance(cross_section, dict):
+            return self.kcl.get_dcross_section(
+                cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
+            )
+        if isinstance(cross_section, dict) and "settings" in cross_section:
             return DCrossSection(
                 kcl=self.kcl,
                 name=cross_section.get("name"),
                 **cross_section["settings"],
             )
-        raise ValueError(
-            "Cannot create a cross section from "
-            f"{type(cross_section)=} and {cross_section_kwargs=}"
-        )
+        return self.kcl.get_dcross_section(cross_section)
 
     @property
     def library_cell(self) -> DKCell:
@@ -3037,29 +3033,21 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         cross_section: str
         | dict[str, Any]
         | Callable[..., CrossSection | DCrossSection]
-        | SymmetricalCrossSection,
+        | SymmetricalCrossSection
+        | AsymmetricalCrossSection,
         **cross_section_kwargs: Any,
-    ) -> CrossSection:
-        if isinstance(cross_section, str):
-            return CrossSection(
-                kcl=self.kcl,
-                base=self.kcl.cross_sections.get_cross_section(cross_section),
-            )
-        if isinstance(cross_section, SymmetricalCrossSection):
-            return CrossSection(kcl=self.kcl, base=cross_section)
+    ) -> CrossSection | AsymmetricCrossSection:
         if callable(cross_section):
-            any_cross_section = cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
-            return CrossSection(kcl=self.kcl, base=any_cross_section._base)  # ty:ignore[unresolved-attribute]
-        if isinstance(cross_section, dict):
+            return self.kcl.get_icross_section(
+                cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
+            )
+        if isinstance(cross_section, dict) and "settings" in cross_section:
             return CrossSection(
                 kcl=self.kcl,
                 name=cross_section.get("name"),
                 **cross_section["settings"],
             )
-        raise ValueError(
-            "Cannot create a cross section from "
-            f"{type(cross_section)=} and {cross_section_kwargs=}"
-        )
+        return self.kcl.get_icross_section(cross_section)
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -3162,6 +3150,27 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
     def __getitem__(self, key: int | str | None) -> DPort:
         """Returns port from instance."""
         return self.ports[key]
+
+    def get_cross_section(
+        self,
+        cross_section: str
+        | dict[str, Any]
+        | Callable[..., CrossSection | DCrossSection]
+        | SymmetricalCrossSection
+        | AsymmetricalCrossSection,
+        **cross_section_kwargs: Any,
+    ) -> DCrossSection | DAsymmetricCrossSection:
+        if callable(cross_section):
+            return self.kcl.get_dcross_section(
+                cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
+            )
+        if isinstance(cross_section, dict) and "settings" in cross_section:
+            return DCrossSection(
+                kcl=self.kcl,
+                name=cross_section.get("name"),
+                **cross_section["settings"],
+            )
+        return self.kcl.get_dcross_section(cross_section)
 
     @property
     def insts(self) -> VInstances:
