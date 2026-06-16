@@ -22,8 +22,8 @@ from .. import kdb
 from ..conf import logger
 from ..cross_section import (
     AnyCrossSectionInput,
-    CrossSectionSpec,
-    DCrossSectionSpec,
+    CrossSectionSpecDict,
+    DCrossSectionSpecDict,
 )
 from ..enclosure import LayerEnclosure, extrude_path_cross_section
 from ..kcell import KCell
@@ -48,8 +48,8 @@ class StraightFactory(Protocol[KC_co]):
         length: dbu,
         cross_section: str
         | AnyCrossSectionInput
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | None = None,
         width: dbu | None = None,
         layer: kdb.LayerInfo | None = None,
@@ -211,8 +211,8 @@ def straight_dbu_factory(
         length: dbu,
         cross_section: str
         | AnyCrossSectionInput
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | None = None,
         width: dbu | None = None,
         layer: kdb.LayerInfo | None = None,

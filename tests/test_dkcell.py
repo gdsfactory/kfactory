@@ -2,7 +2,7 @@ import klayout.db as kdb
 import pytest
 
 import kfactory as kf
-from kfactory.cross_section import CrossSection, CrossSectionSpec, DCrossSection
+from kfactory.cross_section import CrossSection, CrossSectionSpecDict, DCrossSection
 from kfactory.exceptions import LockedError
 from tests.conftest import Layers
 
@@ -58,7 +58,7 @@ def test_dkcell_locked(layers: Layers) -> None:
         cross_section=DCrossSection(
             kcl,
             base=kcl.get_symmetrical_cross_section(
-                CrossSectionSpec(layer=layers.WG, width=2000)
+                CrossSectionSpecDict(layer=layers.WG, width=2000)
             ),
         ),
         port_type="optical",
@@ -83,7 +83,7 @@ def test_dkcell_locked(layers: Layers) -> None:
             cross_section=CrossSection(
                 kcl,
                 base=kcl.get_symmetrical_cross_section(
-                    CrossSectionSpec(layer=layers.WG, width=2000)
+                    CrossSectionSpecDict(layer=layers.WG, width=2000)
                 ),
             ),
             port_type="optical",

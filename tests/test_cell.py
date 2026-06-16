@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 
 import kfactory as kf
-from kfactory.cross_section import CrossSection, CrossSectionSpec
+from kfactory.cross_section import CrossSection, CrossSectionSpecDict
 from kfactory.exceptions import LockedError
 from tests.conftest import Layers
 
@@ -390,7 +390,7 @@ def test_ports_in_cells(
         cross_section=CrossSection(
             kcl,
             base=kcl.get_symmetrical_cross_section(
-                CrossSectionSpec(layer=layers.WG, width=2000)
+                CrossSectionSpecDict(layer=layers.WG, width=2000)
             ),
         ),
     )

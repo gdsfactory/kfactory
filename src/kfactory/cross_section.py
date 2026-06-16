@@ -33,14 +33,27 @@ __all__ = [
     "AsymmetricalCrossSection",
     "CrossSection",
     "CrossSectionLayer",
-    "CrossSectionSpec",
+    "CrossSectionSpecDict",
     "DAsymmetricCrossSection",
     "DAsymmetricalCrossSection",
     "DCrossSection",
     "DCrossSectionLayer",
-    "DCrossSectionSpec",
+    "DCrossSectionSpecDict",
     "SymmetricalCrossSection",
 ]
+
+type CrossSectionSpec = (
+    CrossSection
+    | DCrossSection
+    | SymmetricalCrossSection
+    | DSymmetricalCrossSection
+    | AsymmetricalCrossSection
+    | AsymmetricCrossSection
+    | DAsymmetricCrossSection
+    | CrossSectionSpecDict
+    | DCrossSectionSpecDict
+    | str
+)
 
 
 class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=True):
@@ -1216,11 +1229,11 @@ class TCrossSectionSpec[T: (int, float)](TypedDict):
     bbox_offsets: NotRequired[Sequence[T]]
 
 
-class CrossSectionSpec(TCrossSectionSpec[int]):
+class CrossSectionSpecDict(TCrossSectionSpec[int]):
     unit: NotRequired[Literal["dbu"]]
 
 
-class DCrossSectionSpec(TCrossSectionSpec[float]):
+class DCrossSectionSpecDict(TCrossSectionSpec[float]):
     unit: Literal["um"]
 
 
@@ -1294,8 +1307,8 @@ class CrossSectionModel(BaseModel):
         cross_section: str
         | SymmetricalCrossSection
         | DSymmetricalCrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | CrossSection
         | DCrossSection,
     ) -> SymmetricalCrossSection:

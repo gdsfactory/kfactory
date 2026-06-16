@@ -45,12 +45,12 @@ from .cross_section import (
     CrossSection,
     CrossSectionLayer,
     CrossSectionModel,
-    CrossSectionSpec,
+    CrossSectionSpecDict,
     DAsymmetricalCrossSection,
     DAsymmetricCrossSection,
     DCrossSection,
     DCrossSectionLayer,
-    DCrossSectionSpec,
+    DCrossSectionSpecDict,
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
     TAsymmetricCrossSection,
@@ -2265,8 +2265,8 @@ class KCLayout(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | DSymmetricalCrossSection,
     ) -> SymmetricalCrossSection:
         """Get a cross section by name or specification."""
@@ -2289,8 +2289,8 @@ class KCLayout(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | DSymmetricalCrossSection
         | TCrossSection[Any],
         symmetrical: Literal[True],
@@ -2355,8 +2355,8 @@ class KCLayout(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | DCrossSection
         | DSymmetricalCrossSection
         | CrossSection,
@@ -2397,8 +2397,8 @@ class KCLayout(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | DSymmetricalCrossSection
         | CrossSection
         | DCrossSection,

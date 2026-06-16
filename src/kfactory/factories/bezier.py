@@ -10,8 +10,8 @@ from scipy.special import binom
 from .. import kdb
 from ..cross_section import (
     AnyCrossSectionInput,
-    CrossSectionSpec,
-    DCrossSectionSpec,
+    CrossSectionSpecDict,
+    DCrossSectionSpecDict,
 )
 from ..enclosure import LayerEnclosure, extrude_path_cross_section
 from ..kcell import KCell
@@ -44,8 +44,8 @@ class BezierFactory(Protocol[KC_co]):
         t_stop: float = 1,
         cross_section: str
         | AnyCrossSectionInput
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | None = None,
         width: um | None = None,
         layer: kdb.LayerInfo | None = None,
@@ -234,8 +234,8 @@ def bend_s_bezier_factory(
         t_stop: float = 1,
         cross_section: str
         | AnyCrossSectionInput
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | None = None,
         width: um | None = None,
         layer: kdb.LayerInfo | None = None,

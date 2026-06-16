@@ -24,7 +24,7 @@ from .cross_section import (
     AsymmetricalCrossSection,
     AsymmetricCrossSection,
     CrossSection,
-    CrossSectionSpec,
+    CrossSectionSpecDict,
     DAsymmetricCrossSection,
     DCrossSection,
     SymmetricalCrossSection,
@@ -937,7 +937,7 @@ class Port(ProtoPort[int]):
                     " 'port is None'"
                 )
             sym_xs = kcl_.get_symmetrical_cross_section(
-                CrossSectionSpec(layer=layer_info, width=width)
+                CrossSectionSpecDict(layer=layer_info, width=width)
             )
         elif isinstance(cross_section, SymmetricalCrossSection):
             sym_xs = cross_section
@@ -1310,7 +1310,7 @@ class DPort(ProtoPort[float]):
                     "Ports must have a grid width of multiples of 2."
                 )
             sym_xs = kcl_.get_symmetrical_cross_section(
-                CrossSectionSpec(layer=layer_info, width=kcl_.to_dbu(width))
+                CrossSectionSpecDict(layer=layer_info, width=kcl_.to_dbu(width))
             )
         elif isinstance(cross_section, SymmetricalCrossSection):
             sym_xs = cross_section

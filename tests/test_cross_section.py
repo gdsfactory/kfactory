@@ -15,7 +15,7 @@ from kfactory.exceptions import (
 
 def test_icross_section_creation(kcl: kf.KCLayout) -> None:
     xs = kcl.get_icross_section(
-        kf.cross_section.CrossSectionSpec(
+        kf.cross_section.CrossSectionSpecDict(
             name="WG_350",
             sections=[(kf.kdb.LayerInfo(2, 0), 500)],
             layer=kf.kdb.LayerInfo(1, 0),
@@ -35,7 +35,7 @@ def test_port_cross_section(kcl: kf.KCLayout, layers: kf.LayerInfos) -> None:
     )
 
     xs = kcl.get_icross_section(
-        kf.cross_section.CrossSectionSpec(
+        kf.cross_section.CrossSectionSpecDict(
             name="WG_350",
             sections=[(kf.kdb.LayerInfo(2, 0), 500)],
             layer=kf.kdb.LayerInfo(1, 0),
@@ -650,6 +650,60 @@ def test_cell_serializes_asymmetric_cross_section_to_name(kcl: kf.KCLayout) -> N
 
     assert "symxs" in xs_cell(cross_section=sym).name
     assert "asymxs" in xs_cell(cross_section=asym).name
+
+
+def test_cross_section_spec_serializer_parity(kcl: kf.KCLayout) -> None:
+    """``kcl_cross_section_serializer`` collapses every spec form to one key.
+
+    A cross section referenced as an object, a ``CrossSectionSpec`` dict, or a
+    registered name must serialize to the same string so the ``@cell`` cache
+    treats them as a single key.
+    """
+    from kfactory.serialization import kcl_cross_section_serializer
+
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    xs = kcl.get_icross_section(
+        kf.cross_section.CrossSectionSpecDict(layer=layer, width=1000, name="wg")
+    )
+
+    serialize = kcl_cross_section_serializer(kcl=kcl)
+    from_obj = serialize(xs)
+    from_dict = serialize(
+        kf.cross_section.CrossSectionSpecDict(layer=layer, width=1000)
+    )
+    from_str = serialize("wg")
+
+    assert from_obj == from_dict == from_str == "wg"
+
+
+def test_cell_cross_section_spec_cache_key_parity(kcl: kf.KCLayout) -> None:
+    """Cell args typed ``CrossSectionSpec`` key the cache by the resolved name.
+
+    Passing the same cross section as an object, a spec dict, or its name must
+    all hit the same cache entry (return the identical cell instance).
+    """
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    xs = kcl.get_icross_section(
+        kf.cross_section.CrossSectionSpecDict(layer=layer, width=1000, name="wg")
+    )
+
+    @kcl.cell
+    def spec_cell(
+        cross_section: kf.cross_section.CrossSectionSpec, length: int
+    ) -> kf.KCell:
+        c = kcl.kcell()
+        c.shapes(kcl.layer(layer)).insert(kf.kdb.Box(0, 0, length, 100))
+        return c
+
+    from_obj = spec_cell(cross_section=xs, length=10)
+    from_dict = spec_cell(
+        cross_section=kf.cross_section.CrossSectionSpecDict(layer=layer, width=1000),
+        length=10,
+    )
+    from_str = spec_cell(cross_section="wg", length=10)
+
+    assert from_obj is from_dict is from_str
+    assert "wg" in from_obj.name
 
 
 def test_connect_asym_to_asym_requires_mirror_when_misaligned() -> None:

@@ -22,9 +22,9 @@ from typing import overload
 from .. import KCell, kdb
 from ..cross_section import (
     CrossSection,
-    CrossSectionSpec,
+    CrossSectionSpecDict,
     DCrossSection,
-    DCrossSectionSpec,
+    DCrossSectionSpecDict,
 )
 from ..enclosure import LayerEnclosure
 from ..factories.straight import straight_dbu_factory
@@ -51,8 +51,8 @@ def straight(
     cross_section: str
     | CrossSection
     | DCrossSection
-    | CrossSectionSpec
-    | DCrossSectionSpec,
+    | CrossSectionSpecDict
+    | DCrossSectionSpecDict,
     length: um,
 ) -> KCell: ...
 def straight(
@@ -61,8 +61,8 @@ def straight(
     cross_section: str
     | CrossSection
     | DCrossSection
-    | CrossSectionSpec
-    | DCrossSectionSpec
+    | CrossSectionSpecDict
+    | DCrossSectionSpecDict
     | None = None,
     width: um | None = None,
     layer: kdb.LayerInfo | None = None,

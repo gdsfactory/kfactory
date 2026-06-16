@@ -16,7 +16,9 @@ from .conf import config
 from .exceptions import CellNameError
 
 if TYPE_CHECKING:
+    from .cross_section import CrossSectionSpec
     from .kcell import AnyKCell
+    from .layout import KCLayout
     from .typings import (
         DShapeLike,
         IShapeLike,
@@ -426,3 +428,12 @@ def get_function_name(f: Callable[..., Any]) -> str:
     if hasattr(f, "func") and callable(f.func):
         return get_function_name(f.func)
     raise ValueError(f"Function {f} has no name.")
+
+
+def kcl_cross_section_serializer(
+    kcl: KCLayout,
+) -> Callable[[CrossSectionSpec], str]:
+    def serialize_cross_section_spec(cross_section_spec: CrossSectionSpec) -> str:
+        return kcl.get_icross_section(cross_section_spec).name
+
+    return serialize_cross_section_spec

@@ -20,8 +20,8 @@ from .. import kdb
 from ..conf import logger
 from ..cross_section import (
     AnyCrossSectionInput,
-    CrossSectionSpec,
-    DCrossSectionSpec,
+    CrossSectionSpecDict,
+    DCrossSectionSpecDict,
 )
 from ..enclosure import LayerEnclosure, extrude_path_cross_section
 from ..kcell import KCell
@@ -51,8 +51,8 @@ class BendEulerFactory(Protocol[KC_co]):
         resolution: float = 150,
         cross_section: str
         | AnyCrossSectionInput
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | None = None,
         width: um | None = None,
         layer: kdb.LayerInfo | None = None,
@@ -83,8 +83,8 @@ class BendSEulerFactory(Protocol[KC_co]):
         resolution: float = 150,
         cross_section: str
         | AnyCrossSectionInput
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | None = None,
         width: um | None = None,
         layer: kdb.LayerInfo | None = None,
@@ -383,8 +383,8 @@ def bend_euler_factory(
         resolution: float = 150,
         cross_section: str
         | AnyCrossSectionInput
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | None = None,
         width: um | None = None,
         layer: kdb.LayerInfo | None = None,
@@ -540,8 +540,8 @@ def bend_s_euler_factory(
         resolution: float = 150,
         cross_section: str
         | AnyCrossSectionInput
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | None = None,
         width: um | None = None,
         layer: kdb.LayerInfo | None = None,

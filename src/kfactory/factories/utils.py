@@ -5,7 +5,7 @@ from functools import partial
 from typing import TYPE_CHECKING, TypeGuard
 
 from .. import kdb
-from ..cross_section import CrossSection, CrossSectionSpec
+from ..cross_section import CrossSection, CrossSectionSpecDict
 from ..enclosure import (
     LayerEnclosure,
     extrude_path_dynamic_points,
@@ -66,7 +66,7 @@ def cross_section_from_width(
 ) -> CrossSection:
     """Build a (dbu) symmetric cross section from legacy width/layer/enclosure args."""
     return kcl.get_icross_section(
-        CrossSectionSpec(
+        CrossSectionSpecDict(
             layer=layer,
             width=width,
             unit="dbu",
