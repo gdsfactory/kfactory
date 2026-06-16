@@ -18,12 +18,21 @@ from scipy.special import fresnel
 
 from .. import kdb
 from ..conf import logger
-from ..enclosure import LayerEnclosure, extrude_path
+from ..cross_section import (
+    AnyCrossSectionInput,
+    CrossSectionSpec,
+    DCrossSectionSpec,
+)
+from ..enclosure import LayerEnclosure, extrude_path_cross_section
 from ..kcell import KCell
 from ..layout import CellKWargs, KCLayout
 from ..settings import Info
 from ..typings import KC, KC_co, MetaData, deg, um
-from .utils import _is_additional_info_func
+from .utils import (
+    _is_additional_info_func,
+    boundary_from_shapes,
+    cross_section_from_width,
+)
 
 __all__ = [
     "bend_euler_factory",
@@ -36,22 +45,31 @@ __all__ = [
 class BendEulerFactory(Protocol[KC_co]):
     def __call__(
         self,
-        width: um,
+        *,
         radius: um,
-        layer: kdb.LayerInfo,
-        enclosure: LayerEnclosure | None = None,
         angle: deg = 90,
         resolution: float = 150,
+        cross_section: str
+        | AnyCrossSectionInput
+        | CrossSectionSpec
+        | DCrossSectionSpec
+        | None = None,
+        width: um | None = None,
+        layer: kdb.LayerInfo | None = None,
+        enclosure: LayerEnclosure | None = None,
     ) -> KC_co:
         """Create a euler bend.
 
+        Either pass a ``cross_section`` or the legacy ``width``/``layer``/``enclosure``.
+
         Args:
-            width: Width of the core. [um]
             radius: Radius off the backbone. [um]
-            layer: Layer index / LayerEnum of the core.
-            enclosure: Slab/exclude definition. [dbu]
             angle: Angle of the bend.
             resolution: Angle resolution for the backbone.
+            cross_section: Cross section of the bend.
+            width: Width of the core. [um] (legacy; requires ``layer``)
+            layer: Main layer of the bend. (legacy)
+            enclosure: Slab/exclude definition. (legacy)
         """
         ...
 
@@ -59,22 +77,31 @@ class BendEulerFactory(Protocol[KC_co]):
 class BendSEulerFactory(Protocol[KC_co]):
     def __call__(
         self,
+        *,
         offset: um,
-        width: um,
         radius: um,
-        layer: kdb.LayerInfo,
-        enclosure: LayerEnclosure | None = None,
         resolution: float = 150,
+        cross_section: str
+        | AnyCrossSectionInput
+        | CrossSectionSpec
+        | DCrossSectionSpec
+        | None = None,
+        width: um | None = None,
+        layer: kdb.LayerInfo | None = None,
+        enclosure: LayerEnclosure | None = None,
     ) -> KC_co:
         """Create a euler s-bend.
 
+        Either pass a ``cross_section`` or the legacy ``width``/``layer``/``enclosure``.
+
         Args:
             offset: Offset between left/right. [um]
-            width: Width of the core. [um]
             radius: Radius off the backbone. [um]
-            layer: Layer index / LayerEnum of the core.
-            enclosure: Slab/exclude definition. [dbu]
             resolution: Angle resolution for the backbone.
+            cross_section: Cross section of the bend.
+            width: Width of the core. [um] (legacy; requires ``layer``)
+            layer: Main layer of the bend. (legacy)
+            enclosure: Slab/exclude definition. (legacy)
         """
         ...
 
@@ -250,13 +277,14 @@ def bend_euler_factory(
 ) -> BendEulerFactory[KC]:
     """Returns a function generating euler bends.
 
-    Will snap ports by default
+    The returned function is the generic interface (``cross_section`` or the legacy
+    ``width``/``layer``/``enclosure``). Will snap ports by default.
 
     Args:
         kcl: The KCLayout which will be owned
         additional_info: Add additional key/values to the
             [`KCell.info`][kfactory.settings.Info]. Can be a static dict
-            mapping info name to info value. Or can a callable which takes the straight
+            mapping info name to info value. Or can a callable which takes the bend
             functions' parameters as kwargs and returns a dict with the mapping.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
@@ -277,6 +305,8 @@ def bend_euler_factory(
         _additional_info = additional_info or {}  # ty:ignore[invalid-assignment]
     if cell_kwargs.get("snap_ports") is None:
         cell_kwargs["snap_ports"] = False
+    cell_kwargs.setdefault("basename", "bend_euler")
+    basename = cell_kwargs["basename"]
 
     if output_type is not None:
         cell = kcl.cell(output_type=output_type, **cell_kwargs)
@@ -284,24 +314,13 @@ def bend_euler_factory(
         cell = kcl.cell(output_type=cast("type[KC]", KCell), **cell_kwargs)
 
     @cell
-    def bend_euler(
-        width: um,
+    def _bend_euler(
+        cross_section: str | AnyCrossSectionInput,
         radius: um,
-        layer: kdb.LayerInfo,
-        enclosure: LayerEnclosure | None = None,
         angle: deg = 90,
         resolution: float = 150,
     ) -> KCell:
-        """Create a euler bend.
-
-        Args:
-            width: Width of the core. [um]
-            radius: Radius off the backbone. [um]
-            layer: Layer index / LayerEnum of the core.
-            enclosure: Slab/exclude definition. [dbu]
-            angle: Angle of the bend.
-            resolution: Angle resolution for the backbone.
-        """
+        """Euler bend [um] from a cross section."""
         c = kcl.kcell()
         if angle < 0:
             logger.critical(
@@ -310,30 +329,17 @@ def bend_euler_factory(
                 " lengths."
             )
             angle = -angle
-        if width < 0:
-            logger.critical(
-                f"Negative widths are not allowed {width} as ports"
-                " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
-            )
-            width = -width
+
+        xs = kcl.get_base_cross_section(cross_section)
         backbone = euler_bend_points(angle, radius=radius, resolution=resolution)
 
-        center_path = extrude_path(
-            target=c,
-            layer=layer,
-            path=backbone,
-            width=width,
-            enclosure=enclosure,
-            start_angle=0,
-            end_angle=angle,
-        )
-        li = c.kcl.layer(layer)
+        extrude_path_cross_section(c, backbone, xs, start_angle=0, end_angle=angle)
+
         c.create_port(
             name="o1",
-            layer=li,
-            width=c.kcl.to_dbu(width),
+            cross_section=xs,
             trans=kdb.Trans(2, False, c.kcl.to_dbu(backbone[0]).to_v()),
+            port_type=port_type,
         )
 
         if abs(angle % 90) < 0.001:
@@ -341,35 +347,60 @@ def bend_euler_factory(
             c.create_port(
                 name="o2",
                 trans=kdb.Trans(_ang // 90, False, c.kcl.to_dbu(backbone[-1]).to_v()),
-                width=round(width / c.kcl.dbu),
-                layer=li,
+                cross_section=xs,
                 port_type=port_type,
             )
         else:
             c.create_port(
                 name="o2",
                 dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
-                width=c.kcl.to_dbu(width),
-                layer=li,
+                cross_section=xs,
                 port_type=port_type,
             )
         _info: dict[str, MetaData] = {}
         _info.update(
             _additional_info_func(
-                width=width,
+                cross_section=xs,
                 radius=radius,
-                layer=li,
-                enclosure=enclosure,
                 angle=angle,
                 resolution=resolution,
             )
         )
         _info.update(_additional_info)
         c.info = Info(**_info)
-        c.boundary = center_path
+        boundary = boundary_from_shapes(c)
+        if boundary is not None:
+            c.boundary = boundary
 
         c.auto_rename_ports()
         return c
+
+    @kcl.generic_factory(name=basename)
+    def bend_euler(
+        *,
+        radius: um,
+        angle: deg = 90,
+        resolution: float = 150,
+        cross_section: str
+        | AnyCrossSectionInput
+        | CrossSectionSpec
+        | DCrossSectionSpec
+        | None = None,
+        width: um | None = None,
+        layer: kdb.LayerInfo | None = None,
+        enclosure: LayerEnclosure | None = None,
+    ) -> KC:
+        if cross_section is None:
+            if width is None or layer is None:
+                raise ValueError(
+                    "Provide a cross_section, or width and layer (legacy call)."
+                )
+            xs = cross_section_from_width(kcl, kcl.to_dbu(width), layer, enclosure)
+        else:
+            xs = kcl.get_icross_section(cross_section)
+        return _bend_euler(
+            cross_section=xs, radius=radius, angle=angle, resolution=resolution
+        )
 
     return bend_euler
 
@@ -415,13 +446,13 @@ def bend_s_euler_factory(
     port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BendSEulerFactory[KC]:
-    """Returns a function generating euler s-bends.
+    """Returns a function generating euler s-bends (generic interface).
 
     Args:
         kcl: The KCLayout which will be owned
         additional_info: Add additional key/values to the
             [`KCell.info`][kfactory.settings.Info]. Can be a static dict
-            mapping info name to info value. Or can a callable which takes the straight
+            mapping info name to info value. Or can a callable which takes the bend
             functions' parameters as kwargs and returns a dict with the mapping.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
@@ -440,52 +471,29 @@ def bend_s_euler_factory(
 
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}  # ty:ignore[invalid-assignment]
+    cell_kwargs.setdefault("basename", "bend_s_euler")
+    basename = cell_kwargs["basename"]
     if output_type is not None:
         cell = kcl.cell(output_type=output_type, **cell_kwargs)
     else:
         cell = kcl.cell(output_type=cast("type[KC]", KCell), **cell_kwargs)
 
     @cell
-    def bend_s_euler(
+    def _bend_s_euler(
+        cross_section: str | AnyCrossSectionInput,
         offset: um,
-        width: um,
         radius: um,
-        layer: kdb.LayerInfo,
-        enclosure: LayerEnclosure | None = None,
         resolution: float = 150,
     ) -> KCell:
-        """Create a euler s-bend.
-
-        Args:
-            offset: Offset between left/right. [um]
-            width: Width of the core. [um]
-            radius: Radius off the backbone. [um]
-            layer: Layer index / LayerEnum of the core.
-            enclosure: Slab/exclude definition. [dbu]
-            resolution: Angle resolution for the backbone.
-        """
+        """Euler s-bend [um] from a cross section."""
         c = kcl.kcell()
-        if width < 0:
-            logger.critical(
-                f"Negative widths are not allowed {width} as ports"
-                " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
-            )
-            width = -width
+        xs = kcl.get_base_cross_section(cross_section)
         backbone = euler_sbend_points(
             offset=offset,
             radius=radius,
             resolution=resolution,
         )
-        center_path = extrude_path(
-            target=c,
-            layer=layer,
-            path=backbone,
-            width=width,
-            enclosure=enclosure,
-            start_angle=0,
-            end_angle=0,
-        )
+        extrude_path_cross_section(c, backbone, xs, start_angle=0, end_angle=0)
 
         v = backbone[-1] - backbone[0]
         if v.x < 0:
@@ -494,30 +502,27 @@ def bend_s_euler_factory(
         else:
             p1 = c.kcl.to_dbu(backbone[0])
             p2 = c.kcl.to_dbu(backbone[-1])
-        li = c.kcl.layer(layer)
         c.create_port(
             name="o1",
             trans=kdb.Trans(2, False, p1.to_v()),
-            width=c.kcl.to_dbu(width),
+            cross_section=xs,
             port_type=port_type,
-            layer=li,
         )
         c.create_port(
             name="o2",
             trans=kdb.Trans(0, False, p2.to_v()),
-            width=c.kcl.to_dbu(width),
+            cross_section=xs,
             port_type=port_type,
-            layer=li,
         )
-        c.boundary = center_path
+        boundary = boundary_from_shapes(c)
+        if boundary is not None:
+            c.boundary = boundary
         _info: dict[str, MetaData] = {}
         _info.update(
             _additional_info_func(
+                cross_section=xs,
                 offset=offset,
-                width=width,
                 radius=radius,
-                layer=layer,
-                enclosure=enclosure,
                 resolution=resolution,
             )
         )
@@ -526,5 +531,32 @@ def bend_s_euler_factory(
 
         c.auto_rename_ports()
         return c
+
+    @kcl.generic_factory(name=basename)
+    def bend_s_euler(
+        *,
+        offset: um,
+        radius: um,
+        resolution: float = 150,
+        cross_section: str
+        | AnyCrossSectionInput
+        | CrossSectionSpec
+        | DCrossSectionSpec
+        | None = None,
+        width: um | None = None,
+        layer: kdb.LayerInfo | None = None,
+        enclosure: LayerEnclosure | None = None,
+    ) -> KC:
+        if cross_section is None:
+            if width is None or layer is None:
+                raise ValueError(
+                    "Provide a cross_section, or width and layer (legacy call)."
+                )
+            xs = cross_section_from_width(kcl, kcl.to_dbu(width), layer, enclosure)
+        else:
+            xs = kcl.get_icross_section(cross_section)
+        return _bend_s_euler(
+            cross_section=xs, offset=offset, radius=radius, resolution=resolution
+        )
 
     return bend_s_euler

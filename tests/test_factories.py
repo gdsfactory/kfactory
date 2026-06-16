@@ -31,7 +31,8 @@ def test_factory_retrieval(
     straight: Callable[..., KCell], layers: Layers, wg_enc: LayerEnclosure
 ) -> None:
     straight_ = demo.factories["straight"]
-    c = straight_(width=1000, length=10_000, layer=layers.WG, enclosure=wg_enc)
+    xs = factories.utils.cross_section_from_width(demo, 1000, layers.WG, wg_enc)
+    c = straight_(cross_section=xs, length=10_000)
     assert isinstance(c, KCell)
 
     with pytest.raises(

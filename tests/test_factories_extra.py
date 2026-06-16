@@ -59,11 +59,12 @@ def test_bend_s_bezier_with_static_info(kcl: kf.KCLayout, layers: Layers) -> Non
 
 def test_bend_s_bezier_with_callable_info(kcl: kf.KCLayout, layers: Layers) -> None:
     def info_func(**kwargs: object) -> dict[str, object]:
-        return {"computed_width": kwargs["width"]}
+        xs = kwargs["cross_section"]
+        return {"computed_width": xs.width}  # ty:ignore[unresolved-attribute]
 
     factory = bend_s_bezier_factory(kcl=kcl, additional_info=info_func)  # ty:ignore[invalid-argument-type]
     c = factory(width=0.5, height=1.0, length=8.0, layer=layers.WG)
-    assert c.info["computed_width"] == 0.5
+    assert c.info["computed_width"] == 500
 
 
 def test_virtual_bend_circular_basic(kcl: kf.KCLayout, layers: Layers) -> None:

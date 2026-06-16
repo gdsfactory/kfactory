@@ -176,3 +176,62 @@ def test_pdkenclosure(layers: Layers, straight_blank: kf.KCell) -> None:
         (kf.kdb.Region(c.shapes(c.kcl.find_layer(layers.WGCLADEX))) & port_wg_ex)
         - port_wg_ex
     ).is_empty()
+
+
+def test_extrude_path_cross_section_symmetric_matches_legacy(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    """A symmetric cross section extrudes identically to the legacy width path."""
+    enc = kcl.get_enclosure(
+        kf.LayerEnclosure(
+            sections=[(layers.WGCLAD, 0, 2000)], main_layer=layers.WG, name="enc_eq"
+        )
+    )
+    xs = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="wg_eq")
+    )
+    path = [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(10, 0), kf.kdb.DPoint(10, 10)]
+
+    c_cs = kcl.kcell("cs_extrude")
+    kf.enclosure.extrude_path_cross_section(c_cs, path, xs)
+    c_legacy = kcl.kcell("legacy_extrude")
+    kf.enclosure.extrude_path(c_legacy, layers.WG, path, kcl.to_um(1000), enc)
+
+    for layer in (layers.WG, layers.WGCLAD):
+        li = kcl.layer(layer)
+        xor = kf.kdb.Region(c_cs.shapes(li)) ^ kf.kdb.Region(c_legacy.shapes(li))
+        assert xor.is_empty()
+
+
+def test_extrude_path_cross_section_asymmetric(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    """An asymmetric cross section extrudes one signed band per strip, per layer."""
+    acs = kcl.get_asymmetrical_cross_section(
+        kf.AsymmetricalCrossSection(
+            layer=layers.WG,
+            section_min=-200,
+            section_max=300,
+            sections=(
+                kf.CrossSectionLayer(
+                    layer=layers.WGCLAD, section_min=-100, section_max=900
+                ),
+            ),
+            name="asym_extrude",
+        )
+    )
+    c = kcl.kcell("asym_extrude_cell")
+    length = 10.0
+    kf.enclosure.extrude_path_cross_section(
+        c, [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(length, 0)], acs
+    )
+    length_dbu = kcl.to_dbu(length)
+
+    # main strip on WG keeps its signed offsets [-200, 300]
+    assert kf.kdb.Region(c.shapes(kcl.layer(layers.WG))).bbox() == kf.kdb.Box(
+        0, -200, length_dbu, 300
+    )
+    # aux strip on WGCLAD keeps its signed offsets [-100, 900]
+    assert kf.kdb.Region(c.shapes(kcl.layer(layers.WGCLAD))).bbox() == kf.kdb.Box(
+        0, -100, length_dbu, 900
+    )

@@ -1,19 +1,79 @@
-"""Utility functions for virtual cells."""
+"""Utility functions for cell factories."""
 
 from collections.abc import Callable, Sequence
 from functools import partial
-from typing import TypeGuard
+from typing import TYPE_CHECKING, TypeGuard
 
 from .. import kdb
+from ..cross_section import CrossSection, CrossSectionSpec
 from ..enclosure import (
     LayerEnclosure,
     extrude_path_dynamic_points,
     extrude_path_points,
 )
-from ..kcell import VKCell
+from ..kcell import KCell, VKCell
 from ..typings import MetaData
 
-__all__ = ["extrude_backbone", "extrude_backbone_dynamic"]
+if TYPE_CHECKING:
+    from ..layout import KCLayout
+
+__all__ = [
+    "boundary_from_shapes",
+    "cross_section_from_width",
+    "extrude_backbone",
+    "extrude_backbone_dynamic",
+    "layer_enclosure_to_sections",
+]
+
+
+def boundary_from_shapes(c: KCell) -> kdb.DPolygon | None:
+    """Build a cell boundary from its drawn shapes.
+
+    Collects every shape on every layer, merges them, and returns the first polygon
+    (in um) of the merged region — i.e. the outline of the cell's footprint. Returns
+    `None` if the cell has no shapes.
+    """
+    region = kdb.Region()
+    for layer_index in c.kcl.layer_indexes():
+        region.insert(c.shapes(layer_index))
+    region.merge()
+    if region.is_empty():
+        return None
+    return region[0].to_dtype(c.kcl.dbu)
+
+
+def layer_enclosure_to_sections(
+    enclosure: LayerEnclosure | None,
+) -> list[tuple[kdb.LayerInfo, int] | tuple[kdb.LayerInfo, int, int]]:
+    """Flatten a `LayerEnclosure` into `CrossSectionSpec` ``sections`` (dbu)."""
+    if enclosure is None:
+        return []
+    sections: list[tuple[kdb.LayerInfo, int] | tuple[kdb.LayerInfo, int, int]] = []
+    for layer, layer_section in enclosure.layer_sections.items():
+        for section in layer_section.sections:
+            if section.d_min is None:
+                sections.append((layer, section.d_max))
+            else:
+                sections.append((layer, section.d_min, section.d_max))
+    return sections
+
+
+def cross_section_from_width(
+    kcl: "KCLayout",
+    width: int,
+    layer: kdb.LayerInfo,
+    enclosure: LayerEnclosure | None = None,
+) -> CrossSection:
+    """Build a (dbu) symmetric cross section from legacy width/layer/enclosure args."""
+    return kcl.get_icross_section(
+        CrossSectionSpec(
+            layer=layer,
+            width=width,
+            unit="dbu",
+            sections=layer_enclosure_to_sections(enclosure),
+        ),
+        symmetrical=True,
+    )
 
 
 def extrude_backbone(
