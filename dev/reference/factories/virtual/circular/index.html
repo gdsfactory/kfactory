@@ -5404,16 +5404,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/factories/virtual/circular.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
 <span class="normal">30</span>
 <span class="normal">31</span>
 <span class="normal">32</span>
@@ -5426,27 +5417,58 @@
 <span class="normal">39</span>
 <span class="normal">40</span>
 <span class="normal">41</span>
-<span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BendCircularVKCell</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BendCircularVKCell</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory for virtual circular bend.&quot;&quot;&quot;</span>
+
+    <span class="vm">__name__</span><span class="p">:</span> <span class="nb">str</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
-        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+        <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
         <span class="n">angle_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VKCell</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a virtual circular bend.</span>
 
+<span class="sd">        Either pass a ``cross_section`` or the legacy ``width``/``layer``/``enclosure``.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            width: Width of the core. [um]</span>
 <span class="sd">            radius: Radius of the backbone. [um]</span>
-<span class="sd">            layer: Layer index of the target layer.</span>
-<span class="sd">            enclosure: Optional enclosure.</span>
 <span class="sd">            angle: Angle amount of the bend.</span>
 <span class="sd">            angle_step: Angle amount per backbone point of the bend.</span>
+<span class="sd">            cross_section: Cross section of the bend.</span>
+<span class="sd">            width: Width of the core. [um] (legacy; requires ``layer``)</span>
+<span class="sd">            layer: Main layer of the bend. (legacy)</span>
+<span class="sd">            enclosure: Optional enclosure. (legacy)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -5474,18 +5496,25 @@
 
 </h4>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span>
-    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+    <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
     <span class="n">angle_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VKCell</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Create a virtual circular bend.</p>
+<p>Either pass a <code>cross_section</code> or the legacy <code>width</code>/<code>layer</code>/<code>enclosure</code>.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -5501,26 +5530,15 @@
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>width</code>
-            </td>
-            <td>
-                  <code><span title="float">float</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Width of the core. [um]</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
                 <code>radius</code>
             </td>
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;um&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../../typings/#kfactory.typings.um">um</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5533,47 +5551,15 @@
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>layer</code>
-            </td>
-            <td>
-                  <code><span title="kfactory.kdb.LayerInfo">LayerInfo</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Layer index of the target layer.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>enclosure</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;LayerEnclosure&lt;/span&gt;
-
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../../enclosure/#kfactory.enclosure.LayerEnclosure">LayerEnclosure</a> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Optional enclosure.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
                 <code>angle</code>
             </td>
             <td>
-                  <code><span title="float">float</span></code>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;deg&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../../typings/#kfactory.typings.deg">deg</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5600,24 +5586,87 @@
                   <code>1</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cross_section</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="kfactory.cross_section.AnyCrossSectionInput">AnyCrossSectionInput</span> | <span title="kfactory.cross_section.CrossSectionSpecDict">CrossSectionSpecDict</span> | <span title="kfactory.cross_section.DCrossSectionSpecDict">DCrossSectionSpecDict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cross section of the bend.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>width</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;um&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../../typings/#kfactory.typings.um">um</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Width of the core. [um] (legacy; requires <code>layer</code>)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>layer</code>
+            </td>
+            <td>
+                  <code><span title="kfactory.kdb.LayerInfo">LayerInfo</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Main layer of the bend. (legacy)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>enclosure</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;LayerEnclosure&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../../enclosure/#kfactory.enclosure.LayerEnclosure">LayerEnclosure</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional enclosure. (legacy)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/virtual/circular.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
@@ -5625,24 +5674,53 @@
 <span class="normal">39</span>
 <span class="normal">40</span>
 <span class="normal">41</span>
-<span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+    <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
     <span class="n">angle_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VKCell</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a virtual circular bend.</span>
 
+<span class="sd">    Either pass a ``cross_section`` or the legacy ``width``/``layer``/``enclosure``.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        width: Width of the core. [um]</span>
 <span class="sd">        radius: Radius of the backbone. [um]</span>
-<span class="sd">        layer: Layer index of the target layer.</span>
-<span class="sd">        enclosure: Optional enclosure.</span>
 <span class="sd">        angle: Angle amount of the bend.</span>
 <span class="sd">        angle_step: Angle amount per backbone point of the bend.</span>
+<span class="sd">        cross_section: Cross section of the bend.</span>
+<span class="sd">        width: Width of the core. [um] (legacy; requires ``layer``)</span>
+<span class="sd">        layer: Main layer of the bend. (legacy)</span>
+<span class="sd">        enclosure: Optional enclosure. (legacy)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -5681,6 +5759,8 @@
     <div class="doc doc-contents ">
 
         <p>Returns a function generating virtual circular bends.</p>
+<p>The returned function is the generic interface (<code>cross_section</code> or the legacy
+<code>width</code>/<code>layer</code>/<code>enclosure</code>).</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -5731,7 +5811,7 @@
   &lt;span class=&quot;doc doc-labels&quot;&gt;
       &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt;" href="../../../settings/#kfactory.settings.Info"><code>VKCell.info</code></a>. Can be a static dict
-mapping info name to info value. Or can a callable which takes the straight
+mapping info name to info value. Or can a callable which takes the bend
 functions' parameters as kwargs and returns a dict with the mapping.</p>
               </div>
             </td>
@@ -5778,27 +5858,7 @@ the VKCell will be named 'virtual_bend_circular[...]'.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/virtual/circular.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 45</span>
-<span class="normal"> 46</span>
-<span class="normal"> 47</span>
-<span class="normal"> 48</span>
-<span class="normal"> 49</span>
-<span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
-<span class="normal"> 57</span>
-<span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
-<span class="normal"> 65</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 65</span>
 <span class="normal"> 66</span>
 <span class="normal"> 67</span>
 <span class="normal"> 68</span>
@@ -5908,7 +5968,36 @@ the VKCell will be named 'virtual_bend_circular[...]'.</p>
 <span class="normal">172</span>
 <span class="normal">173</span>
 <span class="normal">174</span>
-<span class="normal">175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">virtual_bend_circular_factory</span><span class="p">(</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">virtual_bend_circular_factory</span><span class="p">(</span>
     <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
     <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
         <span class="o">...</span><span class="p">,</span>
@@ -5921,11 +6010,14 @@ the VKCell will be named 'virtual_bend_circular[...]'.</p>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BendCircularVKCell</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a function generating virtual circular bends.</span>
 
+<span class="sd">    The returned function is the generic interface (``cross_section`` or the legacy</span>
+<span class="sd">    ``width``/``layer``/``enclosure``).</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        kcl: The KCLayout which will be owned</span>
 <span class="sd">        additional_info: Add additional key/values to the</span>
 <span class="sd">            [`VKCell.info`][kfactory.settings.Info]. Can be a static dict</span>
-<span class="sd">            mapping info name to info value. Or can a callable which takes the straight</span>
+<span class="sd">            mapping info name to info value. Or can a callable which takes the bend</span>
 <span class="sd">            functions&#39; parameters as kwargs and returns a dict with the mapping.</span>
 <span class="sd">        basename: Overwrite the prefix of the resulting VKCell&#39;s name. By default</span>
 <span class="sd">            the VKCell will be named &#39;virtual_bend_circular[...]&#39;.</span>
@@ -5937,7 +6029,7 @@ the VKCell will be named 'virtual_bend_circular[...]'.</p>
             <span class="o">...</span><span class="p">,</span>
             <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">],</span>
         <span class="p">]</span> <span class="o">=</span> <span class="n">additional_info</span>
-        <span class="n">_additional_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">_additional_info</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">else</span><span class="p">:</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">additional_info_func</span><span class="p">(</span>
@@ -5949,28 +6041,15 @@ the VKCell will be named 'virtual_bend_circular[...]'.</p>
         <span class="n">_additional_info</span> <span class="o">=</span> <span class="n">additional_info</span> <span class="ow">or</span> <span class="p">{}</span>  <span class="c1"># ty:ignore[invalid-assignment]</span>
 
     <span class="nd">@kcl</span><span class="o">.</span><span class="n">vcell</span><span class="p">(</span>
-        <span class="n">basename</span><span class="o">=</span><span class="n">basename</span><span class="p">,</span>
-        <span class="n">output_type</span><span class="o">=</span><span class="n">VKCell</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">,</span>
+        <span class="n">basename</span><span class="o">=</span><span class="n">basename</span> <span class="ow">or</span> <span class="s2">&quot;virtual_bend_circular&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="n">VKCell</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span>
     <span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">virtual_bend_circular</span><span class="p">(</span>
-        <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
-        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span>
+        <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+        <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
         <span class="n">angle_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VKCell</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a virtual circular bend.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            width: Width of the core. [um]</span>
-<span class="sd">            radius: Radius of the backbone. [um]</span>
-<span class="sd">            layer: Layer index of the target layer.</span>
-<span class="sd">            enclosure: Optional enclosure.</span>
-<span class="sd">            angle: Angle amount of the bend.</span>
-<span class="sd">            angle_step: Angle amount per backbone point of the bend.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Virtual circular bend defined by a cross section (um).&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">vkcell</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">angle</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
@@ -5979,14 +6058,8 @@ the VKCell will be named 'virtual_bend_circular[...]'.</p>
                 <span class="s2">&quot; lengths.&quot;</span>
             <span class="p">)</span>
             <span class="n">angle</span> <span class="o">=</span> <span class="o">-</span><span class="n">angle</span>
-        <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Negative widths are not allowed </span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2"> as ports&quot;</span>
-                <span class="s2">&quot; will be inverted. Please use a positive number. Forcing positive&quot;</span>
-                <span class="s2">&quot; lengths.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">width</span> <span class="o">=</span> <span class="o">-</span><span class="n">width</span>
-        <span class="n">dbu</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span>
+
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_base_cross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
         <span class="n">backbone</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="p">[</span>
@@ -6000,23 +6073,18 @@ the VKCell will be named 'virtual_bend_circular[...]'.</p>
             <span class="p">]</span>
         <span class="p">]</span>
 
-        <span class="n">extrude_backbone</span><span class="p">(</span>
-            <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span>
+        <span class="n">extrude_backbone_cross_section</span><span class="p">(</span>
+            <span class="n">c</span><span class="p">,</span>
             <span class="n">backbone</span><span class="o">=</span><span class="n">backbone</span><span class="p">,</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
-            <span class="n">enclosure</span><span class="o">=</span><span class="n">enclosure</span><span class="p">,</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
             <span class="n">start_angle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">end_angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span>
-            <span class="n">dbu</span><span class="o">=</span><span class="n">dbu</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="n">_additional_info_func</span><span class="p">(</span>
-                <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+                <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
                 <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
-                <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
-                <span class="n">enclosure</span><span class="o">=</span><span class="n">enclosure</span><span class="p">,</span>
                 <span class="n">angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span>
                 <span class="n">angle_step</span><span class="o">=</span><span class="n">angle_step</span><span class="p">,</span>
             <span class="p">)</span>
@@ -6026,19 +6094,49 @@ the VKCell will be named 'virtual_bend_circular[...]'.</p>
 
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer</span><span class="p">),</span>
-            <span class="n">width</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">),</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
             <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">backbone</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_v</span><span class="p">()),</span>
         <span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
             <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">backbone</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_v</span><span class="p">()),</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer</span><span class="p">),</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">c</span>
 
-    <span class="k">return</span> <span class="n">virtual_bend_circular</span>
+    <span class="nd">@kcl</span><span class="o">.</span><span class="n">generic_factory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">basename</span> <span class="ow">or</span> <span class="s2">&quot;virtual_bend_circular&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">virtual_bend_circular_generic</span><span class="p">(</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+        <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
+        <span class="n">angle_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VKCell</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cross_section</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Provide a cross_section, or width and layer (legacy call).&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Negative widths are not allowed </span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2">. Forcing positive width.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">width</span> <span class="o">=</span> <span class="o">-</span><span class="n">width</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="n">cross_section_from_width</span><span class="p">(</span><span class="n">kcl</span><span class="p">,</span> <span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span> <span class="n">layer</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">virtual_bend_circular</span><span class="p">(</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span> <span class="n">angle_step</span><span class="o">=</span><span class="n">angle_step</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">virtual_bend_circular_generic</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

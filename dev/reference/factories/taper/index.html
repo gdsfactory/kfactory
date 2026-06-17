@@ -5354,6 +5354,23 @@
     <div class="doc doc-contents first">
 
         <p>Taper definitions [dbu].</p>
+<p>A linear taper transitions between two cross sections (two core widths) over a
+given length::</p>
+<pre><code>       __
+     _/  │ Slab/Exclude
+   _/  __│
+ _/  _/  │
+│  _/    │
+│_/      │
+│_       │ Core
+│ \_     │
+│_  \_   │
+  \_  \__│
+    \_   │
+      \__│ Slab/Exclude
+</code></pre>
+<p>The slabs and excludes are part of the cross sections the taper is built from, or
+can be given for the legacy <code>(width1, width2, layer, enclosure)</code> call.</p>
 <p>TODO: Non-linear tapers</p>
 
 
@@ -5401,44 +5418,78 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/factories/taper.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TaperFactory</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">KC_co</span><span class="p">]):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TaperFactory</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">KC_co</span><span class="p">]):</span>
+    <span class="vm">__name__</span><span class="p">:</span> <span class="nb">str</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">width1</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-        <span class="n">width2</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
         <span class="n">length</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
+        <span class="n">cross_section1</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cross_section2</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width1</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width2</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Linear Taper [dbu].</span>
@@ -5456,12 +5507,20 @@
 <span class="sd">                \_   │</span>
 <span class="sd">                  \__│ Slab/Exclude</span>
 
+<span class="sd">        Either pass two cross sections (``cross_section1``/``cross_section2``) or the</span>
+<span class="sd">        legacy ``width1``/``width2``/``layer``/``enclosure`` (all dbu) which is</span>
+<span class="sd">        normalized into a pair of symmetric cross sections.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            width1: Width of the core on the left side. [dbu]</span>
-<span class="sd">            width2: Width of the core on the right side. [dbu]</span>
 <span class="sd">            length: Length of the taper. [dbu]</span>
-<span class="sd">            layer: Main layer of the taper.</span>
-<span class="sd">            enclosure: Definition of the slab/exclude.</span>
+<span class="sd">            cross_section1: Cross section of the left side.</span>
+<span class="sd">            cross_section2: Cross section of the right side.</span>
+<span class="sd">            width1: Width of the core on the left side. [dbu] (legacy; requires</span>
+<span class="sd">                ``layer``)</span>
+<span class="sd">            width2: Width of the core on the right side. [dbu] (legacy; requires</span>
+<span class="sd">                ``layer``)</span>
+<span class="sd">            layer: Main layer of the taper. (legacy)</span>
+<span class="sd">            enclosure: Definition of the slab/exclude. (legacy)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -5489,10 +5548,21 @@
 
 </h4>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span>
-    <span class="n">width1</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-    <span class="n">width2</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">length</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
+    <span class="n">cross_section1</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cross_section2</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width1</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width2</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span>
 </code></pre></div>
@@ -5513,6 +5583,9 @@
     \_   │
       \__│ Slab/Exclude
 </code></pre>
+<p>Either pass two cross sections (<code>cross_section1</code>/<code>cross_section2</code>) or the
+legacy <code>width1</code>/<code>width2</code>/<code>layer</code>/<code>enclosure</code> (all dbu) which is
+normalized into a pair of symmetric cross sections.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -5526,48 +5599,6 @@
         </tr>
       </thead>
       <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>width1</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;dbu&lt;/span&gt;
-
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../typings/#kfactory.typings.dbu">dbu</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Width of the core on the left side. [dbu]</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>width2</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;dbu&lt;/span&gt;
-
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../typings/#kfactory.typings.dbu">dbu</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Width of the core on the right side. [dbu]</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
           <tr class="doc-section-item">
             <td>
                 <code>length</code>
@@ -5591,18 +5622,94 @@
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>layer</code>
+                <code>cross_section1</code>
             </td>
             <td>
-                  <code><span title="kfactory.kdb.LayerInfo">LayerInfo</span></code>
+                  <code><span title="str">str</span> | <span title="kfactory.cross_section.AnyCrossSectionInput">AnyCrossSectionInput</span> | <span title="kfactory.cross_section.CrossSectionSpecDict">CrossSectionSpecDict</span> | <span title="kfactory.cross_section.DCrossSectionSpecDict">DCrossSectionSpecDict</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Main layer of the taper.</p>
+                <p>Cross section of the left side.</p>
               </div>
             </td>
             <td>
-                <em>required</em>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cross_section2</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="kfactory.cross_section.AnyCrossSectionInput">AnyCrossSectionInput</span> | <span title="kfactory.cross_section.CrossSectionSpecDict">CrossSectionSpecDict</span> | <span title="kfactory.cross_section.DCrossSectionSpecDict">DCrossSectionSpecDict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cross section of the right side.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>width1</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;dbu&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../typings/#kfactory.typings.dbu">dbu</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Width of the core on the left side. [dbu] (legacy; requires
+<code>layer</code>)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>width2</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;dbu&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../typings/#kfactory.typings.dbu">dbu</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Width of the core on the right side. [dbu] (legacy; requires
+<code>layer</code>)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>layer</code>
+            </td>
+            <td>
+                  <code><span title="kfactory.kdb.LayerInfo">LayerInfo</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Main layer of the taper. (legacy)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -5619,7 +5726,7 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Definition of the slab/exclude.</p>
+                <p>Definition of the slab/exclude. (legacy)</p>
               </div>
             </td>
             <td>
@@ -5632,42 +5739,72 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/taper.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">width1</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-    <span class="n">width2</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">length</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
+    <span class="n">cross_section1</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cross_section2</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width1</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width2</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Linear Taper [dbu].</span>
@@ -5685,12 +5822,20 @@
 <span class="sd">            \_   │</span>
 <span class="sd">              \__│ Slab/Exclude</span>
 
+<span class="sd">    Either pass two cross sections (``cross_section1``/``cross_section2``) or the</span>
+<span class="sd">    legacy ``width1``/``width2``/``layer``/``enclosure`` (all dbu) which is</span>
+<span class="sd">    normalized into a pair of symmetric cross sections.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        width1: Width of the core on the left side. [dbu]</span>
-<span class="sd">        width2: Width of the core on the right side. [dbu]</span>
 <span class="sd">        length: Length of the taper. [dbu]</span>
-<span class="sd">        layer: Main layer of the taper.</span>
-<span class="sd">        enclosure: Definition of the slab/exclude.</span>
+<span class="sd">        cross_section1: Cross section of the left side.</span>
+<span class="sd">        cross_section2: Cross section of the right side.</span>
+<span class="sd">        width1: Width of the core on the left side. [dbu] (legacy; requires</span>
+<span class="sd">            ``layer``)</span>
+<span class="sd">        width2: Width of the core on the right side. [dbu] (legacy; requires</span>
+<span class="sd">            ``layer``)</span>
+<span class="sd">        layer: Main layer of the taper. (legacy)</span>
+<span class="sd">        enclosure: Definition of the slab/exclude. (legacy)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -5764,6 +5909,10 @@
     \_   │
       \__│ Slab/Exclude
 </code></pre>
+<p>The returned function is the generic interface: it accepts either two cross
+sections (<code>cross_section1</code>/<code>cross_section2</code>) or the legacy
+<code>width1</code>/<code>width2</code>/<code>layer</code>/<code>enclosure</code> (all dbu), normalized into a pair
+of symmetric cross sections.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -5814,12 +5963,44 @@
   &lt;span class=&quot;doc doc-labels&quot;&gt;
       &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt;" href="../../settings/#kfactory.settings.Info"><code>KCell.info</code></a>. Can be a static dict
-mapping info name to info value. Or can a callable which takes the straight
+mapping info name to info value. Or can a callable which takes the taper
 functions' parameters as kwargs and returns a dict with the mapping.</p>
               </div>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>output_type</code>
+            </td>
+            <td>
+                  <code><span title="type">type</span>[<span title="kfactory.typings.KC">KC</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The type of the returned cell.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>port_type</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Type of the ports the taper gets.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;optical&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -5844,53 +6025,7 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/taper.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span>
@@ -6014,7 +6149,81 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 <span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span>
-<span class="normal">260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">taper_factory</span><span class="p">(</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">taper_factory</span><span class="p">(</span>
     <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
     <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
         <span class="o">...</span><span class="p">,</span>
@@ -6041,12 +6250,19 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 <span class="sd">            \_   │</span>
 <span class="sd">              \__│ Slab/Exclude</span>
 
+<span class="sd">    The returned function is the generic interface: it accepts either two cross</span>
+<span class="sd">    sections (``cross_section1``/``cross_section2``) or the legacy</span>
+<span class="sd">    ``width1``/``width2``/``layer``/``enclosure`` (all dbu), normalized into a pair</span>
+<span class="sd">    of symmetric cross sections.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        kcl: The KCLayout which will be owned</span>
 <span class="sd">        additional_info: Add additional key/values to the</span>
 <span class="sd">            [`KCell.info`][kfactory.settings.Info]. Can be a static dict</span>
-<span class="sd">            mapping info name to info value. Or can a callable which takes the straight</span>
+<span class="sd">            mapping info name to info value. Or can a callable which takes the taper</span>
 <span class="sd">            functions&#39; parameters as kwargs and returns a dict with the mapping.</span>
+<span class="sd">        output_type: The type of the returned cell.</span>
+<span class="sd">        port_type: Type of the ports the taper gets.</span>
 <span class="sd">        cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_additional_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -6071,6 +6287,8 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
             <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;ports&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">]}</span>
         <span class="k">elif</span> <span class="n">kcl</span><span class="o">.</span><span class="n">rename_function</span> <span class="o">==</span> <span class="n">rename_by_direction</span><span class="p">:</span>
             <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;ports&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;W0&quot;</span><span class="p">],</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;E0&quot;</span><span class="p">]}</span>
+    <span class="n">cell_kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;basename&quot;</span><span class="p">,</span> <span class="s2">&quot;taper&quot;</span><span class="p">)</span>
+    <span class="n">basename</span> <span class="o">=</span> <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;basename&quot;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">output_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">output_type</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">)</span>
@@ -6078,35 +6296,12 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
         <span class="n">cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;type[KC]&quot;</span><span class="p">,</span> <span class="n">KCell</span><span class="p">),</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">)</span>
 
     <span class="nd">@cell</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">taper</span><span class="p">(</span>
-        <span class="n">width1</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-        <span class="n">width2</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_taper</span><span class="p">(</span>
+        <span class="n">cross_section1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span>
+        <span class="n">cross_section2</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span>
         <span class="n">length</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
-        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Linear Taper [um].</span>
-
-<span class="sd">                   __</span>
-<span class="sd">                 _/  │ Slab/Exclude</span>
-<span class="sd">               _/  __│</span>
-<span class="sd">             _/  _/  │</span>
-<span class="sd">            │  _/    │</span>
-<span class="sd">            │_/      │</span>
-<span class="sd">            │_       │ Core</span>
-<span class="sd">            │ \_     │</span>
-<span class="sd">            │_  \_   │</span>
-<span class="sd">              \_  \__│</span>
-<span class="sd">                \_   │</span>
-<span class="sd">                  \__│ Slab/Exclude</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            width1: Width of the core on the left side. [dbu]</span>
-<span class="sd">            width2: Width of the core on the right side. [dbu]</span>
-<span class="sd">            length: Length of the taper. [dbu]</span>
-<span class="sd">            layer: Main layer of the taper.</span>
-<span class="sd">            enclosure: Definition of the slab/exclude.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Linear taper defined by two cross sections.&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
@@ -6115,21 +6310,35 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
                 <span class="s2">&quot; lengths.&quot;</span>
             <span class="p">)</span>
             <span class="n">length</span> <span class="o">=</span> <span class="o">-</span><span class="n">length</span>
-        <span class="k">if</span> <span class="n">width1</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Negative widths are not allowed </span><span class="si">{</span><span class="n">width1</span><span class="si">}</span><span class="s2"> as ports&quot;</span>
-                <span class="s2">&quot; will be inverted. Please use a positive number. Forcing positive&quot;</span>
-                <span class="s2">&quot; lengths.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">width1</span> <span class="o">=</span> <span class="o">-</span><span class="n">width1</span>
 
-        <span class="k">if</span> <span class="n">width2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Negative widths are not allowed </span><span class="si">{</span><span class="n">width2</span><span class="si">}</span><span class="s2"> as ports&quot;</span>
-                <span class="s2">&quot; will be inverted. Please use a positive number. Forcing positive&quot;</span>
-                <span class="s2">&quot; lengths.&quot;</span>
+        <span class="n">xs1</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_base_cross_section</span><span class="p">(</span><span class="n">cross_section1</span><span class="p">)</span>
+        <span class="n">xs2</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_base_cross_section</span><span class="p">(</span><span class="n">cross_section2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xs1</span><span class="p">,</span> <span class="n">AsymmetricalCrossSection</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">xs2</span><span class="p">,</span> <span class="n">AsymmetricalCrossSection</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Tapers do not support asymmetric cross sections yet (the straight&quot;</span>
+                <span class="s2">&quot; edge of the taper is ambiguous for an off-center profile). Got&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">xs1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">xs2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
-            <span class="n">width2</span> <span class="o">=</span> <span class="o">-</span><span class="n">width2</span>
+        <span class="c1"># The taper applies a single, constant enclosure (and core layer) along its</span>
+        <span class="c1"># length via minkowski; a differing enclosure between the two cross sections</span>
+        <span class="c1"># (slab/exclude sections, bbox sections, or main layer) cannot be represented</span>
+        <span class="c1"># and would be silently taken from cross_section1 only. ``LayerEnclosure``</span>
+        <span class="c1"># equality is structural (its name normalizes to a geometry hash) and includes</span>
+        <span class="c1"># the main layer, so this also catches a core-layer mismatch.</span>
+        <span class="k">if</span> <span class="n">xs1</span><span class="o">.</span><span class="n">enclosure</span> <span class="o">!=</span> <span class="n">xs2</span><span class="o">.</span><span class="n">enclosure</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Taper requires both cross sections to share the same enclosure &quot;</span>
+                <span class="s2">&quot;(slab/exclude sections and main layer); got &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xs1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> (</span><span class="si">{</span><span class="n">xs1</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">) and &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xs2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> (</span><span class="si">{</span><span class="n">xs2</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">). Only the core width may &quot;</span>
+                <span class="s2">&quot;differ between the two cross sections.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">width1</span> <span class="o">=</span> <span class="n">xs1</span><span class="o">.</span><span class="n">width</span>
+        <span class="n">width2</span> <span class="o">=</span> <span class="n">xs2</span><span class="o">.</span><span class="n">width</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">xs1</span><span class="o">.</span><span class="n">main_layer</span>
+        <span class="n">enclosure</span> <span class="o">=</span> <span class="n">xs1</span><span class="o">.</span><span class="n">enclosure</span>
 
         <span class="n">li</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
         <span class="n">taper</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">li</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
@@ -6146,35 +6355,31 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">width1</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">li</span><span class="p">,</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs1</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="n">port_type</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">width2</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">li</span><span class="p">,</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs2</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="n">port_type</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">enclosure</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">enclosure</span><span class="o">.</span><span class="n">apply_minkowski_y</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+        <span class="n">enclosure</span><span class="o">.</span><span class="n">apply_minkowski_y</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+
         <span class="n">_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;width1_um&quot;</span><span class="p">:</span> <span class="n">width1</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">,</span>
-            <span class="s2">&quot;width2_um&quot;</span><span class="p">:</span> <span class="n">width2</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">,</span>
-            <span class="s2">&quot;length_um&quot;</span><span class="p">:</span> <span class="n">length</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">,</span>
+            <span class="s2">&quot;width1_um&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">width1</span><span class="p">),</span>
+            <span class="s2">&quot;width2_um&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">width2</span><span class="p">),</span>
+            <span class="s2">&quot;length_um&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">length</span><span class="p">),</span>
             <span class="s2">&quot;width1_dbu&quot;</span><span class="p">:</span> <span class="n">width1</span><span class="p">,</span>
             <span class="s2">&quot;width2_dbu&quot;</span><span class="p">:</span> <span class="n">width2</span><span class="p">,</span>
             <span class="s2">&quot;length_dbu&quot;</span><span class="p">:</span> <span class="n">length</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="n">_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="n">_additional_info_func</span><span class="p">(</span>
-                <span class="n">width1</span><span class="o">=</span><span class="n">width1</span><span class="p">,</span>
-                <span class="n">width2</span><span class="o">=</span><span class="n">width2</span><span class="p">,</span>
+                <span class="n">cross_section1</span><span class="o">=</span><span class="n">xs1</span><span class="p">,</span>
+                <span class="n">cross_section2</span><span class="o">=</span><span class="n">xs2</span><span class="p">,</span>
                 <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
-                <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
-                <span class="n">enclosure</span><span class="o">=</span><span class="n">enclosure</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="n">_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_additional_info</span><span class="p">)</span>
@@ -6183,6 +6388,38 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
         <span class="n">c</span><span class="o">.</span><span class="n">boundary</span> <span class="o">=</span> <span class="n">taper</span><span class="o">.</span><span class="n">dpolygon</span>
 
         <span class="k">return</span> <span class="n">c</span>
+
+    <span class="nd">@kcl</span><span class="o">.</span><span class="n">generic_factory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">basename</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">taper</span><span class="p">(</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">length</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
+        <span class="n">cross_section1</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cross_section2</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width1</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width2</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cross_section1</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cross_section2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">width1</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">width2</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Provide cross_section1 and cross_section2, or width1, width2 and&quot;</span>
+                    <span class="s2">&quot; layer (legacy call).&quot;</span>
+                <span class="p">)</span>
+            <span class="n">xs1</span> <span class="o">=</span> <span class="n">cross_section_from_width</span><span class="p">(</span><span class="n">kcl</span><span class="p">,</span> <span class="n">width1</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">)</span>
+            <span class="n">xs2</span> <span class="o">=</span> <span class="n">cross_section_from_width</span><span class="p">(</span><span class="n">kcl</span><span class="p">,</span> <span class="n">width2</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xs1</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">cross_section1</span><span class="p">)</span>
+            <span class="n">xs2</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">cross_section2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_taper</span><span class="p">(</span><span class="n">cross_section1</span><span class="o">=</span><span class="n">xs1</span><span class="p">,</span> <span class="n">cross_section2</span><span class="o">=</span><span class="n">xs2</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">taper</span>
 </code></pre></div></td></tr></table></div>

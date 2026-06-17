@@ -3471,6 +3471,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#kfactory.factories.utils.extrude_backbone_cross_section" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        extrude_backbone_cross_section
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kfactory.factories.utils.extrude_backbone_dynamic" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -5324,6 +5335,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#kfactory.factories.utils.extrude_backbone_cross_section" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        extrude_backbone_cross_section
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kfactory.factories.utils.extrude_backbone_dynamic" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -5428,12 +5450,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
@@ -5441,7 +5458,12 @@
 <span class="normal">39</span>
 <span class="normal">40</span>
 <span class="normal">41</span>
-<span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">boundary_from_shapes</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">boundary_from_shapes</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a cell boundary from its drawn shapes.</span>
 
 <span class="sd">    Collects every shape on every layer, merges them, and returns the first polygon</span>
@@ -5484,12 +5506,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">66</span>
 <span class="normal">67</span>
 <span class="normal">68</span>
 <span class="normal">69</span>
@@ -5499,7 +5516,12 @@
 <span class="normal">73</span>
 <span class="normal">74</span>
 <span class="normal">75</span>
-<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cross_section_from_width</span><span class="p">(</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cross_section_from_width</span><span class="p">(</span>
     <span class="n">kcl</span><span class="p">:</span> <span class="s2">&quot;KCLayout&quot;</span><span class="p">,</span>
     <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
@@ -5696,12 +5718,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 84</span>
 <span class="normal"> 85</span>
 <span class="normal"> 86</span>
 <span class="normal"> 87</span>
@@ -5753,7 +5770,12 @@
 <span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
-<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extrude_backbone</span><span class="p">(</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extrude_backbone</span><span class="p">(</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span>
     <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span>
     <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -5811,6 +5833,254 @@
                     <span class="p">)</span>
                     <span class="n">outer_r</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
                     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">_li</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span><span class="p">(</span><span class="n">outer_l</span> <span class="o">+</span> <span class="n">outer_r</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="kfactory.factories.utils.extrude_backbone_cross_section" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">extrude_backbone_cross_section</span>
+
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_backbone_cross_section</span><span class="p">(</span>
+    <span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span>
+    <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="n">AnyCrossSection</span><span class="p">,</span>
+    <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Extrude a (symmetric or asymmetric) cross section along a backbone (um).</p>
+<p>The virtual-cell counterpart of
+<a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-function-name&quot;&gt;extrude_path_cross_section&lt;/span&gt;" href="../../enclosure/#kfactory.enclosure.extrude_path_cross_section"><code>extrude_path_cross_section</code></a>:
+symmetric cross sections reproduce <code>extrude_backbone</code> exactly (byte-identical,
+centered width + enclosure annuli); asymmetric ones are extruded as one signed
+band <code>[section_min, section_max]</code> per strip (main strip + each aux section),
+with strips sharing a layer merged.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>c</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;VKCell&lt;/span&gt;" href="../../kcell/#kfactory.kcell.VKCell">VKCell</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>target virtual cell</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>backbone</code>
+            </td>
+            <td>
+                  <code><span title="collections.abc.Sequence">Sequence</span>[<span title="kfactory.kdb.DPoint">DPoint</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>backbone to extrude (in um)</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cross_section</code>
+            </td>
+            <td>
+                  <code><span title="kfactory.cross_section.AnyCrossSection">AnyCrossSection</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>the cross section to extrude</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>start_angle</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>force a certain start angle</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>end_angle</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>force a certain end angle</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>kfactory/factories/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extrude_backbone_cross_section</span><span class="p">(</span>
+    <span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span>
+    <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="s2">&quot;AnyCrossSection&quot;</span><span class="p">,</span>
+    <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extrude a (symmetric or asymmetric) cross section along a backbone (um).</span>
+
+<span class="sd">    The virtual-cell counterpart of</span>
+<span class="sd">    [`extrude_path_cross_section`][kfactory.enclosure.extrude_path_cross_section]:</span>
+<span class="sd">    symmetric cross sections reproduce `extrude_backbone` exactly (byte-identical,</span>
+<span class="sd">    centered width + enclosure annuli); asymmetric ones are extruded as one signed</span>
+<span class="sd">    band ``[section_min, section_max]`` per strip (main strip + each aux section),</span>
+<span class="sd">    with strips sharing a layer merged.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        c: target virtual cell</span>
+<span class="sd">        backbone: backbone to extrude (in um)</span>
+<span class="sd">        cross_section: the cross section to extrude</span>
+<span class="sd">        start_angle: force a certain start angle</span>
+<span class="sd">        end_angle: force a certain end angle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">..cross_section</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsymmetricalCrossSection</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="n">AsymmetricalCrossSection</span><span class="p">):</span>
+        <span class="n">extrude_backbone</span><span class="p">(</span>
+            <span class="n">c</span><span class="p">,</span>
+            <span class="n">backbone</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">backbone</span><span class="p">),</span>
+            <span class="n">width</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">cross_section</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
+            <span class="n">layer</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">main_layer</span><span class="p">,</span>
+            <span class="n">start_angle</span><span class="o">=</span><span class="n">start_angle</span><span class="p">,</span>
+            <span class="n">end_angle</span><span class="o">=</span><span class="n">end_angle</span><span class="p">,</span>
+            <span class="n">dbu</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">,</span>
+            <span class="n">enclosure</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">enclosure</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">to_um</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span>
+    <span class="n">strips</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">strips</span><span class="p">[</span><span class="n">cross_section</span><span class="o">.</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">to_um</span><span class="p">(</span><span class="n">cross_section</span><span class="o">.</span><span class="n">section_min</span><span class="p">),</span> <span class="n">to_um</span><span class="p">(</span><span class="n">cross_section</span><span class="o">.</span><span class="n">section_max</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">sections</span><span class="p">:</span>
+        <span class="n">strips</span><span class="p">[</span><span class="n">sec</span><span class="o">.</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">to_um</span><span class="p">(</span><span class="n">sec</span><span class="o">.</span><span class="n">section_min</span><span class="p">),</span> <span class="n">to_um</span><span class="p">(</span><span class="n">sec</span><span class="o">.</span><span class="n">section_max</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">layer</span><span class="p">,</span> <span class="n">bands</span> <span class="ow">in</span> <span class="n">strips</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">bands</span><span class="p">:</span>
+            <span class="n">polygon</span> <span class="o">=</span> <span class="n">path_pts_to_polygon</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">_extrude_path_band_points</span><span class="p">(</span>
+                    <span class="nb">list</span><span class="p">(</span><span class="n">backbone</span><span class="p">),</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">,</span> <span class="n">start_angle</span><span class="p">,</span> <span class="n">end_angle</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">region</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">polygon</span><span class="p">))</span>
+        <span class="n">region</span><span class="o">.</span><span class="n">merge</span><span class="p">()</span>
+        <span class="n">li</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">poly</span> <span class="ow">in</span> <span class="n">region</span><span class="o">.</span><span class="n">each</span><span class="p">():</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">li</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -6009,73 +6279,73 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extrude_backbone_dynamic</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extrude_backbone_dynamic</span><span class="p">(</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span>
     <span class="n">backbone</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span>
     <span class="n">width1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -6171,12 +6441,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
@@ -6184,7 +6449,12 @@
 <span class="normal">55</span>
 <span class="normal">56</span>
 <span class="normal">57</span>
-<span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">layer_enclosure_to_sections</span><span class="p">(</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">layer_enclosure_to_sections</span><span class="p">(</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Flatten a `LayerEnclosure` into `CrossSectionSpec` ``sections`` (dbu).&quot;&quot;&quot;</span>
