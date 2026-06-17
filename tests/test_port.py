@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 
 import kfactory as kf
-from kfactory.cross_section import CrossSection, CrossSectionSpec
+from kfactory.cross_section import CrossSection, CrossSectionSpecDict
 from tests.conftest import Layers
 
 _PortsType = tuple[kf.port.DPort, kf.port.Port, kf.port.DPort, kf.port.Port]
@@ -21,7 +21,7 @@ def get_ports() -> _PortsType:
         name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
-            CrossSectionSpec(layer=layers.WG, width=2000)
+            CrossSectionSpecDict(layer=layers.WG, width=2000)
         ),
         port_type="optical",
         trans=kf.kdb.Trans(0, 0),
@@ -65,7 +65,7 @@ def test_invalid_base_port_trans(kcl: kf.KCLayout, layers: Layers) -> None:
             name="o1",
             kcl=kcl,
             cross_section=kcl.get_symmetrical_cross_section(
-                CrossSectionSpec(layer=layers.WG, width=2000)
+                CrossSectionSpecDict(layer=layers.WG, width=2000)
             ),
             port_type="optical",
         )
@@ -77,7 +77,7 @@ def test_invalid_base_port_trans(kcl: kf.KCLayout, layers: Layers) -> None:
             name="o2",
             kcl=kcl,
             cross_section=kcl.get_symmetrical_cross_section(
-                CrossSectionSpec(layer=layers.WG, width=2000)
+                CrossSectionSpecDict(layer=layers.WG, width=2000)
             ),
             port_type="optical",
             trans=kf.kdb.Trans(1, 0),
@@ -90,7 +90,7 @@ def test_base_port_ser_model(kcl: kf.KCLayout, layers: Layers) -> None:
         name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
-            CrossSectionSpec(layer=layers.WG, width=2000)
+            CrossSectionSpecDict(layer=layers.WG, width=2000)
         ),
         port_type="optical",
         trans=kf.kdb.Trans(1, 0),
@@ -100,7 +100,7 @@ def test_base_port_ser_model(kcl: kf.KCLayout, layers: Layers) -> None:
         name="o2",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
-            CrossSectionSpec(layer=layers.WG, width=2000)
+            CrossSectionSpecDict(layer=layers.WG, width=2000)
         ),
         port_type="optical",
         dcplx_trans=kf.kdb.DCplxTrans(1, 0),
@@ -113,7 +113,7 @@ def test_base_port_get_trans(kcl: kf.KCLayout, layers: Layers) -> None:
         name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
-            CrossSectionSpec(layer=layers.WG, width=2000)
+            CrossSectionSpecDict(layer=layers.WG, width=2000)
         ),
         port_type="optical",
         trans=kf.kdb.Trans(1, 0),
@@ -126,7 +126,7 @@ def test_base_port_get_trans(kcl: kf.KCLayout, layers: Layers) -> None:
         name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
-            CrossSectionSpec(layer=layers.WG, width=2000)
+            CrossSectionSpecDict(layer=layers.WG, width=2000)
         ),
         port_type="optical",
         dcplx_trans=kf.kdb.DCplxTrans(1, 0),
@@ -141,7 +141,7 @@ def test_base_port_eq(kcl: kf.KCLayout, layers: Layers) -> None:
         name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
-            CrossSectionSpec(layer=layers.WG, width=2000)
+            CrossSectionSpecDict(layer=layers.WG, width=2000)
         ),
         port_type="optical",
         trans=kf.kdb.Trans(1, 0),
@@ -167,7 +167,7 @@ def test_port_kcl(kcl: kf.KCLayout, pdk: kf.KCLayout, layers: Layers) -> None:
         name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
-            CrossSectionSpec(layer=layers.WG, width=2000)
+            CrossSectionSpecDict(layer=layers.WG, width=2000)
         ),
         port_type="optical",
         trans=kf.kdb.Trans(1, 0),
@@ -182,41 +182,41 @@ def test_port_cross_section(kcl: kf.KCLayout, layers: Layers) -> None:
         name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
-            CrossSectionSpec(layer=layers.WG, width=2000)
+            CrossSectionSpecDict(layer=layers.WG, width=2000)
         ),
         port_type="optical",
         trans=kf.kdb.Trans(1, 0),
     )
     port = kf.port.Port(base=base_port)
     assert port.cross_section.base is kcl.get_symmetrical_cross_section(
-        CrossSectionSpec(layer=layers.WG, width=2000)
+        CrossSectionSpecDict(layer=layers.WG, width=2000)
     )
     assert port.cross_section.width == 2000
     port.cross_section = kcl.get_symmetrical_cross_section(
-        CrossSectionSpec(layer=layers.WG, width=3000)
+        CrossSectionSpecDict(layer=layers.WG, width=3000)
     )
     assert port.cross_section.base is kcl.get_symmetrical_cross_section(
-        CrossSectionSpec(layer=layers.WG, width=3000)
+        CrossSectionSpecDict(layer=layers.WG, width=3000)
     )
     port.cross_section = CrossSection(
         kcl,
         base=kcl.get_symmetrical_cross_section(
-            CrossSectionSpec(layer=layers.WG, width=3000)
+            CrossSectionSpecDict(layer=layers.WG, width=3000)
         ),
     )
     assert port.cross_section.base is kcl.get_symmetrical_cross_section(
-        CrossSectionSpec(layer=layers.WG, width=3000)
+        CrossSectionSpecDict(layer=layers.WG, width=3000)
     )
     assert port.width == 3000
     dport = port.to_dtype()
     dport.cross_section = CrossSection(
         kcl,
         base=kcl.get_symmetrical_cross_section(
-            CrossSectionSpec(layer=layers.WG, width=3000)
+            CrossSectionSpecDict(layer=layers.WG, width=3000)
         ),
     )
     assert dport.cross_section.base is kcl.get_symmetrical_cross_section(
-        CrossSectionSpec(layer=layers.WG, width=3000)
+        CrossSectionSpecDict(layer=layers.WG, width=3000)
     )
 
 
@@ -293,7 +293,7 @@ def test_port_copy(kcl: kf.KCLayout, layers: Layers) -> None:
         name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
-            CrossSectionSpec(layer=layers.WG, width=2000)
+            CrossSectionSpecDict(layer=layers.WG, width=2000)
         ),
         port_type="optical",
         trans=kf.kdb.Trans(1, 0),
@@ -303,7 +303,7 @@ def test_port_copy(kcl: kf.KCLayout, layers: Layers) -> None:
     assert port2.name == "o1"
     assert port2.kcl is kcl
     assert port2.cross_section.base is kcl.get_symmetrical_cross_section(
-        CrossSectionSpec(layer=layers.WG, width=2000)
+        CrossSectionSpecDict(layer=layers.WG, width=2000)
     )
     assert port2.port_type == "optical"
     assert port2.trans == kf.kdb.Trans(1, 0)
@@ -553,7 +553,7 @@ def test_create(
     cell.create_port(
         name="o1",
         cross_section=kcl.get_icross_section(
-            CrossSectionSpec(layer=layers.WG, width=2000)
+            CrossSectionSpecDict(layer=layers.WG, width=2000)
         ),
         port_type="optical",
         trans=kf.kdb.Trans(1, 0),

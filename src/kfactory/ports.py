@@ -12,11 +12,11 @@ from .cross_section import (
     AsymmetricalCrossSection,
     AsymmetricCrossSection,
     CrossSection,
-    CrossSectionSpec,
+    CrossSectionSpecDict,
     DAsymmetricalCrossSection,
     DAsymmetricCrossSection,
     DCrossSection,
-    DCrossSectionSpec,
+    DCrossSectionSpecDict,
     SymmetricalCrossSection,
     TAsymmetricCrossSection,
 )
@@ -271,8 +271,8 @@ class ICreatePort(ABC):
         *,
         name: str,
         trans: kdb.Trans,
-        cross_section: CrossSectionSpec
-        | DCrossSectionSpec
+        cross_section: CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection
@@ -351,8 +351,8 @@ class ICreatePort(ABC):
         name: str,
         layer_info: kdb.LayerInfo,
         trans: kdb.Trans,
-        cross_section: CrossSectionSpec
-        | DCrossSectionSpec
+        cross_section: CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection
@@ -368,8 +368,8 @@ class ICreatePort(ABC):
         *,
         name: str,
         dcplx_trans: kdb.DCplxTrans,
-        cross_section: CrossSectionSpec
-        | DCrossSectionSpec
+        cross_section: CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection
@@ -393,8 +393,8 @@ class ICreatePort(ABC):
         center: tuple[int, int] | None = None,
         angle: Angle | None = None,
         mirror_x: bool = False,
-        cross_section: CrossSectionSpec
-        | DCrossSectionSpec
+        cross_section: CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection
@@ -427,7 +427,7 @@ class ICreatePort(ABC):
             assert layer_info is not None
             try:
                 xs = self.kcl.get_icross_section(
-                    CrossSectionSpec(layer=layer_info, width=width, unit="dbu")
+                    CrossSectionSpecDict(layer=layer_info, width=width, unit="dbu")
                 )
             except ValidationError as e:
                 raise ValueError(
@@ -578,8 +578,8 @@ class DCreatePort(ABC):
         self,
         *,
         trans: kdb.Trans,
-        cross_section: CrossSectionSpec
-        | DCrossSectionSpec
+        cross_section: CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection
@@ -595,8 +595,8 @@ class DCreatePort(ABC):
         self,
         *,
         dcplx_trans: kdb.DCplxTrans,
-        cross_section: CrossSectionSpec
-        | DCrossSectionSpec
+        cross_section: CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection
@@ -621,8 +621,8 @@ class DCreatePort(ABC):
         center: tuple[float, float] | None = None,
         orientation: float | None = None,
         mirror_x: bool = False,
-        cross_section: CrossSectionSpec
-        | DCrossSectionSpec
+        cross_section: CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection
@@ -655,7 +655,7 @@ class DCreatePort(ABC):
             assert layer_info is not None
             try:
                 xs = self.kcl.get_dcross_section(
-                    DCrossSectionSpec(layer=layer_info, width=width, unit="um")
+                    DCrossSectionSpecDict(layer=layer_info, width=width, unit="um")
                 )
             except ValidationError as e:
                 raise ValueError(

@@ -45,6 +45,7 @@ if TYPE_CHECKING:
         Sequence,
     )
 
+    from .cross_section import AnyCrossSection
     from .kcell import KCell
     from .layout import KCLayout
     from .port import Port
@@ -53,6 +54,7 @@ __all__ = [
     "KCellEnclosure",
     "LayerEnclosure",
     "extrude_path",
+    "extrude_path_cross_section",
     "extrude_path_dynamic",
     "extrude_path_dynamic_points",
     "extrude_path_points",
@@ -92,17 +94,25 @@ def path_pts_to_polygon(
     return kdb.DPolygon(pts_top + pts_bot)
 
 
-def extrude_path_points(
+def _extrude_path_band_points(
     path: Sequence[kdb.DPoint],
-    width: float,
+    lo: float,
+    hi: float,
     start_angle: float | None = None,
     end_angle: float | None = None,
 ) -> tuple[list[kdb.DPoint], list[kdb.DPoint]]:
-    """Extrude a path from a list of points and a static width.
+    """Generate the two edges of a signed band along ``path``.
+
+    The band covers the signed offsets ``[lo, hi]`` from the path center line, in the
+    same units as ``path`` (``+`` is the left-hand side of the travel direction). The
+    returned ``(top, bottom)`` edges sit at offset ``hi`` and ``lo`` respectively. The
+    symmetric case is ``lo=-width/2, hi=width/2`` (what `extrude_path_points` passes),
+    which reproduces the previous ``±width/2`` + ``R180``-mirror behavior exactly.
 
     Args:
         path: list of floating-points points
-        width: width in um
+        lo: signed offset of the bottom edge from the center line
+        hi: signed offset of the top edge from the center line
         start_angle: optionally specify a custom starting angle if `None` will
             be autocalculated from the first two elements
         end_angle: optionally specify a custom ending angle if `None`
@@ -120,9 +130,10 @@ def extrude_path_points(
     start_trans = kdb.DCplxTrans(1, start_angle, False, p_start.x, p_start.y)
     end_trans = kdb.DCplxTrans(1, end_angle, False, p_end.x, p_end.y)
 
-    ref_vector = kdb.DCplxTrans(kdb.DVector(0, width / 2))
-    vector_top = [start_trans * ref_vector]
-    vector_bot = [(start_trans * kdb.DCplxTrans.R180) * ref_vector]
+    top_vector = kdb.DCplxTrans(kdb.DVector(0, hi))
+    bot_vector = kdb.DCplxTrans(kdb.DVector(0, lo))
+    vector_top = [start_trans * top_vector]
+    vector_bot = [start_trans * bot_vector]
 
     p_old = path[0]
     p = path[1]
@@ -132,15 +143,36 @@ def extrude_path_points(
         v = p_new - p_old
         angle = np.rad2deg(np.arctan2(v.y, v.x))
         transformation = kdb.DCplxTrans(1, angle, False, p.x, p.y)
-        vector_top.append(transformation * ref_vector)
-        vector_bot.append(transformation * kdb.DCplxTrans.R180 * ref_vector)
+        vector_top.append(transformation * top_vector)
+        vector_bot.append(transformation * bot_vector)
         p_old = p
         p = p_new
 
-    vector_top.append(end_trans * ref_vector)
-    vector_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_vector)
+    vector_top.append(end_trans * top_vector)
+    vector_bot.append(end_trans * bot_vector)
 
     return [v.disp.to_p() for v in vector_top], [v.disp.to_p() for v in vector_bot]
+
+
+def extrude_path_points(
+    path: Sequence[kdb.DPoint],
+    width: float,
+    start_angle: float | None = None,
+    end_angle: float | None = None,
+) -> tuple[list[kdb.DPoint], list[kdb.DPoint]]:
+    """Extrude a path from a list of points and a static width.
+
+    Args:
+        path: list of floating-points points
+        width: width in um
+        start_angle: optionally specify a custom starting angle if `None` will
+            be autocalculated from the first two elements
+        end_angle: optionally specify a custom ending angle if `None`
+            will be autocalculated from the last two elements
+    """
+    return _extrude_path_band_points(
+        path, -width / 2, width / 2, start_angle, end_angle
+    )
 
 
 def extrude_path(
@@ -203,6 +235,65 @@ def extrude_path(
                 ret_path = path_
         target.shapes(target.kcl.layer(_layer)).insert(reg.merge())
     return ret_path
+
+
+def extrude_path_cross_section(
+    target: KCell,
+    path: list[kdb.DPoint],
+    cross_section: AnyCrossSection,
+    start_angle: float | None = None,
+    end_angle: float | None = None,
+) -> None:
+    """Extrude a (symmetric or asymmetric) cross section along a path.
+
+    The standard static-width extrusion that takes a cross section instead of a
+    ``(layer, width, enclosure)`` triple. Symmetric cross sections are extruded exactly
+    as `extrude_path` (centered ``width`` + enclosure sections — byte-identical output).
+    Asymmetric cross sections are extruded as one signed band ``[section_min,
+    section_max]`` per strip (the main strip plus each aux section), so the profile
+    keeps its left/right offsets; strips sharing a layer are merged.
+
+    Args:
+        target: the cell where to insert the shapes to (and get the database unit from)
+        path: list of floating-points points (in um)
+        cross_section: the cross section to extrude
+        start_angle: optionally specify a custom starting angle if `None` will
+            be autocalculated from the first two elements
+        end_angle: optionally specify a custom ending angle if `None` will be
+            autocalculated from the last two elements
+    """
+    from .cross_section import AsymmetricalCrossSection
+
+    if not isinstance(cross_section, AsymmetricalCrossSection):
+        # Symmetric: identical to the legacy width + enclosure path.
+        extrude_path(
+            target,
+            cross_section.main_layer,
+            path,
+            target.kcl.to_um(cross_section.width),
+            cross_section.enclosure,
+            start_angle,
+            end_angle,
+        )
+        return
+
+    to_um = target.kcl.to_um
+    # One signed band [section_min, section_max] per strip; strips merged per layer.
+    strips: dict[kdb.LayerInfo, list[tuple[float, float]]] = defaultdict(list)
+    strips[cross_section.layer].append(
+        (to_um(cross_section.section_min), to_um(cross_section.section_max))
+    )
+    for sec in cross_section.sections:
+        strips[sec.layer].append((to_um(sec.section_min), to_um(sec.section_max)))
+
+    for _layer, bands in strips.items():
+        reg = kdb.Region()
+        for lo, hi in bands:
+            polygon = path_pts_to_polygon(
+                *_extrude_path_band_points(path, lo, hi, start_angle, end_angle)
+            )
+            reg.insert(target.kcl.to_dbu(polygon))
+        target.shapes(target.kcl.layer(_layer)).insert(reg.merge())
 
 
 def extrude_path_dynamic_points(

@@ -10,17 +10,25 @@ import numpy as np
 
 from .. import kdb
 from ..conf import logger
-from ..enclosure import LayerEnclosure, extrude_path
+from ..cross_section import (
+    AnyCrossSectionInput,
+    CrossSectionSpecDict,
+    DCrossSectionSpecDict,
+)
+from ..enclosure import LayerEnclosure, extrude_path_cross_section
 from ..kcell import KCell
 from ..layout import CellKWargs, KCLayout
 from ..settings import Info
 from ..typings import KC, KC_co, MetaData, deg, um
-from .utils import _is_additional_info_func
+from .utils import (
+    _is_additional_info_func,
+    boundary_from_shapes,
+    cross_section_from_width,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from ..enclosure import LayerEnclosure
     from ..kcell import KCell
 
 __all__ = ["bend_circular_factory"]
@@ -29,22 +37,32 @@ __all__ = ["bend_circular_factory"]
 class BendCircularFactory(Protocol[KC_co]):
     def __call__(
         self,
-        width: um,
+        *,
         radius: um,
-        layer: kdb.LayerInfo,
-        enclosure: LayerEnclosure | None = None,
         angle: deg = 90,
         angle_step: deg = 1,
+        cross_section: str
+        | AnyCrossSectionInput
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
+        | None = None,
+        width: um | None = None,
+        layer: kdb.LayerInfo | None = None,
+        enclosure: LayerEnclosure | None = None,
     ) -> KC_co:
         """Circular radius bend [um].
 
+        Either pass a ``cross_section`` (name, spec, or instance) or the legacy
+        ``width``/``layer``/``enclosure`` which is normalized into a cross section.
+
         Args:
-            width: Width of the core. [um]
             radius: Radius of the backbone. [um]
-            layer: Layer index of the target layer.
-            enclosure: Optional enclosure.
             angle: Angle amount of the bend.
             angle_step: Angle amount per backbone point of the bend.
+            cross_section: Cross section of the bend.
+            width: Width of the core. [um] (legacy; requires ``layer``)
+            layer: Main layer of the bend. (legacy)
+            enclosure: Optional enclosure. (legacy)
         """
         ...
 
@@ -93,13 +111,15 @@ def bend_circular_factory(
 ) -> BendCircularFactory[KC]:
     """Returns a function generating circular bends.
 
-    Will snap ports by default
+    The returned function is the generic interface: it accepts either a
+    ``cross_section`` or the legacy ``width``/``layer``/``enclosure`` (normalized into a
+    symmetric cross section). Will snap ports by default.
 
     Args:
         kcl: The KCLayout which will be owned
         additional_info: Add additional key/values to the
             [`KCell.info`][kfactory.settings.Info]. Can be a static dict
-            mapping info name to info value. Or can a callable which takes the straight
+            mapping info name to info value. Or can a callable which takes the bend
             functions' parameters as kwargs and returns a dict with the mapping.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
@@ -121,6 +141,8 @@ def bend_circular_factory(
 
     if cell_kwargs.get("snap_ports") is None:
         cell_kwargs["snap_ports"] = False
+    cell_kwargs.setdefault("basename", "bend_circular")
+    basename = cell_kwargs["basename"]
 
     if output_type is not None:
         cell = kcl.cell(output_type=output_type, **cell_kwargs)
@@ -128,24 +150,13 @@ def bend_circular_factory(
         cell = kcl.cell(output_type=cast("type[KC]", KCell), **cell_kwargs)
 
     @cell
-    def bend_circular(
-        width: um,
+    def _bend_circular(
+        cross_section: str | AnyCrossSectionInput,
         radius: um,
-        layer: kdb.LayerInfo,
-        enclosure: LayerEnclosure | None = None,
         angle: deg = 90,
         angle_step: deg = 1,
     ) -> KCell:
-        """Circular radius bend [um].
-
-        Args:
-            width: Width of the core. [um]
-            radius: Radius of the backbone. [um]
-            layer: Layer index of the target layer.
-            enclosure: Optional enclosure.
-            angle: Angle amount of the bend.
-            angle_step: Angle amount per backbone point of the bend.
-        """
+        """Circular radius bend [um] from a cross section."""
         c = kcl.kcell()
         r = radius
 
@@ -156,13 +167,8 @@ def bend_circular_factory(
                 " lengths."
             )
             angle = -angle
-        if width < 0:
-            logger.critical(
-                f"Negative widths are not allowed {width} as ports"
-                " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
-            )
-            width = -width
+
+        xs = kcl.get_base_cross_section(cross_section)
 
         backbone = [
             kdb.DPoint(x, y)
@@ -177,39 +183,29 @@ def bend_circular_factory(
             ]
         ]
 
-        center_path = extrude_path(
-            target=c,
-            layer=layer,
-            path=backbone,
-            width=width,
-            enclosure=enclosure,
-            start_angle=0,
-            end_angle=angle,
-        )
+        extrude_path_cross_section(c, backbone, xs, start_angle=0, end_angle=angle)
 
         c.create_port(
             name="o1",
             trans=kdb.Trans(2, False, 0, 0),
-            width=int(width / c.kcl.dbu),
-            layer=c.kcl.layer(layer),
+            cross_section=xs,
             port_type=port_type,
         )
         c.create_port(
             name="o2",
             dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
-            width=c.kcl.to_dbu(width),
-            layer=c.kcl.layer(layer),
+            cross_section=xs,
             port_type=port_type,
         )
         c.auto_rename_ports()
-        c.boundary = center_path
+        boundary = boundary_from_shapes(c)
+        if boundary is not None:
+            c.boundary = boundary
         _info: dict[str, MetaData] = {}
         _info.update(
             _additional_info_func(
-                width=width,
+                cross_section=xs,
                 radius=radius,
-                layer=layer,
-                enclosure=enclosure,
                 angle=angle,
                 angle_step=angle_step,
             )
@@ -217,5 +213,32 @@ def bend_circular_factory(
         _info.update(_additional_info)
         c.info = Info(**_info)
         return c
+
+    @kcl.generic_factory(name=basename)
+    def bend_circular(
+        *,
+        radius: um,
+        angle: deg = 90,
+        angle_step: deg = 1,
+        cross_section: str
+        | AnyCrossSectionInput
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
+        | None = None,
+        width: um | None = None,
+        layer: kdb.LayerInfo | None = None,
+        enclosure: LayerEnclosure | None = None,
+    ) -> KC:
+        if cross_section is None:
+            if width is None or layer is None:
+                raise ValueError(
+                    "Provide a cross_section, or width and layer (legacy call)."
+                )
+            xs = cross_section_from_width(kcl, kcl.to_dbu(width), layer, enclosure)
+        else:
+            xs = kcl.get_icross_section(cross_section)
+        return _bend_circular(
+            cross_section=xs, radius=radius, angle=angle, angle_step=angle_step
+        )
 
     return bend_circular

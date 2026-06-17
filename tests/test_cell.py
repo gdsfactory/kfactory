@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 
 import kfactory as kf
-from kfactory.cross_section import CrossSection, CrossSectionSpec
+from kfactory.cross_section import CrossSection, CrossSectionSpecDict
 from kfactory.exceptions import LockedError
 from tests.conftest import Layers
 
@@ -18,7 +18,7 @@ def test_enclosure_name(
     oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     wg = straight_factory_dbu(width=1000, length=10000)
-    assert wg.name == "straight_W1000_L10000_LWG_EWGSTD"
+    assert wg.name == "straight_CSf7fe636c_1000_L10000"
     oas_regression(wg)
 
 
@@ -390,7 +390,7 @@ def test_ports_in_cells(
         cross_section=CrossSection(
             kcl,
             base=kcl.get_symmetrical_cross_section(
-                CrossSectionSpec(layer=layers.WG, width=2000)
+                CrossSectionSpecDict(layer=layers.WG, width=2000)
             ),
         ),
     )

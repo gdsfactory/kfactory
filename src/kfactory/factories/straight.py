@@ -12,8 +12,7 @@ A waveguide is a rectangle of material with excludes and/or slab around it::
     │         Slab/Exclude         │
     └──────────────────────────────┘
 
-The slabs and excludes can be given in the form of an
-[Enclosure][kfactory.enclosure.LayerEnclosure].
+The slabs and excludes are part of the cross section the waveguide is built from.
 """
 
 from collections.abc import Callable
@@ -21,14 +20,21 @@ from typing import Any, Protocol, Unpack, cast, overload
 
 from .. import kdb
 from ..conf import logger
-from ..decorators import PortsDefinition
-from ..enclosure import LayerEnclosure
+from ..cross_section import (
+    AnyCrossSectionInput,
+    CrossSectionSpecDict,
+    DCrossSectionSpecDict,
+)
+from ..enclosure import LayerEnclosure, extrude_path_cross_section
 from ..kcell import KCell
 from ..layout import CellKWargs, KCLayout
 from ..port import rename_by_direction, rename_clockwise
 from ..settings import Info
 from ..typings import KC, KC_co, MetaData, dbu
-from .utils import _is_additional_info_func
+from .utils import (
+    _is_additional_info_func,
+    cross_section_from_width,
+)
 
 __all__ = ["straight_dbu_factory"]
 
@@ -38,32 +44,31 @@ class StraightFactory(Protocol[KC_co]):
 
     def __call__(
         self,
-        width: dbu,
+        *,
         length: dbu,
-        layer: kdb.LayerInfo,
+        cross_section: str
+        | AnyCrossSectionInput
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
+        | None = None,
+        width: dbu | None = None,
+        layer: kdb.LayerInfo | None = None,
         enclosure: LayerEnclosure | None = None,
     ) -> KC_co:
-        """Waveguide defined in dbu.
+        """Waveguide defined by a cross section, length in dbu.
 
-            ┌──────────────────────────────┐
-            │         Slab/Exclude         │
-            ├──────────────────────────────┤
-            │                              │
-            │             Core             │
-            │                              │
-            ├──────────────────────────────┤
-            │         Slab/Exclude         │
-            └──────────────────────────────┘
+        Either pass a ``cross_section`` (name, spec, or instance) or the legacy
+        ``width``/``layer``/``enclosure`` (all dbu) which is normalized into a
+        cross section.
+
         Args:
-            width: Waveguide width. [dbu]
             length: Waveguide length. [dbu]
-            layer: Main layer of the waveguide.
-            enclosure: Definition of slab/excludes. [dbu]
+            cross_section: Cross section of the waveguide.
+            width: Waveguide width. [dbu] (legacy; requires ``layer``)
+            layer: Main layer of the waveguide. (legacy)
+            enclosure: Definition of slab/excludes. [dbu] (legacy)
         """
         ...
-
-
-_straight_default_ports = PortsDefinition(left=["o1"], right=["o2"])
 
 
 @overload
@@ -107,17 +112,12 @@ def straight_dbu_factory(
     port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> StraightFactory[KC]:
-    """Returns a function generating straights [dbu].
+    """Returns a function generating straights [dbu length].
 
-        ┌──────────────────────────────┐
-        │         Slab/Exclude         │
-        ├──────────────────────────────┤
-        │                              │
-        │             Core             │
-        │                              │
-        ├──────────────────────────────┤
-        │         Slab/Exclude         │
-        └──────────────────────────────┘
+    The returned function is the generic interface: it accepts either a
+    ``cross_section`` or the legacy ``width``/``layer``/``enclosure`` (all dbu),
+    normalized into a symmetric cross section.
+
     Args:
         kcl: The KCLayout which will be owned
         additional_info: Add additional key/values to the
@@ -148,6 +148,8 @@ def straight_dbu_factory(
             cell_kwargs["ports"] = {"left": ["o1"], "right": ["o2"]}
         elif kcl.rename_function == rename_by_direction:
             cell_kwargs["ports"] = {"left": ["W0"], "right": ["E0"]}
+    cell_kwargs.setdefault("basename", "straight")
+    basename = cell_kwargs["basename"]
 
     if output_type is not None:
         cell = kcl.cell(output_type=output_type, **cell_kwargs)
@@ -155,29 +157,11 @@ def straight_dbu_factory(
         cell = kcl.cell(output_type=cast("type[KC]", KCell), **cell_kwargs)
 
     @cell
-    def straight(
-        width: dbu,
+    def _straight(
+        cross_section: str | AnyCrossSectionInput,
         length: dbu,
-        layer: kdb.LayerInfo,
-        enclosure: LayerEnclosure | None = None,
     ) -> KCell:
-        """Waveguide defined in dbu.
-
-            ┌──────────────────────────────┐
-            │         Slab/Exclude         │
-            ├──────────────────────────────┤
-            │                              │
-            │             Core             │
-            │                              │
-            ├──────────────────────────────┤
-            │         Slab/Exclude         │
-            └──────────────────────────────┘
-        Args:
-            width: Waveguide width. [dbu]
-            length: Waveguide length. [dbu]
-            layer: Main layer of the waveguide.
-            enclosure: Definition of slab/excludes. [dbu]
-        """
+        """Waveguide defined by a cross section."""
         c = kcl.kcell()
 
         if length < 0:
@@ -187,52 +171,61 @@ def straight_dbu_factory(
                 " lengths."
             )
             length = -length
-        if width < 0:
-            logger.critical(
-                f"Negative widths are not allowed {width} as ports"
-                " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
-            )
-            width = -width
 
-        if width // 2 * 2 != width:
-            raise ValueError("The width (w) must be a multiple of 2 database units")
+        xs = kcl.get_base_cross_section(cross_section)
 
-        li = c.kcl.layer(layer)
-        c.shapes(li).insert(kdb.Box(0, -width // 2, length, width // 2))
+        extrude_path_cross_section(
+            c, [kdb.DPoint(0.0, 0.0), kdb.DPoint(kcl.to_um(length), 0.0)], xs
+        )
+
         c.create_port(
             name="o1",
             trans=kdb.Trans(2, False, 0, 0),
-            layer=li,
-            width=width,
+            cross_section=xs,
             port_type=port_type,
         )
         c.create_port(
             name="o2",
             trans=kdb.Trans(0, False, length, 0),
-            layer=li,
-            width=width,
+            cross_section=xs,
             port_type=port_type,
         )
 
-        if enclosure is not None:
-            enclosure.apply_minkowski_y(c, layer)
         _info: dict[str, MetaData] = {
-            "width_um": width * c.kcl.dbu,
-            "length_um": length * c.kcl.dbu,
-            "width_dbu": width,
+            "width_um": kcl.to_um(xs.width),
+            "length_um": kcl.to_um(length),
+            "width_dbu": xs.width,
             "length_dbu": length,
         }
-        _info.update(
-            _additional_info_func(
-                width=width, length=length, layer=layer, enclosure=enclosure
-            )
-        )
+        _info.update(_additional_info_func(cross_section=xs, length=length))
         _info.update(_additional_info)
         c.info = Info(**_info)
 
         c.boundary = kdb.DPolygon(c.dbbox())
         c.auto_rename_ports()
         return c
+
+    @kcl.generic_factory(name=basename)
+    def straight(
+        *,
+        length: dbu,
+        cross_section: str
+        | AnyCrossSectionInput
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
+        | None = None,
+        width: dbu | None = None,
+        layer: kdb.LayerInfo | None = None,
+        enclosure: LayerEnclosure | None = None,
+    ) -> KC:
+        if cross_section is None:
+            if width is None or layer is None:
+                raise ValueError(
+                    "Provide a cross_section, or width and layer (legacy call)."
+                )
+            xs = cross_section_from_width(kcl, width, layer, enclosure)
+        else:
+            xs = kcl.get_icross_section(cross_section)
+        return _straight(cross_section=xs, length=length)
 
     return straight

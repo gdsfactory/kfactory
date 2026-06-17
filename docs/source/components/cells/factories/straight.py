@@ -17,8 +17,9 @@
 # %% [markdown]
 # # Straight Waveguide
 #
-# `straight_dbu_factory(kcl)` returns a cached cell function whose arguments are
-# all in **DBU** (database units). Convert µm values with `kcl.to_dbu()`.
+# `straight_dbu_factory(kcl)` returns a cached cell function. Its canonical input
+# is a **cross section** (by name, instance, or spec dict); the `length` is in
+# **DBU** (database units). Convert µm values with `kcl.to_dbu()`.
 
 # %%
 import kfactory as kf
@@ -42,43 +43,45 @@ L = LAYER()
 # %%
 straight = straight_dbu_factory(pdk)
 
-wg_short = straight(
-    width=pdk.to_dbu(0.5),  # 500 DBU = 0.5 µm
-    length=pdk.to_dbu(10.0),  # 10000 DBU = 10 µm
-    layer=L.WG,
+# Register a symmetric cross section (width in DBU) on the PDK, then build by name.
+wg = pdk.get_icross_section(
+    kf.CrossSectionSpecDict(
+        layer=L.WG,
+        width=pdk.to_dbu(0.5),  # 500 DBU = 0.5 µm
+        unit="dbu",
+        name="WG",
+    )
 )
-wg_long = straight(
-    width=pdk.to_dbu(0.5),
-    length=pdk.to_dbu(20.0),
-    layer=L.WG,
-)
+
+wg_short = straight(cross_section="WG", length=pdk.to_dbu(10.0))  # 10 µm
+wg_long = straight(cross_section="WG", length=pdk.to_dbu(20.0))
 
 print("short name:", wg_short.name)
 print("long  name:", wg_long.name)
 print(
     "same object (same args)?",
-    wg_short is straight(pdk.to_dbu(0.5), pdk.to_dbu(10.0), L.WG),
+    wg_short is straight(cross_section=wg, length=pdk.to_dbu(10.0)),
 )
 wg_short
 
 # %% [markdown]
-# ## Enclosure (cladding / exclude)
+# ## Cladding / exclude via the cross section
 #
-# Pass a `LayerEnclosure` to add slab or exclude layers automatically.
+# Extra layers (slab, exclude, cladding) are **sections** of the cross section —
+# `(layer, width)` or `(layer, min, max)` offsets around the core, in DBU.
 
 # %%
-enc = kf.LayerEnclosure(
-    sections=[(L.WGCLAD, pdk.to_dbu(3.0))],
-    main_layer=L.WG,
-    kcl=pdk,
+wg_clad_xs = pdk.get_icross_section(
+    kf.CrossSectionSpecDict(
+        layer=L.WG,
+        width=pdk.to_dbu(0.5),
+        sections=[(L.WGCLAD, pdk.to_dbu(3.0))],
+        unit="dbu",
+        name="WG_CLAD",
+    )
 )
 
-wg_clad = straight(
-    width=pdk.to_dbu(0.5),
-    length=pdk.to_dbu(15.0),
-    layer=L.WG,
-    enclosure=enc,
-)
+wg_clad = straight(cross_section="WG_CLAD", length=pdk.to_dbu(15.0))
 wg_clad
 
 # %% [markdown]

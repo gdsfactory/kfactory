@@ -17,17 +17,29 @@ from typing import (
     Annotated,
     Any,
     Protocol,
+    TypeAliasType,
     TypedDict,
     Unpack,
+    cast,
     final,
     get_origin,
+    get_type_hints,
     overload,
 )
 
 from cachetools import Cache, cached
 from cachetools.keys import hashkey
 
-from . import CrossSection, DCrossSection, SymmetricalCrossSection, kdb
+from . import (
+    AsymmetricalCrossSection,
+    AsymmetricCrossSection,
+    CrossSection,
+    CrossSectionSpec,
+    DAsymmetricCrossSection,
+    DCrossSection,
+    SymmetricalCrossSection,
+    kdb,
+)
 from .conf import CheckInstances, CheckUnnamedCells, logger
 from .exceptions import CellNameError
 from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
@@ -37,6 +49,7 @@ from .serialization import (
     get_cell_name,
     get_function_name,
     hashable_to_original,
+    kcl_cross_section_serializer,
     to_hashable,
 )
 from .settings import KCellSettings, KCellSettingsUnits
@@ -398,10 +411,19 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
         schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
         type_serializers: Sequence[tuple[type | UnionType, Callable[[Any], Any]]] = (
             (
-                SymmetricalCrossSection | CrossSection | DCrossSection,
+                SymmetricalCrossSection
+                | CrossSection
+                | DCrossSection
+                | AsymmetricalCrossSection
+                | AsymmetricCrossSection
+                | DAsymmetricCrossSection,
                 attrgetter("name"),
             ),
         ),
+        type_hints_serializer: dict[
+            type | UnionType | TypeAliasType, Callable[[Any], Any]
+        ]
+        | None = None,
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
@@ -412,6 +434,23 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
 
         # Pre-compute static signature metadata once at decoration time
         sig_params = SignatureParams(sig)
+        # Resolve annotations to concrete types for the type-hint serializers.
+        # Guard against ``NameError`` etc. raised by ``from __future__ import
+        # annotations`` functions whose hints reference ``TYPE_CHECKING``-only
+        # imports; an unresolvable hint simply opts out of hint-based
+        # serialization rather than breaking decoration.
+        try:
+            hints = get_type_hints(f)
+        except Exception:
+            hints = {}
+        if type_hints_serializer is None:
+            # ``cast`` because ty cannot recognize a PEP-695 ``type`` alias used
+            # as a value (the ``CrossSectionSpec`` dict key) as assignable to
+            # ``TypeAliasType``, even though it is one at runtime.
+            type_hints_serializer = cast(
+                "dict[type | UnionType | TypeAliasType, Callable[[Any], Any]]",
+                {CrossSectionSpec: kcl_cross_section_serializer(kcl=kcl)},
+            )
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -445,7 +484,10 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
             cache=cache,
             lock=RLock(),
             key=get_keys_function(
-                drop_args=drop_params, serialize_types=type_serializers
+                hints=hints,
+                drop_args=drop_params,
+                serialize_types=type_serializers,
+                serialize_hints=type_hints_serializer,
             ),
         )
         def wrapped_cell(**params: Any) -> KC:
@@ -979,8 +1021,10 @@ class Decorators:
 
 
 def get_keys_function(
+    hints: dict[str, type],
     drop_args: Sequence[str],
     serialize_types: Sequence[tuple[type | UnionType, Callable[[Any], Any]]],
+    serialize_hints: dict[type | UnionType | TypeAliasType, Callable[[Any], Any]],
 ) -> Callable[..., tuple[Hashable, ...]]:
     types_ = tuple(st[0] for st in serialize_types)
 
@@ -990,7 +1034,9 @@ def get_keys_function(
 
         updates: dict[str, Any] = {}
         for key, value in kwargs.items():
-            if isinstance(value, types_):
+            if key in hints and hints[key] in serialize_hints:
+                updates[key] = serialize_hints[hints[key]](value)
+            elif isinstance(value, types_):
                 for type_, serializer in serialize_types:
                     if isinstance(value, type_):
                         updates[key] = serializer(value)

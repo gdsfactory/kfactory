@@ -33,14 +33,27 @@ __all__ = [
     "AsymmetricalCrossSection",
     "CrossSection",
     "CrossSectionLayer",
-    "CrossSectionSpec",
+    "CrossSectionSpecDict",
     "DAsymmetricCrossSection",
     "DAsymmetricalCrossSection",
     "DCrossSection",
     "DCrossSectionLayer",
-    "DCrossSectionSpec",
+    "DCrossSectionSpecDict",
     "SymmetricalCrossSection",
 ]
+
+type CrossSectionSpec = (
+    CrossSection
+    | DCrossSection
+    | SymmetricalCrossSection
+    | DSymmetricalCrossSection
+    | AsymmetricalCrossSection
+    | AsymmetricCrossSection
+    | DAsymmetricCrossSection
+    | CrossSectionSpecDict
+    | DCrossSectionSpecDict
+    | str
+)
 
 
 class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=True):
@@ -141,6 +154,10 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
             for sections in self.enclosure.layer_sections.values()
             for s in sections.sections
         )
+
+    def get_xmin(self) -> int:
+        # Symmetric by construction: the full extent is mirrored about the center line.
+        return -self.get_xmax()
 
     def model_copy(
         self, *, update: Mapping[str, Any] | None = {"name": None}, deep: bool = False
@@ -1074,8 +1091,7 @@ class CrossSection(TCrossSection[int]):
         return self._base.radius_min
 
     def get_xmin_xmax(self) -> tuple[int, int]:
-        xmax = self._base.get_xmax()
-        return (xmax, xmax)
+        return (self._base.get_xmin(), self._base.get_xmax())
 
     def model_copy(
         self, *, update: Mapping[str, Any] = {"name": None}, deep: bool
@@ -1191,8 +1207,10 @@ class DCrossSection(TCrossSection[float]):
         return self.kcl.to_um(self._base.radius_min)
 
     def get_xmin_xmax(self) -> tuple[float, float]:
-        xmax = self.kcl.to_um(self._base.get_xmax())
-        return (xmax, xmax)
+        return (
+            self.kcl.to_um(self._base.get_xmin()),
+            self.kcl.to_um(self._base.get_xmax()),
+        )
 
     def model_copy(
         self, *, update: Mapping[str, Any] = {"name": None}, deep: bool
@@ -1211,11 +1229,11 @@ class TCrossSectionSpec[T: (int, float)](TypedDict):
     bbox_offsets: NotRequired[Sequence[T]]
 
 
-class CrossSectionSpec(TCrossSectionSpec[int]):
+class CrossSectionSpecDict(TCrossSectionSpec[int]):
     unit: NotRequired[Literal["dbu"]]
 
 
-class DCrossSectionSpec(TCrossSectionSpec[float]):
+class DCrossSectionSpecDict(TCrossSectionSpec[float]):
     unit: Literal["um"]
 
 
@@ -1289,8 +1307,8 @@ class CrossSectionModel(BaseModel):
         cross_section: str
         | SymmetricalCrossSection
         | DSymmetricalCrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | CrossSection
         | DCrossSection,
     ) -> SymmetricalCrossSection:

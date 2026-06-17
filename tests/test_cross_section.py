@@ -15,7 +15,7 @@ from kfactory.exceptions import (
 
 def test_icross_section_creation(kcl: kf.KCLayout) -> None:
     xs = kcl.get_icross_section(
-        kf.cross_section.CrossSectionSpec(
+        kf.cross_section.CrossSectionSpecDict(
             name="WG_350",
             sections=[(kf.kdb.LayerInfo(2, 0), 500)],
             layer=kf.kdb.LayerInfo(1, 0),
@@ -35,7 +35,7 @@ def test_port_cross_section(kcl: kf.KCLayout, layers: kf.LayerInfos) -> None:
     )
 
     xs = kcl.get_icross_section(
-        kf.cross_section.CrossSectionSpec(
+        kf.cross_section.CrossSectionSpecDict(
             name="WG_350",
             sections=[(kf.kdb.LayerInfo(2, 0), 500)],
             layer=kf.kdb.LayerInfo(1, 0),
@@ -322,6 +322,40 @@ def test_asymmetrical_cross_section_gds_roundtrip() -> None:
     assert restored == acs
 
 
+def test_symmetrical_cross_section_radius_gds_roundtrip() -> None:
+    """``radius``/``radius_min`` survive a GDS metadata round-trip.
+
+    Regression: symmetric serialization used to drop them (asymmetric kept them).
+    They are non-identifying for ``__eq__``, so assert on the values directly.
+    """
+    kcl_w = kf.KCLayout("SYM_RADIUS_GDS_W")
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    enc = kcl_w.get_enclosure(
+        kf.LayerEnclosure(
+            sections=[(kf.kdb.LayerInfo(2, 0, "S"), 500)], main_layer=layer
+        )
+    )
+    kcl_w.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(
+            width=1000, enclosure=enc, name="wg_r", radius=10000, radius_min=5000
+        )
+    )
+    c = kcl_w.kcell("sym_radius_top")
+    c.shapes(kcl_w.layer(layer)).insert(kf.kdb.Box(0, 0, 100, 100))
+
+    with tempfile.TemporaryDirectory() as d:
+        path = Path(d) / "sym_radius.gds"
+        kcl_w.write(path)
+
+        kcl_r = kf.KCLayout("SYM_RADIUS_GDS_R")
+        kcl_r.read(path)
+
+    restored = kcl_r.cross_sections.cross_sections["wg_r"]
+    assert isinstance(restored, kf.SymmetricalCrossSection)
+    assert restored.radius == 10000
+    assert restored.radius_min == 5000
+
+
 def test_connect_symmetric_vs_asymmetric_raises() -> None:
     kcl = kf.KCLayout("ASYM_CONN")
     layer = kf.kdb.LayerInfo(1, 0, "WG")
@@ -469,6 +503,31 @@ def test_asymmetric_wrappers_share_base_and_compare_across_units() -> None:
     assert dxs.get_xmin_xmax() == (kcl.to_um(-200), kcl.to_um(900))
 
 
+def test_symmetric_wrapper_get_xmin_xmax(kcl: kf.KCLayout) -> None:
+    """A symmetric profile's full extent is mirrored about the center line.
+
+    Regression: the wrappers used to return ``(xmax, xmax)`` instead of
+    ``(-xmax, xmax)`` (the symmetric ``get_xmin`` was missing entirely).
+    """
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    enc = kcl.get_enclosure(
+        kf.LayerEnclosure(
+            sections=[(kf.kdb.LayerInfo(2, 0, "S"), 500)], main_layer=layer
+        )
+    )
+    base = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="wg_xminmax")
+    )
+    xmax = base.get_xmax()
+    assert xmax > 0
+    assert base.get_xmin() == -xmax
+
+    ixs = kf.CrossSection(kcl=kcl, base=base)
+    dxs = kf.DCrossSection(kcl=kcl, base=base)
+    assert ixs.get_xmin_xmax() == (-xmax, xmax)
+    assert dxs.get_xmin_xmax() == (kcl.to_um(-xmax), kcl.to_um(xmax))
+
+
 def test_asymmetric_wrapper_construct_from_scratch() -> None:
     kcl = kf.KCLayout("ASYM_WRAP_FROM_SCRATCH")
     layer = kf.kdb.LayerInfo(1, 0, "WG")
@@ -560,6 +619,91 @@ def test_metadata_uses_separate_prefix_for_asymmetric() -> None:
 
     assert "wg1000" in kcl_r.cross_sections.cross_sections
     assert "aw500" in kcl_r.cross_sections.cross_sections
+
+
+def test_cell_serializes_asymmetric_cross_section_to_name(kcl: kf.KCLayout) -> None:
+    """Cross sections passed as cell args key the cache by ``.name``.
+
+    Regression: the ``@cell`` serializer only listed the symmetric union, so an
+    asymmetric cross section did not serialize to its name.
+    """
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    enc = kcl.get_enclosure(
+        kf.LayerEnclosure(
+            sections=[(kf.kdb.LayerInfo(2, 0, "S"), 500)], main_layer=layer
+        )
+    )
+    sym = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="symxs")
+    )
+    asym = kcl.get_asymmetrical_cross_section(
+        kf.AsymmetricalCrossSection(
+            layer=layer, section_min=-250, section_max=250, name="asymxs"
+        )
+    )
+
+    @kcl.cell
+    def xs_cell(cross_section: kf.cross_section.AnyCrossSection) -> kf.KCell:
+        c = kcl.kcell()
+        c.shapes(kcl.layer(layer)).insert(kf.kdb.Box(0, 0, 100, 100))
+        return c
+
+    assert "symxs" in xs_cell(cross_section=sym).name
+    assert "asymxs" in xs_cell(cross_section=asym).name
+
+
+def test_cross_section_spec_serializer_parity(kcl: kf.KCLayout) -> None:
+    """``kcl_cross_section_serializer`` collapses every spec form to one key.
+
+    A cross section referenced as an object, a ``CrossSectionSpec`` dict, or a
+    registered name must serialize to the same string so the ``@cell`` cache
+    treats them as a single key.
+    """
+    from kfactory.serialization import kcl_cross_section_serializer
+
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    xs = kcl.get_icross_section(
+        kf.cross_section.CrossSectionSpecDict(layer=layer, width=1000, name="wg")
+    )
+
+    serialize = kcl_cross_section_serializer(kcl=kcl)
+    from_obj = serialize(xs)
+    from_dict = serialize(
+        kf.cross_section.CrossSectionSpecDict(layer=layer, width=1000)
+    )
+    from_str = serialize("wg")
+
+    assert from_obj == from_dict == from_str == "wg"
+
+
+def test_cell_cross_section_spec_cache_key_parity(kcl: kf.KCLayout) -> None:
+    """Cell args typed ``CrossSectionSpec`` key the cache by the resolved name.
+
+    Passing the same cross section as an object, a spec dict, or its name must
+    all hit the same cache entry (return the identical cell instance).
+    """
+    layer = kf.kdb.LayerInfo(1, 0, "WG")
+    xs = kcl.get_icross_section(
+        kf.cross_section.CrossSectionSpecDict(layer=layer, width=1000, name="wg")
+    )
+
+    @kcl.cell
+    def spec_cell(
+        cross_section: kf.cross_section.CrossSectionSpec, length: int
+    ) -> kf.KCell:
+        c = kcl.kcell()
+        c.shapes(kcl.layer(layer)).insert(kf.kdb.Box(0, 0, length, 100))
+        return c
+
+    from_obj = spec_cell(cross_section=xs, length=10)
+    from_dict = spec_cell(
+        cross_section=kf.cross_section.CrossSectionSpecDict(layer=layer, width=1000),
+        length=10,
+    )
+    from_str = spec_cell(cross_section="wg", length=10)
+
+    assert from_obj is from_dict is from_str
+    assert "wg" in from_obj.name
 
 
 def test_connect_asym_to_asym_requires_mirror_when_misaligned() -> None:

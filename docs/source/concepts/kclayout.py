@@ -99,8 +99,12 @@ kcl2.kcells
 # %%
 sf2 = kf.factories.straight.straight_dbu_factory(kcl=kcl2)
 
-# Call the factory directly …
-s2 = kcl2.factories["straight"](length=10_000, width=200, layer=L.WG)
+# Register a cross section on kcl2, then call the factory by name with it.
+# (`kcl2.factories["straight"]` is cross-section-first — pass `cross_section=`.)
+kcl2.get_icross_section(
+    kf.CrossSectionSpecDict(layer=L.WG, width=200, unit="dbu", name="WG")
+)
+s2 = kcl2.factories["straight"](length=10_000, cross_section="WG")
 s2.settings
 
 # %% [markdown]

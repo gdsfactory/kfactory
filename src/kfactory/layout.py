@@ -45,12 +45,12 @@ from .cross_section import (
     CrossSection,
     CrossSectionLayer,
     CrossSectionModel,
-    CrossSectionSpec,
+    CrossSectionSpecDict,
     DAsymmetricalCrossSection,
     DAsymmetricCrossSection,
     DCrossSection,
     DCrossSectionLayer,
-    DCrossSectionSpec,
+    DCrossSectionSpecDict,
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
     TAsymmetricCrossSection,
@@ -2103,6 +2103,8 @@ class KCLayout(
                     width=cs["width"],
                     enclosure=self.get_enclosure(cs["layer_enclosure"]),
                     name=cs["name"],
+                    radius=cs.get("radius"),
+                    radius_min=cs.get("radius_min"),
                 )
             )
         for acs in asym_cross_sections:
@@ -2175,6 +2177,12 @@ class KCLayout(
                         {
                             "width": xs.width,
                             "layer_enclosure": xs.enclosure.name,
+                            **({"radius": xs.radius} if xs.radius is not None else {}),
+                            **(
+                                {"radius_min": xs.radius_min}
+                                if xs.radius_min is not None
+                                else {}
+                            ),
                         },
                         None,
                         True,
@@ -2257,8 +2265,8 @@ class KCLayout(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | DSymmetricalCrossSection,
     ) -> SymmetricalCrossSection:
         """Get a cross section by name or specification."""
@@ -2281,8 +2289,8 @@ class KCLayout(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | DSymmetricalCrossSection
         | TCrossSection[Any],
         symmetrical: Literal[True],
@@ -2347,8 +2355,8 @@ class KCLayout(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | DCrossSection
         | DSymmetricalCrossSection
         | CrossSection,
@@ -2389,8 +2397,8 @@ class KCLayout(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
         | DSymmetricalCrossSection
         | CrossSection
         | DCrossSection,
