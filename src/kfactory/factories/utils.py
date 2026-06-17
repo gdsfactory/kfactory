@@ -1,5 +1,6 @@
 """Utility functions for cell factories."""
 
+from collections import defaultdict
 from collections.abc import Callable, Sequence
 from functools import partial
 from typing import TYPE_CHECKING, TypeGuard
@@ -8,19 +9,23 @@ from .. import kdb
 from ..cross_section import CrossSection, CrossSectionSpecDict
 from ..enclosure import (
     LayerEnclosure,
+    _extrude_path_band_points,
     extrude_path_dynamic_points,
     extrude_path_points,
+    path_pts_to_polygon,
 )
 from ..kcell import KCell, VKCell
 from ..typings import MetaData
 
 if TYPE_CHECKING:
+    from ..cross_section import AnyCrossSection
     from ..layout import KCLayout
 
 __all__ = [
     "boundary_from_shapes",
     "cross_section_from_width",
     "extrude_backbone",
+    "extrude_backbone_cross_section",
     "extrude_backbone_dynamic",
     "layer_enclosure_to_sections",
 ]
@@ -134,6 +139,67 @@ def extrude_backbone(
                     )
                     outer_r.reverse()
                     c.shapes(_li).insert(kdb.DPolygon(outer_l + outer_r))
+
+
+def extrude_backbone_cross_section(
+    c: VKCell,
+    backbone: Sequence[kdb.DPoint],
+    cross_section: "AnyCrossSection",
+    start_angle: float,
+    end_angle: float,
+) -> None:
+    """Extrude a (symmetric or asymmetric) cross section along a backbone (um).
+
+    The virtual-cell counterpart of
+    [`extrude_path_cross_section`][kfactory.enclosure.extrude_path_cross_section]:
+    symmetric cross sections reproduce `extrude_backbone` exactly (byte-identical,
+    centered width + enclosure annuli); asymmetric ones are extruded as one signed
+    band ``[section_min, section_max]`` per strip (main strip + each aux section),
+    with strips sharing a layer merged.
+
+    Args:
+        c: target virtual cell
+        backbone: backbone to extrude (in um)
+        cross_section: the cross section to extrude
+        start_angle: force a certain start angle
+        end_angle: force a certain end angle
+    """
+    from ..cross_section import AsymmetricalCrossSection
+
+    if not isinstance(cross_section, AsymmetricalCrossSection):
+        extrude_backbone(
+            c,
+            backbone=list(backbone),
+            width=c.kcl.to_um(cross_section.width),
+            layer=cross_section.main_layer,
+            start_angle=start_angle,
+            end_angle=end_angle,
+            dbu=c.kcl.dbu,
+            enclosure=cross_section.enclosure,
+        )
+        return
+
+    to_um = c.kcl.to_um
+    strips: dict[kdb.LayerInfo, list[tuple[float, float]]] = defaultdict(list)
+    strips[cross_section.layer].append(
+        (to_um(cross_section.section_min), to_um(cross_section.section_max))
+    )
+    for sec in cross_section.sections:
+        strips[sec.layer].append((to_um(sec.section_min), to_um(sec.section_max)))
+
+    for layer, bands in strips.items():
+        region = kdb.Region()
+        for lo, hi in bands:
+            polygon = path_pts_to_polygon(
+                *_extrude_path_band_points(
+                    list(backbone), lo, hi, start_angle, end_angle
+                )
+            )
+            region.insert(c.kcl.to_dbu(polygon))
+        region.merge()
+        li = c.kcl.layer(layer)
+        for poly in region.each():
+            c.shapes(li).insert(poly.to_dtype(c.kcl.dbu))
 
 
 def extrude_backbone_dynamic(

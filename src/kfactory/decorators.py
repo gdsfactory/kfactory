@@ -732,6 +732,21 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
         tags: Sequence[str] | None = None,
+        type_serializers: Sequence[tuple[type | UnionType, Callable[[Any], Any]]] = (
+            (
+                SymmetricalCrossSection
+                | CrossSection
+                | DCrossSection
+                | AsymmetricalCrossSection
+                | AsymmetricCrossSection
+                | DAsymmetricCrossSection,
+                attrgetter("name"),
+            ),
+        ),
+        type_hints_serializer: dict[
+            type | UnionType | TypeAliasType, Callable[[Any], Any]
+        ]
+        | None = None,
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
@@ -741,6 +756,18 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
 
         # Pre-compute static signature metadata once at decoration time
         sig_params = SignatureParams(sig)
+        # Resolve annotations to concrete types for the type-hint serializers (see
+        # the equivalent block in ``WrappedKCellFunc``); an unresolvable hint simply
+        # opts out of hint-based serialization rather than breaking decoration.
+        try:
+            hints = get_type_hints(f)
+        except Exception:
+            hints = {}
+        if type_hints_serializer is None:
+            type_hints_serializer = cast(
+                "dict[type | UnionType | TypeAliasType, Callable[[Any], Any]]",
+                {CrossSectionSpec: kcl_cross_section_serializer(kcl=kcl)},
+            )
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -758,7 +785,16 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
 
                 return cell_
 
-        @cached(cache=cache, lock=RLock())
+        @cached(
+            cache=cache,
+            lock=RLock(),
+            key=get_keys_function(
+                hints=hints,
+                drop_args=drop_params,
+                serialize_types=type_serializers,
+                serialize_hints=type_hints_serializer,
+            ),
+        )
         def wrapped_cell(**params: Any) -> VK:
 
             _params_to_original(params)
