@@ -1235,10 +1235,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#enclosure-cladding-exclude" class="md-nav__link">
+  <a href="#cladding-exclude-via-the-cross-section" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Enclosure (cladding / exclude)
+        Cladding / exclude via the cross section
       </span>
     </span>
   </a>
@@ -5259,10 +5259,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#enclosure-cladding-exclude" class="md-nav__link">
+  <a href="#cladding-exclude-via-the-cross-section" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Enclosure (cladding / exclude)
+        Cladding / exclude via the cross section
       </span>
     </span>
   </a>
@@ -5303,8 +5303,9 @@
 
 <p><a class="md-button" href="../straight/straight.ipynb"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"/></svg></span> Download notebook (.ipynb)</a></p>
 <h1 id="straight-waveguide">Straight Waveguide</h1>
-<p><code>straight_dbu_factory(kcl)</code> returns a cached cell function whose arguments are
-all in <strong>DBU</strong> (database units). Convert µm values with <code>kcl.to_dbu()</code>.</p>
+<p><code>straight_dbu_factory(kcl)</code> returns a cached cell function. Its canonical input
+is a <strong>cross section</strong> (by name, instance, or spec dict); the <code>length</code> is in
+<strong>DBU</strong> (database units). Convert µm values with <code>kcl.to_dbu()</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.factories.straight</span><span class="w"> </span><span class="kn">import</span> <span class="n">straight_dbu_factory</span>
 
@@ -5322,46 +5323,48 @@ all in <strong>DBU</strong> (database units). Convert µm values with <code>kcl.
 <code>@kcl.cell</code> cache at work.</p>
 <div class="highlight"><pre><span></span><code><span class="n">straight</span> <span class="o">=</span> <span class="n">straight_dbu_factory</span><span class="p">(</span><span class="n">pdk</span><span class="p">)</span>
 
-<span class="n">wg_short</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span>
-    <span class="n">width</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span>  <span class="c1"># 500 DBU = 0.5 µm</span>
-    <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">10.0</span><span class="p">),</span>  <span class="c1"># 10000 DBU = 10 µm</span>
-    <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
+<span class="c1"># Register a symmetric cross section (width in DBU) on the PDK, then build by name.</span>
+<span class="n">wg</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">CrossSectionSpecDict</span><span class="p">(</span>
+        <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span>  <span class="c1"># 500 DBU = 0.5 µm</span>
+        <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 <span class="p">)</span>
-<span class="n">wg_long</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span>
-    <span class="n">width</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span>
-    <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">20.0</span><span class="p">),</span>
-    <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
-<span class="p">)</span>
+
+<span class="n">wg_short</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">10.0</span><span class="p">))</span>  <span class="c1"># 10 µm</span>
+<span class="n">wg_long</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">20.0</span><span class="p">))</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;short name:&quot;</span><span class="p">,</span> <span class="n">wg_short</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;long  name:&quot;</span><span class="p">,</span> <span class="n">wg_long</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span>
     <span class="s2">&quot;same object (same args)?&quot;</span><span class="p">,</span>
-    <span class="n">wg_short</span> <span class="ow">is</span> <span class="n">straight</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">10.0</span><span class="p">),</span> <span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">),</span>
+    <span class="n">wg_short</span> <span class="ow">is</span> <span class="n">straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="n">wg</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)),</span>
 <span class="p">)</span>
 <span class="n">wg_short</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>short name: straight_W500_L10000_LWG_ENone
-long  name: straight_W500_L20000_LWG_ENone
+<div class="highlight"><pre><span></span><code>short name: straight_CSWG_L10000
+long  name: straight_CSWG_L20000
 same object (same args)? True
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
 <img alt="png" src="../straight/output_4_1.png" /></p>
-<h2 id="enclosure-cladding-exclude">Enclosure (cladding / exclude)</h2>
-<p>Pass a <code>LayerEnclosure</code> to add slab or exclude layers automatically.</p>
-<div class="highlight"><pre><span></span><code><span class="n">enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span>
-    <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))],</span>
-    <span class="n">main_layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
-    <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
+<h2 id="cladding-exclude-via-the-cross-section">Cladding / exclude via the cross section</h2>
+<p>Extra layers (slab, exclude, cladding) are <strong>sections</strong> of the cross section —
+<code>(layer, width)</code> or <code>(layer, min, max)</code> offsets around the core, in DBU.</p>
+<div class="highlight"><pre><span></span><code><span class="n">wg_clad_xs</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">CrossSectionSpecDict</span><span class="p">(</span>
+        <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span>
+        <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))],</span>
+        <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_CLAD&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 <span class="p">)</span>
 
-<span class="n">wg_clad</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span>
-    <span class="n">width</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span>
-    <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">15.0</span><span class="p">),</span>
-    <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="o">=</span><span class="n">enc</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="n">wg_clad</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG_CLAD&quot;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">15.0</span><span class="p">))</span>
 <span class="n">wg_clad</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>

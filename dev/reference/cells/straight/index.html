@@ -2730,6 +2730,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#kfactory.cells.straight.straight_dbu" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        straight_dbu
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kfactory.cells.straight.straight" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -5247,6 +5258,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#kfactory.cells.straight.straight_dbu" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        straight_dbu
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kfactory.cells.straight.straight" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -5309,13 +5331,14 @@
 │        Slab/Exclude         │
 └─────────────────────────────┘
 </code></pre>
-<p>The slabs and excludes can be given in the form of an
+<p>The slabs and excludes are part of the cross section, or can be given for the legacy
+<code>(width, layer, enclosure)</code> call via a
 <a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;LayerEnclosure&lt;/span&gt;
 
 
   &lt;span class=&quot;doc doc-labels&quot;&gt;
       &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../enclosure/#kfactory.enclosure.LayerEnclosure">Enclosure</a>.</p>
+  &lt;/span&gt;" href="../../enclosure/#kfactory.enclosure.LayerEnclosure"><code>LayerEnclosure</code></a>.</p>
 
 
 
@@ -5334,6 +5357,30 @@
 
 
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="kfactory.cells.straight.straight_dbu" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">straight_dbu</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">straight_dbu</span> <span class="o">=</span> <span class="n">straight_dbu_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">demo</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Cross-section-first straight factory on the default KCLayout (length in dbu).</p>
+
+    </div>
+
+</div>
+
 
 
 
@@ -5345,10 +5392,35 @@
 
 
 </h3>
+          <div class="doc-overloads">
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">straight</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">width</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
     <span class="n">length</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
+    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span>
+</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">straight</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">CrossSection</span>
+    <span class="o">|</span> <span class="n">DCrossSection</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span><span class="p">,</span>
+    <span class="n">length</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span>
+</code></pre></div>          </div>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">straight</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">length</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">CrossSection</span>
+    <span class="o">|</span> <span class="n">DCrossSection</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span>
 </code></pre></div>
@@ -5356,17 +5428,8 @@
     <div class="doc doc-contents ">
 
         <p>Straight waveguide in um.</p>
-<p>Visualization::</p>
-<pre><code>┌─────────────────────────────┐
-│        Slab/Exclude         │
-├─────────────────────────────┤
-│                             │
-│            Core             │
-│                             │
-├─────────────────────────────┤
-│        Slab/Exclude         │
-└─────────────────────────────┘
-</code></pre>
+<p>Either pass a <code>cross_section</code> (name, spec, or instance) or the legacy
+<code>width</code>/<code>layer</code>/<code>enclosure</code>.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -5380,27 +5443,6 @@
         </tr>
       </thead>
       <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>width</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;um&lt;/span&gt;
-
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../typings/#kfactory.typings.um">um</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Width of the straight. [um]</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
           <tr class="doc-section-item">
             <td>
                 <code>length</code>
@@ -5424,18 +5466,55 @@
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>layer</code>
+                <code>cross_section</code>
             </td>
             <td>
-                  <code><span title="kfactory.kdb.LayerInfo">LayerInfo</span></code>
+                  <code><span title="str">str</span> | <span title="kfactory.cross_section.CrossSection">CrossSection</span> | <span title="kfactory.cross_section.DCrossSection">DCrossSection</span> | <span title="kfactory.cross_section.CrossSectionSpecDict">CrossSectionSpecDict</span> | <span title="kfactory.cross_section.DCrossSectionSpecDict">DCrossSectionSpecDict</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Main layer of the straight.</p>
+                <p>Cross section of the straight.</p>
               </div>
             </td>
             <td>
-                <em>required</em>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>width</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;um&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../typings/#kfactory.typings.um">um</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Width of the core. [um] (legacy; requires <code>layer</code>)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>layer</code>
+            </td>
+            <td>
+                  <code><span title="kfactory.kdb.LayerInfo">LayerInfo</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Main layer of the straight. (legacy)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -5452,7 +5531,7 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Definition of slabs/excludes. [um]</p>
+                <p>Definition of slabs/excludes. (legacy)</p>
               </div>
             </td>
             <td>
@@ -5465,63 +5544,69 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/cells/straight.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">58</span>
 <span class="normal">59</span>
 <span class="normal">60</span>
-<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">straight</span><span class="p">(</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">straight</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">length</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">CrossSection</span>
+    <span class="o">|</span> <span class="n">DCrossSection</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Straight waveguide in um.</span>
 
-<span class="sd">    Visualization::</span>
-
-<span class="sd">        ┌─────────────────────────────┐</span>
-<span class="sd">        │        Slab/Exclude         │</span>
-<span class="sd">        ├─────────────────────────────┤</span>
-<span class="sd">        │                             │</span>
-<span class="sd">        │            Core             │</span>
-<span class="sd">        │                             │</span>
-<span class="sd">        ├─────────────────────────────┤</span>
-<span class="sd">        │        Slab/Exclude         │</span>
-<span class="sd">        └─────────────────────────────┘</span>
+<span class="sd">    Either pass a ``cross_section`` (name, spec, or instance) or the legacy</span>
+<span class="sd">    ``width``/``layer``/``enclosure``.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        width: Width of the straight. [um]</span>
 <span class="sd">        length: Length of the straight. [um]</span>
-<span class="sd">        layer: Main layer of the straight.</span>
-<span class="sd">        enclosure: Definition of slabs/excludes. [um]</span>
+<span class="sd">        cross_section: Cross section of the straight.</span>
+<span class="sd">        width: Width of the core. [um] (legacy; requires ``layer``)</span>
+<span class="sd">        layer: Main layer of the straight. (legacy)</span>
+<span class="sd">        enclosure: Definition of slabs/excludes. (legacy)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cross_section</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">straight_dbu</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="n">cross_section</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">demo</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide a cross_section, or width and layer (legacy call).&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">straight_dbu</span><span class="p">(</span>
         <span class="n">width</span><span class="o">=</span><span class="n">demo</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
         <span class="n">length</span><span class="o">=</span><span class="n">demo</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">length</span><span class="p">),</span>

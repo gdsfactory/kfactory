@@ -9557,7 +9557,15 @@ them</p>
 <span class="normal">2531</span>
 <span class="normal">2532</span>
 <span class="normal">2533</span>
-<span class="normal">2534</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCLayout</span><span class="p">(</span>
+<span class="normal">2534</span>
+<span class="normal">2535</span>
+<span class="normal">2536</span>
+<span class="normal">2537</span>
+<span class="normal">2538</span>
+<span class="normal">2539</span>
+<span class="normal">2540</span>
+<span class="normal">2541</span>
+<span class="normal">2542</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCLayout</span><span class="p">(</span>
     <span class="n">BaseModel</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">&quot;allow&quot;</span><span class="p">,</span> <span class="n">validate_assignment</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Small extension to the klayout.db.Layout.</span>
@@ -11434,6 +11442,8 @@ them</p>
                     <span class="n">width</span><span class="o">=</span><span class="n">cs</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span>
                     <span class="n">enclosure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span><span class="n">cs</span><span class="p">[</span><span class="s2">&quot;layer_enclosure&quot;</span><span class="p">]),</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">cs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                    <span class="n">radius</span><span class="o">=</span><span class="n">cs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;radius&quot;</span><span class="p">),</span>
+                    <span class="n">radius_min</span><span class="o">=</span><span class="n">cs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;radius_min&quot;</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">for</span> <span class="n">acs</span> <span class="ow">in</span> <span class="n">asym_cross_sections</span><span class="p">:</span>
@@ -11506,6 +11516,12 @@ them</p>
                         <span class="p">{</span>
                             <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
                             <span class="s2">&quot;layer_enclosure&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="o">**</span><span class="p">({</span><span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">radius</span><span class="p">}</span> <span class="k">if</span> <span class="n">xs</span><span class="o">.</span><span class="n">radius</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}),</span>
+                            <span class="o">**</span><span class="p">(</span>
+                                <span class="p">{</span><span class="s2">&quot;radius_min&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">radius_min</span><span class="p">}</span>
+                                <span class="k">if</span> <span class="n">xs</span><span class="o">.</span><span class="n">radius_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                                <span class="k">else</span> <span class="p">{}</span>
+                            <span class="p">),</span>
                         <span class="p">},</span>
                         <span class="kc">None</span><span class="p">,</span>
                         <span class="kc">True</span><span class="p">,</span>
@@ -11588,8 +11604,8 @@ them</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
         <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
-        <span class="o">|</span> <span class="n">CrossSectionSpec</span>
-        <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
         <span class="o">|</span> <span class="n">DSymmetricalCrossSection</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymmetricalCrossSection</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a cross section by name or specification.&quot;&quot;&quot;</span>
@@ -11612,8 +11628,8 @@ them</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
         <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
-        <span class="o">|</span> <span class="n">CrossSectionSpec</span>
-        <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
         <span class="o">|</span> <span class="n">DSymmetricalCrossSection</span>
         <span class="o">|</span> <span class="n">TCrossSection</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
         <span class="n">symmetrical</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
@@ -11678,8 +11694,8 @@ them</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
         <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
-        <span class="o">|</span> <span class="n">CrossSectionSpec</span>
-        <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
         <span class="o">|</span> <span class="n">DCrossSection</span>
         <span class="o">|</span> <span class="n">DSymmetricalCrossSection</span>
         <span class="o">|</span> <span class="n">CrossSection</span><span class="p">,</span>
@@ -11720,8 +11736,8 @@ them</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
         <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
-        <span class="o">|</span> <span class="n">CrossSectionSpec</span>
-        <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
         <span class="o">|</span> <span class="n">DSymmetricalCrossSection</span>
         <span class="o">|</span> <span class="n">CrossSection</span>
         <span class="o">|</span> <span class="n">DCrossSection</span><span class="p">,</span>
@@ -13739,13 +13755,13 @@ exists.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2242</span>
-<span class="normal">2243</span>
-<span class="normal">2244</span>
-<span class="normal">2245</span>
-<span class="normal">2246</span>
-<span class="normal">2247</span>
-<span class="normal">2248</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2250</span>
+<span class="normal">2251</span>
+<span class="normal">2252</span>
+<span class="normal">2253</span>
+<span class="normal">2254</span>
+<span class="normal">2255</span>
+<span class="normal">2256</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Clears all cells in the Layout object.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">kc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcells</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">kc</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="kc">False</span>
@@ -14499,15 +14515,7 @@ this layout.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2489</span>
-<span class="normal">2490</span>
-<span class="normal">2491</span>
-<span class="normal">2492</span>
-<span class="normal">2493</span>
-<span class="normal">2494</span>
-<span class="normal">2495</span>
-<span class="normal">2496</span>
-<span class="normal">2497</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2497</span>
 <span class="normal">2498</span>
 <span class="normal">2499</span>
 <span class="normal">2500</span>
@@ -14544,7 +14552,15 @@ this layout.</p>
 <span class="normal">2531</span>
 <span class="normal">2532</span>
 <span class="normal">2533</span>
-<span class="normal">2534</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generic_factory</span><span class="p">[</span><span class="n">F</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]](</span>
+<span class="normal">2534</span>
+<span class="normal">2535</span>
+<span class="normal">2536</span>
+<span class="normal">2537</span>
+<span class="normal">2538</span>
+<span class="normal">2539</span>
+<span class="normal">2540</span>
+<span class="normal">2541</span>
+<span class="normal">2542</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generic_factory</span><span class="p">[</span><span class="n">F</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]](</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">F</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -14619,17 +14635,17 @@ this layout.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2267</span>
-<span class="normal">2268</span>
-<span class="normal">2269</span>
-<span class="normal">2270</span>
-<span class="normal">2271</span>
-<span class="normal">2272</span>
-<span class="normal">2273</span>
-<span class="normal">2274</span>
-<span class="normal">2275</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2275</span>
 <span class="normal">2276</span>
-<span class="normal">2277</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_asymmetrical_cross_section</span><span class="p">(</span>
+<span class="normal">2277</span>
+<span class="normal">2278</span>
+<span class="normal">2279</span>
+<span class="normal">2280</span>
+<span class="normal">2281</span>
+<span class="normal">2282</span>
+<span class="normal">2283</span>
+<span class="normal">2284</span>
+<span class="normal">2285</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_asymmetrical_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">AsymmetricalCrossSection</span>
@@ -14658,8 +14674,8 @@ this layout.</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_base_cross_section</span><span class="p">(</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
-    <span class="o">|</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">DSymmetricalCrossSection</span>
     <span class="o">|</span> <span class="n">TCrossSection</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="n">symmetrical</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
@@ -14738,15 +14754,7 @@ raises if the resolved one is symmetric.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2308</span>
-<span class="normal">2309</span>
-<span class="normal">2310</span>
-<span class="normal">2311</span>
-<span class="normal">2312</span>
-<span class="normal">2313</span>
-<span class="normal">2314</span>
-<span class="normal">2315</span>
-<span class="normal">2316</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2316</span>
 <span class="normal">2317</span>
 <span class="normal">2318</span>
 <span class="normal">2319</span>
@@ -14773,7 +14781,15 @@ raises if the resolved one is symmetric.</p>
 <span class="normal">2340</span>
 <span class="normal">2341</span>
 <span class="normal">2342</span>
-<span class="normal">2343</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_base_cross_section</span><span class="p">(</span>
+<span class="normal">2343</span>
+<span class="normal">2344</span>
+<span class="normal">2345</span>
+<span class="normal">2346</span>
+<span class="normal">2347</span>
+<span class="normal">2348</span>
+<span class="normal">2349</span>
+<span class="normal">2350</span>
+<span class="normal">2351</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_base_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">symmetrical</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -14979,17 +14995,17 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2441</span>
-<span class="normal">2442</span>
-<span class="normal">2443</span>
-<span class="normal">2444</span>
-<span class="normal">2445</span>
-<span class="normal">2446</span>
-<span class="normal">2447</span>
-<span class="normal">2448</span>
-<span class="normal">2449</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2449</span>
 <span class="normal">2450</span>
-<span class="normal">2451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dasymmetric_cross_section</span><span class="p">(</span>
+<span class="normal">2451</span>
+<span class="normal">2452</span>
+<span class="normal">2453</span>
+<span class="normal">2454</span>
+<span class="normal">2455</span>
+<span class="normal">2456</span>
+<span class="normal">2457</span>
+<span class="normal">2458</span>
+<span class="normal">2459</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dasymmetric_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">AsymmetricalCrossSection</span>
@@ -15018,8 +15034,8 @@ cell_type: type of cell to return</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_dcross_section</span><span class="p">(</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
-    <span class="o">|</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">DSymmetricalCrossSection</span>
     <span class="o">|</span> <span class="n">CrossSection</span>
     <span class="o">|</span> <span class="n">DCrossSection</span><span class="p">,</span>
@@ -15048,22 +15064,22 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2412</span>
-<span class="normal">2413</span>
-<span class="normal">2414</span>
-<span class="normal">2415</span>
-<span class="normal">2416</span>
-<span class="normal">2417</span>
-<span class="normal">2418</span>
-<span class="normal">2419</span>
-<span class="normal">2420</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2420</span>
 <span class="normal">2421</span>
 <span class="normal">2422</span>
 <span class="normal">2423</span>
 <span class="normal">2424</span>
 <span class="normal">2425</span>
 <span class="normal">2426</span>
-<span class="normal">2427</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dcross_section</span><span class="p">(</span>
+<span class="normal">2427</span>
+<span class="normal">2428</span>
+<span class="normal">2429</span>
+<span class="normal">2430</span>
+<span class="normal">2431</span>
+<span class="normal">2432</span>
+<span class="normal">2433</span>
+<span class="normal">2434</span>
+<span class="normal">2435</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dcross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">symmetrical</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DCrossSection</span> <span class="o">|</span> <span class="n">DAsymmetricCrossSection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a um cross section wrapper (symmetric or asymmetric, see kwarg).&quot;&quot;&quot;</span>
@@ -15105,11 +15121,11 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2250</span>
-<span class="normal">2251</span>
-<span class="normal">2252</span>
-<span class="normal">2253</span>
-<span class="normal">2254</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_enclosure</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2258</span>
+<span class="normal">2259</span>
+<span class="normal">2260</span>
+<span class="normal">2261</span>
+<span class="normal">2262</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_enclosure</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="n">LayerEnclosureSpec</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LayerEnclosure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets a layer enclosure by name specification or the layerenclosure itself.&quot;&quot;&quot;</span>
@@ -15143,17 +15159,17 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2429</span>
-<span class="normal">2430</span>
-<span class="normal">2431</span>
-<span class="normal">2432</span>
-<span class="normal">2433</span>
-<span class="normal">2434</span>
-<span class="normal">2435</span>
-<span class="normal">2436</span>
-<span class="normal">2437</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2437</span>
 <span class="normal">2438</span>
-<span class="normal">2439</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_iasymmetric_cross_section</span><span class="p">(</span>
+<span class="normal">2439</span>
+<span class="normal">2440</span>
+<span class="normal">2441</span>
+<span class="normal">2442</span>
+<span class="normal">2443</span>
+<span class="normal">2444</span>
+<span class="normal">2445</span>
+<span class="normal">2446</span>
+<span class="normal">2447</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_iasymmetric_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">AsymmetricalCrossSection</span>
@@ -15182,8 +15198,8 @@ cell_type: type of cell to return</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_icross_section</span><span class="p">(</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
-    <span class="o">|</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">DCrossSection</span>
     <span class="o">|</span> <span class="n">DSymmetricalCrossSection</span>
     <span class="o">|</span> <span class="n">CrossSection</span><span class="p">,</span>
@@ -15212,22 +15228,22 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2370</span>
-<span class="normal">2371</span>
-<span class="normal">2372</span>
-<span class="normal">2373</span>
-<span class="normal">2374</span>
-<span class="normal">2375</span>
-<span class="normal">2376</span>
-<span class="normal">2377</span>
-<span class="normal">2378</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2378</span>
 <span class="normal">2379</span>
 <span class="normal">2380</span>
 <span class="normal">2381</span>
 <span class="normal">2382</span>
 <span class="normal">2383</span>
 <span class="normal">2384</span>
-<span class="normal">2385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_icross_section</span><span class="p">(</span>
+<span class="normal">2385</span>
+<span class="normal">2386</span>
+<span class="normal">2387</span>
+<span class="normal">2388</span>
+<span class="normal">2389</span>
+<span class="normal">2390</span>
+<span class="normal">2391</span>
+<span class="normal">2392</span>
+<span class="normal">2393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_icross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">symmetrical</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrossSection</span> <span class="o">|</span> <span class="n">AsymmetricCrossSection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a dbu cross section wrapper (symmetric or asymmetric, see kwarg).&quot;&quot;&quot;</span>
@@ -15325,7 +15341,9 @@ cell_type: type of cell to return</p>
 <span class="normal">2121</span>
 <span class="normal">2122</span>
 <span class="normal">2123</span>
-<span class="normal">2124</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="normal">2124</span>
+<span class="normal">2125</span>
+<span class="normal">2126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read KCLayout meta info from the KLayout object.&quot;&quot;&quot;</span>
     <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -15365,6 +15383,8 @@ cell_type: type of cell to return</p>
                 <span class="n">width</span><span class="o">=</span><span class="n">cs</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span>
                 <span class="n">enclosure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span><span class="n">cs</span><span class="p">[</span><span class="s2">&quot;layer_enclosure&quot;</span><span class="p">]),</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">cs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                <span class="n">radius</span><span class="o">=</span><span class="n">cs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;radius&quot;</span><span class="p">),</span>
+                <span class="n">radius_min</span><span class="o">=</span><span class="n">cs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;radius_min&quot;</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="p">)</span>
     <span class="k">for</span> <span class="n">acs</span> <span class="ow">in</span> <span class="n">asym_cross_sections</span><span class="p">:</span>
@@ -15401,8 +15421,8 @@ cell_type: type of cell to return</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_symmetrical_cross_section</span><span class="p">(</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
-    <span class="o">|</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">DSymmetricalCrossSection</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymmetricalCrossSection</span>
 </code></pre></div>
@@ -15414,21 +15434,21 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2256</span>
-<span class="normal">2257</span>
-<span class="normal">2258</span>
-<span class="normal">2259</span>
-<span class="normal">2260</span>
-<span class="normal">2261</span>
-<span class="normal">2262</span>
-<span class="normal">2263</span>
-<span class="normal">2264</span>
-<span class="normal">2265</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_symmetrical_cross_section</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2264</span>
+<span class="normal">2265</span>
+<span class="normal">2266</span>
+<span class="normal">2267</span>
+<span class="normal">2268</span>
+<span class="normal">2269</span>
+<span class="normal">2270</span>
+<span class="normal">2271</span>
+<span class="normal">2272</span>
+<span class="normal">2273</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_symmetrical_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
-    <span class="o">|</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">DSymmetricalCrossSection</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymmetricalCrossSection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a cross section by name or specification.&quot;&quot;&quot;</span>
@@ -16240,9 +16260,7 @@ Doesn't allow name duplication.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2126</span>
-<span class="normal">2127</span>
-<span class="normal">2128</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2128</span>
 <span class="normal">2129</span>
 <span class="normal">2130</span>
 <span class="normal">2131</span>
@@ -16296,7 +16314,15 @@ Doesn't allow name duplication.</p>
 <span class="normal">2179</span>
 <span class="normal">2180</span>
 <span class="normal">2181</span>
-<span class="normal">2182</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2182</span>
+<span class="normal">2183</span>
+<span class="normal">2184</span>
+<span class="normal">2185</span>
+<span class="normal">2186</span>
+<span class="normal">2187</span>
+<span class="normal">2188</span>
+<span class="normal">2189</span>
+<span class="normal">2190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set the info/settings of the KCLayout.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">write_kfactory_settings</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">setting</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -16348,6 +16374,12 @@ Doesn't allow name duplication.</p>
                     <span class="p">{</span>
                         <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
                         <span class="s2">&quot;layer_enclosure&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="o">**</span><span class="p">({</span><span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">radius</span><span class="p">}</span> <span class="k">if</span> <span class="n">xs</span><span class="o">.</span><span class="n">radius</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}),</span>
+                        <span class="o">**</span><span class="p">(</span>
+                            <span class="p">{</span><span class="s2">&quot;radius_min&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">radius_min</span><span class="p">}</span>
+                            <span class="k">if</span> <span class="n">xs</span><span class="o">.</span><span class="n">radius_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                            <span class="k">else</span> <span class="p">{}</span>
+                        <span class="p">),</span>
                     <span class="p">},</span>
                     <span class="kc">None</span><span class="p">,</span>
                     <span class="kc">True</span><span class="p">,</span>
@@ -16575,9 +16607,9 @@ Doesn't allow name duplication.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2238</span>
-<span class="normal">2239</span>
-<span class="normal">2240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2246</span>
+<span class="normal">2247</span>
+<span class="normal">2248</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the top KCell if there is a single one.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">top_cell</span><span class="p">()</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()]</span>
 </code></pre></div></td></tr></table></div>
@@ -16604,9 +16636,9 @@ Doesn't allow name duplication.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2234</span>
-<span class="normal">2235</span>
-<span class="normal">2236</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">KCell</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2242</span>
+<span class="normal">2243</span>
+<span class="normal">2244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">KCell</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the top KCells.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">tc</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()]</span> <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_cells</span><span class="p">()]</span>
 </code></pre></div></td></tr></table></div>
@@ -17392,15 +17424,7 @@ for the options. If not set, this will default to <code>GDSII</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2184</span>
-<span class="normal">2185</span>
-<span class="normal">2186</span>
-<span class="normal">2187</span>
-<span class="normal">2188</span>
-<span class="normal">2189</span>
-<span class="normal">2190</span>
-<span class="normal">2191</span>
-<span class="normal">2192</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2192</span>
 <span class="normal">2193</span>
 <span class="normal">2194</span>
 <span class="normal">2195</span>
@@ -17440,7 +17464,15 @@ for the options. If not set, this will default to <code>GDSII</code>.</p>
 <span class="normal">2229</span>
 <span class="normal">2230</span>
 <span class="normal">2231</span>
-<span class="normal">2232</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
+<span class="normal">2232</span>
+<span class="normal">2233</span>
+<span class="normal">2234</span>
+<span class="normal">2235</span>
+<span class="normal">2236</span>
+<span class="normal">2237</span>
+<span class="normal">2238</span>
+<span class="normal">2239</span>
+<span class="normal">2240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">options</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">SaveLayoutOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

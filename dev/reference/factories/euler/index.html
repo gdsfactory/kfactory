@@ -5550,16 +5550,7 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/factories/euler.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
 <span class="normal">46</span>
 <span class="normal">47</span>
 <span class="normal">48</span>
@@ -5570,25 +5561,52 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
 <span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
-<span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BendEulerFactory</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">KC_co</span><span class="p">]):</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BendEulerFactory</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">KC_co</span><span class="p">]):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
         <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
-        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
         <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a euler bend.</span>
 
+<span class="sd">        Either pass a ``cross_section`` or the legacy ``width``/``layer``/``enclosure``.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            width: Width of the core. [um]</span>
 <span class="sd">            radius: Radius off the backbone. [um]</span>
-<span class="sd">            layer: Layer index / LayerEnum of the core.</span>
-<span class="sd">            enclosure: Slab/exclude definition. [dbu]</span>
 <span class="sd">            angle: Angle of the bend.</span>
 <span class="sd">            resolution: Angle resolution for the backbone.</span>
+<span class="sd">            cross_section: Cross section of the bend.</span>
+<span class="sd">            width: Width of the core. [um] (legacy; requires ``layer``)</span>
+<span class="sd">            layer: Main layer of the bend. (legacy)</span>
+<span class="sd">            enclosure: Slab/exclude definition. (legacy)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -5616,18 +5634,25 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
 
 </h4>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
     <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Create a euler bend.</p>
+<p>Either pass a <code>cross_section</code> or the legacy <code>width</code>/<code>layer</code>/<code>enclosure</code>.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -5641,27 +5666,6 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
         </tr>
       </thead>
       <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>width</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;um&lt;/span&gt;
-
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../typings/#kfactory.typings.um">um</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Width of the core. [um]</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
           <tr class="doc-section-item">
             <td>
                 <code>radius</code>
@@ -5681,43 +5685,6 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
             </td>
             <td>
                 <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>layer</code>
-            </td>
-            <td>
-                  <code><span title="kfactory.kdb.LayerInfo">LayerInfo</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Layer index / LayerEnum of the core.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>enclosure</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;LayerEnclosure&lt;/span&gt;
-
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../enclosure/#kfactory.enclosure.LayerEnclosure">LayerEnclosure</a> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Slab/exclude definition. [dbu]</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -5757,22 +5724,87 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
                   <code>150</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cross_section</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="kfactory.cross_section.AnyCrossSectionInput">AnyCrossSectionInput</span> | <span title="kfactory.cross_section.CrossSectionSpecDict">CrossSectionSpecDict</span> | <span title="kfactory.cross_section.DCrossSectionSpecDict">DCrossSectionSpecDict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cross section of the bend.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>width</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;um&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../typings/#kfactory.typings.um">um</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Width of the core. [um] (legacy; requires <code>layer</code>)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>layer</code>
+            </td>
+            <td>
+                  <code><span title="kfactory.kdb.LayerInfo">LayerInfo</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Main layer of the bend. (legacy)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>enclosure</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;LayerEnclosure&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../enclosure/#kfactory.enclosure.LayerEnclosure">LayerEnclosure</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Slab/exclude definition. (legacy)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/euler.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
 <span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span>
@@ -5782,24 +5814,51 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
 <span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
-<span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
     <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a euler bend.</span>
 
+<span class="sd">    Either pass a ``cross_section`` or the legacy ``width``/``layer``/``enclosure``.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        width: Width of the core. [um]</span>
 <span class="sd">        radius: Radius off the backbone. [um]</span>
-<span class="sd">        layer: Layer index / LayerEnum of the core.</span>
-<span class="sd">        enclosure: Slab/exclude definition. [dbu]</span>
 <span class="sd">        angle: Angle of the bend.</span>
 <span class="sd">        resolution: Angle resolution for the backbone.</span>
+<span class="sd">        cross_section: Cross section of the bend.</span>
+<span class="sd">        width: Width of the core. [um] (legacy; requires ``layer``)</span>
+<span class="sd">        layer: Main layer of the bend. (legacy)</span>
+<span class="sd">        enclosure: Slab/exclude definition. (legacy)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -5842,45 +5901,63 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/factories/euler.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BendSEulerFactory</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">KC_co</span><span class="p">]):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BendSEulerFactory</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">KC_co</span><span class="p">]):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
         <span class="n">offset</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
         <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
-        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a euler s-bend.</span>
 
+<span class="sd">        Either pass a ``cross_section`` or the legacy ``width``/``layer``/``enclosure``.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            offset: Offset between left/right. [um]</span>
-<span class="sd">            width: Width of the core. [um]</span>
 <span class="sd">            radius: Radius off the backbone. [um]</span>
-<span class="sd">            layer: Layer index / LayerEnum of the core.</span>
-<span class="sd">            enclosure: Slab/exclude definition. [dbu]</span>
 <span class="sd">            resolution: Angle resolution for the backbone.</span>
+<span class="sd">            cross_section: Cross section of the bend.</span>
+<span class="sd">            width: Width of the core. [um] (legacy; requires ``layer``)</span>
+<span class="sd">            layer: Main layer of the bend. (legacy)</span>
+<span class="sd">            enclosure: Slab/exclude definition. (legacy)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -5908,18 +5985,25 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
 
 </h4>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">offset</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Create a euler s-bend.</p>
+<p>Either pass a <code>cross_section</code> or the legacy <code>width</code>/<code>layer</code>/<code>enclosure</code>.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -5956,27 +6040,6 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>width</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;um&lt;/span&gt;
-
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../typings/#kfactory.typings.um">um</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Width of the core. [um]</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
                 <code>radius</code>
             </td>
             <td>
@@ -5998,18 +6061,71 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>layer</code>
+                <code>resolution</code>
             </td>
             <td>
-                  <code><span title="kfactory.kdb.LayerInfo">LayerInfo</span></code>
+                  <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Layer index / LayerEnum of the core.</p>
+                <p>Angle resolution for the backbone.</p>
               </div>
             </td>
             <td>
-                <em>required</em>
+                  <code>150</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cross_section</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="kfactory.cross_section.AnyCrossSectionInput">AnyCrossSectionInput</span> | <span title="kfactory.cross_section.CrossSectionSpecDict">CrossSectionSpecDict</span> | <span title="kfactory.cross_section.DCrossSectionSpecDict">DCrossSectionSpecDict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cross section of the bend.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>width</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;um&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../typings/#kfactory.typings.um">um</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Width of the core. [um] (legacy; requires <code>layer</code>)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>layer</code>
+            </td>
+            <td>
+                  <code><span title="kfactory.kdb.LayerInfo">LayerInfo</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Main layer of the bend. (legacy)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -6026,27 +6142,11 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Slab/exclude definition. [dbu]</p>
+                <p>Slab/exclude definition. (legacy)</p>
               </div>
             </td>
             <td>
                   <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>resolution</code>
-            </td>
-            <td>
-                  <code><span title="float">float</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Angle resolution for the backbone.</p>
-              </div>
-            </td>
-            <td>
-                  <code>150</code>
             </td>
           </tr>
       </tbody>
@@ -6055,43 +6155,61 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/euler.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">offset</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a euler s-bend.</span>
 
+<span class="sd">    Either pass a ``cross_section`` or the legacy ``width``/``layer``/``enclosure``.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        offset: Offset between left/right. [um]</span>
-<span class="sd">        width: Width of the core. [um]</span>
 <span class="sd">        radius: Radius off the backbone. [um]</span>
-<span class="sd">        layer: Layer index / LayerEnum of the core.</span>
-<span class="sd">        enclosure: Slab/exclude definition. [dbu]</span>
 <span class="sd">        resolution: Angle resolution for the backbone.</span>
+<span class="sd">        cross_section: Cross section of the bend.</span>
+<span class="sd">        width: Width of the core. [um] (legacy; requires ``layer``)</span>
+<span class="sd">        layer: Main layer of the bend. (legacy)</span>
+<span class="sd">        enclosure: Slab/exclude definition. (legacy)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -6153,7 +6271,8 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
     <div class="doc doc-contents ">
 
         <p>Returns a function generating euler bends.</p>
-<p>Will snap ports by default</p>
+<p>The returned function is the generic interface (<code>cross_section</code> or the legacy
+<code>width</code>/<code>layer</code>/<code>enclosure</code>). Will snap ports by default.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -6204,7 +6323,7 @@ BendEulerCustom(KCell.kcl) and use that one.</p>
   &lt;span class=&quot;doc doc-labels&quot;&gt;
       &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt;" href="../../settings/#kfactory.settings.Info"><code>KCell.info</code></a>. Can be a static dict
-mapping info name to info value. Or can a callable which takes the straight
+mapping info name to info value. Or can a callable which takes the bend
 functions' parameters as kwargs and returns a dict with the mapping.</p>
               </div>
             </td>
@@ -6234,34 +6353,7 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/euler.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">265</span>
 <span class="normal">266</span>
 <span class="normal">267</span>
 <span class="normal">268</span>
@@ -6370,7 +6462,38 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 <span class="normal">371</span>
 <span class="normal">372</span>
 <span class="normal">373</span>
-<span class="normal">374</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bend_euler_factory</span><span class="p">(</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bend_euler_factory</span><span class="p">(</span>
     <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6385,13 +6508,14 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BendEulerFactory</span><span class="p">[</span><span class="n">KC</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a function generating euler bends.</span>
 
-<span class="sd">    Will snap ports by default</span>
+<span class="sd">    The returned function is the generic interface (``cross_section`` or the legacy</span>
+<span class="sd">    ``width``/``layer``/``enclosure``). Will snap ports by default.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        kcl: The KCLayout which will be owned</span>
 <span class="sd">        additional_info: Add additional key/values to the</span>
 <span class="sd">            [`KCell.info`][kfactory.settings.Info]. Can be a static dict</span>
-<span class="sd">            mapping info name to info value. Or can a callable which takes the straight</span>
+<span class="sd">            mapping info name to info value. Or can a callable which takes the bend</span>
 <span class="sd">            functions&#39; parameters as kwargs and returns a dict with the mapping.</span>
 <span class="sd">        cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -6412,6 +6536,8 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
         <span class="n">_additional_info</span> <span class="o">=</span> <span class="n">additional_info</span> <span class="ow">or</span> <span class="p">{}</span>  <span class="c1"># ty:ignore[invalid-assignment]</span>
     <span class="k">if</span> <span class="n">cell_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;snap_ports&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;snap_ports&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">cell_kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;basename&quot;</span><span class="p">,</span> <span class="s2">&quot;bend_euler&quot;</span><span class="p">)</span>
+    <span class="n">basename</span> <span class="o">=</span> <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;basename&quot;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">output_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">output_type</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">)</span>
@@ -6419,24 +6545,13 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
         <span class="n">cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;type[KC]&quot;</span><span class="p">,</span> <span class="n">KCell</span><span class="p">),</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">)</span>
 
     <span class="nd">@cell</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">bend_euler</span><span class="p">(</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_bend_euler</span><span class="p">(</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span>
         <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
-        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
         <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a euler bend.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            width: Width of the core. [um]</span>
-<span class="sd">            radius: Radius off the backbone. [um]</span>
-<span class="sd">            layer: Layer index / LayerEnum of the core.</span>
-<span class="sd">            enclosure: Slab/exclude definition. [dbu]</span>
-<span class="sd">            angle: Angle of the bend.</span>
-<span class="sd">            resolution: Angle resolution for the backbone.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Euler bend [um] from a cross section.&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">angle</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
@@ -6445,30 +6560,17 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
                 <span class="s2">&quot; lengths.&quot;</span>
             <span class="p">)</span>
             <span class="n">angle</span> <span class="o">=</span> <span class="o">-</span><span class="n">angle</span>
-        <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Negative widths are not allowed </span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2"> as ports&quot;</span>
-                <span class="s2">&quot; will be inverted. Please use a positive number. Forcing positive&quot;</span>
-                <span class="s2">&quot; lengths.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">width</span> <span class="o">=</span> <span class="o">-</span><span class="n">width</span>
+
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_base_cross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
         <span class="n">backbone</span> <span class="o">=</span> <span class="n">euler_bend_points</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span>
 
-        <span class="n">center_path</span> <span class="o">=</span> <span class="n">extrude_path</span><span class="p">(</span>
-            <span class="n">target</span><span class="o">=</span><span class="n">c</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
-            <span class="n">path</span><span class="o">=</span><span class="n">backbone</span><span class="p">,</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
-            <span class="n">enclosure</span><span class="o">=</span><span class="n">enclosure</span><span class="p">,</span>
-            <span class="n">start_angle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">end_angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">li</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+        <span class="n">extrude_path_cross_section</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">backbone</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">start_angle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_angle</span><span class="o">=</span><span class="n">angle</span><span class="p">)</span>
+
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">li</span><span class="p">,</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">backbone</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">to_v</span><span class="p">()),</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="n">port_type</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span> <span class="o">%</span> <span class="mi">90</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
@@ -6476,35 +6578,60 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
             <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
                 <span class="n">trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">_ang</span> <span class="o">//</span> <span class="mi">90</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">backbone</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">to_v</span><span class="p">()),</span>
-                <span class="n">width</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">),</span>
-                <span class="n">layer</span><span class="o">=</span><span class="n">li</span><span class="p">,</span>
+                <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
                 <span class="n">port_type</span><span class="o">=</span><span class="n">port_type</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
                 <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">backbone</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_v</span><span class="p">()),</span>
-                <span class="n">width</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
-                <span class="n">layer</span><span class="o">=</span><span class="n">li</span><span class="p">,</span>
+                <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
                 <span class="n">port_type</span><span class="o">=</span><span class="n">port_type</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="n">_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="n">_additional_info_func</span><span class="p">(</span>
-                <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+                <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
                 <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
-                <span class="n">layer</span><span class="o">=</span><span class="n">li</span><span class="p">,</span>
-                <span class="n">enclosure</span><span class="o">=</span><span class="n">enclosure</span><span class="p">,</span>
                 <span class="n">angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span>
                 <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="n">_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_additional_info</span><span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="o">**</span><span class="n">_info</span><span class="p">)</span>
-        <span class="n">c</span><span class="o">.</span><span class="n">boundary</span> <span class="o">=</span> <span class="n">center_path</span>
+        <span class="n">boundary</span> <span class="o">=</span> <span class="n">boundary_from_shapes</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">boundary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">boundary</span> <span class="o">=</span> <span class="n">boundary</span>
 
         <span class="n">c</span><span class="o">.</span><span class="n">auto_rename_ports</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">c</span>
+
+    <span class="nd">@kcl</span><span class="o">.</span><span class="n">generic_factory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">basename</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bend_euler</span><span class="p">(</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+        <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cross_section</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Provide a cross_section, or width and layer (legacy call).&quot;</span>
+                <span class="p">)</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="n">cross_section_from_width</span><span class="p">(</span><span class="n">kcl</span><span class="p">,</span> <span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span> <span class="n">layer</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_bend_euler</span><span class="p">(</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span>
+        <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">bend_euler</span>
 </code></pre></div></td></tr></table></div>
@@ -6555,7 +6682,7 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Returns a function generating euler s-bends.</p>
+        <p>Returns a function generating euler s-bends (generic interface).</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -6606,7 +6733,7 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
   &lt;span class=&quot;doc doc-labels&quot;&gt;
       &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt;" href="../../settings/#kfactory.settings.Info"><code>KCell.info</code></a>. Can be a static dict
-mapping info name to info value. Or can a callable which takes the straight
+mapping info name to info value. Or can a callable which takes the bend
 functions' parameters as kwargs and returns a dict with the mapping.</p>
               </div>
             </td>
@@ -6636,38 +6763,7 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/euler.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span>
-<span class="normal">429</span>
-<span class="normal">430</span>
-<span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">437</span>
 <span class="normal">438</span>
 <span class="normal">439</span>
 <span class="normal">440</span>
@@ -6760,7 +6856,39 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 <span class="normal">527</span>
 <span class="normal">528</span>
 <span class="normal">529</span>
-<span class="normal">530</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bend_s_euler_factory</span><span class="p">(</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span>
+<span class="normal">557</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bend_s_euler_factory</span><span class="p">(</span>
     <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
     <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
@@ -6772,13 +6900,13 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
     <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;optical&quot;</span><span class="p">,</span>
     <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">CellKWargs</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BendSEulerFactory</span><span class="p">[</span><span class="n">KC</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a function generating euler s-bends.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a function generating euler s-bends (generic interface).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        kcl: The KCLayout which will be owned</span>
 <span class="sd">        additional_info: Add additional key/values to the</span>
 <span class="sd">            [`KCell.info`][kfactory.settings.Info]. Can be a static dict</span>
-<span class="sd">            mapping info name to info value. Or can a callable which takes the straight</span>
+<span class="sd">            mapping info name to info value. Or can a callable which takes the bend</span>
 <span class="sd">            functions&#39; parameters as kwargs and returns a dict with the mapping.</span>
 <span class="sd">        cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -6797,52 +6925,29 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 
         <span class="n">_additional_info_func</span> <span class="o">=</span> <span class="n">additional_info_func</span>
         <span class="n">_additional_info</span> <span class="o">=</span> <span class="n">additional_info</span> <span class="ow">or</span> <span class="p">{}</span>  <span class="c1"># ty:ignore[invalid-assignment]</span>
+    <span class="n">cell_kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;basename&quot;</span><span class="p">,</span> <span class="s2">&quot;bend_s_euler&quot;</span><span class="p">)</span>
+    <span class="n">basename</span> <span class="o">=</span> <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;basename&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">output_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">output_type</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;type[KC]&quot;</span><span class="p">,</span> <span class="n">KCell</span><span class="p">),</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">)</span>
 
     <span class="nd">@cell</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">bend_s_euler</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_bend_s_euler</span><span class="p">(</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span>
         <span class="n">offset</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
         <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
-        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a euler s-bend.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            offset: Offset between left/right. [um]</span>
-<span class="sd">            width: Width of the core. [um]</span>
-<span class="sd">            radius: Radius off the backbone. [um]</span>
-<span class="sd">            layer: Layer index / LayerEnum of the core.</span>
-<span class="sd">            enclosure: Slab/exclude definition. [dbu]</span>
-<span class="sd">            resolution: Angle resolution for the backbone.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Euler s-bend [um] from a cross section.&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Negative widths are not allowed </span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2"> as ports&quot;</span>
-                <span class="s2">&quot; will be inverted. Please use a positive number. Forcing positive&quot;</span>
-                <span class="s2">&quot; lengths.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">width</span> <span class="o">=</span> <span class="o">-</span><span class="n">width</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_base_cross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
         <span class="n">backbone</span> <span class="o">=</span> <span class="n">euler_sbend_points</span><span class="p">(</span>
             <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
             <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
             <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">center_path</span> <span class="o">=</span> <span class="n">extrude_path</span><span class="p">(</span>
-            <span class="n">target</span><span class="o">=</span><span class="n">c</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
-            <span class="n">path</span><span class="o">=</span><span class="n">backbone</span><span class="p">,</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
-            <span class="n">enclosure</span><span class="o">=</span><span class="n">enclosure</span><span class="p">,</span>
-            <span class="n">start_angle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">end_angle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">extrude_path_cross_section</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">backbone</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">start_angle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_angle</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="n">v</span> <span class="o">=</span> <span class="n">backbone</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">backbone</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -6851,30 +6956,27 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">p1</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">backbone</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">p2</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">backbone</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">li</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p1</span><span class="o">.</span><span class="n">to_v</span><span class="p">()),</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="n">port_type</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">li</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p2</span><span class="o">.</span><span class="n">to_v</span><span class="p">()),</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="n">port_type</span><span class="p">,</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">li</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">c</span><span class="o">.</span><span class="n">boundary</span> <span class="o">=</span> <span class="n">center_path</span>
+        <span class="n">boundary</span> <span class="o">=</span> <span class="n">boundary_from_shapes</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">boundary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">boundary</span> <span class="o">=</span> <span class="n">boundary</span>
         <span class="n">_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="n">_additional_info_func</span><span class="p">(</span>
+                <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
                 <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
-                <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
                 <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
-                <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
-                <span class="n">enclosure</span><span class="o">=</span><span class="n">enclosure</span><span class="p">,</span>
                 <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -6883,6 +6985,33 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 
         <span class="n">c</span><span class="o">.</span><span class="n">auto_rename_ports</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">c</span>
+
+    <span class="nd">@kcl</span><span class="o">.</span><span class="n">generic_factory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">basename</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bend_s_euler</span><span class="p">(</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">offset</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+        <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cross_section</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Provide a cross_section, or width and layer (legacy call).&quot;</span>
+                <span class="p">)</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="n">cross_section_from_width</span><span class="p">(</span><span class="n">kcl</span><span class="p">,</span> <span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span> <span class="n">layer</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_bend_s_euler</span><span class="p">(</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span>
+        <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">bend_s_euler</span>
 </code></pre></div></td></tr></table></div>
@@ -6913,34 +7042,7 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/euler.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
@@ -6972,7 +7074,34 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span>
-<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">euler_bend_points</span><span class="p">(</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">euler_bend_points</span><span class="p">(</span>
     <span class="n">angle_amount</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="n">um</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base euler bend, no transformation, emerging from the origin.&quot;&quot;&quot;</span>
@@ -7061,27 +7190,27 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/euler.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">euler_endpoint</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">euler_endpoint</span><span class="p">(</span>
     <span class="n">start_point</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
     <span class="n">radius</span><span class="p">:</span> <span class="n">um</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
     <span class="n">input_angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
@@ -7130,34 +7259,7 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/euler.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">194</span>
 <span class="normal">195</span>
 <span class="normal">196</span>
 <span class="normal">197</span>
@@ -7171,7 +7273,34 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 <span class="normal">205</span>
 <span class="normal">206</span>
 <span class="normal">207</span>
-<span class="normal">208</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">euler_sbend_points</span><span class="p">(</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">euler_sbend_points</span><span class="p">(</span>
     <span class="n">offset</span><span class="p">:</span> <span class="n">um</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="n">um</span> <span class="o">=</span> <span class="mf">10.0e-6</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An Euler s-bend with parallel input and output, separated by an offset.&quot;&quot;&quot;</span>

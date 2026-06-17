@@ -5504,11 +5504,15 @@ dbu  : 0.005 µm  (5 nm grid)
 After registration, the factory is accessible by name via <code>kcl2.factories</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">sf2</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">factories</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight_dbu_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl2</span><span class="p">)</span>
 
-<span class="c1"># Call the factory directly …</span>
-<span class="n">s2</span> <span class="o">=</span> <span class="n">kcl2</span><span class="o">.</span><span class="n">factories</span><span class="p">[</span><span class="s2">&quot;straight&quot;</span><span class="p">](</span><span class="n">length</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
+<span class="c1"># Register a cross section on kcl2, then call the factory by name with it.</span>
+<span class="c1"># (`kcl2.factories[&quot;straight&quot;]` is cross-section-first — pass `cross_section=`.)</span>
+<span class="n">kcl2</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">CrossSectionSpecDict</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">s2</span> <span class="o">=</span> <span class="n">kcl2</span><span class="o">.</span><span class="n">factories</span><span class="p">[</span><span class="s2">&quot;straight&quot;</span><span class="p">](</span><span class="n">length</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">)</span>
 <span class="n">s2</span><span class="o">.</span><span class="n">settings</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>KCellSettings(width=200, length=10000, layer=WG (1/0), enclosure=None)
+<div class="highlight"><pre><span></span><code>KCellSettings(cross_section=&#39;WG&#39;, length=10000)
 </code></pre></div>
 <h2 id="dbu-vs-m-dimensions-across-layouts">DBU vs µm dimensions across layouts</h2>
 <p>The same physical width (1 µm) occupies different numbers of database units
@@ -5628,8 +5632,8 @@ file. <code>KCLayout.read()</code> loads it back.</p>
     <span class="n">kcl3</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gds_path</span><span class="p">,</span> <span class="n">register_cells</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cells read back: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">kcl3</span><span class="o">.</span><span class="n">kcells</span><span class="o">.</span><span class="n">keys</span><span class="p">())[:</span><span class="mi">5</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>written: 1230 bytes
-cells read back: [1, 0, 2]
+<div class="highlight"><pre><span></span><code>written: 1180 bytes
+cells read back: [0, 1, 2]
 </code></pre></div>
 <h2 id="key-attributes-at-a-glance">Key attributes at a glance</h2>
 <table>

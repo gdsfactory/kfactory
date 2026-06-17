@@ -6506,8 +6506,8 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
-        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-        <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
         <span class="o">|</span> <span class="n">CrossSection</span>
         <span class="o">|</span> <span class="n">DCrossSection</span>
         <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -6523,8 +6523,8 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">dcplx_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">,</span>
-        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-        <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
         <span class="o">|</span> <span class="n">CrossSection</span>
         <span class="o">|</span> <span class="n">DCrossSection</span>
         <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -6549,8 +6549,8 @@
         <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">orientation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mirror_x</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-        <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
         <span class="o">|</span> <span class="n">CrossSection</span>
         <span class="o">|</span> <span class="n">DCrossSection</span>
         <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -6583,7 +6583,7 @@
             <span class="k">assert</span> <span class="n">layer_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_dcross_section</span><span class="p">(</span>
-                    <span class="n">DCrossSectionSpec</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;um&quot;</span><span class="p">)</span>
+                    <span class="n">DCrossSectionSpecDict</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;um&quot;</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -6731,8 +6731,8 @@
 </code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_port</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">trans</span><span class="p">:</span> <span class="n">Trans</span><span class="p">,</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">CrossSection</span>
     <span class="o">|</span> <span class="n">DCrossSection</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -6746,8 +6746,8 @@
 </code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_port</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">dcplx_trans</span><span class="p">:</span> <span class="n">DCplxTrans</span><span class="p">,</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">CrossSection</span>
     <span class="o">|</span> <span class="n">DCrossSection</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -6771,8 +6771,8 @@
     <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">orientation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">mirror_x</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">CrossSection</span>
     <span class="o">|</span> <span class="n">DCrossSection</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -6906,8 +6906,8 @@
     <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">orientation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">mirror_x</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">CrossSection</span>
     <span class="o">|</span> <span class="n">DCrossSection</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -6940,7 +6940,7 @@
         <span class="k">assert</span> <span class="n">layer_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_dcross_section</span><span class="p">(</span>
-                <span class="n">DCrossSectionSpec</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;um&quot;</span><span class="p">)</span>
+                <span class="n">DCrossSectionSpecDict</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;um&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -8097,8 +8097,8 @@ equivalent) to <code>False</code>.</p>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
-        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-        <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
         <span class="o">|</span> <span class="n">CrossSection</span>
         <span class="o">|</span> <span class="n">DCrossSection</span>
         <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -8177,8 +8177,8 @@ equivalent) to <code>False</code>.</p>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
         <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
-        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-        <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
         <span class="o">|</span> <span class="n">CrossSection</span>
         <span class="o">|</span> <span class="n">DCrossSection</span>
         <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -8194,8 +8194,8 @@ equivalent) to <code>False</code>.</p>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">dcplx_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">,</span>
-        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-        <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
         <span class="o">|</span> <span class="n">CrossSection</span>
         <span class="o">|</span> <span class="n">DCrossSection</span>
         <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -8219,8 +8219,8 @@ equivalent) to <code>False</code>.</p>
         <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">angle</span><span class="p">:</span> <span class="n">Angle</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mirror_x</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-        <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
         <span class="o">|</span> <span class="n">CrossSection</span>
         <span class="o">|</span> <span class="n">DCrossSection</span>
         <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -8253,7 +8253,7 @@ equivalent) to <code>False</code>.</p>
             <span class="k">assert</span> <span class="n">layer_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span>
-                    <span class="n">CrossSectionSpec</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">)</span>
+                    <span class="n">CrossSectionSpecDict</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -8345,8 +8345,8 @@ equivalent) to <code>False</code>.</p>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">trans</span><span class="p">:</span> <span class="n">Trans</span><span class="p">,</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">CrossSection</span>
     <span class="o">|</span> <span class="n">DCrossSection</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -8407,8 +8407,8 @@ equivalent) to <code>False</code>.</p>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">layer_info</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
     <span class="n">trans</span><span class="p">:</span> <span class="n">Trans</span><span class="p">,</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">CrossSection</span>
     <span class="o">|</span> <span class="n">DCrossSection</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -8422,8 +8422,8 @@ equivalent) to <code>False</code>.</p>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">dcplx_trans</span><span class="p">:</span> <span class="n">DCplxTrans</span><span class="p">,</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">CrossSection</span>
     <span class="o">|</span> <span class="n">DCrossSection</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -8446,8 +8446,8 @@ equivalent) to <code>False</code>.</p>
     <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">angle</span><span class="p">:</span> <span class="n">Angle</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">mirror_x</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">CrossSection</span>
     <span class="o">|</span> <span class="n">DCrossSection</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -8580,8 +8580,8 @@ equivalent) to <code>False</code>.</p>
     <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">angle</span><span class="p">:</span> <span class="n">Angle</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">mirror_x</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpec</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpec</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
     <span class="o">|</span> <span class="n">CrossSection</span>
     <span class="o">|</span> <span class="n">DCrossSection</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -8614,7 +8614,7 @@ equivalent) to <code>False</code>.</p>
         <span class="k">assert</span> <span class="n">layer_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span>
-                <span class="n">CrossSectionSpec</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">)</span>
+                <span class="n">CrossSectionSpecDict</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>

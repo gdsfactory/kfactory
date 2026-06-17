@@ -3438,6 +3438,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#kfactory.factories.utils.boundary_from_shapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        boundary_from_shapes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kfactory.factories.utils.cross_section_from_width" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        cross_section_from_width
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kfactory.factories.utils.extrude_backbone" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -3453,6 +3475,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         extrude_backbone_dynamic
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kfactory.factories.utils.layer_enclosure_to_sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        layer_enclosure_to_sections
       </span>
     </span>
   </a>
@@ -5258,6 +5291,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#kfactory.factories.utils.boundary_from_shapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        boundary_from_shapes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kfactory.factories.utils.cross_section_from_width" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        cross_section_from_width
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kfactory.factories.utils.extrude_backbone" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -5273,6 +5328,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         extrude_backbone_dynamic
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kfactory.factories.utils.layer_enclosure_to_sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        layer_enclosure_to_sections
       </span>
     </span>
   </a>
@@ -5319,7 +5385,7 @@
 
     <div class="doc doc-contents first">
 
-        <p>Utility functions for virtual cells.</p>
+        <p>Utility functions for cell factories.</p>
 
 
 
@@ -5340,6 +5406,120 @@
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="kfactory.factories.utils.boundary_from_shapes" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">boundary_from_shapes</span>
+
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">boundary_from_shapes</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span> <span class="o">|</span> <span class="kc">None</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Build a cell boundary from its drawn shapes.</p>
+<p>Collects every shape on every layer, merges them, and returns the first polygon
+(in um) of the merged region — i.e. the outline of the cell's footprint. Returns
+<code>None</code> if the cell has no shapes.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>kfactory/factories/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">boundary_from_shapes</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a cell boundary from its drawn shapes.</span>
+
+<span class="sd">    Collects every shape on every layer, merges them, and returns the first polygon</span>
+<span class="sd">    (in um) of the merged region — i.e. the outline of the cell&#39;s footprint. Returns</span>
+<span class="sd">    `None` if the cell has no shapes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">layer_index</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer_indexes</span><span class="p">():</span>
+        <span class="n">region</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index</span><span class="p">))</span>
+    <span class="n">region</span><span class="o">.</span><span class="n">merge</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">region</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">region</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="kfactory.factories.utils.cross_section_from_width" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">cross_section_from_width</span>
+
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">cross_section_from_width</span><span class="p">(</span>
+    <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
+    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrossSection</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Build a (dbu) symmetric cross section from legacy width/layer/enclosure args.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>kfactory/factories/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cross_section_from_width</span><span class="p">(</span>
+    <span class="n">kcl</span><span class="p">:</span> <span class="s2">&quot;KCLayout&quot;</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
+    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrossSection</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a (dbu) symmetric cross section from legacy width/layer/enclosure args.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span>
+        <span class="n">CrossSectionSpecDict</span><span class="p">(</span>
+            <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
+            <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span>
+            <span class="n">sections</span><span class="o">=</span><span class="n">layer_enclosure_to_sections</span><span class="p">(</span><span class="n">enclosure</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">symmetrical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 
@@ -5516,64 +5696,64 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extrude_backbone</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extrude_backbone</span><span class="p">(</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span>
     <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span>
     <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -5829,73 +6009,73 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
 <span class="normal">140</span>
 <span class="normal">141</span>
 <span class="normal">142</span>
 <span class="normal">143</span>
 <span class="normal">144</span>
-<span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extrude_backbone_dynamic</span><span class="p">(</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extrude_backbone_dynamic</span><span class="p">(</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span>
     <span class="n">backbone</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span>
     <span class="n">width1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -5962,6 +6142,62 @@
                     <span class="p">)</span>
                     <span class="n">outer_r</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
                     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">_li</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span><span class="p">(</span><span class="n">outer_l</span> <span class="o">+</span> <span class="n">outer_r</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="kfactory.factories.utils.layer_enclosure_to_sections" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">layer_enclosure_to_sections</span>
+
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">layer_enclosure_to_sections</span><span class="p">(</span>
+    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span>
+    <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+    <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Flatten a <code>LayerEnclosure</code> into <code>CrossSectionSpec</code> <code>sections</code> (dbu).</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>kfactory/factories/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">layer_enclosure_to_sections</span><span class="p">(</span>
+    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flatten a `LayerEnclosure` into `CrossSectionSpec` ``sections`` (dbu).&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">enclosure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">sections</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">layer</span><span class="p">,</span> <span class="n">layer_section</span> <span class="ow">in</span> <span class="n">enclosure</span><span class="o">.</span><span class="n">layer_sections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">layer_section</span><span class="o">.</span><span class="n">sections</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">d_min</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sections</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">layer</span><span class="p">,</span> <span class="n">section</span><span class="o">.</span><span class="n">d_max</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sections</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">layer</span><span class="p">,</span> <span class="n">section</span><span class="o">.</span><span class="n">d_min</span><span class="p">,</span> <span class="n">section</span><span class="o">.</span><span class="n">d_max</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">sections</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

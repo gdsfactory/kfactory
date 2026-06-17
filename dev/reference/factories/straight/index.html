@@ -5365,13 +5365,7 @@
 │         Slab/Exclude         │
 └──────────────────────────────┘
 </code></pre>
-<p>The slabs and excludes can be given in the form of an
-<a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;LayerEnclosure&lt;/span&gt;
-
-
-  &lt;span class=&quot;doc doc-labels&quot;&gt;
-      &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
-  &lt;/span&gt;" href="../../enclosure/#kfactory.enclosure.LayerEnclosure">Enclosure</a>.</p>
+<p>The slabs and excludes are part of the cross section the waveguide is built from.</p>
 
 
 
@@ -5418,13 +5412,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/factories/straight.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">42</span>
 <span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
@@ -5445,32 +5433,42 @@
 <span class="normal">60</span>
 <span class="normal">61</span>
 <span class="normal">62</span>
-<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">StraightFactory</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">KC_co</span><span class="p">]):</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">StraightFactory</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">KC_co</span><span class="p">]):</span>
     <span class="vm">__name__</span><span class="p">:</span> <span class="nb">str</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
         <span class="n">length</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Waveguide defined in dbu.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Waveguide defined by a cross section, length in dbu.</span>
 
-<span class="sd">            ┌──────────────────────────────┐</span>
-<span class="sd">            │         Slab/Exclude         │</span>
-<span class="sd">            ├──────────────────────────────┤</span>
-<span class="sd">            │                              │</span>
-<span class="sd">            │             Core             │</span>
-<span class="sd">            │                              │</span>
-<span class="sd">            ├──────────────────────────────┤</span>
-<span class="sd">            │         Slab/Exclude         │</span>
-<span class="sd">            └──────────────────────────────┘</span>
+<span class="sd">        Either pass a ``cross_section`` (name, spec, or instance) or the legacy</span>
+<span class="sd">        ``width``/``layer``/``enclosure`` (all dbu) which is normalized into a</span>
+<span class="sd">        cross section.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            width: Waveguide width. [dbu]</span>
 <span class="sd">            length: Waveguide length. [dbu]</span>
-<span class="sd">            layer: Main layer of the waveguide.</span>
-<span class="sd">            enclosure: Definition of slab/excludes. [dbu]</span>
+<span class="sd">            cross_section: Cross section of the waveguide.</span>
+<span class="sd">            width: Waveguide width. [dbu] (legacy; requires ``layer``)</span>
+<span class="sd">            layer: Main layer of the waveguide. (legacy)</span>
+<span class="sd">            enclosure: Definition of slab/excludes. [dbu] (legacy)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -5498,42 +5496,140 @@
 
 </h4>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">length</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Waveguide defined in dbu.</p>
-<pre><code>┌──────────────────────────────┐
-│         Slab/Exclude         │
-├──────────────────────────────┤
-│                              │
-│             Core             │
-│                              │
-├──────────────────────────────┤
-│         Slab/Exclude         │
-└──────────────────────────────┘
-</code></pre>
-<p>Args:
-    width: Waveguide width. [dbu]
-    length: Waveguide length. [dbu]
-    layer: Main layer of the waveguide.
-    enclosure: Definition of slab/excludes. [dbu]</p>
+        <p>Waveguide defined by a cross section, length in dbu.</p>
+<p>Either pass a <code>cross_section</code> (name, spec, or instance) or the legacy
+<code>width</code>/<code>layer</code>/<code>enclosure</code> (all dbu) which is normalized into a
+cross section.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>length</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;dbu&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../typings/#kfactory.typings.dbu">dbu</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Waveguide length. [dbu]</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cross_section</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="kfactory.cross_section.AnyCrossSectionInput">AnyCrossSectionInput</span> | <span title="kfactory.cross_section.CrossSectionSpecDict">CrossSectionSpecDict</span> | <span title="kfactory.cross_section.DCrossSectionSpecDict">DCrossSectionSpecDict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cross section of the waveguide.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>width</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;dbu&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../typings/#kfactory.typings.dbu">dbu</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Waveguide width. [dbu] (legacy; requires <code>layer</code>)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>layer</code>
+            </td>
+            <td>
+                  <code><span title="kfactory.kdb.LayerInfo">LayerInfo</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Main layer of the waveguide. (legacy)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>enclosure</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;LayerEnclosure&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../enclosure/#kfactory.enclosure.LayerEnclosure">LayerEnclosure</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Definition of slab/excludes. [dbu] (legacy)</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/straight.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
 <span class="normal">46</span>
 <span class="normal">47</span>
 <span class="normal">48</span>
@@ -5551,29 +5647,39 @@
 <span class="normal">60</span>
 <span class="normal">61</span>
 <span class="normal">62</span>
-<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
     <span class="n">length</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Waveguide defined in dbu.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Waveguide defined by a cross section, length in dbu.</span>
 
-<span class="sd">        ┌──────────────────────────────┐</span>
-<span class="sd">        │         Slab/Exclude         │</span>
-<span class="sd">        ├──────────────────────────────┤</span>
-<span class="sd">        │                              │</span>
-<span class="sd">        │             Core             │</span>
-<span class="sd">        │                              │</span>
-<span class="sd">        ├──────────────────────────────┤</span>
-<span class="sd">        │         Slab/Exclude         │</span>
-<span class="sd">        └──────────────────────────────┘</span>
+<span class="sd">    Either pass a ``cross_section`` (name, spec, or instance) or the legacy</span>
+<span class="sd">    ``width``/``layer``/``enclosure`` (all dbu) which is normalized into a</span>
+<span class="sd">    cross section.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        width: Waveguide width. [dbu]</span>
 <span class="sd">        length: Waveguide length. [dbu]</span>
-<span class="sd">        layer: Main layer of the waveguide.</span>
-<span class="sd">        enclosure: Definition of slab/excludes. [dbu]</span>
+<span class="sd">        cross_section: Cross section of the waveguide.</span>
+<span class="sd">        width: Waveguide width. [dbu] (legacy; requires ``layer``)</span>
+<span class="sd">        layer: Main layer of the waveguide. (legacy)</span>
+<span class="sd">        enclosure: Definition of slab/excludes. [dbu] (legacy)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
@@ -5633,39 +5739,91 @@
 
     <div class="doc doc-contents ">
 
-        <p>Returns a function generating straights [dbu].</p>
-<pre><code>┌──────────────────────────────┐
-│         Slab/Exclude         │
-├──────────────────────────────┤
-│                              │
-│             Core             │
-│                              │
-├──────────────────────────────┤
-│         Slab/Exclude         │
-└──────────────────────────────┘
-</code></pre>
-<p>Args:
-    kcl: The KCLayout which will be owned
-    additional_info: Add additional key/values to the
-        <a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;Info&lt;/span&gt;
+        <p>Returns a function generating straights [dbu length].</p>
+<p>The returned function is the generic interface: it accepts either a
+<code>cross_section</code> or the legacy <code>width</code>/<code>layer</code>/<code>enclosure</code> (all dbu),
+normalized into a symmetric cross section.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>kcl</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;KCLayout&lt;/span&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt;" href="../../layout/#kfactory.layout.KCLayout">KCLayout</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The KCLayout which will be owned</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>additional_info</code>
+            </td>
+            <td>
+                  <code><span title="collections.abc.Callable">Callable</span>[..., <span title="dict">dict</span>[<span title="str">str</span>, <span title="kfactory.typings.MetaData">MetaData</span>]] | <span title="dict">dict</span>[<span title="str">str</span>, <span title="kfactory.typings.MetaData">MetaData</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Add additional key/values to the
+<a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;Info&lt;/span&gt;
 
 
   &lt;span class=&quot;doc doc-labels&quot;&gt;
       &lt;small class=&quot;doc doc-label doc-label-pydantic-model&quot;&gt;&lt;code&gt;pydantic-model&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt;" href="../../settings/#kfactory.settings.Info"><code>KCell.info</code></a>. Can be a static dict
-        mapping info name to info value. Or can a callable which takes the straight
-        functions' parameters as kwargs and returns a dict with the mapping.
-    cell_kwargs: Additional arguments passed as <code>@kcl.cell(**cell_kwargs)</code>.</p>
+mapping info name to info value. Or can a callable which takes the straight
+functions' parameters as kwargs and returns a dict with the mapping.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cell_kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Unpack">Unpack</span>[<span title="kfactory.layout.CellKWargs">CellKWargs</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additional arguments passed as <code>@kcl.cell(**cell_kwargs)</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/factories/straight.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
 <span class="normal">106</span>
@@ -5793,14 +5951,7 @@
 <span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">straight_dbu_factory</span><span class="p">(</span>
+<span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">straight_dbu_factory</span><span class="p">(</span>
     <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
     <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
         <span class="o">...</span><span class="p">,</span>
@@ -5812,17 +5963,12 @@
     <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;optical&quot;</span><span class="p">,</span>
     <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">CellKWargs</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StraightFactory</span><span class="p">[</span><span class="n">KC</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a function generating straights [dbu].</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a function generating straights [dbu length].</span>
 
-<span class="sd">        ┌──────────────────────────────┐</span>
-<span class="sd">        │         Slab/Exclude         │</span>
-<span class="sd">        ├──────────────────────────────┤</span>
-<span class="sd">        │                              │</span>
-<span class="sd">        │             Core             │</span>
-<span class="sd">        │                              │</span>
-<span class="sd">        ├──────────────────────────────┤</span>
-<span class="sd">        │         Slab/Exclude         │</span>
-<span class="sd">        └──────────────────────────────┘</span>
+<span class="sd">    The returned function is the generic interface: it accepts either a</span>
+<span class="sd">    ``cross_section`` or the legacy ``width``/``layer``/``enclosure`` (all dbu),</span>
+<span class="sd">    normalized into a symmetric cross section.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        kcl: The KCLayout which will be owned</span>
 <span class="sd">        additional_info: Add additional key/values to the</span>
@@ -5853,6 +5999,8 @@
             <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;ports&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">]}</span>
         <span class="k">elif</span> <span class="n">kcl</span><span class="o">.</span><span class="n">rename_function</span> <span class="o">==</span> <span class="n">rename_by_direction</span><span class="p">:</span>
             <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;ports&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;W0&quot;</span><span class="p">],</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;E0&quot;</span><span class="p">]}</span>
+    <span class="n">cell_kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;basename&quot;</span><span class="p">,</span> <span class="s2">&quot;straight&quot;</span><span class="p">)</span>
+    <span class="n">basename</span> <span class="o">=</span> <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;basename&quot;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">output_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">output_type</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">)</span>
@@ -5860,29 +6008,11 @@
         <span class="n">cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;type[KC]&quot;</span><span class="p">,</span> <span class="n">KCell</span><span class="p">),</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">)</span>
 
     <span class="nd">@cell</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">straight</span><span class="p">(</span>
-        <span class="n">width</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_straight</span><span class="p">(</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span>
         <span class="n">length</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
-        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
-        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Waveguide defined in dbu.</span>
-
-<span class="sd">            ┌──────────────────────────────┐</span>
-<span class="sd">            │         Slab/Exclude         │</span>
-<span class="sd">            ├──────────────────────────────┤</span>
-<span class="sd">            │                              │</span>
-<span class="sd">            │             Core             │</span>
-<span class="sd">            │                              │</span>
-<span class="sd">            ├──────────────────────────────┤</span>
-<span class="sd">            │         Slab/Exclude         │</span>
-<span class="sd">            └──────────────────────────────┘</span>
-<span class="sd">        Args:</span>
-<span class="sd">            width: Waveguide width. [dbu]</span>
-<span class="sd">            length: Waveguide length. [dbu]</span>
-<span class="sd">            layer: Main layer of the waveguide.</span>
-<span class="sd">            enclosure: Definition of slab/excludes. [dbu]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Waveguide defined by a cross section.&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -5892,53 +6022,62 @@
                 <span class="s2">&quot; lengths.&quot;</span>
             <span class="p">)</span>
             <span class="n">length</span> <span class="o">=</span> <span class="o">-</span><span class="n">length</span>
-        <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Negative widths are not allowed </span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2"> as ports&quot;</span>
-                <span class="s2">&quot; will be inverted. Please use a positive number. Forcing positive&quot;</span>
-                <span class="s2">&quot; lengths.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">width</span> <span class="o">=</span> <span class="o">-</span><span class="n">width</span>
 
-        <span class="k">if</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">!=</span> <span class="n">width</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The width (w) must be a multiple of 2 database units&quot;</span><span class="p">)</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_base_cross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
 
-        <span class="n">li</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
-        <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">li</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">extrude_path_cross_section</span><span class="p">(</span>
+            <span class="n">c</span><span class="p">,</span> <span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">(</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">length</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)],</span> <span class="n">xs</span>
+        <span class="p">)</span>
+
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">li</span><span class="p">,</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="n">port_type</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-            <span class="n">layer</span><span class="o">=</span><span class="n">li</span><span class="p">,</span>
-            <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+            <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="n">port_type</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">enclosure</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">enclosure</span><span class="o">.</span><span class="n">apply_minkowski_y</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
         <span class="n">_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;width_um&quot;</span><span class="p">:</span> <span class="n">width</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">,</span>
-            <span class="s2">&quot;length_um&quot;</span><span class="p">:</span> <span class="n">length</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">,</span>
-            <span class="s2">&quot;width_dbu&quot;</span><span class="p">:</span> <span class="n">width</span><span class="p">,</span>
+            <span class="s2">&quot;width_um&quot;</span><span class="p">:</span> <span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
+            <span class="s2">&quot;length_um&quot;</span><span class="p">:</span> <span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">length</span><span class="p">),</span>
+            <span class="s2">&quot;width_dbu&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
             <span class="s2">&quot;length_dbu&quot;</span><span class="p">:</span> <span class="n">length</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="n">_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="n">_additional_info_func</span><span class="p">(</span>
-                <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">enclosure</span><span class="o">=</span><span class="n">enclosure</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_additional_info_func</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">))</span>
         <span class="n">_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_additional_info</span><span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="o">**</span><span class="n">_info</span><span class="p">)</span>
 
         <span class="n">c</span><span class="o">.</span><span class="n">boundary</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">dbbox</span><span class="p">())</span>
         <span class="n">c</span><span class="o">.</span><span class="n">auto_rename_ports</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">c</span>
+
+    <span class="nd">@kcl</span><span class="o">.</span><span class="n">generic_factory</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">basename</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">straight</span><span class="p">(</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">length</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
+        <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cross_section</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Provide a cross_section, or width and layer (legacy call).&quot;</span>
+                <span class="p">)</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="n">cross_section_from_width</span><span class="p">(</span><span class="n">kcl</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">straight</span>
 </code></pre></div></td></tr></table></div>

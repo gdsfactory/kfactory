@@ -9226,7 +9226,7 @@ contain layer number and datatype</p>
                     <span class="s2">&quot;Ports must have a grid width of multiples of 2.&quot;</span>
                 <span class="p">)</span>
             <span class="n">sym_xs</span> <span class="o">=</span> <span class="n">kcl_</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
-                <span class="n">CrossSectionSpec</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">kcl_</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">))</span>
+                <span class="n">CrossSectionSpecDict</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">kcl_</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">))</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="n">SymmetricalCrossSection</span><span class="p">):</span>
             <span class="n">sym_xs</span> <span class="o">=</span> <span class="n">cross_section</span>
@@ -9952,7 +9952,7 @@ transformation (set simple to <code>None</code> and the complex to the provided 
                 <span class="s2">&quot;Ports must have a grid width of multiples of 2.&quot;</span>
             <span class="p">)</span>
         <span class="n">sym_xs</span> <span class="o">=</span> <span class="n">kcl_</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
-            <span class="n">CrossSectionSpec</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">kcl_</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">))</span>
+            <span class="n">CrossSectionSpecDict</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">kcl_</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">))</span>
         <span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="n">SymmetricalCrossSection</span><span class="p">):</span>
         <span class="n">sym_xs</span> <span class="o">=</span> <span class="n">cross_section</span>
@@ -11080,7 +11080,7 @@ contain layer number and datatype</p>
                     <span class="s2">&quot; &#39;port is None&#39;&quot;</span>
                 <span class="p">)</span>
             <span class="n">sym_xs</span> <span class="o">=</span> <span class="n">kcl_</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
-                <span class="n">CrossSectionSpec</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">)</span>
+                <span class="n">CrossSectionSpecDict</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="n">SymmetricalCrossSection</span><span class="p">):</span>
             <span class="n">sym_xs</span> <span class="o">=</span> <span class="n">cross_section</span>
@@ -11740,7 +11740,7 @@ transformation (set simple to <code>None</code> and the complex to the provided 
                 <span class="s2">&quot; &#39;port is None&#39;&quot;</span>
             <span class="p">)</span>
         <span class="n">sym_xs</span> <span class="o">=</span> <span class="n">kcl_</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
-            <span class="n">CrossSectionSpec</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">)</span>
+            <span class="n">CrossSectionSpecDict</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">layer_info</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="n">SymmetricalCrossSection</span><span class="p">):</span>
         <span class="n">sym_xs</span> <span class="o">=</span> <span class="n">cross_section</span>
