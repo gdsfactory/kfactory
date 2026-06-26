@@ -528,125 +528,59 @@ class TKCell(BaseKCell):
             and not self.kcl.layout.cell(value).is_library_cell()
             and not self.is_library_cell()
         ):
-            stack = inspect.stack()
-            module = inspect.getmodule(stack[3].frame)
             tkcells = [
                 self.kcl.tkcells[cell.cell_index()]
                 for cell in self.kcl.layout.cells(value)
                 if not cell.is_library_cell()
             ]
 
+            conflicting = "\n".join(
+                f"  - {tkcell.name!r} (cell_index={tkcell.kdb_cell.cell_index()},"
+                f" function_name={tkcell.function_name!r},"
+                f" basename={tkcell.basename!r})"
+                for tkcell in tkcells
+            )
+
+            stack = inspect.stack()
+            module = inspect.getmodule(stack[3].frame)
+
             if module is not None and module.__name__ == "kfactory.layout":
-                frame_info = stack[5]
-                logger.opt(depth=2).error(
-                    "Name conflict in "
-                    f"{frame_info.frame.f_locals['f'].__code__.co_filename}::"
-                    f"{frame_info.frame.f_locals['f'].__name__} at line "
-                    f"{frame_info.frame.f_locals['f'].__code__.co_firstlineno}\n"
-                    f"Renaming {self.name} (cell_index={self.kdb_cell.cell_index()}) to"
-                    f" {value} would cause it to be named the same as:\n"
-                    + "\n".join(
-                        f" - {tkcell.name} (cell_index={tkcell.kdb_cell.cell_index()}),"
-                        f" function_name={tkcell.function_name},"
-                        f" basename={tkcell.basename}"
-                        for tkcell in tkcells
+                fi = stack[5]
+                f_obj = fi.frame.f_locals.get("f")
+                if f_obj is not None:
+                    location = (
+                        f"{f_obj.__code__.co_filename}::{f_obj.__name__}"
+                        f" at line {f_obj.__code__.co_firstlineno}"
                     )
-                )
-                if config.debug_names:
-                    raise ValueError(
-                        "Name conflict in "
-                        f"{frame_info.frame.f_locals['f'].__code__.co_filename}::"
-                        f"{frame_info.frame.f_locals['f'].__name__} at line "
-                        f"{frame_info.frame.f_locals['f'].__code__.co_firstlineno}\n"
-                        f"Renaming {self.name} (cell_index={self.kdb_cell.cell_index()}"
-                        f") to {value} would cause it to be named the same as:\n"
-                        + "\n".join(
-                            f" - {tkcell.name} "
-                            f"(cell_index={tkcell.kdb_cell.cell_index()}),"
-                            f" function_name={tkcell.function_name},"
-                            f" basename={tkcell.basename}"
-                            for tkcell in tkcells
-                        )
-                    )
-            else:
-                frame_info = stack[3]
-                if module is not None:
-                    module_name = module.__name__
-                    if module_name == "__main__":
-                        module_name = frame_info.filename
-                    function_name = (
-                        "::" + frame_info.function
-                        if frame_info.function != "<module>"
-                        else ""
-                    )
-                    logger.opt(depth=3).error(
-                        "Name conflict in "
-                        f"{module_name}{function_name} at line "
-                        f"{frame_info.lineno}\n"
-                        f"Renaming {self.name} (cell_index="
-                        f"{self.kdb_cell.cell_index()}) to"
-                        f" {value} would cause it to be named the same as:\n"
-                        + "\n".join(
-                            f" - {tkcell.name} "
-                            f"(cell_index={tkcell.kdb_cell.cell_index()}),"
-                            f" function_name={tkcell.function_name},"
-                            f" basename={tkcell.basename}"
-                            for tkcell in tkcells
-                        )
-                    )
-                    if config.debug_names:
-                        raise ValueError(
-                            "Name conflict in "
-                            f"{module_name}{function_name} at line "
-                            f"{frame_info.lineno}\n"
-                            f"Renaming {self.name} (cell_index="
-                            f"{self.kdb_cell.cell_index()}) to"
-                            f" {value} would cause it to be named the same as:\n"
-                            + "\n".join(
-                                f" - {tkcell.name} "
-                                f"(cell_index={tkcell.kdb_cell.cell_index()}),"
-                                f" function_name={tkcell.function_name},"
-                                f" basename={tkcell.basename}"
-                                for tkcell in tkcells
-                            )
-                        )
                 else:
-                    function_name = (
-                        "::" + frame_info.function
-                        if frame_info.function != "<module>"
-                        else ""
-                    )
-                    logger.opt(depth=3).error(
-                        "Name conflict in "
-                        f"{frame_info.filename}"
-                        f"{function_name} at line {frame_info.lineno}\n"
-                        f"Renaming {self.name} (cell_index="
-                        f"{self.kdb_cell.cell_index()}) to"
-                        f" {value} would cause it to be named the same as:\n"
-                        + "\n".join(
-                            f" - {tkcell.name} "
-                            f"(cell_index={tkcell.kdb_cell.cell_index()}),"
-                            f" function_name={tkcell.function_name},"
-                            f" basename={tkcell.basename}"
-                            for tkcell in tkcells
-                        )
-                    )
-                    if config.debug_names:
-                        raise ValueError(
-                            "Name conflict in "
-                            f"{frame_info.filename}"
-                            f"{function_name} at line {frame_info.lineno}\n"
-                            f"Renaming {self.name} (cell_index="
-                            f"{self.kdb_cell.cell_index()}) to"
-                            f" {value} would cause it to be named the same as:\n"
-                            + "\n".join(
-                                f" - {tkcell.name} "
-                                f"(cell_index={tkcell.kdb_cell.cell_index()}),"
-                                f" function_name={tkcell.function_name},"
-                                f" basename={tkcell.basename}"
-                                for tkcell in tkcells
-                            )
-                        )
+                    location = f"{fi.filename}::{fi.function} at line {fi.lineno}"
+                log_depth = 2
+            else:
+                fi = stack[3]
+                if module is not None:
+                    mod_name = module.__name__
+                    if mod_name == "__main__":
+                        mod_name = fi.filename
+                else:
+                    mod_name = fi.filename
+                func_suffix = f"::{fi.function}" if fi.function != "<module>" else ""
+                location = f"{mod_name}{func_suffix} at line {fi.lineno}"
+                log_depth = 3
+
+            msg = (
+                f"Cell name conflict in {location}\n"
+                f"Renaming {self.name!r}"
+                f" (cell_index={self.kdb_cell.cell_index()}) to {value!r}"
+                f" would create a duplicate — the following cell(s) already"
+                f" have that name:\n{conflicting}\n"
+                f"This will make the layout unwritable (GDS/OASIS require"
+                f" unique cell names).\n"
+                f"Set `kf.config.debug_names = True` to turn this warning"
+                f" into an error and catch the conflict at its source."
+            )
+            logger.opt(depth=log_depth).error(msg)
+            if config.debug_names:
+                raise DuplicateCellNameError(msg)
 
         self.kdb_cell.name = value
 
