@@ -71,7 +71,7 @@ optional-dependencies.docs = [
   "mkdocs-literate-nav>=0.6.3,<0.7",
   "mkdocs-video>=1.5,<1.6",
   "mkdocstrings[python]>=1.0.4,<1.1",
-  "pymdown-extensions>=10.21.3,<10.22",
+  "pymdown-extensions>=10.21.3,<11.1",
   "ruff>=0.15.16,<0.16",
   "zensical>=0.0.44,<0.1",
 ]
