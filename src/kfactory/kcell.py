@@ -145,8 +145,14 @@ __all__ = [
 ]
 
 
-def _check_duplicate_cell_names(layout: kdb.Layout, cell_indices: set[int]) -> None:
-    """Raise `DuplicateCellNameError` if any cells in `cell_indices` share a name."""
+def _deduplicate_cell_names(layout: kdb.Layout, cell_indices: set[int]) -> None:
+    """Auto-rename cells with duplicate names so the layout can be written.
+
+    GDS/OASIS require unique cell names. When duplicates are found among
+    `cell_indices`, the first cell keeps its name and subsequent ones get
+    a ``$1``, ``$2``, … suffix (matching KLayout's own convention).
+    A warning is logged for each renamed cell.
+    """
     from collections import defaultdict
 
     name_to_indices: dict[str, list[int]] = defaultdict(list)
@@ -161,34 +167,27 @@ def _check_duplicate_cell_names(layout: kdb.Layout, cell_indices: set[int]) -> N
     if not duplicates:
         return
 
-    lines = [
-        "Cannot write layout: multiple cells share the same name.",
-        "GDS/OASIS requires every cell name to be unique.",
-        "",
-    ]
-    for name, indices in sorted(duplicates.items()):
-        lines.append(f"  {name!r} is used by {len(indices)} cells:")
-        for ci in indices:
+    for name, indices in duplicates.items():
+        # Keep the first cell, rename the rest
+        for ci in indices[1:]:
             c = layout.cell(ci)
-            if c is None:
+            if c is None or c._destroyed():
                 continue
-            parent_count = len(list(c.each_parent_cell()))
-            lines.append(
-                f"    - cell_index={ci}, {parent_count} parent(s),"
-                f" hierarchy_levels={c.hierarchy_levels()}"
+            unique = layout.unique_cell_name(name)
+            was_locked = c.is_locked()
+            if was_locked:
+                c.locked = False
+            c.name = unique
+            if was_locked:
+                c.locked = True
+            logger.warning(
+                "Renamed duplicate cell {old!r} (cell_index={ci}) to {new!r}"
+                " before writing. Set `kf.config.debug_names = True` to catch"
+                " name conflicts earlier.",
+                old=name,
+                ci=ci,
+                new=unique,
             )
-        lines.append("")
-
-    lines.append(
-        "This usually happens when a cell function creates or returns a cell"
-        " whose name collides with another cell already in the layout."
-    )
-    lines.append(
-        "To catch conflicts earlier, set `kf.config.debug_names = True`"
-        " — this raises an error at the point where the duplicate name is assigned."
-    )
-
-    raise DuplicateCellNameError("\n".join(lines))
 
 
 class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
@@ -1304,7 +1303,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 ...
 
         relevant_cells = {self.cell_index(), *self.called_cells()}
-        _check_duplicate_cell_names(self.layout(), relevant_cells)
+        _deduplicate_cell_names(self.layout(), relevant_cells)
 
         filename = str(filename)
         if autoformat_from_file_extension:
@@ -1351,7 +1350,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 ...
 
         relevant_cells = {self.cell_index(), *self.called_cells()}
-        _check_duplicate_cell_names(self.layout(), relevant_cells)
+        _deduplicate_cell_names(self.layout(), relevant_cells)
 
         save_options.format = save_options.format or "OASIS"
         save_options.clear_cells()

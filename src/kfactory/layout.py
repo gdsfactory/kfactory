@@ -68,7 +68,7 @@ from .enclosure import (
     LayerEnclosureModel,
     LayerEnclosureSpec,
 )
-from .exceptions import DuplicateCellNameError, FactoriesLockedError, MergeError
+from .exceptions import FactoriesLockedError, MergeError
 from .kcell import (
     AnyTKCell,
     BaseKCell,
@@ -2234,15 +2234,20 @@ class KCLayout(
                     if kcell.is_library_cell() and not kcell.destroyed():
                         kcell.convert_to_static(recursive=True)
 
-        self._check_duplicate_cell_names()
+        self._deduplicate_cell_names()
 
         if autoformat_from_file_extension:
             options.set_format_from_filename(filename)
 
         return self.layout.write(filename, options)
 
-    def _check_duplicate_cell_names(self) -> None:
-        """Raise `DuplicateCellNameError` if any cells in the layout share a name."""
+    def _deduplicate_cell_names(self) -> None:
+        """Auto-rename cells with duplicate names so the layout can be written.
+
+        GDS/OASIS require unique cell names. The first cell keeps its name;
+        subsequent duplicates get ``$1``, ``$2``, … suffixes. A warning is
+        logged for each rename.
+        """
         from collections import defaultdict
 
         name_to_cells: dict[str, list[kdb.Cell]] = defaultdict(list)
@@ -2256,35 +2261,29 @@ class KCLayout(
         if not duplicates:
             return
 
-        lines = [
-            "Cannot write layout: multiple cells share the same name.",
-            "GDS/OASIS requires every cell name to be unique.",
-            "",
-        ]
-        for name, cells in sorted(duplicates.items()):
-            lines.append(f"  {name!r} is used by {len(cells)} cells:")
-            for c in cells:
+        for name, cells in duplicates.items():
+            for c in cells[1:]:
+                if c._destroyed():
+                    continue
+                unique = self.layout.unique_cell_name(name)
                 tkcell = self.tkcells.get(c.cell_index())
                 fn = tkcell.function_name if tkcell else None
-                bn = tkcell.basename if tkcell else None
-                parent_count = len(list(c.each_parent_cell()))
-                lines.append(
-                    f"    - cell_index={c.cell_index()}, function_name={fn!r},"
-                    f" basename={bn!r}, {parent_count} parent(s)"
+                was_locked = c.is_locked()
+                if was_locked:
+                    c.locked = False
+                c.name = unique
+                if was_locked:
+                    c.locked = True
+                logger.warning(
+                    "Renamed duplicate cell {old!r} (cell_index={ci},"
+                    " function_name={fn!r}) to {new!r} before writing."
+                    " Set `kf.config.debug_names = True` to catch name"
+                    " conflicts earlier.",
+                    old=name,
+                    ci=c.cell_index(),
+                    fn=fn,
+                    new=unique,
                 )
-            lines.append("")
-
-        lines.append(
-            "This usually happens when a cell function creates or returns a cell"
-            " whose name collides with another cell already in the layout."
-        )
-        lines.append(
-            "To catch conflicts earlier, set `kf.config.debug_names = True`"
-            " — this raises an error at the point where the duplicate name"
-            " is assigned."
-        )
-
-        raise DuplicateCellNameError("\n".join(lines))
 
     def top_kcells(self) -> list[KCell]:
         """Return the top KCells."""
