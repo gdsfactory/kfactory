@@ -69,7 +69,7 @@ from .cross_section import (
     TAsymmetricCrossSection,
     TCrossSection,
 )
-from .exceptions import LockedError, MergeError
+from .exceptions import DuplicateCellNameError, LockedError, MergeError
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .instance import DInstance, Instance, ProtoInstance, ProtoTInstance, VInstance
 from .instances import (
@@ -143,6 +143,52 @@ __all__ = [
     "get_cells",
     "show",
 ]
+
+
+def _check_duplicate_cell_names(layout: kdb.Layout, cell_indices: set[int]) -> None:
+    """Raise `DuplicateCellNameError` if any cells in `cell_indices` share a name."""
+    from collections import defaultdict
+
+    name_to_indices: dict[str, list[int]] = defaultdict(list)
+    for ci in cell_indices:
+        c = layout.cell(ci)
+        if c is not None and not c._destroyed():
+            name_to_indices[c.name].append(ci)
+
+    duplicates = {
+        name: indices for name, indices in name_to_indices.items() if len(indices) > 1
+    }
+    if not duplicates:
+        return
+
+    lines = [
+        "Cannot write layout: multiple cells share the same name.",
+        "GDS/OASIS requires every cell name to be unique.",
+        "",
+    ]
+    for name, indices in sorted(duplicates.items()):
+        lines.append(f"  {name!r} is used by {len(indices)} cells:")
+        for ci in indices:
+            c = layout.cell(ci)
+            if c is None:
+                continue
+            parent_count = len(list(c.each_parent_cell()))
+            lines.append(
+                f"    - cell_index={ci}, {parent_count} parent(s),"
+                f" hierarchy_levels={c.hierarchy_levels()}"
+            )
+        lines.append("")
+
+    lines.append(
+        "This usually happens when a cell function creates or returns a cell"
+        " whose name collides with another cell already in the layout."
+    )
+    lines.append(
+        "To catch conflicts earlier, set `kf.config.debug_names = True`"
+        " — this raises an error at the point where the duplicate name is assigned."
+    )
+
+    raise DuplicateCellNameError("\n".join(lines))
 
 
 class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
@@ -1323,6 +1369,9 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
             case _:
                 ...
 
+        relevant_cells = {self.cell_index(), *self.called_cells()}
+        _check_duplicate_cell_names(self.layout(), relevant_cells)
+
         filename = str(filename)
         if autoformat_from_file_extension:
             save_options.set_format_from_filename(filename)
@@ -1366,6 +1415,9 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     self.convert_to_static(recursive=True)
             case _:
                 ...
+
+        relevant_cells = {self.cell_index(), *self.called_cells()}
+        _check_duplicate_cell_names(self.layout(), relevant_cells)
 
         save_options.format = save_options.format or "OASIS"
         save_options.clear_cells()
