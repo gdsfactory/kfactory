@@ -1667,6 +1667,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 placed_islands.append(island)
                 placed_insts |= island
 
+        cell_ports_by_name = c.ports.get_all_named()
         nets_per_route = self.routes_nets()
 
         # routes
@@ -1677,7 +1678,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 resolved_port_list: list[KCellPort | DKCellPort] = []
                 for port_ref in net.net:
                     if isinstance(port_ref, Port):
-                        p: KCellPort | DKCellPort = c.ports[port_ref.name]
+                        p: KCellPort | DKCellPort = cell_ports_by_name[port_ref.name]
                     else:
                         inst = self.instances[port_ref.instance]
                         target = (
@@ -1743,13 +1744,14 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 )
 
         # verify connections
+        cell_ports_by_name = c.ports.get_all_named()
         port_connection_transformation_errors: list[Connection[T]] = []
         connection_transformation_errors: list[Connection[T]] = []
         for conn in connections:
             c1 = conn.net[0]
             c2 = conn.net[1]
             if isinstance(c1, Port):
-                p1 = c.ports[c1.name]
+                p1 = cell_ports_by_name[c1.name]
                 p2 = c.insts[c2.instance].ports[c2.port]
                 if p1.dcplx_trans != p2.dcplx_trans:
                     port_connection_transformation_errors.append(conn)
@@ -1837,12 +1839,12 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     )
                 c.create_pin(
                     name=pin_name,
-                    ports=[c.ports[n] for n in cell_port_names],
+                    ports=[cell_ports_by_name[n] for n in cell_port_names],
                     pin_type=inst_pin.pin_type,
                     info=inst_pin.info.model_dump(),
                 )
             else:
-                missing = [p for p in pin_def.ports if p not in c.ports]
+                missing = [p for p in pin_def.ports if p not in cell_ports_by_name]
                 if missing:
                     raise ValueError(
                         f"Cannot materialize pin {pin_name!r}: port(s) "
@@ -1850,7 +1852,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     )
                 c.create_pin(
                     name=pin_name,
-                    ports=[c.ports[p] for p in pin_def.ports],
+                    ports=[cell_ports_by_name[p] for p in pin_def.ports],
                     pin_type=pin_def.pin_type,
                     info=dict(pin_def.info),
                 )
