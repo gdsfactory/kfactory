@@ -372,6 +372,32 @@ def test_ports_getitem(kcl: kf.KCLayout, layers: Layers) -> None:
         ports["o3"]
 
 
+def test_ports_getitem_uses_renamed_port(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kf.factories.straight.straight_dbu_factory(kcl)(
+        width=5000, length=10000, layer=layers.WG
+    )
+    ports = c.ports
+    port = ports["o1"]
+    port.name = "renamed"
+
+    assert ports["renamed"] == port
+    assert "renamed" in ports
+    assert "o1" not in ports
+
+
+def test_ports_getitem_duplicate_names_return_first(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    c = kf.factories.straight.straight_dbu_factory(kcl)(
+        width=5000, length=10000, layer=layers.WG
+    )
+    ports = c.ports
+    first = ports["o1"]
+    ports["o2"].name = "o1"
+
+    assert ports["o1"] == first
+
+
 def test_ports_getitem_slice(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kf.factories.straight.straight_dbu_factory(kcl)(
         width=5000, length=10000, layer=layers.WG
@@ -460,6 +486,19 @@ def test_dports_getitem(kcl: kf.KCLayout, layers: Layers) -> None:
     assert ports[0] == ports["o1"]
     with pytest.raises(KeyError):
         ports["o3"]
+
+
+def test_dports_getitem_uses_renamed_port(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kf.factories.straight.straight_dbu_factory(kcl)(
+        width=5000, length=10000, layer=layers.WG
+    ).to_dtype()
+    ports = c.ports
+    port = ports["o1"]
+    port.name = "renamed"
+
+    assert ports["renamed"] == port
+    assert "renamed" in ports
+    assert "o1" not in ports
 
 
 def test_dports_getitem_slice(kcl: kf.KCLayout, layers: Layers) -> None:
