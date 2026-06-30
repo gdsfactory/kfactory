@@ -150,7 +150,7 @@ def _check_duplicate_cell_names(
     cell_indices: set[int],
     *,
     auto_rename: bool = False,
-    tkcells: Mapping[int, Any] | None = None,
+    tkcells: Mapping[int, TKCell] | None = None,
 ) -> None:
     """Check for duplicate cell names before writing a layout.
 
