@@ -145,6 +145,24 @@ __all__ = [
 ]
 
 
+def _cell_detail(ci: int, tkcells: Mapping[int, TKCell] | None) -> str:
+    """Build a concise description of a cell for error/warning messages."""
+    tkcell = tkcells.get(ci) if tkcells else None
+    if tkcell is None:
+        return f"cell_index={ci}"
+
+    factory_name = tkcell.basename or tkcell.function_name
+    parts = [f"cell_index={ci}"]
+    if factory_name:
+        parts.append(f"factory={factory_name!r}")
+        factory = tkcell.kcl.factories.get(factory_name) or (
+            tkcell.kcl.virtual_factories.get(factory_name)
+        )
+        if factory is not None:
+            parts.append(str(factory.file))
+    return ", ".join(parts)
+
+
 def _check_duplicate_cell_names(
     layout: kdb.Layout,
     cell_indices: set[int],
@@ -179,7 +197,10 @@ def _check_duplicate_cell_names(
     if not auto_rename:
         lines = []
         for name, indices in duplicates.items():
-            lines.append(f"  {name!r}: cell_index(es) {indices}")
+            detail_lines = [
+                f"    - {_cell_detail(ci, tkcells)}" for ci in indices
+            ]
+            lines.append(f"  {name!r}:\n" + "\n".join(detail_lines))
         raise DuplicateCellNameError(
             "Duplicate cell names detected — GDS/OASIS require unique cell"
             " names.\n" + "\n".join(lines) + "\n"
@@ -200,18 +221,13 @@ def _check_duplicate_cell_names(
             c.name = unique
             if was_locked:
                 c.locked = True
-            fn = None
-            if tkcells is not None:
-                tkcell = tkcells.get(ci)
-                fn = tkcell.function_name if tkcell else None
+            detail = _cell_detail(ci, tkcells)
             logger.warning(
-                "Renamed duplicate cell {old!r} (cell_index={ci},"
-                " function_name={fn!r}) to {new!r} before writing."
+                "Renamed duplicate cell {old!r} ({detail}) -> {new!r}."
                 " Set `kf.config.debug_names = True` to catch name"
                 " conflicts earlier.",
                 old=name,
-                ci=ci,
-                fn=fn,
+                detail=detail,
                 new=unique,
             )
 
