@@ -172,7 +172,9 @@ def _cell_detail(
                     loc += f":{lineno}"
                 parts.append(loc)
         else:
-            parts.append("no factory (created manually or via dup)")
+            c = layout.cell(ci)
+            cell_name = c.name if c is not None and not c._destroyed() else None
+            parts.append(f"no factory, name={cell_name!r}")
 
     c = layout.cell(ci)
     if c is not None and not c._destroyed():
