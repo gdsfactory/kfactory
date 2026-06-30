@@ -2398,7 +2398,10 @@ def _check_pin_ports_in_cell(
     cell: ProtoTKCell[Any], ports: Iterable[ProtoPort[Any]], *, pin_name: str
 ) -> None:
     cell_ports = cell.base.ports
+    cell_port_ids = {id(port) for port in cell_ports}
     for port in ports:
+        if id(port.base) in cell_port_ids:
+            continue
         if port.base not in cell_ports:
             raise ValueError(
                 f"Cannot create pin {pin_name!r}: port {port!r} is not a port"
