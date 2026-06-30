@@ -2196,6 +2196,7 @@ class KCLayout(
         set_meta_data: bool = True,
         convert_external_cells: bool = False,
         autoformat_from_file_extension: bool = True,
+        deduplicate_cell_names: bool = False,
     ) -> None:
         """Write a GDS file into the existing Layout.
 
@@ -2209,6 +2210,11 @@ class KCLayout(
             autoformat_from_file_extension: Set the format of the output file
                 automatically from the file extension of `filename`. This is necessary
                 for the options. If not set, this will default to `GDSII`.
+            deduplicate_cell_names: If True, auto-rename duplicate cells with
+                ``$1``, ``$2``, … suffixes before writing. If False (the
+                default), raise
+                :class:`~kfactory.exceptions.DuplicateCellNameError` when
+                duplicates are detected.
         """
         if options is None:
             options = save_layout_options()
@@ -2234,21 +2240,26 @@ class KCLayout(
                     if kcell.is_library_cell() and not kcell.destroyed():
                         kcell.convert_to_static(recursive=True)
 
-        self._deduplicate_cell_names()
+        self._check_duplicate_cell_names(auto_rename=deduplicate_cell_names)
 
         if autoformat_from_file_extension:
             options.set_format_from_filename(filename)
 
         return self.layout.write(filename, options)
 
-    def _deduplicate_cell_names(self) -> None:
-        """Auto-rename cells with duplicate names so the layout can be written.
+    def _check_duplicate_cell_names(self, *, auto_rename: bool = False) -> None:
+        """Check for duplicate cell names before writing the layout.
 
-        GDS/OASIS require unique cell names. The first cell keeps its name;
-        subsequent duplicates get ``$1``, ``$2``, … suffixes. A warning is
-        logged for each rename.
+        GDS/OASIS require unique cell names.
+
+        Args:
+            auto_rename: If True, rename duplicates with ``$1``, ``$2``, …
+                suffixes and log a warning. If False (the default), raise
+                :class:`~kfactory.exceptions.DuplicateCellNameError`.
         """
         from collections import defaultdict
+
+        from .exceptions import DuplicateCellNameError
 
         name_to_cells: dict[str, list[kdb.Cell]] = defaultdict(list)
         for c in self.layout.each_cell():
@@ -2260,6 +2271,19 @@ class KCLayout(
         }
         if not duplicates:
             return
+
+        if not auto_rename:
+            lines = []
+            for name, cells in duplicates.items():
+                indices = [c.cell_index() for c in cells if not c._destroyed()]
+                lines.append(f"  {name!r}: cell_index(es) {indices}")
+            raise DuplicateCellNameError(
+                "Duplicate cell names detected — GDS/OASIS require unique cell"
+                " names.\n" + "\n".join(lines) + "\n"
+                "Pass `deduplicate_cell_names=True` to auto-rename duplicates,"
+                " or set `kf.config.debug_names = True` to catch conflicts"
+                " earlier at assignment time."
+            )
 
         for name, cells in duplicates.items():
             for c in cells[1:]:
