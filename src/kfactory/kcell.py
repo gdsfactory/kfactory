@@ -145,13 +145,21 @@ __all__ = [
 ]
 
 
-def _deduplicate_cell_names(layout: kdb.Layout, cell_indices: set[int]) -> None:
-    """Auto-rename cells with duplicate names so the layout can be written.
+def _check_duplicate_cell_names(
+    layout: kdb.Layout,
+    cell_indices: set[int],
+    *,
+    auto_rename: bool = False,
+) -> None:
+    """Check for duplicate cell names before writing a layout.
 
     GDS/OASIS require unique cell names. When duplicates are found among
-    `cell_indices`, the first cell keeps its name and subsequent ones get
-    a ``$1``, ``$2``, … suffix (matching KLayout's own convention).
-    A warning is logged for each renamed cell.
+    `cell_indices`:
+
+    - If ``auto_rename`` is *False* (the default), raise
+      :class:`~kfactory.exceptions.DuplicateCellNameError`.
+    - If ``auto_rename`` is *True*, rename duplicates with ``$1``, ``$2``, …
+      suffixes (matching KLayout's own convention) and log a warning.
     """
     from collections import defaultdict
 
@@ -167,8 +175,19 @@ def _deduplicate_cell_names(layout: kdb.Layout, cell_indices: set[int]) -> None:
     if not duplicates:
         return
 
+    if not auto_rename:
+        lines = []
+        for name, indices in duplicates.items():
+            lines.append(f"  {name!r}: cell_index(es) {indices}")
+        raise DuplicateCellNameError(
+            "Duplicate cell names detected — GDS/OASIS require unique cell"
+            " names.\n" + "\n".join(lines) + "\n"
+            "Pass `deduplicate_cell_names=True` to auto-rename duplicates,"
+            " or set `kf.config.debug_names = True` to catch conflicts"
+            " earlier at assignment time."
+        )
+
     for name, indices in duplicates.items():
-        # Keep the first cell, rename the rest
         for ci in indices[1:]:
             c = layout.cell(ci)
             if c is None or c._destroyed():
@@ -527,59 +546,125 @@ class TKCell(BaseKCell):
             and not self.kcl.layout.cell(value).is_library_cell()
             and not self.is_library_cell()
         ):
+            stack = inspect.stack()
+            module = inspect.getmodule(stack[3].frame)
             tkcells = [
                 self.kcl.tkcells[cell.cell_index()]
                 for cell in self.kcl.layout.cells(value)
                 if not cell.is_library_cell()
             ]
 
-            conflicting = "\n".join(
-                f"  - {tkcell.name!r} (cell_index={tkcell.kdb_cell.cell_index()},"
-                f" function_name={tkcell.function_name!r},"
-                f" basename={tkcell.basename!r})"
-                for tkcell in tkcells
-            )
-
-            stack = inspect.stack()
-            module = inspect.getmodule(stack[3].frame)
-
             if module is not None and module.__name__ == "kfactory.layout":
-                fi = stack[5]
-                f_obj = fi.frame.f_locals.get("f")
-                if f_obj is not None:
-                    location = (
-                        f"{f_obj.__code__.co_filename}::{f_obj.__name__}"
-                        f" at line {f_obj.__code__.co_firstlineno}"
+                frame_info = stack[5]
+                logger.opt(depth=2).error(
+                    "Name conflict in "
+                    f"{frame_info.frame.f_locals['f'].__code__.co_filename}::"
+                    f"{frame_info.frame.f_locals['f'].__name__} at line "
+                    f"{frame_info.frame.f_locals['f'].__code__.co_firstlineno}\n"
+                    f"Renaming {self.name} (cell_index={self.kdb_cell.cell_index()}) to"
+                    f" {value} would cause it to be named the same as:\n"
+                    + "\n".join(
+                        f" - {tkcell.name} (cell_index={tkcell.kdb_cell.cell_index()}),"
+                        f" function_name={tkcell.function_name},"
+                        f" basename={tkcell.basename}"
+                        for tkcell in tkcells
                     )
-                else:
-                    location = f"{fi.filename}::{fi.function} at line {fi.lineno}"
-                log_depth = 2
+                )
+                if config.debug_names:
+                    raise DuplicateCellNameError(
+                        "Name conflict in "
+                        f"{frame_info.frame.f_locals['f'].__code__.co_filename}::"
+                        f"{frame_info.frame.f_locals['f'].__name__} at line "
+                        f"{frame_info.frame.f_locals['f'].__code__.co_firstlineno}\n"
+                        f"Renaming {self.name} (cell_index={self.kdb_cell.cell_index()}"
+                        f") to {value} would cause it to be named the same as:\n"
+                        + "\n".join(
+                            f" - {tkcell.name} "
+                            f"(cell_index={tkcell.kdb_cell.cell_index()}),"
+                            f" function_name={tkcell.function_name},"
+                            f" basename={tkcell.basename}"
+                            for tkcell in tkcells
+                        )
+                    )
             else:
-                fi = stack[3]
+                frame_info = stack[3]
                 if module is not None:
-                    mod_name = module.__name__
-                    if mod_name == "__main__":
-                        mod_name = fi.filename
+                    module_name = module.__name__
+                    if module_name == "__main__":
+                        module_name = frame_info.filename
+                    function_name = (
+                        "::" + frame_info.function
+                        if frame_info.function != "<module>"
+                        else ""
+                    )
+                    logger.opt(depth=3).error(
+                        "Name conflict in "
+                        f"{module_name}{function_name} at line "
+                        f"{frame_info.lineno}\n"
+                        f"Renaming {self.name} (cell_index="
+                        f"{self.kdb_cell.cell_index()}) to"
+                        f" {value} would cause it to be named the same as:\n"
+                        + "\n".join(
+                            f" - {tkcell.name} "
+                            f"(cell_index={tkcell.kdb_cell.cell_index()}),"
+                            f" function_name={tkcell.function_name},"
+                            f" basename={tkcell.basename}"
+                            for tkcell in tkcells
+                        )
+                    )
+                    if config.debug_names:
+                        raise DuplicateCellNameError(
+                            "Name conflict in "
+                            f"{module_name}{function_name} at line "
+                            f"{frame_info.lineno}\n"
+                            f"Renaming {self.name} (cell_index="
+                            f"{self.kdb_cell.cell_index()}) to"
+                            f" {value} would cause it to be named the same as:\n"
+                            + "\n".join(
+                                f" - {tkcell.name} "
+                                f"(cell_index={tkcell.kdb_cell.cell_index()}),"
+                                f" function_name={tkcell.function_name},"
+                                f" basename={tkcell.basename}"
+                                for tkcell in tkcells
+                            )
+                        )
                 else:
-                    mod_name = fi.filename
-                func_suffix = f"::{fi.function}" if fi.function != "<module>" else ""
-                location = f"{mod_name}{func_suffix} at line {fi.lineno}"
-                log_depth = 3
-
-            msg = (
-                f"Cell name conflict in {location}\n"
-                f"Renaming {self.name!r}"
-                f" (cell_index={self.kdb_cell.cell_index()}) to {value!r}"
-                f" would create a duplicate — the following cell(s) already"
-                f" have that name:\n{conflicting}\n"
-                f"This will make the layout unwritable (GDS/OASIS require"
-                f" unique cell names).\n"
-                f"Set `kf.config.debug_names = True` to turn this warning"
-                f" into an error and catch the conflict at its source."
-            )
-            logger.opt(depth=log_depth).error(msg)
-            if config.debug_names:
-                raise DuplicateCellNameError(msg)
+                    function_name = (
+                        "::" + frame_info.function
+                        if frame_info.function != "<module>"
+                        else ""
+                    )
+                    logger.opt(depth=3).error(
+                        "Name conflict in "
+                        f"{frame_info.filename}"
+                        f"{function_name} at line {frame_info.lineno}\n"
+                        f"Renaming {self.name} (cell_index="
+                        f"{self.kdb_cell.cell_index()}) to"
+                        f" {value} would cause it to be named the same as:\n"
+                        + "\n".join(
+                            f" - {tkcell.name} "
+                            f"(cell_index={tkcell.kdb_cell.cell_index()}),"
+                            f" function_name={tkcell.function_name},"
+                            f" basename={tkcell.basename}"
+                            for tkcell in tkcells
+                        )
+                    )
+                    if config.debug_names:
+                        raise DuplicateCellNameError(
+                            "Name conflict in "
+                            f"{frame_info.filename}"
+                            f"{function_name} at line {frame_info.lineno}\n"
+                            f"Renaming {self.name} (cell_index="
+                            f"{self.kdb_cell.cell_index()}) to"
+                            f" {value} would cause it to be named the same as:\n"
+                            + "\n".join(
+                                f" - {tkcell.name} "
+                                f"(cell_index={tkcell.kdb_cell.cell_index()}),"
+                                f" function_name={tkcell.function_name},"
+                                f" basename={tkcell.basename}"
+                                for tkcell in tkcells
+                            )
+                        )
 
         self.kdb_cell.name = value
 
@@ -1268,10 +1353,17 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
         autoformat_from_file_extension: bool = True,
+        deduplicate_cell_names: bool = False,
     ) -> None:
         """Write a KCell to a GDS.
 
         See [KCLayout.write][kfactory.layout.KCLayout.write] for more info.
+
+        Args:
+            deduplicate_cell_names: If True, auto-rename duplicate cells with
+                ``$1``, ``$2``, … suffixes before writing. If False (the
+                default), raise :class:`~kfactory.exceptions.DuplicateCellNameError`
+                when duplicates are detected.
         """
         if save_options is None:
             save_options = save_layout_options()
@@ -1303,7 +1395,9 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 ...
 
         relevant_cells = {self.cell_index(), *self.called_cells()}
-        _deduplicate_cell_names(self.layout(), relevant_cells)
+        _check_duplicate_cell_names(
+            self.layout(), relevant_cells, auto_rename=deduplicate_cell_names
+        )
 
         filename = str(filename)
         if autoformat_from_file_extension:
@@ -1315,10 +1409,17 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         save_options: kdb.SaveLayoutOptions | None = None,
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
+        deduplicate_cell_names: bool = False,
     ) -> bytes:
         """Write a KCell to a binary format as oasis.
 
         See [KCLayout.write][kfactory.layout.KCLayout.write] for more info.
+
+        Args:
+            deduplicate_cell_names: If True, auto-rename duplicate cells with
+                ``$1``, ``$2``, … suffixes before writing. If False (the
+                default), raise :class:`~kfactory.exceptions.DuplicateCellNameError`
+                when duplicates are detected.
         """
         if save_options is None:
             save_options = save_layout_options()
@@ -1350,7 +1451,9 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 ...
 
         relevant_cells = {self.cell_index(), *self.called_cells()}
-        _deduplicate_cell_names(self.layout(), relevant_cells)
+        _check_duplicate_cell_names(
+            self.layout(), relevant_cells, auto_rename=deduplicate_cell_names
+        )
 
         save_options.format = save_options.format or "OASIS"
         save_options.clear_cells()
