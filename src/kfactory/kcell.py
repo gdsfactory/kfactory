@@ -150,6 +150,7 @@ def _check_duplicate_cell_names(
     cell_indices: set[int],
     *,
     auto_rename: bool = False,
+    tkcells: Mapping[int, Any] | None = None,
 ) -> None:
     """Check for duplicate cell names before writing a layout.
 
@@ -199,12 +200,18 @@ def _check_duplicate_cell_names(
             c.name = unique
             if was_locked:
                 c.locked = True
+            fn = None
+            if tkcells is not None:
+                tkcell = tkcells.get(ci)
+                fn = tkcell.function_name if tkcell else None
             logger.warning(
-                "Renamed duplicate cell {old!r} (cell_index={ci}) to {new!r}"
-                " before writing. Set `kf.config.debug_names = True` to catch"
-                " name conflicts earlier.",
+                "Renamed duplicate cell {old!r} (cell_index={ci},"
+                " function_name={fn!r}) to {new!r} before writing."
+                " Set `kf.config.debug_names = True` to catch name"
+                " conflicts earlier.",
                 old=name,
                 ci=ci,
+                fn=fn,
                 new=unique,
             )
 

@@ -80,6 +80,7 @@ from .kcell import (
     TKCell,
     TVCell,
     VKCell,
+    _check_duplicate_cell_names,
     show,
 )
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
@@ -2240,74 +2241,20 @@ class KCLayout(
                     if kcell.is_library_cell() and not kcell.destroyed():
                         kcell.convert_to_static(recursive=True)
 
-        self._check_duplicate_cell_names(auto_rename=deduplicate_cell_names)
+        all_indices = {
+            c.cell_index() for c in self.layout.each_cell() if not c._destroyed()
+        }
+        _check_duplicate_cell_names(
+            self.layout,
+            all_indices,
+            auto_rename=deduplicate_cell_names,
+            tkcells=self.tkcells,
+        )
 
         if autoformat_from_file_extension:
             options.set_format_from_filename(filename)
 
         return self.layout.write(filename, options)
-
-    def _check_duplicate_cell_names(self, *, auto_rename: bool = False) -> None:
-        """Check for duplicate cell names before writing the layout.
-
-        GDS/OASIS require unique cell names.
-
-        Args:
-            auto_rename: If True, rename duplicates with ``$1``, ``$2``, …
-                suffixes and log a warning. If False (the default), raise
-                :class:`~kfactory.exceptions.DuplicateCellNameError`.
-        """
-        from collections import defaultdict
-
-        from .exceptions import DuplicateCellNameError
-
-        name_to_cells: dict[str, list[kdb.Cell]] = defaultdict(list)
-        for c in self.layout.each_cell():
-            if not c._destroyed():
-                name_to_cells[c.name].append(c)
-
-        duplicates = {
-            name: cells for name, cells in name_to_cells.items() if len(cells) > 1
-        }
-        if not duplicates:
-            return
-
-        if not auto_rename:
-            lines = []
-            for name, cells in duplicates.items():
-                indices = [c.cell_index() for c in cells if not c._destroyed()]
-                lines.append(f"  {name!r}: cell_index(es) {indices}")
-            raise DuplicateCellNameError(
-                "Duplicate cell names detected — GDS/OASIS require unique cell"
-                " names.\n" + "\n".join(lines) + "\n"
-                "Pass `deduplicate_cell_names=True` to auto-rename duplicates,"
-                " or set `kf.config.debug_names = True` to catch conflicts"
-                " earlier at assignment time."
-            )
-
-        for name, cells in duplicates.items():
-            for c in cells[1:]:
-                if c._destroyed():
-                    continue
-                unique = self.layout.unique_cell_name(name)
-                tkcell = self.tkcells.get(c.cell_index())
-                fn = tkcell.function_name if tkcell else None
-                was_locked = c.is_locked()
-                if was_locked:
-                    c.locked = False
-                c.name = unique
-                if was_locked:
-                    c.locked = True
-                logger.warning(
-                    "Renamed duplicate cell {old!r} (cell_index={ci},"
-                    " function_name={fn!r}) to {new!r} before writing."
-                    " Set `kf.config.debug_names = True` to catch name"
-                    " conflicts earlier.",
-                    old=name,
-                    ci=c.cell_index(),
-                    fn=fn,
-                    new=unique,
-                )
 
     def top_kcells(self) -> list[KCell]:
         """Return the top KCells."""
