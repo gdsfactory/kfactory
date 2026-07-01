@@ -181,15 +181,15 @@ def get_affinity() -> int:
     On (most) linux we can get it through the scheduling affinity. Otherwise,
     fall back to the multiprocessing cpu count.
     """
-    sched_getaffinity = getattr(os, "sched_getaffinity", None)
-    if sched_getaffinity is not None:
-        return len(sched_getaffinity(0))
     try:
-        import multiprocessing
+        return len(os.sched_getaffinity(0))  # ty:ignore[unresolved-attribute]
+    except AttributeError:
+        try:
+            import multiprocessing
 
-        return multiprocessing.cpu_count()
-    except ModuleNotFoundError:
-        return 1
+            return multiprocessing.cpu_count()
+        except ModuleNotFoundError:
+            return 1
 
 
 dotenv_path = find_dotenv(usecwd=True)
