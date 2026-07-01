@@ -34,7 +34,7 @@ jobs:
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt install graphviz graphviz-dev
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # mike needs full history of gh-pages
 
