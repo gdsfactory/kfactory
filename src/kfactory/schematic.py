@@ -1132,6 +1132,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             | AsymmetricCrossSection
             | DAsymmetricCrossSection,
         ],
+        instances: Mapping[str, Instance | VInstance] | None = None,
     ) -> BasePort:
         """Materialize a schematic-level port on `cell`.
 
@@ -1144,6 +1145,11 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         """
         port = self.ports[name]
         if isinstance(port, PortArrayRef):
+            if instances is not None:
+                return cell.add_port(
+                    port=instances[port.instance].ports[port.port, port.ia, port.ib],
+                    name=name,
+                ).base
             if self.instances[port.instance].virtual:
                 return cell.add_port(
                     port=cell.vinsts[port.instance].ports[port.port, port.ia, port.ib],
@@ -1154,6 +1160,10 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 name=name,
             ).base
         if isinstance(port, PortRef):
+            if instances is not None:
+                return cell.add_port(
+                    port=instances[port.instance].ports[port.port], name=name
+                ).base
             if self.instances[port.instance].virtual:
                 return cell.add_port(
                     port=cell.vinsts[port.instance].ports[port.port], name=name
@@ -1667,6 +1677,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 placed_islands.append(island)
                 placed_insts |= island
 
+        cell_ports_by_name = c.ports.get_all_named()
         nets_per_route = self.routes_nets()
 
         # routes
@@ -1677,14 +1688,9 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 resolved_port_list: list[KCellPort | DKCellPort] = []
                 for port_ref in net.net:
                     if isinstance(port_ref, Port):
-                        p: KCellPort | DKCellPort = c.ports[port_ref.name]
+                        p: KCellPort | DKCellPort = cell_ports_by_name[port_ref.name]
                     else:
-                        inst = self.instances[port_ref.instance]
-                        target = (
-                            c.vinsts[port_ref.instance]
-                            if inst.virtual
-                            else c.insts[port_ref.instance]
-                        )
+                        target = instances[port_ref.instance]
                         if isinstance(port_ref, PortArrayRef):
                             p = target.ports[port_ref.port, port_ref.ia, port_ref.ib]
                         else:
@@ -1743,25 +1749,20 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 )
 
         # verify connections
+        cell_ports_by_name = c.ports.get_all_named()
         port_connection_transformation_errors: list[Connection[T]] = []
         connection_transformation_errors: list[Connection[T]] = []
         for conn in connections:
             c1 = conn.net[0]
             c2 = conn.net[1]
             if isinstance(c1, Port):
-                p1 = c.ports[c1.name]
-                p2 = c.insts[c2.instance].ports[c2.port]
+                p1 = cell_ports_by_name[c1.name]
+                p2 = instances[c2.instance].ports[c2.port]
                 if p1.dcplx_trans != p2.dcplx_trans:
                     port_connection_transformation_errors.append(conn)
             else:
-                if self.instances[c1.instance].virtual:
-                    inst1: Instance | VInstance = c.vinsts[c1.instance]
-                else:
-                    inst1 = c.insts[c1.instance]
-                if self.instances[c2.instance].virtual:
-                    inst2: Instance | VInstance = c.vinsts[c2.instance]
-                else:
-                    inst2 = c.insts[c2.instance]
+                inst1 = instances[c1.instance]
+                inst2 = instances[c2.instance]
                 if isinstance(c1, PortArrayRef):
                     p1 = inst1.ports[c1.port, c1.ia, c1.ib]
                 else:
@@ -1837,12 +1838,12 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     )
                 c.create_pin(
                     name=pin_name,
-                    ports=[c.ports[n] for n in cell_port_names],
+                    ports=[cell_ports_by_name[n] for n in cell_port_names],
                     pin_type=inst_pin.pin_type,
                     info=inst_pin.info.model_dump(),
                 )
             else:
-                missing = [p for p in pin_def.ports if p not in c.ports]
+                missing = [p for p in pin_def.ports if p not in cell_ports_by_name]
                 if missing:
                     raise ValueError(
                         f"Cannot materialize pin {pin_name!r}: port(s) "
@@ -1850,7 +1851,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     )
                 c.create_pin(
                     name=pin_name,
-                    ports=[c.ports[p] for p in pin_def.ports],
+                    ports=[cell_ports_by_name[p] for p in pin_def.ports],
                     pin_type=pin_def.pin_type,
                     info=dict(pin_def.info),
                 )
@@ -3112,6 +3113,7 @@ def _get_and_place_insts_and_ports[T: (int, float)](
             port,
             cell=c,
             cross_sections=cross_sections,
+            instances=instances,
         )
         placed_ports.add(port)
     placed_insts |= placeable_insts
