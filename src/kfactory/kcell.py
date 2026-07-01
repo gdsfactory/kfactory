@@ -336,10 +336,11 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # 
     def write(
         self,
         filename: str | Path,
-        save_options: kdb.SaveLayoutOptions = ...,
+        save_options: kdb.SaveLayoutOptions | None = ...,
         convert_external_cells: bool = ...,
         set_meta_data: bool = ...,
         autoformat_from_file_extension: bool = ...,
+        deduplicate_cell_names: bool = ...,
     ) -> None: ...
 
     @property
@@ -3894,6 +3895,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
         autoformat_from_file_extension: bool = True,
+        deduplicate_cell_names: bool = False,
     ) -> None:
         """Write a KCell to a GDS.
 
@@ -3908,14 +3910,26 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         c.settings_units = self.settings_units
         c.info = self.info
         VInstance(self).insert_into_flat(c, levels=1)
-
-        c.write(
-            filename=filename,
-            save_options=save_options,
-            convert_external_cells=convert_external_cells,
-            set_meta_data=set_meta_data,
-            autoformat_from_file_extension=autoformat_from_file_extension,
-        )
+        try:
+            c.write(
+                filename=filename,
+                save_options=save_options,
+                convert_external_cells=convert_external_cells,
+                set_meta_data=set_meta_data,
+                autoformat_from_file_extension=autoformat_from_file_extension,
+            )
+        except RuntimeError:
+            relevant_cells = {c.cell_index(), *c.called_cells()}
+            _check_duplicate_cell_names(
+                c.layout(), relevant_cells, auto_rename=deduplicate_cell_names
+            )
+            c.write(
+                filename=filename,
+                save_options=save_options,
+                convert_external_cells=convert_external_cells,
+                set_meta_data=set_meta_data,
+                autoformat_from_file_extension=autoformat_from_file_extension,
+            )
 
     def l2n(
         self, port_types: Iterable[str] = ("optical",)
