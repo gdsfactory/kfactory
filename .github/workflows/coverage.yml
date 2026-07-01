@@ -22,7 +22,7 @@ jobs:
         shell: bash -l {0}
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt install graphviz graphviz-dev
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
           ssh-key: ${{ secrets.SUBMODULE_SSH_KEY }}
