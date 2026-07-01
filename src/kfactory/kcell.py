@@ -1406,15 +1406,17 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             case _:
                 ...
 
-        relevant_cells = {self.cell_index(), *self.called_cells()}
-        _check_duplicate_cell_names(
-            self.layout(), relevant_cells, auto_rename=deduplicate_cell_names
-        )
-
         filename = str(filename)
         if autoformat_from_file_extension:
             save_options.set_format_from_filename(filename)
-        self._base.kdb_cell.write(filename, save_options)
+        try:
+            self._base.kdb_cell.write(filename, save_options)
+        except RuntimeError:
+            relevant_cells = {self.cell_index(), *self.called_cells()}
+            _check_duplicate_cell_names(
+                self.layout(), relevant_cells, auto_rename=deduplicate_cell_names
+            )
+            self._base.kdb_cell.write(filename, save_options)
 
     def write_bytes(
         self,
@@ -1462,15 +1464,17 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             case _:
                 ...
 
-        relevant_cells = {self.cell_index(), *self.called_cells()}
-        _check_duplicate_cell_names(
-            self.layout(), relevant_cells, auto_rename=deduplicate_cell_names
-        )
-
         save_options.format = save_options.format or "OASIS"
         save_options.clear_cells()
         save_options.select_cell(self.cell_index())
-        return self.kcl.layout.write_bytes(save_options)
+        try:
+            return self.kcl.layout.write_bytes(save_options)
+        except RuntimeError:
+            relevant_cells = {self.cell_index(), *self.called_cells()}
+            _check_duplicate_cell_names(
+                self.layout(), relevant_cells, auto_rename=deduplicate_cell_names
+            )
+            return self.kcl.layout.write_bytes(save_options)
 
     def read(
         self,
