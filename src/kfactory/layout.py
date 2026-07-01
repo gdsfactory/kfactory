@@ -2241,20 +2241,21 @@ class KCLayout(
                     if kcell.is_library_cell() and not kcell.destroyed():
                         kcell.convert_to_static(recursive=True)
 
-        all_indices = {
-            c.cell_index() for c in self.layout.each_cell() if not c._destroyed()
-        }
-        _check_duplicate_cell_names(
-            self.layout,
-            all_indices,
-            auto_rename=deduplicate_cell_names,
-            tkcells=self.tkcells,
-        )
-
         if autoformat_from_file_extension:
             options.set_format_from_filename(filename)
-
-        return self.layout.write(filename, options)
+        try:
+            return self.layout.write(filename, options)
+        except RuntimeError:
+            all_indices = {
+                c.cell_index() for c in self.layout.each_cell() if not c._destroyed()
+            }
+            _check_duplicate_cell_names(
+                self.layout,
+                all_indices,
+                auto_rename=deduplicate_cell_names,
+                tkcells=self.tkcells,
+            )
+            return self.layout.write(filename, options)
 
     def write_bytes(
         self,
@@ -2285,17 +2286,19 @@ class KCLayout(
                     if kcell.is_library_cell() and not kcell.destroyed():
                         kcell.convert_to_static(recursive=True)
 
-        all_indices = {
-            c.cell_index() for c in self.layout.each_cell() if not c._destroyed()
-        }
-        _check_duplicate_cell_names(
-            self.layout,
-            all_indices,
-            auto_rename=deduplicate_cell_names,
-            tkcells=self.tkcells,
-        )
-
-        return self.layout.write_bytes(options)
+        try:
+            return self.layout.write_bytes(options)
+        except RuntimeError:
+            all_indices = {
+                c.cell_index() for c in self.layout.each_cell() if not c._destroyed()
+            }
+            _check_duplicate_cell_names(
+                self.layout,
+                all_indices,
+                auto_rename=deduplicate_cell_names,
+                tkcells=self.tkcells,
+            )
+            return self.layout.write_bytes(options)
 
     def top_kcells(self) -> list[KCell]:
         """Return the top KCells."""
