@@ -145,11 +145,56 @@ __all__ = [
 ]
 
 
+def _cell_detail(
+    ci: int,
+    layout: kdb.Layout,
+    tkcells: Mapping[int, TKCell] | None,
+) -> str:
+    """Build a concise description of a cell for error/warning messages."""
+    tkcell = tkcells.get(ci) if tkcells else None
+    parts = [f"cell_index={ci}"]
+
+    if tkcell is not None:
+        factory_name = tkcell.basename or tkcell.function_name
+        if factory_name:
+            parts.append(f"factory={factory_name!r}")
+            factory = tkcell.kcl.factories.get(factory_name) or (
+                tkcell.kcl.virtual_factories.get(factory_name)
+            )
+            if factory is not None:
+                lineno = getattr(
+                    getattr(factory._f_orig, "__code__", None),
+                    "co_firstlineno",
+                    None,
+                )
+                loc = str(factory.file)
+                if lineno is not None:
+                    loc += f":{lineno}"
+                parts.append(loc)
+        else:
+            c = layout.cell(ci)
+            cell_name = c.name if c is not None and not c._destroyed() else None
+            parts.append(f"no factory, name={cell_name!r}")
+
+    c = layout.cell(ci)
+    if c is not None and not c._destroyed():
+        parent_names = []
+        for parent_ci in c.caller_cells():
+            pc = layout.cell(parent_ci)
+            if pc is not None and not pc._destroyed():
+                parent_names.append(pc.name)
+        if parent_names:
+            parts.append(f"parent(s): {parent_names}")
+
+    return ", ".join(parts)
+
+
 def _check_duplicate_cell_names(
     layout: kdb.Layout,
     cell_indices: set[int],
     *,
     auto_rename: bool = False,
+    tkcells: Mapping[int, TKCell] | None = None,
 ) -> None:
     """Check for duplicate cell names before writing a layout.
 
@@ -178,7 +223,10 @@ def _check_duplicate_cell_names(
     if not auto_rename:
         lines = []
         for name, indices in duplicates.items():
-            lines.append(f"  {name!r}: cell_index(es) {indices}")
+            detail_lines = [
+                f"    - {_cell_detail(ci, layout, tkcells)}" for ci in indices
+            ]
+            lines.append(f"  {name!r}:\n" + "\n".join(detail_lines))
         raise DuplicateCellNameError(
             "Duplicate cell names detected — GDS/OASIS require unique cell"
             " names.\n" + "\n".join(lines) + "\n"
@@ -199,12 +247,13 @@ def _check_duplicate_cell_names(
             c.name = unique
             if was_locked:
                 c.locked = True
+            detail = _cell_detail(ci, layout, tkcells)
             logger.warning(
-                "Renamed duplicate cell {old!r} (cell_index={ci}) to {new!r}"
-                " before writing. Set `kf.config.debug_names = True` to catch"
-                " name conflicts earlier.",
+                "Renamed duplicate cell {old!r} ({detail}) -> {new!r}."
+                " Set `kf.config.debug_names = True` to catch name"
+                " conflicts earlier.",
                 old=name,
-                ci=ci,
+                detail=detail,
                 new=unique,
             )
 
