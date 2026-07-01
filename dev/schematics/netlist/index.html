@@ -5824,8 +5824,6 @@ instance ordering stable so the JSON output is reproducible.</p>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>{&quot;instances&quot;:{&quot;s1&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;straight&quot;,&quot;settings&quot;:{&quot;length&quot;:15000,&quot;width&quot;:500}},&quot;x1&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;cross&quot;,&quot;settings&quot;:{&quot;length&quot;:10000,&quot;width&quot;:500}},&quot;x2&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;cross&quot;,&quot;settings&quot;:{&quot;length&quot;:10000,&quot;width&quot;:500}}},&quot;nets&quot;:[[{&quot;instance&quot;:&quot;s1&quot;,&quot;port&quot;:&quot;o1&quot;},{&quot;instance&quot;:&quot;x1&quot;,&quot;port&quot;:&quot;o1&quot;}],[{&quot;instance&quot;:&quot;s1&quot;,&quot;port&quot;:&quot;o2&quot;},{&quot;instance&quot;:&quot;x2&quot;,&quot;port&quot;:&quot;o3&quot;}]],&quot;ports&quot;:[]}
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>
-</code></pre></div>
 <p>The JSON contains three top-level keys:</p>
 <ul>
 <li><code>instances</code> — each instance's <code>component</code>, <code>kcl</code> (the owning KCLayout name),
