@@ -60,7 +60,7 @@ from .cross_section import (
     SymmetricalCrossSection,
     TCrossSection,
 )
-from .exceptions import LockedError, MergeError
+from .exceptions import DuplicateCellNameError, LockedError, MergeError
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .instance import DInstance, Instance, ProtoInstance, ProtoTInstance, VInstance
 from .instances import (
@@ -131,6 +131,119 @@ __all__ = [
     "get_cells",
     "show",
 ]
+
+
+def _cell_detail(
+    ci: int,
+    layout: kdb.Layout,
+    tkcells: Mapping[int, TKCell] | None,
+) -> str:
+    """Build a concise description of a cell for error/warning messages."""
+    tkcell = tkcells.get(ci) if tkcells else None
+    parts = [f"cell_index={ci}"]
+
+    if tkcell is not None:
+        factory_name = tkcell.basename or tkcell.function_name
+        if factory_name:
+            parts.append(f"factory={factory_name!r}")
+            factory = tkcell.kcl.factories.get(factory_name) or (
+                tkcell.kcl.virtual_factories.get(factory_name)
+            )
+            if factory is not None:
+                lineno = getattr(
+                    getattr(factory._f_orig, "__code__", None),
+                    "co_firstlineno",
+                    None,
+                )
+                loc = str(factory.file)
+                if lineno is not None:
+                    loc += f":{lineno}"
+                parts.append(loc)
+        else:
+            c = layout.cell(ci)
+            cell_name = c.name if c is not None and not c._destroyed() else None
+            parts.append(f"no factory, name={cell_name!r}")
+
+    c = layout.cell(ci)
+    if c is not None and not c._destroyed():
+        parent_names = []
+        for parent_ci in c.caller_cells():
+            pc = layout.cell(parent_ci)
+            if pc is not None and not pc._destroyed():
+                parent_names.append(pc.name)
+        if parent_names:
+            parts.append(f"parent(s): {parent_names}")
+
+    return ", ".join(parts)
+
+
+def _check_duplicate_cell_names(
+    layout: kdb.Layout,
+    cell_indices: set[int],
+    *,
+    auto_rename: bool = False,
+    tkcells: Mapping[int, TKCell] | None = None,
+) -> None:
+    """Check for duplicate cell names before writing a layout.
+
+    GDS/OASIS require unique cell names. When duplicates are found among
+    `cell_indices`:
+
+    - If ``auto_rename`` is *False* (the default), raise
+      :class:`~kfactory.exceptions.DuplicateCellNameError`.
+    - If ``auto_rename`` is *True*, rename duplicates with ``$1``, ``$2``, …
+      suffixes (matching KLayout's own convention) and log a warning.
+    """
+    from collections import defaultdict
+
+    name_to_indices: dict[str, list[int]] = defaultdict(list)
+    for ci in cell_indices:
+        c = layout.cell(ci)
+        if c is not None and not c._destroyed():
+            name_to_indices[c.name].append(ci)
+
+    duplicates = {
+        name: indices for name, indices in name_to_indices.items() if len(indices) > 1
+    }
+    if not duplicates:
+        return
+
+    if not auto_rename:
+        lines = []
+        for name, indices in duplicates.items():
+            detail_lines = [
+                f"    - {_cell_detail(ci, layout, tkcells)}" for ci in indices
+            ]
+            lines.append(f"  {name!r}:\n" + "\n".join(detail_lines))
+        raise DuplicateCellNameError(
+            "Duplicate cell names detected — GDS/OASIS require unique cell"
+            " names.\n" + "\n".join(lines) + "\n"
+            "Pass `deduplicate_cell_names=True` to auto-rename duplicates,"
+            " or set `kf.config.debug_names = True` to catch conflicts"
+            " earlier at assignment time."
+        )
+
+    for name, indices in duplicates.items():
+        for ci in indices[1:]:
+            c = layout.cell(ci)
+            if c is None or c._destroyed():
+                continue
+            unique = layout.unique_cell_name(name)
+            was_locked = c.is_locked()
+            if was_locked:
+                c.locked = False
+            c.name = unique
+            if was_locked:
+                c.locked = True
+            detail = _cell_detail(ci, layout, tkcells)
+            logger.warning(
+                "Renamed duplicate cell {old!r} ({detail}) -> {new!r}."
+                " Set `kf.config.debug_names = True` to catch name"
+                " conflicts earlier.",
+                old=name,
+                detail=detail,
+                new=unique,
+            )
 
 
 class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
@@ -495,7 +608,7 @@ class TKCell(BaseKCell):
                     )
                 )
                 if config.debug_names:
-                    raise ValueError(
+                    raise DuplicateCellNameError(
                         "Name conflict in "
                         f"{frame_info.frame.f_locals['f'].__code__.co_filename}::"
                         f"{frame_info.frame.f_locals['f'].__name__} at line "
@@ -537,7 +650,7 @@ class TKCell(BaseKCell):
                         )
                     )
                     if config.debug_names:
-                        raise ValueError(
+                        raise DuplicateCellNameError(
                             "Name conflict in "
                             f"{module_name}{function_name} at line "
                             f"{frame_info.lineno}\n"
@@ -574,7 +687,7 @@ class TKCell(BaseKCell):
                         )
                     )
                     if config.debug_names:
-                        raise ValueError(
+                        raise DuplicateCellNameError(
                             "Name conflict in "
                             f"{frame_info.filename}"
                             f"{function_name} at line {frame_info.lineno}\n"
@@ -1252,10 +1365,17 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
         autoformat_from_file_extension: bool = True,
+        deduplicate_cell_names: bool = False,
     ) -> None:
         """Write a KCell to a GDS.
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
+
+        Args:
+            deduplicate_cell_names: If True, auto-rename duplicate cells with
+                ``$1``, ``$2``, … suffixes before writing. If False (the
+                default), raise :class:`~kfactory.exceptions.DuplicateCellNameError`
+                when duplicates are detected.
         """
         if save_options is None:
             save_options = save_layout_options()
@@ -1285,6 +1405,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     self.convert_to_static(recursive=True)
             case _:
                 ...
+
+        relevant_cells = {self.cell_index(), *self.called_cells()}
+        _check_duplicate_cell_names(
+            self.layout(), relevant_cells, auto_rename=deduplicate_cell_names
+        )
 
         filename = str(filename)
         if autoformat_from_file_extension:
@@ -1296,10 +1421,17 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         save_options: kdb.SaveLayoutOptions | None = None,
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
+        deduplicate_cell_names: bool = False,
     ) -> bytes:
         """Write a KCell to a binary format as oasis.
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
+
+        Args:
+            deduplicate_cell_names: If True, auto-rename duplicate cells with
+                ``$1``, ``$2``, … suffixes before writing. If False (the
+                default), raise :class:`~kfactory.exceptions.DuplicateCellNameError`
+                when duplicates are detected.
         """
         if save_options is None:
             save_options = save_layout_options()
@@ -1329,6 +1461,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     self.convert_to_static(recursive=True)
             case _:
                 ...
+
+        relevant_cells = {self.cell_index(), *self.called_cells()}
+        _check_duplicate_cell_names(
+            self.layout(), relevant_cells, auto_rename=deduplicate_cell_names
+        )
 
         save_options.format = save_options.format or "OASIS"
         save_options.clear_cells()
