@@ -2256,6 +2256,47 @@ class KCLayout(
 
         return self.layout.write(filename, options)
 
+    def write_bytes(
+        self,
+        options: kdb.SaveLayoutOptions | None = None,
+        convert_external_cells: bool = False,
+        set_meta_data: bool = True,
+        deduplicate_cell_names: bool = False,
+    ) -> bytes:
+        if options is None:
+            options = save_layout_options()
+        for kc in list(self.kcells.values()):
+            kc.insert_vinsts()
+        match (set_meta_data, convert_external_cells):
+            case (True, True):
+                self.set_meta_data()
+                for kcell in self.kcells.values():
+                    if not kcell.destroyed():
+                        kcell.set_meta_data()
+                        if kcell.is_library_cell():
+                            kcell.convert_to_static(recursive=True)
+            case (True, False):
+                self.set_meta_data()
+                for kcell in self.kcells.values():
+                    if not kcell.destroyed():
+                        kcell.set_meta_data()
+            case (False, True):
+                for kcell in self.kcells.values():
+                    if kcell.is_library_cell() and not kcell.destroyed():
+                        kcell.convert_to_static(recursive=True)
+
+        all_indices = {
+            c.cell_index() for c in self.layout.each_cell() if not c._destroyed()
+        }
+        _check_duplicate_cell_names(
+            self.layout,
+            all_indices,
+            auto_rename=deduplicate_cell_names,
+            tkcells=self.tkcells,
+        )
+
+        return self.layout.write_bytes(options)
+
     def top_kcells(self) -> list[KCell]:
         """Return the top KCells."""
         return [self[tc.cell_index()] for tc in self.top_cells()]
