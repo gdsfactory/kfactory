@@ -182,7 +182,9 @@ def get_affinity() -> int:
     fall back to the multiprocessing cpu count.
     """
     try:
-        return len(os.sched_getaffinity(0))  # ty:ignore[unresolved-attribute]
+        return len(
+            os.sched_getaffinity(0)  # ty:ignore[unresolved-attribute, unused-ignore-comment]
+        )
     except AttributeError:
         try:
             import multiprocessing
