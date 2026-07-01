@@ -5988,7 +5988,7 @@ signature (or to reuse a name for a different signature) raises this error.</p>
 
     <div class="doc doc-contents ">
             <p class="doc doc-class-bases">
-              Bases: <code><span title="ValueError">ValueError</span></code></p>
+              Bases: <code><span title="RuntimeError">RuntimeError</span></code></p>
 
 
 
@@ -6010,7 +6010,7 @@ about which names are duplicated and which cells are involved.</p>
 <span class="normal">209</span>
 <span class="normal">210</span>
 <span class="normal">211</span>
-<span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DuplicateCellNameError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DuplicateCellNameError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when writing a layout with multiple cells sharing the same name.</span>
 
 <span class="sd">    GDS/OASIS formats require unique cell names. This error provides details</span>
