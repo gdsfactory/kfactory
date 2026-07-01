@@ -9622,7 +9622,10 @@ them</p>
 <span class="normal">2597</span>
 <span class="normal">2598</span>
 <span class="normal">2599</span>
-<span class="normal">2600</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCLayout</span><span class="p">(</span>
+<span class="normal">2600</span>
+<span class="normal">2601</span>
+<span class="normal">2602</span>
+<span class="normal">2603</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCLayout</span><span class="p">(</span>
     <span class="n">BaseModel</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">&quot;allow&quot;</span><span class="p">,</span> <span class="n">validate_assignment</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Small extension to the klayout.db.Layout.</span>
@@ -11636,20 +11639,21 @@ them</p>
                     <span class="k">if</span> <span class="n">kcell</span><span class="o">.</span><span class="n">is_library_cell</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kcell</span><span class="o">.</span><span class="n">destroyed</span><span class="p">():</span>
                         <span class="n">kcell</span><span class="o">.</span><span class="n">convert_to_static</span><span class="p">(</span><span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">all_indices</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">_destroyed</span><span class="p">()</span>
-        <span class="p">}</span>
-        <span class="n">_check_duplicate_cell_names</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span>
-            <span class="n">all_indices</span><span class="p">,</span>
-            <span class="n">auto_rename</span><span class="o">=</span><span class="n">deduplicate_cell_names</span><span class="p">,</span>
-            <span class="n">tkcells</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tkcells</span><span class="p">,</span>
-        <span class="p">)</span>
-
         <span class="k">if</span> <span class="n">autoformat_from_file_extension</span><span class="p">:</span>
             <span class="n">options</span><span class="o">.</span><span class="n">set_format_from_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+            <span class="n">all_indices</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">_destroyed</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="n">_check_duplicate_cell_names</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span>
+                <span class="n">all_indices</span><span class="p">,</span>
+                <span class="n">auto_rename</span><span class="o">=</span><span class="n">deduplicate_cell_names</span><span class="p">,</span>
+                <span class="n">tkcells</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tkcells</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">write_bytes</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -11680,17 +11684,19 @@ them</p>
                     <span class="k">if</span> <span class="n">kcell</span><span class="o">.</span><span class="n">is_library_cell</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kcell</span><span class="o">.</span><span class="n">destroyed</span><span class="p">():</span>
                         <span class="n">kcell</span><span class="o">.</span><span class="n">convert_to_static</span><span class="p">(</span><span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">all_indices</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">_destroyed</span><span class="p">()</span>
-        <span class="p">}</span>
-        <span class="n">_check_duplicate_cell_names</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span>
-            <span class="n">all_indices</span><span class="p">,</span>
-            <span class="n">auto_rename</span><span class="o">=</span><span class="n">deduplicate_cell_names</span><span class="p">,</span>
-            <span class="n">tkcells</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tkcells</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+            <span class="n">all_indices</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">_destroyed</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="n">_check_duplicate_cell_names</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span>
+                <span class="n">all_indices</span><span class="p">,</span>
+                <span class="n">auto_rename</span><span class="o">=</span><span class="n">deduplicate_cell_names</span><span class="p">,</span>
+                <span class="n">tkcells</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tkcells</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">top_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">KCell</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the top KCells.&quot;&quot;&quot;</span>
@@ -13869,13 +13875,13 @@ exists.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2308</span>
-<span class="normal">2309</span>
-<span class="normal">2310</span>
-<span class="normal">2311</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2311</span>
 <span class="normal">2312</span>
 <span class="normal">2313</span>
-<span class="normal">2314</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2314</span>
+<span class="normal">2315</span>
+<span class="normal">2316</span>
+<span class="normal">2317</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Clears all cells in the Layout object.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">kc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcells</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">kc</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="kc">False</span>
@@ -14629,10 +14635,7 @@ this layout.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2555</span>
-<span class="normal">2556</span>
-<span class="normal">2557</span>
-<span class="normal">2558</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2558</span>
 <span class="normal">2559</span>
 <span class="normal">2560</span>
 <span class="normal">2561</span>
@@ -14674,7 +14677,10 @@ this layout.</p>
 <span class="normal">2597</span>
 <span class="normal">2598</span>
 <span class="normal">2599</span>
-<span class="normal">2600</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generic_factory</span><span class="p">[</span><span class="n">F</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]](</span>
+<span class="normal">2600</span>
+<span class="normal">2601</span>
+<span class="normal">2602</span>
+<span class="normal">2603</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generic_factory</span><span class="p">[</span><span class="n">F</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]](</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">F</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -14749,17 +14755,17 @@ this layout.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2333</span>
-<span class="normal">2334</span>
-<span class="normal">2335</span>
-<span class="normal">2336</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2336</span>
 <span class="normal">2337</span>
 <span class="normal">2338</span>
 <span class="normal">2339</span>
 <span class="normal">2340</span>
 <span class="normal">2341</span>
 <span class="normal">2342</span>
-<span class="normal">2343</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_asymmetrical_cross_section</span><span class="p">(</span>
+<span class="normal">2343</span>
+<span class="normal">2344</span>
+<span class="normal">2345</span>
+<span class="normal">2346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_asymmetrical_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">AsymmetricalCrossSection</span>
@@ -14868,10 +14874,7 @@ raises if the resolved one is symmetric.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2374</span>
-<span class="normal">2375</span>
-<span class="normal">2376</span>
-<span class="normal">2377</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2377</span>
 <span class="normal">2378</span>
 <span class="normal">2379</span>
 <span class="normal">2380</span>
@@ -14903,7 +14906,10 @@ raises if the resolved one is symmetric.</p>
 <span class="normal">2406</span>
 <span class="normal">2407</span>
 <span class="normal">2408</span>
-<span class="normal">2409</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_base_cross_section</span><span class="p">(</span>
+<span class="normal">2409</span>
+<span class="normal">2410</span>
+<span class="normal">2411</span>
+<span class="normal">2412</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_base_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">symmetrical</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -15109,17 +15115,17 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2507</span>
-<span class="normal">2508</span>
-<span class="normal">2509</span>
-<span class="normal">2510</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2510</span>
 <span class="normal">2511</span>
 <span class="normal">2512</span>
 <span class="normal">2513</span>
 <span class="normal">2514</span>
 <span class="normal">2515</span>
 <span class="normal">2516</span>
-<span class="normal">2517</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dasymmetric_cross_section</span><span class="p">(</span>
+<span class="normal">2517</span>
+<span class="normal">2518</span>
+<span class="normal">2519</span>
+<span class="normal">2520</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dasymmetric_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">AsymmetricalCrossSection</span>
@@ -15178,10 +15184,7 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2478</span>
-<span class="normal">2479</span>
-<span class="normal">2480</span>
-<span class="normal">2481</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2481</span>
 <span class="normal">2482</span>
 <span class="normal">2483</span>
 <span class="normal">2484</span>
@@ -15193,7 +15196,10 @@ cell_type: type of cell to return</p>
 <span class="normal">2490</span>
 <span class="normal">2491</span>
 <span class="normal">2492</span>
-<span class="normal">2493</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dcross_section</span><span class="p">(</span>
+<span class="normal">2493</span>
+<span class="normal">2494</span>
+<span class="normal">2495</span>
+<span class="normal">2496</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dcross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">symmetrical</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DCrossSection</span> <span class="o">|</span> <span class="n">DAsymmetricCrossSection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a um cross section wrapper (symmetric or asymmetric, see kwarg).&quot;&quot;&quot;</span>
@@ -15235,11 +15241,11 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2316</span>
-<span class="normal">2317</span>
-<span class="normal">2318</span>
-<span class="normal">2319</span>
-<span class="normal">2320</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_enclosure</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2319</span>
+<span class="normal">2320</span>
+<span class="normal">2321</span>
+<span class="normal">2322</span>
+<span class="normal">2323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_enclosure</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="n">LayerEnclosureSpec</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LayerEnclosure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets a layer enclosure by name specification or the layerenclosure itself.&quot;&quot;&quot;</span>
@@ -15273,17 +15279,17 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2495</span>
-<span class="normal">2496</span>
-<span class="normal">2497</span>
-<span class="normal">2498</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2498</span>
 <span class="normal">2499</span>
 <span class="normal">2500</span>
 <span class="normal">2501</span>
 <span class="normal">2502</span>
 <span class="normal">2503</span>
 <span class="normal">2504</span>
-<span class="normal">2505</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_iasymmetric_cross_section</span><span class="p">(</span>
+<span class="normal">2505</span>
+<span class="normal">2506</span>
+<span class="normal">2507</span>
+<span class="normal">2508</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_iasymmetric_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">AsymmetricalCrossSection</span>
@@ -15342,10 +15348,7 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2436</span>
-<span class="normal">2437</span>
-<span class="normal">2438</span>
-<span class="normal">2439</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2439</span>
 <span class="normal">2440</span>
 <span class="normal">2441</span>
 <span class="normal">2442</span>
@@ -15357,7 +15360,10 @@ cell_type: type of cell to return</p>
 <span class="normal">2448</span>
 <span class="normal">2449</span>
 <span class="normal">2450</span>
-<span class="normal">2451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_icross_section</span><span class="p">(</span>
+<span class="normal">2451</span>
+<span class="normal">2452</span>
+<span class="normal">2453</span>
+<span class="normal">2454</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_icross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">symmetrical</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrossSection</span> <span class="o">|</span> <span class="n">AsymmetricCrossSection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a dbu cross section wrapper (symmetric or asymmetric, see kwarg).&quot;&quot;&quot;</span>
@@ -15548,16 +15554,16 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2322</span>
-<span class="normal">2323</span>
-<span class="normal">2324</span>
-<span class="normal">2325</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2325</span>
 <span class="normal">2326</span>
 <span class="normal">2327</span>
 <span class="normal">2328</span>
 <span class="normal">2329</span>
 <span class="normal">2330</span>
-<span class="normal">2331</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_symmetrical_cross_section</span><span class="p">(</span>
+<span class="normal">2331</span>
+<span class="normal">2332</span>
+<span class="normal">2333</span>
+<span class="normal">2334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_symmetrical_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -16721,9 +16727,9 @@ Doesn't allow name duplication.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2304</span>
-<span class="normal">2305</span>
-<span class="normal">2306</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2307</span>
+<span class="normal">2308</span>
+<span class="normal">2309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the top KCell if there is a single one.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">top_cell</span><span class="p">()</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()]</span>
 </code></pre></div></td></tr></table></div>
@@ -16750,9 +16756,9 @@ Doesn't allow name duplication.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2300</span>
-<span class="normal">2301</span>
-<span class="normal">2302</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">KCell</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2303</span>
+<span class="normal">2304</span>
+<span class="normal">2305</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">KCell</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the top KCells.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">tc</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()]</span> <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_cells</span><span class="p">()]</span>
 </code></pre></div></td></tr></table></div>
@@ -17623,7 +17629,8 @@ duplicates are detected.</p>
 <span class="normal">2254</span>
 <span class="normal">2255</span>
 <span class="normal">2256</span>
-<span class="normal">2257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
+<span class="normal">2257</span>
+<span class="normal">2258</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">options</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">SaveLayoutOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -17674,20 +17681,21 @@ duplicates are detected.</p>
                 <span class="k">if</span> <span class="n">kcell</span><span class="o">.</span><span class="n">is_library_cell</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kcell</span><span class="o">.</span><span class="n">destroyed</span><span class="p">():</span>
                     <span class="n">kcell</span><span class="o">.</span><span class="n">convert_to_static</span><span class="p">(</span><span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="n">all_indices</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">c</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">_destroyed</span><span class="p">()</span>
-    <span class="p">}</span>
-    <span class="n">_check_duplicate_cell_names</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span>
-        <span class="n">all_indices</span><span class="p">,</span>
-        <span class="n">auto_rename</span><span class="o">=</span><span class="n">deduplicate_cell_names</span><span class="p">,</span>
-        <span class="n">tkcells</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tkcells</span><span class="p">,</span>
-    <span class="p">)</span>
-
     <span class="k">if</span> <span class="n">autoformat_from_file_extension</span><span class="p">:</span>
         <span class="n">options</span><span class="o">.</span><span class="n">set_format_from_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+        <span class="n">all_indices</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">each_cell</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">_destroyed</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="n">_check_duplicate_cell_names</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span>
+            <span class="n">all_indices</span><span class="p">,</span>
+            <span class="n">auto_rename</span><span class="o">=</span><span class="n">deduplicate_cell_names</span><span class="p">,</span>
+            <span class="n">tkcells</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tkcells</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
