@@ -1144,32 +1144,25 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
           references), then creates the port via `cell.create_port`.
         """
         port = self.ports[name]
-        if isinstance(port, PortArrayRef):
+
+        def target_instance(port_ref: PortRef) -> Instance | VInstance:
             if instances is not None:
-                return cell.add_port(
-                    port=instances[port.instance].ports[port.port, port.ia, port.ib],
-                    name=name,
-                ).base
-            if self.instances[port.instance].virtual:
-                return cell.add_port(
-                    port=cell.vinsts[port.instance].ports[port.port, port.ia, port.ib],
-                    name=name,
-                ).base
+                return instances[port_ref.instance]
+            inst = self.instances[port_ref.instance]
+            return (
+                cell.vinsts[port_ref.instance]
+                if inst.virtual
+                else cell.insts[port_ref.instance]
+            )
+
+        if isinstance(port, PortArrayRef):
             return cell.add_port(
-                port=cell.insts[port.instance].ports[port.port, port.ia, port.ib],
+                port=target_instance(port).ports[port.port, port.ia, port.ib],
                 name=name,
             ).base
         if isinstance(port, PortRef):
-            if instances is not None:
-                return cell.add_port(
-                    port=instances[port.instance].ports[port.port], name=name
-                ).base
-            if self.instances[port.instance].virtual:
-                return cell.add_port(
-                    port=cell.vinsts[port.instance].ports[port.port], name=name
-                ).base
             return cell.add_port(
-                port=cell.insts[port.instance].ports[port.port], name=name
+                port=target_instance(port).ports[port.port], name=name
             ).base
 
         if isinstance(port.x, PortRef):
