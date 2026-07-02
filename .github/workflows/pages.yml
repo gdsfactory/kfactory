@@ -34,7 +34,7 @@ jobs:
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt install graphviz graphviz-dev
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # mike needs full history of gh-pages
 
@@ -42,7 +42,7 @@ jobs:
       - uses: extractions/setup-just@v4
 
       - name: Cache executed notebooks
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             docs/.build-cache
