@@ -80,6 +80,7 @@ from .kcell import (
     TKCell,
     TVCell,
     VKCell,
+    _check_duplicate_cell_names,
     show,
 )
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
@@ -2196,6 +2197,7 @@ class KCLayout(
         set_meta_data: bool = True,
         convert_external_cells: bool = False,
         autoformat_from_file_extension: bool = True,
+        deduplicate_cell_names: bool = False,
     ) -> None:
         """Write a GDS file into the existing Layout.
 
@@ -2209,6 +2211,11 @@ class KCLayout(
             autoformat_from_file_extension: Set the format of the output file
                 automatically from the file extension of `filename`. This is necessary
                 for the options. If not set, this will default to `GDSII`.
+            deduplicate_cell_names: If True, auto-rename duplicate cells with
+                ``$1``, ``$2``, … suffixes before writing. If False (the
+                default), raise
+                :class:`~kfactory.exceptions.DuplicateCellNameError` when
+                duplicates are detected.
         """
         if options is None:
             options = save_layout_options()
@@ -2236,8 +2243,62 @@ class KCLayout(
 
         if autoformat_from_file_extension:
             options.set_format_from_filename(filename)
+        try:
+            return self.layout.write(filename, options)
+        except RuntimeError:
+            all_indices = {
+                c.cell_index() for c in self.layout.each_cell() if not c._destroyed()
+            }
+            _check_duplicate_cell_names(
+                self.layout,
+                all_indices,
+                auto_rename=deduplicate_cell_names,
+                tkcells=self.tkcells,
+            )
+            return self.layout.write(filename, options)
 
-        return self.layout.write(filename, options)
+    def write_bytes(
+        self,
+        options: kdb.SaveLayoutOptions | None = None,
+        convert_external_cells: bool = False,
+        set_meta_data: bool = True,
+        deduplicate_cell_names: bool = False,
+    ) -> bytes:
+        if options is None:
+            options = save_layout_options()
+        for kc in list(self.kcells.values()):
+            kc.insert_vinsts()
+        match (set_meta_data, convert_external_cells):
+            case (True, True):
+                self.set_meta_data()
+                for kcell in self.kcells.values():
+                    if not kcell.destroyed():
+                        kcell.set_meta_data()
+                        if kcell.is_library_cell():
+                            kcell.convert_to_static(recursive=True)
+            case (True, False):
+                self.set_meta_data()
+                for kcell in self.kcells.values():
+                    if not kcell.destroyed():
+                        kcell.set_meta_data()
+            case (False, True):
+                for kcell in self.kcells.values():
+                    if kcell.is_library_cell() and not kcell.destroyed():
+                        kcell.convert_to_static(recursive=True)
+
+        try:
+            return self.layout.write_bytes(options)
+        except RuntimeError:
+            all_indices = {
+                c.cell_index() for c in self.layout.each_cell() if not c._destroyed()
+            }
+            _check_duplicate_cell_names(
+                self.layout,
+                all_indices,
+                auto_rename=deduplicate_cell_names,
+                tkcells=self.tkcells,
+            )
+            return self.layout.write_bytes(options)
 
     def top_kcells(self) -> list[KCell]:
         """Return the top KCells."""
