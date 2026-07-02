@@ -14,6 +14,7 @@ __all__ = [
     "CellNameError",
     "CrossSectionNamingConflictError",
     "CrossSectionSymmetryMismatchError",
+    "DuplicateCellNameError",
     "FactoriesLockedError",
     "InvalidLayerError",
     "LockedError",
@@ -201,6 +202,14 @@ class CrossSectionSymmetryMismatchError(ValueError):
 
 class CellNameError(ValueError):
     """Raised if a KCell is created and the automatic assigned name is taken."""
+
+
+class DuplicateCellNameError(RuntimeError):
+    """Raised when writing a layout with multiple cells sharing the same name.
+
+    GDS/OASIS formats require unique cell names. This error provides details
+    about which names are duplicated and which cells are involved.
+    """
 
 
 class InvalidLayerError(ValueError):
