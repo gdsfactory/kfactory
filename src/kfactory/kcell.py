@@ -2400,9 +2400,7 @@ def _check_pin_ports_in_cell(
     cell_ports = cell.base.ports
     cell_port_ids = {id(port) for port in cell_ports}
     for port in ports:
-        if id(port.base) in cell_port_ids:
-            continue
-        if port.base not in cell_ports:
+        if id(port.base) not in cell_port_ids:
             raise ValueError(
                 f"Cannot create pin {pin_name!r}: port {port!r} is not a port"
                 f" of cell {cell.name!r}. Add it via cell.create_port/add_port"
