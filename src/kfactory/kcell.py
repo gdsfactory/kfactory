@@ -464,6 +464,8 @@ class TKCell(BaseKCell):
 
     @locked.setter
     def locked(self, value: bool) -> None:
+        if self.kdb_cell.is_locked() != value:
+            self._ports_name_cache.clear()
         self.kdb_cell.locked = value
 
     def __repr__(self) -> str:
@@ -617,6 +619,8 @@ class TVCell(BaseKCell):
 
     @locked.setter
     def locked(self, value: bool) -> None:
+        if self._locked != value:
+            self._ports_name_cache.clear()
         self._locked = value
 
     @property
@@ -2472,7 +2476,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         return DPorts(
             kcl=self.kcl,
             bases=self._base.ports,
-            name_cache=self._base._ports_name_cache,
+            name_cache=self._base._ports_name_cache if self.locked else None,
         )
 
     @ports.setter
@@ -2665,7 +2669,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         return Ports(
             kcl=self.kcl,
             bases=self._base.ports,
-            name_cache=self._base._ports_name_cache,
+            name_cache=self._base._ports_name_cache if self.locked else None,
         )
 
     @ports.setter
@@ -3126,7 +3130,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         return DPorts(
             kcl=self.kcl,
             bases=self._base.ports,
-            name_cache=self._base._ports_name_cache,
+            name_cache=self._base._ports_name_cache if self.locked else None,
         )
 
     @ports.setter

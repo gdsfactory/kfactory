@@ -73,7 +73,7 @@ class ProtoPorts[T: (int, float)](Protocol):
     _kcl: KCLayout
     _locked: bool
     _bases: list[BasePort]
-    _name_cache: dict[str | None, BasePort]
+    _name_cache: dict[str | None, BasePort] | None
 
     @overload
     def __init__(self, *, kcl: KCLayout) -> None: ...
@@ -100,7 +100,7 @@ class ProtoPorts[T: (int, float)](Protocol):
         *,
         kcl: KCLayout,
         bases: list[BasePort],
-        name_cache: dict[str | None, BasePort],
+        name_cache: dict[str | None, BasePort] | None = None,
     ) -> None: ...
 
     def __init__(
@@ -117,6 +117,7 @@ class ProtoPorts[T: (int, float)](Protocol):
             kcl: The KCLayout instance.
             ports: The ports to add.
             bases: The bases to add.
+            name_cache: Optional shared name lookup cache.
         """
         self.kcl = kcl
         if bases is not None:
@@ -125,7 +126,7 @@ class ProtoPorts[T: (int, float)](Protocol):
             self._bases = [p.base for p in ports]
         else:
             self._bases = []
-        self._name_cache = name_cache if name_cache is not None else {}
+        self._name_cache = name_cache
         self._locked = False
 
     def __len__(self) -> int:
@@ -138,13 +139,24 @@ class ProtoPorts[T: (int, float)](Protocol):
         return self._bases
 
     def _rebuild_name_cache(self) -> dict[str | None, BasePort]:
+        if self._name_cache is None:
+            return {}
         self._name_cache.clear()
         for base in self._bases:
             self._name_cache.setdefault(base.name, base)
         return self._name_cache
 
+    def _find_base_by_name(self, key: str | None) -> BasePort:
+        for base in self._bases:
+            if base.name == key:
+                return base
+        raise KeyError(key)
+
     def _get_base_by_name(self, key: str | None) -> BasePort:
         name_cache = self._name_cache
+        if name_cache is None:
+            return self._find_base_by_name(key)
+
         if not name_cache and self._bases:
             self._rebuild_name_cache()
 
@@ -159,7 +171,8 @@ class ProtoPorts[T: (int, float)](Protocol):
         raise KeyError(key)
 
     def _add_to_name_cache(self, base: BasePort) -> None:
-        self._name_cache.setdefault(base.name, base)
+        if self._name_cache is not None:
+            self._name_cache.setdefault(base.name, base)
 
     @property
     def kcl(self) -> KCLayout:
@@ -271,7 +284,8 @@ class ProtoPorts[T: (int, float)](Protocol):
     def clear(self) -> None:
         """Deletes all ports."""
         self._bases.clear()
-        self._name_cache.clear()
+        if self._name_cache is not None:
+            self._name_cache.clear()
 
     def __eq__(self, other: object) -> bool:
         """Support for `ports1 == ports2` comparisons."""
