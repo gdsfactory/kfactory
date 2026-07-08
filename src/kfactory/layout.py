@@ -557,6 +557,44 @@ class KCLayout(
     ) -> Callable[..., Any]:
         return self._register_annotation_provider("metadata", target, provider)
 
+    def schematic_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+    ) -> Callable[..., Any]:
+        factory = self._resolve_kcell_factory(target)
+
+        def register(f: Callable[..., Any]) -> Callable[..., Any]:
+            factory._f_schematic = f
+            return f
+
+        if provider is None:
+            return register
+        return register(provider)
+
+    def _resolve_kcell_factory(
+        self, target: str | WrappedKCellFunc[Any, Any]
+    ) -> WrappedKCellFunc[Any, Any]:
+        if not isinstance(target, str):
+            if target in self.factories:
+                return target
+            raise KeyError(f"Unknown factory target {target!r}.")
+
+        if "." in target:
+            factory = self.factories.get_by_qualified_name(target)
+            if factory is None:
+                raise KeyError(f"Unknown factory FQN {target!r}.")
+            return factory
+
+        matches = self.factories.get_all_by_name(target)
+        if not matches:
+            raise KeyError(f"Unknown factory name {target!r}.")
+        if len(matches) > 1:
+            raise ValueError(
+                f"Ambiguous factory name {target!r}; use a fully-qualified name."
+            )
+        return matches[0]
+
     def annotation_providers_for(
         self, factory: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]
     ) -> tuple[_AnnotationProviderRecord, ...]:

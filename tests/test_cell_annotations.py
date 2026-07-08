@@ -153,6 +153,54 @@ def test_schematic_function_is_separate(kcl: kf.KCLayout) -> None:
     assert isinstance(factory.get_schematic(), kf.DSchematic)
 
 
+def test_schematic_for_decorator(kcl: kf.KCLayout) -> None:
+    @kcl.cell
+    def my_cell() -> kf.KCell:
+        return kcl.kcell()
+
+    factory = kcl.factories["my_cell"]
+    assert not factory.schematic_driven()
+
+    @kcl.schematic_for("my_cell")
+    def my_schematic() -> kf.DSchematic:
+        s = kf.DSchematic()
+        s.info["symbol"] = "ckt"
+        return s
+
+    assert factory.schematic_driven()
+    schematic = factory.get_schematic()
+    assert isinstance(schematic, kf.DSchematic)
+    assert schematic.info["symbol"] == "ckt"
+
+
+def test_schematic_for_with_fqn(kcl: kf.KCLayout) -> None:
+    @kcl.cell
+    def another_cell() -> kf.KCell:
+        return kcl.kcell()
+
+    factory = kcl.factories["another_cell"]
+
+    @kcl.schematic_for(factory.qualified_name)
+    def schematic() -> kf.DSchematic:
+        return kf.DSchematic()
+
+    assert factory.schematic_driven()
+
+
+def test_schematic_for_with_object(kcl: kf.KCLayout) -> None:
+    @kcl.cell
+    def obj_cell() -> kf.KCell:
+        return kcl.kcell()
+
+    factory = kcl.factories["obj_cell"]
+
+    @kcl.schematic_for(factory)
+    def schematic() -> kf.DSchematic:
+        return kf.DSchematic()
+
+    assert factory.schematic_driven()
+
+
 def test_display_as_dict(kcl: kf.KCLayout) -> None:
     @kcl.cell
     def comp() -> kf.KCell:
