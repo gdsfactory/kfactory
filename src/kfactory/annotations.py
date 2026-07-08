@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, RootModel, TypeAdapter
+from pydantic import BaseModel, Field, TypeAdapter
 
-type ParamExpr = str
 type JSONSerializable = (
     int
     | float
@@ -39,127 +38,23 @@ class AnnotationPort(BaseModel):
     aliases: tuple[str, ...] = ()
 
 
-class DisplaySpec(BaseModel):
-    kind: str = "builtin"
-    name: str | None = None
-    path: str | None = None
-    library: str | None = None
-    parameters: dict[str, JSONSerializable] = Field(default_factory=dict)
-
-
-class BaseModelSpec(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    language: str
-    simulator: str | None = None
-    implementation: str | None = None
-    name: str
-    port_order: tuple[str, ...] = ()
-    params: dict[str, ParamExpr] = Field(default_factory=dict)
-
-
-class SaxModelSpec(BaseModelSpec):
-    language: Literal["sax"] = "sax"
-    simulator: str | None = "sax"
-    module: str
-    qualname: str
-
-
-class SpiceModelSpec(BaseModelSpec):
-    language: Literal["spice", "spectre"]
-    spice_type: str
-    library: str
-    sections: tuple[str, ...] = ()
-    code: str | None = None
-
-
-class GenericModelSpec(BaseModelSpec):
-    model_config = ConfigDict(extra="allow")
-
-
-type ModelSpec = Annotated[
-    SaxModelSpec | SpiceModelSpec | GenericModelSpec,
-    Field(union_mode="left_to_right"),
-]
-
-_model_adapter = TypeAdapter(ModelSpec)
-_port_adapter = TypeAdapter(AnnotationPort)
-_display_adapter = TypeAdapter(DisplaySpec)
-
-
-class ModelList(RootModel[tuple[ModelSpec, ...]]):
-    root: tuple[ModelSpec, ...] = ()
-
-    def __iter__(self) -> Iterator[ModelSpec]:
-        return iter(self.root)
-
-    def __len__(self) -> int:
-        return len(self.root)
-
-    def __getitem__(self, idx: int) -> ModelSpec:
-        return self.root[idx]
-
-    def select(
-        self,
-        *,
-        language: str | None = None,
-        simulator: str | None = None,
-        implementation: str | None = None,
-        name: str | None = None,
-    ) -> tuple[ModelSpec, ...]:
-        return tuple(
-            model
-            for model in self.root
-            if (language is None or model.language == language)
-            and (simulator is None or model.simulator == simulator)
-            and (implementation is None or model.implementation == implementation)
-            and (name is None or model.name == name)
-        )
-
-
 class CellAnnotation(BaseModel):
     device_type: str | None = None
     ports: tuple[AnnotationPort, ...] = ()
-    models: ModelList = Field(default_factory=ModelList)
+    models: list = Field(default_factory=list)
     tags: tuple[str, ...] = ()
-    display: DisplaySpec | None = None
+    display: dict = Field(default_factory=dict)
     metadata: dict[str, JSONSerializable] = Field(default_factory=dict)
-
-
-@dataclass(frozen=True, slots=True)
-class _ModelSelector:
-    language: str | None = None
-    simulator: str | None = None
-    implementation: str | None = None
-    name: str | None = None
-
-    def matches(self, model: ModelSpec) -> bool:
-        return (
-            (self.language is None or model.language == self.language)
-            and (self.simulator is None or model.simulator == self.simulator)
-            and (
-                self.implementation is None
-                or model.implementation == self.implementation
-            )
-            and (self.name is None or model.name == self.name)
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class _ModelPatch:
-    append: tuple[ModelSpec, ...] = ()
-    prepend: tuple[ModelSpec, ...] = ()
-    replace: tuple[ModelSpec, ...] | None = None
-    remove: tuple[_ModelSelector, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
 class _CellAnnotationPatch:
     device_type: str | None = None
     ports: tuple[AnnotationPort, ...] | None = None
-    models: _ModelPatch = _ModelPatch()
+    models: list | None = None
+    models_position: Literal["append", "prepend"] = "append"
     tags: tuple[str, ...] = ()
-    display: DisplaySpec | None = None
+    display: dict | None = None
     metadata: dict[str, JSONSerializable] | None = None
 
 
@@ -263,11 +158,8 @@ def provider_result_to_patch(
         case "model":
             models = _coerce_models(result)
             return _CellAnnotationPatch(
-                models=(
-                    _ModelPatch(prepend=models)
-                    if record.position == "prepend"
-                    else _ModelPatch(append=models)
-                )
+                models=models,
+                models_position=record.position,
             )
         case "device_type":
             return _CellAnnotationPatch(
@@ -279,9 +171,7 @@ def provider_result_to_patch(
             return _CellAnnotationPatch(tags=_coerce_tags(result))
         case "display":
             return _CellAnnotationPatch(
-                display=(
-                    None if result is None else _display_adapter.validate_python(result)
-                )
+                display=None if result is None else _coerce_display(result)
             )
         case "metadata":
             if result is None:
@@ -297,9 +187,9 @@ def resolve_annotation(
 ) -> CellAnnotation:
     device_type: str | None = None
     ports: tuple[AnnotationPort, ...] | None = None
-    models: tuple[ModelSpec, ...] = ()
+    models: list = []
     tags: tuple[str, ...] = ()
-    display: DisplaySpec | None = None
+    display: dict = {}
     metadata: dict[str, JSONSerializable] = {}
 
     for record in providers:
@@ -323,25 +213,17 @@ def resolve_annotation(
                 raise ValueError("Conflicting annotation port declarations.")
             ports = patch.ports
 
-        if patch.models.replace is not None:
-            models = patch.models.replace
-        if patch.models.remove:
-            models = tuple(
-                model
-                for model in models
-                if not any(selector.matches(model) for selector in patch.models.remove)
-            )
-        if patch.models.prepend:
-            models = (*patch.models.prepend, *models)
-        if patch.models.append:
-            models = (*models, *patch.models.append)
-        models = _dedupe_models(models)
+        if patch.models is not None:
+            if patch.models_position == "prepend":
+                models = patch.models + models
+            else:
+                models = models + patch.models
 
         if patch.tags:
             tags = _merge_tags(tags, patch.tags)
 
-        if patch.display is not None:
-            if display is not None and display != patch.display and not record.replace:
+        if patch.display:
+            if display and patch.display != display and not record.replace:
                 raise ValueError("Conflicting annotation display declarations.")
             display = patch.display
 
@@ -354,7 +236,7 @@ def resolve_annotation(
     return CellAnnotation(
         device_type=device_type,
         ports=ports or (),
-        models=ModelList(models),
+        models=models,
         tags=tags,
         display=display,
         metadata=metadata,
@@ -368,10 +250,10 @@ def _annotation_result_to_patch(result: Any) -> _CellAnnotationPatch:
         return _CellAnnotationPatch(
             device_type=result.device_type,
             ports=result.ports,
-            models=_ModelPatch(append=tuple(result.models)),
+            models=list(result.models),
             tags=result.tags,
-            display=result.display,
-            metadata=result.metadata,
+            display=result.display or None,
+            metadata=result.metadata or None,
         )
     if not isinstance(result, Mapping):
         raise TypeError(
@@ -389,12 +271,10 @@ def _annotation_result_to_patch(result: Any) -> _CellAnnotationPatch:
             if "ports" not in result or result.get("ports") is None
             else _coerce_ports(result.get("ports"))
         ),
-        models=_ModelPatch(append=_coerce_models(result.get("models", ()))),
+        models=_coerce_models(result.get("models", ())),
         tags=_coerce_tags(result.get("tags", ())),
         display=(
-            None
-            if result.get("display") is None
-            else _display_adapter.validate_python(result.get("display"))
+            _coerce_display(result.get("display")) if result.get("display") else None
         ),
         metadata=(
             None
@@ -402,6 +282,9 @@ def _annotation_result_to_patch(result: Any) -> _CellAnnotationPatch:
             else {str(k): v for k, v in dict(result.get("metadata", {})).items()}
         ),
     )
+
+
+_port_adapter: TypeAdapter[AnnotationPort] = TypeAdapter(AnnotationPort)
 
 
 def _coerce_ports(value: Any) -> tuple[AnnotationPort, ...]:
@@ -412,16 +295,22 @@ def _coerce_ports(value: Any) -> tuple[AnnotationPort, ...]:
     return tuple(_port_adapter.validate_python(port) for port in value)
 
 
-def _coerce_models(value: Any) -> tuple[ModelSpec, ...]:
+def _coerce_models(value: Any) -> list:
     if value is None:
-        return ()
-    if isinstance(value, BaseModelSpec):
-        return (_model_adapter.validate_python(value),)
-    if isinstance(value, ModelList):
-        return tuple(value)
+        return []
+    if isinstance(value, Mapping):
+        return [dict(value)]
     if isinstance(value, Sequence) and not isinstance(value, str | bytes):
-        return tuple(_model_adapter.validate_python(model) for model in value)
-    return (_model_adapter.validate_python(value),)
+        return [dict(m) if isinstance(m, Mapping) else m for m in value]
+    return [value]
+
+
+def _coerce_display(value: Any) -> dict:
+    if value is None:
+        return {}
+    if isinstance(value, Mapping):
+        return dict(value)
+    return {"name": str(value)}
 
 
 def _coerce_tags(value: Any) -> tuple[str, ...]:
@@ -440,19 +329,3 @@ def _merge_tags(existing: tuple[str, ...], new: tuple[str, ...]) -> tuple[str, .
             seen.add(tag)
             merged.append(tag)
     return tuple(merged)
-
-
-def _model_key(model: ModelSpec) -> tuple[str, str | None, str | None, str]:
-    return (model.language, model.simulator, model.implementation, model.name)
-
-
-def _dedupe_models(models: tuple[ModelSpec, ...]) -> tuple[ModelSpec, ...]:
-    seen: set[tuple[str, str | None, str | None, str]] = set()
-    deduped: list[ModelSpec] = []
-    for model in models:
-        key = _model_key(model)
-        if key in seen:
-            continue
-        seen.add(key)
-        deduped.append(model)
-    return tuple(deduped)

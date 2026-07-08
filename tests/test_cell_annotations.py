@@ -31,13 +31,14 @@ def test_layout_annotation_decorators(kcl: kf.KCLayout) -> None:
         ]
 
     @kcl.model_for("mmi1x2")
-    def base_model() -> kf.SaxModelSpec:
-        return kf.SaxModelSpec(
-            name="mmi",
-            module="base_models",
-            qualname="mmi",
-            port_order=("o1", "o2", "o3"),
-        )
+    def base_model() -> dict:
+        return {
+            "language": "sax",
+            "name": "mmi",
+            "module": "base_models",
+            "qualname": "mmi",
+            "port_order": ("o1", "o2", "o3"),
+        }
 
     factory = kcl.factories["mmi1x2"]
     annotation = factory.get_annotation(n=3)
@@ -46,7 +47,8 @@ def test_layout_annotation_decorators(kcl: kf.KCLayout) -> None:
     assert annotation.device_type == "mmi-1x2"
     assert [p.name for p in annotation.ports] == ["o1", "o2", "o3", "o4"]
     assert [p.side for p in annotation.ports] == ["left", "right", "right", "right"]
-    assert annotation.models.select(simulator="sax")[0].module == "base_models"
+    assert len(annotation.models) == 1
+    assert annotation.models[0]["module"] == "base_models"
 
 
 def test_fqn_providers_and_prepend(kcl: kf.KCLayout) -> None:
@@ -57,20 +59,22 @@ def test_fqn_providers_and_prepend(kcl: kf.KCLayout) -> None:
     factory = kcl.factories["straight"]
 
     @kcl.model_for("straight")
-    def base_model() -> kf.SaxModelSpec:
-        return kf.SaxModelSpec(
-            name="straight",
-            module="base_models",
-            qualname="straight",
-        )
+    def base_model() -> dict:
+        return {
+            "language": "sax",
+            "name": "straight",
+            "module": "base_models",
+            "qualname": "straight",
+        }
 
     @kcl.model_for(factory.qualified_name, position="prepend")
-    def preferred_model() -> kf.SaxModelSpec:
-        return kf.SaxModelSpec(
-            name="straight",
-            module="preferred_models",
-            qualname="straight",
-        )
+    def preferred_model() -> dict:
+        return {
+            "language": "sax",
+            "name": "straight_preferred",
+            "module": "preferred_models",
+            "qualname": "straight",
+        }
 
     @kcl.tags_for(factory.qualified_name)
     def tags() -> tuple[str, ...]:
@@ -79,7 +83,8 @@ def test_fqn_providers_and_prepend(kcl: kf.KCLayout) -> None:
     annotation = factory.get_annotation()
 
     assert kcl.factories.get_by_qualified_name(factory.qualified_name) is factory
-    assert [model.module for model in annotation.models] == ["preferred_models"]
+    assert annotation.models[0]["module"] == "preferred_models"
+    assert annotation.models[1]["module"] == "base_models"
     assert annotation.tags == ("fqn",)
 
 
@@ -146,3 +151,34 @@ def test_schematic_function_is_separate(kcl: kf.KCLayout) -> None:
     assert not factory.has_annotation()
     assert factory.get_annotation() == kf.CellAnnotation()
     assert isinstance(factory.get_schematic(), kf.DSchematic)
+
+
+def test_display_as_dict(kcl: kf.KCLayout) -> None:
+    @kcl.cell
+    def comp() -> kf.KCell:
+        return kcl.kcell()
+
+    @kcl.display_for("comp")
+    def display() -> dict:
+        return {"kind": "svg", "path": "/icons/comp.svg"}
+
+    annotation = kcl.factories["comp"].get_annotation()
+    assert annotation.display == {"kind": "svg", "path": "/icons/comp.svg"}
+
+
+def test_models_are_plain_lists(kcl: kf.KCLayout) -> None:
+    @kcl.cell
+    def dev() -> kf.KCell:
+        return kcl.kcell()
+
+    @kcl.model_for("dev")
+    def models() -> list:
+        return [
+            {"language": "sax", "name": "dev_sax"},
+            {"language": "spice", "name": "dev_spice"},
+        ]
+
+    annotation = kcl.factories["dev"].get_annotation()
+    assert len(annotation.models) == 2
+    assert annotation.models[0]["language"] == "sax"
+    assert annotation.models[1]["language"] == "spice"

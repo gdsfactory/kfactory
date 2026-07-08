@@ -15,11 +15,6 @@ from klayout import rdb
 from .annotations import (
     AnnotationPort,
     CellAnnotation,
-    DisplaySpec,
-    GenericModelSpec,
-    ModelList,
-    SaxModelSpec,
-    SpiceModelSpec,
 )
 from .conf import config, logger, CheckInstances
 from .cross_section import (
@@ -132,8 +127,6 @@ __all__ = [
     "DPorts",
     "DSchema",
     "DSchematic",
-    "DisplaySpec",
-    "GenericModelSpec",
     "Info",
     "Instance",
     "InstanceGroup",
@@ -147,7 +140,6 @@ __all__ = [
     "LayerEnum",
     "LayerInfos",
     "LayerStack",
-    "ModelList",
     "Netlist",
     "PathLengthMatch",
     "Pin",
@@ -157,10 +149,8 @@ __all__ = [
     "ProtoPin",
     "ProtoPort",
     "ProtoTKCell",
-    "SaxModelSpec",
     "Schema",
     "Schematic",
-    "SpiceModelSpec",
     "SymmetricalCrossSection",
     "VInstance",
     "VInstanceGroup",
