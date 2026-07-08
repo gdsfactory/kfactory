@@ -3,9 +3,9 @@ from __future__ import annotations
 import inspect
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Any, Literal, NotRequired, TypedDict
 
-from pydantic import BaseModel, Field, TypeAdapter
+from pydantic import BaseModel, Field
 
 type JSONSerializable = (
     int
@@ -27,15 +27,15 @@ type AnnotationProviderKind = Literal[
 ]
 
 
-class AnnotationPort(BaseModel):
+class AnnotationPort(TypedDict):
     name: str
     kind: str
-    side: Literal["left", "right", "top", "bottom"] | None = None
-    orientation: Literal[0, 90, 180, 270] | None = None
-    order: int | None = None
-    cross_section: str | None = None
-    role: str | None = None
-    aliases: tuple[str, ...] = ()
+    side: NotRequired[Literal["left", "right", "top", "bottom"] | None]
+    orientation: NotRequired[Literal[0, 90, 180, 270] | None]
+    order: NotRequired[int | None]
+    cross_section: NotRequired[str | None]
+    role: NotRequired[str | None]
+    aliases: NotRequired[tuple[str, ...]]
 
 
 class CellAnnotation(BaseModel):
@@ -284,15 +284,12 @@ def _annotation_result_to_patch(result: Any) -> _CellAnnotationPatch:
     )
 
 
-_port_adapter: TypeAdapter[AnnotationPort] = TypeAdapter(AnnotationPort)
-
-
 def _coerce_ports(value: Any) -> tuple[AnnotationPort, ...]:
     if value is None:
         return ()
-    if isinstance(value, AnnotationPort):
-        return (value,)
-    return tuple(_port_adapter.validate_python(port) for port in value)
+    if isinstance(value, Mapping):
+        return (dict(value),)  # type: ignore[return-value]
+    return tuple(dict(p) if isinstance(p, Mapping) else p for p in value)  # type: ignore[return-value]
 
 
 def _coerce_models(value: Any) -> list:

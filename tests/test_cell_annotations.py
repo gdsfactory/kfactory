@@ -45,8 +45,8 @@ def test_layout_annotation_decorators(kcl: kf.KCLayout) -> None:
 
     assert factory.has_annotation()
     assert annotation.device_type == "mmi-1x2"
-    assert [p.name for p in annotation.ports] == ["o1", "o2", "o3", "o4"]
-    assert [p.side for p in annotation.ports] == ["left", "right", "right", "right"]
+    assert [p["name"] for p in annotation.ports] == ["o1", "o2", "o3", "o4"]
+    assert [p["side"] for p in annotation.ports] == ["left", "right", "right", "right"]
     assert len(annotation.models) == 1
     assert annotation.models[0]["module"] == "base_models"
 
