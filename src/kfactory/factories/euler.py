@@ -106,66 +106,54 @@ class BendSEulerFactory(Protocol[KC_co]):
         ...
 
 
+def _euler_bend_xy(
+    angle_amount: deg = 90, radius: um = 100, resolution: float = 150
+) -> tuple[np.ndarray, np.ndarray]:
+    if angle_amount < 0:
+        raise ValueError(f"angle_amount should be positive. Got {angle_amount}")
+
+    eth = angle_amount * np.pi / 180
+    if eth == 0:
+        return np.array([0.0]), np.array([0.0])
+
+    th = eth / 2
+    total_length = 4 * radius * th
+    a = np.sqrt(radius**2 * np.abs(th))
+    sq2pi = np.sqrt(2 * np.pi)
+    fasin, facos = fresnel(np.sqrt(2 / np.pi) * radius * th / a)
+    step = total_length / max(int(th * resolution), 1)
+    s_vals = np.linspace(0.0, total_length, round(total_length / step) + 1)
+    left_mask = s_vals <= total_length / 2
+    fresnel_arg = np.where(left_mask, s_vals, total_length - s_vals) / (sq2pi * a)
+    fsin, fcos = fresnel(fresnel_arg)
+
+    x = np.where(
+        left_mask,
+        sq2pi * a * fcos,
+        sq2pi
+        * a
+        * (facos + np.cos(2 * th) * (facos - fcos) + np.sin(2 * th) * (fasin - fsin)),
+    )
+    y = np.where(
+        left_mask,
+        sq2pi * a * fsin,
+        sq2pi
+        * a
+        * (fasin - np.cos(2 * th) * (fasin - fsin) + np.sin(2 * th) * (facos - fcos)),
+    )
+    return x, y
+
+
 def euler_bend_points(
     angle_amount: deg = 90, radius: um = 100, resolution: float = 150
 ) -> list[kdb.DPoint]:
     """Base euler bend, no transformation, emerging from the origin."""
-    if angle_amount < 0:
-        raise ValueError(f"angle_amount should be positive. Got {angle_amount}")
-    # End angle
-    eth = angle_amount * np.pi / 180
-
-    # If bend is trivial, return a trivial shape
-    if eth == 0:
-        return [kdb.DPoint(0, 0)]
-
-    # Total displaced angle
-    th = eth / 2
-
-    # Total length of curve
-    total_length = 4 * radius * th
-
-    # Compute curve ##
-    a = np.sqrt(radius**2 * np.abs(th))
-    sq2pi = np.sqrt(2 * np.pi)
-
-    # Function for computing curve coords
-    (fasin, facos) = fresnel(np.sqrt(2 / np.pi) * radius * th / a)
-
-    def _xy(s: float) -> kdb.DPoint:
-        if th == 0:
-            return kdb.DPoint(0, 0)
-        if s <= total_length / 2:
-            (fsin, fcos) = fresnel(s / (sq2pi * a))
-            x = sq2pi * a * fcos
-            y = sq2pi * a * fsin
-        else:
-            (fsin, fcos) = fresnel((total_length - s) / (sq2pi * a))
-            x = (
-                sq2pi
-                * a
-                * (
-                    facos
-                    + np.cos(2 * th) * (facos - fcos)
-                    + np.sin(2 * th) * (fasin - fsin)
-                )
-            )
-            y = (
-                sq2pi
-                * a
-                * (
-                    fasin
-                    - np.cos(2 * th) * (fasin - fsin)
-                    + np.sin(2 * th) * (facos - fcos)
-                )
-            )
-        return kdb.DPoint(x, y)
-
-    # Parametric step size
-    step = total_length / max(int(th * resolution), 1)
-
-    # Generate points
-    return [_xy(i * step) for i in range(round(total_length / step) + 1)]
+    x_vals, y_vals = _euler_bend_xy(
+        angle_amount=angle_amount, radius=radius, resolution=resolution
+    )
+    return [
+        kdb.DPoint(float(x), float(y)) for x, y in zip(x_vals, y_vals, strict=False)
+    ]
 
 
 def euler_endpoint(
@@ -218,21 +206,18 @@ def euler_sbend_points(
         angle = direction * 90.0
         extra_y = -direction * fb
 
-    spoints = []
-    right_point = []
-    points_left_half = euler_bend_points(abs(angle), radius, resolution)
+    left_x, orig_y = _euler_bend_xy(abs(angle), radius, resolution)
+    left_y = orig_y * direction
+    right_x = 2 * left_x[-1] - left_x
+    right_y = (2 * orig_y[-1] - orig_y + extra_y * direction) * direction
 
-    # Second bend
-    for pts in points_left_half:
-        r_pt_x = 2 * points_left_half[-1].x - pts.x
-        r_pt_y = 2 * points_left_half[-1].y - pts.y + extra_y * direction
-        pts.y = pts.y * direction
-        r_pt_y = r_pt_y * direction
-        spoints.append(pts)
-        right_point.append(kdb.DPoint(r_pt_x, r_pt_y))
-    spoints += right_point[::-1]
-
-    return spoints
+    left_points = [
+        kdb.DPoint(float(x), float(y)) for x, y in zip(left_x, left_y, strict=False)
+    ]
+    right_points = [
+        kdb.DPoint(float(x), float(y)) for x, y in zip(right_x, right_y, strict=False)
+    ]
+    return left_points + right_points[::-1]
 
 
 @overload

@@ -1304,6 +1304,7 @@ def route_smart(
         for r in all_routers
     ]
     _router_extra_bbox: list[kdb.Box | None] = [None] * len(all_routers)
+    _router_index = {id(router): i for i, router in enumerate(all_routers)}
     _max_overlap_retries = 5
     for _retry_attempt in range(_max_overlap_retries):
         if _retry_attempt > 0:
@@ -1665,22 +1666,28 @@ def route_smart(
         # extend the affected routers' router_bbox via _router_extra_bbox
         # so the next attempt will bundle them together.
         _bundle_regions: list[kdb.Region] = []
+        _bundle_bboxes: list[kdb.Box] = []
         for _bundle in bundled_routers:
             _region = kdb.Region()
+            _bbox = kdb.Box()
             for _router in _bundle:
                 _pts = list(_router.start.pts) + list(reversed(_router.end.pts))
                 if len(_pts) >= 2:
                     _path = kdb.Path(_pts, _router.width)
                     _region.insert(_path.polygon())
+                    _bbox += _path.bbox()
             _bundle_regions.append(_region)
+            _bundle_bboxes.append(_bbox)
         _found_overlap = False
         for _bi in range(len(_bundle_regions)):
             for _bj in range(_bi + 1, len(_bundle_regions)):
+                if (_bundle_bboxes[_bi] & _bundle_bboxes[_bj]).empty():
+                    continue
                 _inter = _bundle_regions[_bi] & _bundle_regions[_bj]
                 if not _inter.is_empty():
                     _overlap_bbox = _inter.bbox()
                     for _router in bundled_routers[_bi] + bundled_routers[_bj]:
-                        _idx = all_routers.index(_router)
+                        _idx = _router_index[id(_router)]
                         _existing = _router_extra_bbox[_idx]
                         if _existing is None:
                             _router_extra_bbox[_idx] = _overlap_bbox.dup()

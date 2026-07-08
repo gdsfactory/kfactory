@@ -1672,6 +1672,11 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
 
         cell_ports_by_name = c.ports.get_all_named()
         nets_per_route = self.routes_nets()
+        constraints_by_route_name: dict[str, list[Constraint]] = defaultdict(list)
+        for ct in self.constraints:
+            for route_name in ct.route_names:
+                constraints_by_route_name[route_name].append(ct)
+        is_kcell_output = issubclass(output_type, KCell)
 
         # routes
         route_results: dict[str, list[Any]] = {}
@@ -1691,22 +1696,20 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     resolved_port_list.append(p)
                 resolved_ports.append(tuple(resolved_port_list))
             route_c = output_type(base=c.base)
-            relevant_constraints = [
-                ct for ct in self.constraints if route.name in ct.route_names
-            ]
+            relevant_constraints = constraints_by_route_name.get(route.name, [])
             extra_kwargs: dict[str, Any] = (
                 {"constraints": relevant_constraints} if relevant_constraints else {}
             )
-            if isinstance(route_c, KCell):
+            if is_kcell_output:
                 result = routing_strategies[route.routing_strategy](
-                    output_type(base=c.base),
+                    route_c,
                     resolved_ports,
                     **route.settings,
                     **extra_kwargs,
                 )
             else:
                 result = routing_strategies[route.routing_strategy](
-                    output_type(base=c.base),
+                    route_c,
                     [
                         tuple(DKCellPort(base=p.base) for p in net_ports)
                         for net_ports in resolved_ports
