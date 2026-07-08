@@ -40,6 +40,7 @@ from . import (
     SymmetricalCrossSection,
     kdb,
 )
+from .annotations import CellAnnotation, _AnnotationProviderRecord, resolve_annotation
 from .conf import CheckInstances, CheckUnnamedCells, logger
 from .exceptions import CellNameError
 from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
@@ -381,6 +382,8 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
     lvs_equivalent_ports: list[list[str]] | None = None
     ports_definition: PortsDefinition | None = None
     tags: set[str]
+    signature: inspect.Signature
+    _sig_params: SignatureParams
 
     def __init__(
         self,
@@ -434,6 +437,8 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
 
         # Pre-compute static signature metadata once at decoration time
         sig_params = SignatureParams(sig)
+        self.signature = sig
+        self._sig_params = sig_params
         # Resolve annotations to concrete types for the type-hint serializers.
         # Guard against ``NameError`` etc. raised by ``from __future__ import
         # annotations`` functions whose hints reference ``TYPE_CHECKING``-only
@@ -674,6 +679,10 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
     def file(self) -> Path:
         return _get_path(self._f_orig)
 
+    @property
+    def qualified_name(self) -> str:
+        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"
+
     def prune(self) -> None:
         cells = [c for c in self.cache.values() if not c._destroyed()]
         caller_cis = {
@@ -698,6 +707,24 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
             )
         return self._f_schematic(*args, **kwargs)
 
+    def annotation_providers(self) -> tuple[_AnnotationProviderRecord, ...]:
+        return self.kcl.annotation_providers_for(self)
+
+    def has_annotation(self) -> bool:
+        return bool(self.annotation_providers())
+
+    def get_annotation(
+        self, *args: KCellParams.args, **kwargs: KCellParams.kwargs
+    ) -> CellAnnotation:
+        params = _parse_params(
+            self._sig_params.defaults,
+            self._sig_params.names,
+            self.kcl,
+            args,
+            kwargs,
+        )
+        return resolve_annotation(self.annotation_providers(), params)
+
 
 @final
 class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
@@ -710,6 +737,8 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
     lvs_equivalent_ports: list[list[str]] | None = None
     ports_definition: PortsDefinition | None = None
     tags: set[str]
+    signature: inspect.Signature
+    _sig_params: SignatureParams
 
     def __init__(
         self,
@@ -756,6 +785,8 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
 
         # Pre-compute static signature metadata once at decoration time
         sig_params = SignatureParams(sig)
+        self.signature = sig
+        self._sig_params = sig_params
         # Resolve annotations to concrete types for the type-hint serializers (see
         # the equivalent block in ``WrappedKCellFunc``); an unresolvable hint simply
         # opts out of hint-based serialization rather than breaking decoration.
@@ -920,6 +951,28 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
     @functools.cached_property
     def file(self) -> Path:
         return _get_path(self._f_orig)
+
+    @property
+    def qualified_name(self) -> str:
+        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"
+
+    def annotation_providers(self) -> tuple[_AnnotationProviderRecord, ...]:
+        return self.kcl.annotation_providers_for(self)
+
+    def has_annotation(self) -> bool:
+        return bool(self.annotation_providers())
+
+    def get_annotation(
+        self, *args: VKCellParams.args, **kwargs: VKCellParams.kwargs
+    ) -> CellAnnotation:
+        params = _parse_params(
+            self._sig_params.defaults,
+            self._sig_params.names,
+            self.kcl,
+            args,
+            kwargs,
+        )
+        return resolve_annotation(self.annotation_providers(), params)
 
 
 def _get_path(f: Callable[..., Any]) -> Path:

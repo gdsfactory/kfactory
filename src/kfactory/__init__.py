@@ -12,6 +12,15 @@ import klayout.db as kdb
 from klayout import lay
 from klayout import rdb
 
+from .annotations import (
+    AnnotationPort,
+    CellAnnotation,
+    DisplaySpec,
+    GenericModelSpec,
+    ModelList,
+    SaxModelSpec,
+    SpiceModelSpec,
+)
 from .conf import config, logger, CheckInstances
 from .cross_section import (
     AsymmetricCrossSection,
@@ -96,9 +105,11 @@ def __getattr__(name: str) -> ModuleType:
 
 
 __all__ = [
+    "AnnotationPort",
     "AsymmetricCrossSection",
     "AsymmetricalCrossSection",
     "BaseKCell",
+    "CellAnnotation",
     "CheckInstances",
     "Constants",
     "CrossSection",
@@ -121,6 +132,8 @@ __all__ = [
     "DPorts",
     "DSchema",
     "DSchematic",
+    "DisplaySpec",
+    "GenericModelSpec",
     "Info",
     "Instance",
     "InstanceGroup",
@@ -134,6 +147,7 @@ __all__ = [
     "LayerEnum",
     "LayerInfos",
     "LayerStack",
+    "ModelList",
     "Netlist",
     "PathLengthMatch",
     "Pin",
@@ -143,8 +157,10 @@ __all__ = [
     "ProtoPin",
     "ProtoPort",
     "ProtoTKCell",
+    "SaxModelSpec",
     "Schema",
     "Schematic",
+    "SpiceModelSpec",
     "SymmetricalCrossSection",
     "VInstance",
     "VInstanceGroup",

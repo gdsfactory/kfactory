@@ -38,6 +38,11 @@ from pydantic import (
 )
 
 from . import __version__, kdb
+from .annotations import (
+    AnnotationProviderKind,
+    AnnotationRegistry,
+    _AnnotationProviderRecord,
+)
 from .conf import CheckInstances, CheckUnnamedCells, config, logger
 from .cross_section import (
     AsymmetricalCrossSection,
@@ -178,6 +183,21 @@ class Factories[F: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]](
     def get_by_tag(self, tag: str) -> list[F]:
         return [self._all[idx] for idx in self._by_tag[tag]]
 
+    def all(self) -> tuple[F, ...]:
+        return tuple(self._all)
+
+    def annotated(self) -> tuple[F, ...]:
+        return tuple(factory for factory in self._all if factory.has_annotation())
+
+    def get_all_by_name(self, name: str) -> tuple[F, ...]:
+        return tuple(factory for factory in self._all if factory.name == name)
+
+    def get_by_qualified_name(self, qualified_name: str) -> F | None:
+        for factory in self._all:
+            if factory.qualified_name == qualified_name:
+                return factory
+        return None
+
     def __iter__(self) -> Iterator[str]:
         return iter(self._by_name)
 
@@ -294,6 +314,9 @@ class KCLayout(
     info: Info = Field(default_factory=Info)
     settings: KCellSettings = Field(frozen=True)
     _future_cell_name: str | None = PrivateAttr(default=None)
+    _annotation_registry: AnnotationRegistry = PrivateAttr(
+        default_factory=AnnotationRegistry
+    )
 
     decorators: Decorators
     default_cell_output_type: type[KCell | DKCell] = KCell
@@ -464,6 +487,138 @@ class KCLayout(
         """
         self.factories.lock()
         self.virtual_factories.lock()
+
+    def annotate_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        replace: bool = False,
+    ) -> Callable[..., Any]:
+        return self._register_annotation_provider(
+            "annotate", target, provider, replace=replace
+        )
+
+    def model_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        position: Literal["append", "prepend"] = "append",
+    ) -> Callable[..., Any]:
+        return self._register_annotation_provider(
+            "model", target, provider, position=position
+        )
+
+    def device_type_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        replace: bool = False,
+    ) -> Callable[..., Any]:
+        return self._register_annotation_provider(
+            "device_type", target, provider, replace=replace
+        )
+
+    def ports_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        replace: bool = False,
+    ) -> Callable[..., Any]:
+        return self._register_annotation_provider(
+            "ports", target, provider, replace=replace
+        )
+
+    def tags_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+    ) -> Callable[..., Any]:
+        return self._register_annotation_provider("tags", target, provider)
+
+    def display_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        replace: bool = False,
+    ) -> Callable[..., Any]:
+        return self._register_annotation_provider(
+            "display", target, provider, replace=replace
+        )
+
+    def metadata_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+    ) -> Callable[..., Any]:
+        return self._register_annotation_provider("metadata", target, provider)
+
+    def annotation_providers_for(
+        self, factory: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]
+    ) -> tuple[_AnnotationProviderRecord, ...]:
+        return self._annotation_registry.providers_for(
+            name=factory.name, qualified_name=factory.qualified_name, obj=factory
+        )
+
+    def _register_annotation_provider(
+        self,
+        kind: AnnotationProviderKind,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        replace: bool = False,
+        position: Literal["append", "prepend"] = "append",
+    ) -> Callable[..., Any]:
+        target_kind, target_key = self._annotation_target_key(target)
+
+        def register(f: Callable[..., Any]) -> Callable[..., Any]:
+            self._annotation_registry.add(
+                target_kind=target_kind,
+                target_key=target_key,
+                kind=kind,
+                provider=f,
+                replace=replace,
+                position=position,
+            )
+            return f
+
+        if provider is None:
+            return register
+        return register(provider)
+
+    def _annotation_target_key(
+        self, target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]
+    ) -> tuple[Literal["name", "fqn", "object"], str | int]:
+        if isinstance(target, str):
+            if "." in target:
+                factory = self.factories.get_by_qualified_name(target)
+                virtual_factory = self.virtual_factories.get_by_qualified_name(target)
+                matches = [f for f in (factory, virtual_factory) if f is not None]
+                if not matches:
+                    raise KeyError(f"Unknown factory FQN {target!r}.")
+                if len(matches) > 1:
+                    raise ValueError(f"Ambiguous factory FQN {target!r}.")
+                return "fqn", target
+
+            matches = [
+                *self.factories.get_all_by_name(target),
+                *self.virtual_factories.get_all_by_name(target),
+            ]
+            if not matches:
+                raise KeyError(f"Unknown factory name {target!r}.")
+            if len(matches) > 1:
+                raise ValueError(
+                    f"Ambiguous factory name {target!r}; use a fully-qualified name."
+                )
+            return "name", target
+
+        if target in self.factories or target in self.virtual_factories:
+            return "object", id(target)
+        raise KeyError(f"Unknown factory target {target!r}.")
 
     def create_layer_enclosure(
         self,
