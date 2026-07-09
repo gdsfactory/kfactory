@@ -11,6 +11,7 @@ def test_custom_show() -> None:
 
     def show(
         layout: kf.KCLayout | AnyKCell | Path | str,
+        *,
         lyrdb: kf.rdb.ReportDatabase | Path | str | None = None,
         l2n: kf.kdb.LayoutToNetlist | Path | str | None = None,
         keep_position: bool = True,
@@ -20,6 +21,7 @@ def test_custom_show() -> None:
         technology: str | None = None,
         markers: list[tuple[kf.typings.DShapeLike, kf.typings.MarkerConfig]]
         | None = None,
+        name: str | None = None,
     ) -> None:
         nonlocal showed
         showed = True

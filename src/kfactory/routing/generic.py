@@ -12,8 +12,8 @@ from pydantic import BaseModel, Field
 from ..conf import logger
 from ..instance import Instance  # noqa: TC001
 from ..port import BasePort, Port, ProtoPort
-from ..typings import dbu  # noqa: TC001
 from ..spatial import collect_instance_region, iter_overlapping_bbox_pairs
+from ..typings import dbu  # noqa: TC001
 from .length_functions import LengthFunction, get_length_from_area
 from .manhattan import (
     ManhattanBundleRoutingFunction,

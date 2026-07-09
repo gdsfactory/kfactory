@@ -552,8 +552,8 @@ def route_bundle(
                     _straight_cell_cache[key] = straight_cell
                 return straight_cell
 
-            _straight_factory.supports_routing_fast = True
-            _straight_factory.supports_polygon_materialization = (
+            cast("Any", _straight_factory).supports_routing_fast = True
+            cast("Any", _straight_factory).supports_polygon_materialization = (
                 _raw_routing_fast_straight_factory is not None
             )
             placer_kwargs["straight_factory"] = _straight_factory
@@ -699,7 +699,9 @@ def route_bundle(
         _straight_cell_cache[key] = straight_cell
         return straight_cell
 
-    _straight_factory.supports_routing_fast = _straight_factory_supports_routing_fast
+    cast(
+        "Any", _straight_factory
+    ).supports_routing_fast = _straight_factory_supports_routing_fast
 
     bend90_cell = c.kcl[bend90_cell.cell_index()]
     if taper_cell is not None:
@@ -861,6 +863,7 @@ def _place_straight(
             c=c,
             straight_factory=straight_factory,
             w=w,
+            length=length,
             route=route,
             p1=p1_route,
             p2=p2_route,
@@ -896,6 +899,7 @@ def _place_straight_polygon(
     c: KCell,
     straight_factory: StraightFactoryDBU,
     w: int,
+    length: int,
     route: ManhattanRoute,
     p1: RoutePort,
     p2: RoutePort,
@@ -907,22 +911,25 @@ def _place_straight_polygon(
     if (
         not p1.is_dbu
         or not p2.is_dbu
-        or p1.base.cross_section is None
-        or p2.base.cross_section is None
         or p1.width != w
         or p2.width != w
         or p1.port_type != port_type
         or p2.port_type != port_type
-        or not p1.base.any_cross_section.main_layer.is_equivalent(
-            p2.base.any_cross_section.main_layer
-        )
     ):
         return None
 
     if not _is_manhattan(p2.trans.disp - p1.trans.disp):
         return None
 
-    xs = p1.base.cross_section
+    straight_cell = cast("KCell", cast("Any", straight_factory)(width=w, length=length))
+    xs = straight_cell._base.ports[0].cross_section
+    if xs is None:
+        return None
+    if not p1.base.any_cross_section.main_layer.is_equivalent(
+        xs.main_layer
+    ) or not p2.base.any_cross_section.main_layer.is_equivalent(xs.main_layer):
+        return None
+
     _queue_straight_cross_section_polygons(route, xs, p1, p2)
     return (
         RoutePort(base=p1.base, trans=p1.trans * kdb.Trans.R180, dbu=True),

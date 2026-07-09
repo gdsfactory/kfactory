@@ -146,19 +146,23 @@ def lyp_to_yaml(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
 
 def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
     """Convert a KLayout LayerPropertiesNodeRef to a pydantic representation."""
-    return LayerPropertiesModel(
-        name=kl.name.rstrip(f" - {kl.source_layer}/{kl.source_datatype}"),
-        layer=(kl.source_layer, kl.source_datatype),
-        frame_color=Color(hex(kl.frame_color)) if kl.frame_color else None,
-        fill_color=Color(hex(kl.fill_color)) if kl.fill_color else None,
-        dither_pattern=index2dither[kl.dither_pattern],  # ty:ignore[invalid-argument-type]
-        line_style=index2line.get(kl.line_style, "solid"),  # ty:ignore[invalid-argument-type]
-        visible=kl.visible,
-        width=kl.width,
-        xfill=kl.xfill,
-        layer_to_name=kl.name.endswith(f" - {kl.source_layer}/{kl.source_datatype}"),
-        transparent=kl.transparent,
-        valid=kl.valid,
+    return LayerPropertiesModel.model_validate(
+        {
+            "name": kl.name.rstrip(f" - {kl.source_layer}/{kl.source_datatype}"),
+            "layer": (kl.source_layer, kl.source_datatype),
+            "frame_color": Color(hex(kl.frame_color)) if kl.frame_color else None,
+            "fill_color": Color(hex(kl.fill_color)) if kl.fill_color else None,
+            "dither_pattern": index2dither[kl.dither_pattern],
+            "line_style": index2line.get(kl.line_style, "solid"),
+            "visible": kl.visible,
+            "width": kl.width,
+            "xfill": kl.xfill,
+            "layer_to_name": kl.name.endswith(
+                f" - {kl.source_layer}/{kl.source_datatype}"
+            ),
+            "transparent": kl.transparent,
+            "valid": kl.valid,
+        }
     )
 
 

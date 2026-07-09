@@ -841,8 +841,9 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             self.bbox_sections.items(), key=lambda kv: str(kv[0])
         ):
             list_to_hash.append((str(layer), "bbox", str(offset)))
-        self._unnamed_key = sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]  # noqa: S324
-        return self._unnamed_key
+        unnamed_key = sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]  # noqa: S324
+        object.__setattr__(self, "_unnamed_key", unnamed_key)
+        return unnamed_key
 
     def minkowski_region(
         self,

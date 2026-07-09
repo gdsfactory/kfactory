@@ -473,12 +473,14 @@ class ICreatePort(ABC):
                     layer_info.name,
                     width,
                 )
-                xs = self.kcl._dbu_cross_section_cache.get(cache_key)
-                if xs is None:
+                cached_xs = self.kcl._dbu_cross_section_cache.get(cache_key)
+                if cached_xs is None:
                     xs = self.kcl.get_icross_section(
                         CrossSectionSpecDict(layer=layer_info, width=width, unit="dbu")
                     )
                     self.kcl._dbu_cross_section_cache[cache_key] = xs
+                else:
+                    xs = cached_xs
             except ValidationError as e:
                 raise ValueError(
                     "Port width needs to be even to snap to grid properly "

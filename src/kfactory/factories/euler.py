@@ -152,8 +152,7 @@ def euler_bend_points(
         angle_amount=angle_amount, radius=radius, resolution=resolution
     )
     return [
-        kdb.DPoint(x, y)
-        for x, y in zip(x_vals.tolist(), y_vals.tolist(), strict=False)
+        kdb.DPoint(x, y) for x, y in zip(x_vals.tolist(), y_vals.tolist(), strict=False)
     ]
 
 

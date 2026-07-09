@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import heapq
-from collections.abc import Iterator, Sequence
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any
 
 from . import kdb
 
-T = TypeVar("T")
+if TYPE_CHECKING:
+    from collections.abc import Iterator, Sequence
 
 
 def collect_instance_region(
@@ -31,9 +31,7 @@ def iter_overlapping_bbox_pairs(
     boxes: Sequence[kdb.Box],
 ) -> Iterator[tuple[int, int]]:
     """Yield index pairs whose bounding boxes overlap."""
-    ordered = sorted(
-        enumerate(boxes), key=lambda item: (item[1].left, item[1].bottom)
-    )
+    ordered = sorted(enumerate(boxes), key=lambda item: (item[1].left, item[1].bottom))
     active: dict[int, kdb.Box] = {}
     active_rights: list[tuple[int, int]] = []
 

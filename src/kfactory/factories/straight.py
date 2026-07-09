@@ -149,7 +149,9 @@ def straight_dbu_factory(
         elif kcl.rename_function == rename_by_direction:
             cell_kwargs["ports"] = {"left": ["W0"], "right": ["E0"]}
     cell_kwargs.setdefault("basename", "straight")
-    cell_kwargs.setdefault("drop_params", ("self", "cls", "routing_fast"))
+    cast("dict[str, Any]", cell_kwargs).setdefault(
+        "drop_params", ("self", "cls", "routing_fast")
+    )
     basename = cell_kwargs["basename"]
 
     if output_type is not None:
@@ -283,5 +285,5 @@ def straight_dbu_factory(
             xs = kcl.get_icross_section(cross_section)
         return _straight_impl(xs.base, length, routing_fast=True)
 
-    straight.routing_fast_factory = routing_fast_straight
+    cast("Any", straight).routing_fast_factory = routing_fast_straight
     return straight

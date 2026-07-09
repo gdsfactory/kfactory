@@ -7,7 +7,8 @@ verification, but can be called individually for narrower checks.
 """
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+
+from typing import TYPE_CHECKING, Any, cast
 
 from kfnetlist import PortCheck, check_connection
 
@@ -415,7 +416,9 @@ def port_mismatch_check(
             if n == 1:
                 if layer in cell_ports and coord in cell_ports[layer]:
                     cell_port = cell_ports[layer][coord][0]
-                    result = check_connection(cell_port, ports[0][0])
+                    result = check_connection(
+                        cast("Any", cell_port), cast("Any", ports[0][0])
+                    )
                     emit_mismatch(
                         result,
                         lc,
@@ -428,7 +431,9 @@ def port_mismatch_check(
                     )
                 # Dangling case is handled by dangling_ports_check.
             elif n == 2:
-                result = check_connection(ports[0][0], ports[1][0])
+                result = check_connection(
+                    cast("Any", ports[0][0]), cast("Any", ports[1][0])
+                )
                 emit_mismatch(
                     result,
                     lc,
@@ -711,7 +716,9 @@ def instance_overlap_check(
             (inst, inst.ibbox(layer)) for inst in cell.insts
         ]
         inst_cache: dict[int, kdb.Region] = {}
-        for idx, other_idx in iter_overlapping_bbox_pairs([bbox for _, bbox in inst_records]):
+        for idx, other_idx in iter_overlapping_bbox_pairs(
+            [bbox for _, bbox in inst_records]
+        ):
             inst, _ = inst_records[idx]
             other_inst, _ = inst_records[other_idx]
             inst_region = inst_cache.get(idx)

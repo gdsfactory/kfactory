@@ -18,7 +18,7 @@ def _simplify_from_arrays(
     xs = np.fromiter((p.x for p in points), dtype=np.float64, count=len(points))
     ys = np.fromiter((p.y for p in points), dtype=np.float64, count=len(points))
     indices = _simplify_indices(xs, ys, 0, len(points) - 1, tolerance)
-    return [points[i] for i in indices]
+    return cast("list[kdb.Point] | list[kdb.DPoint]", [points[i] for i in indices])
 
 
 def _simplify_indices(

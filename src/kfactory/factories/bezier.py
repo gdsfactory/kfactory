@@ -91,8 +91,7 @@ def bezier_curve(
             + 3 * (y1 - y0)
         ) * t + y0
         return [
-            kdb.DPoint(x, y)
-            for x, y in zip(xs.tolist(), ys.tolist(), strict=False)
+            kdb.DPoint(x, y) for x, y in zip(xs.tolist(), ys.tolist(), strict=False)
         ]
 
     xs = np.zeros(t.shape, dtype=np.float64)

@@ -2241,27 +2241,13 @@ def _route_to_side(
         br = rs.router.bend90_radius
         match t.angle:
             case 0:
-                s = (
-                    bbox.right
-                    + hw1
-                    + separation
-                    - t.disp.x
-                    - br
-                )
+                s = bbox.right + hw1 + separation - t.disp.x - br
             case 1:
                 s = bbox.top + hw1 + separation - t.disp.y - br
             case 2:
-                s = (
-                    t.disp.x
-                    - (bbox.left - hw1 - separation)
-                    - br
-                )
+                s = t.disp.x - (bbox.left - hw1 - separation) - br
             case _:
-                s = (
-                    t.disp.y
-                    - (bbox.bottom - hw1 - separation)
-                    - br
-                )
+                s = t.disp.y - (bbox.bottom - hw1 - separation) - br
         rs.straight(s)
         tv = rs.tv
         ta = rs.ta
@@ -2811,12 +2797,10 @@ def clean_points(
         v2 = p_n - p  # ty:ignore[unsupported-operator]
         v1 = p - p_p  # ty:ignore[unsupported-operator]
 
-        same_direction = (v1.x > 0) == (v2.x > 0) and (v1.x < 0) == (
-            v2.x < 0
+        same_direction = (v1.x > 0) == (v2.x > 0) and (v1.x < 0) == (v2.x < 0)
+        same_direction = (
+            same_direction and (v1.y > 0) == (v2.y > 0) and (v1.y < 0) == (v2.y < 0)
         )
-        same_direction = same_direction and (v1.y > 0) == (v2.y > 0) and (
-            v1.y < 0
-        ) == (v2.y < 0)
         if same_direction or v2.abs() == 0:
             del_points.append(i - 1)
         else:
