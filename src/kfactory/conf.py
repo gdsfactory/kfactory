@@ -87,6 +87,7 @@ class ShowFunction(Protocol):
         library_save_options: kdb.SaveLayoutOptions,
         technology: str | None = None,
         markers: list[tuple[DShapeLike, MarkerConfig]] | None = None,
+        name: str | None = None,
     ) -> None: ...
 
 

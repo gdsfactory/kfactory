@@ -13,6 +13,7 @@ from ..conf import logger
 from ..instance import Instance  # noqa: TC001
 from ..port import BasePort, Port, ProtoPort
 from ..typings import dbu  # noqa: TC001
+from ..spatial import collect_instance_region, iter_overlapping_bbox_pairs
 from .length_functions import LengthFunction, get_length_from_area
 from .manhattan import (
     ManhattanBundleRoutingFunction,
@@ -174,43 +175,29 @@ def check_collisions(
             layer_ = c.kcl.layout.layer(layer_info)
             error_region_instances = kdb.Region()
             error_region_shapes = kdb.Region()
+            inst_records: list[tuple[Instance, kdb.Box]] = [
+                (inst, inst.bbox(layer_)) for inst in insts
+            ]
             inst_regions: dict[int, kdb.Region] = {}
-            inst_region = kdb.Region()
             shape_region = kdb.Region()
             for r in shapes_regions:
                 if not (shape_region & r).is_empty():
                     error_region_shapes.insert(shape_region & r)
                 shape_region.insert(r)
-            for i, inst in enumerate(insts):
-                inst_region_ = kdb.Region(inst.bbox(layer_))
-                if not (inst_region & inst_region_).is_empty():
-                    # if inst_shapes is None:
-                    inst_shapes = kdb.Region()
-                    shape_it = c.begin_shapes_rec_overlapping(layer_, inst.bbox(layer_))
-                    shape_it.select_cells([inst.cell.cell_index()])
-                    shape_it.min_depth = 1
-                    for _it in shape_it.each():
-                        if _it.path()[0].inst() == inst.instance:
-                            inst_shapes.insert(
-                                _it.shape().polygon.transformed(_it.trans())
-                            )
-                    for j, _reg in inst_regions.items():
-                        if _reg & inst_region_:
-                            reg = kdb.Region()
-                            shape_it = c.begin_shapes_rec_touching(
-                                layer_, (_reg & inst_region_).bbox()
-                            )
-                            shape_it.select_cells([insts[j].cell.cell_index()])
-                            shape_it.min_depth = 1
-                            for _it in shape_it.each():
-                                if _it.path()[0].inst() == insts[j].instance:
-                                    reg.insert(
-                                        _it.shape().polygon.transformed(_it.trans())
-                                    )
-
-                            error_region_instances.insert(reg & inst_shapes)
-                inst_region += inst_region_
-                inst_regions[i] = inst_region_
+            for idx, other_idx in iter_overlapping_bbox_pairs(
+                [bbox for _, bbox in inst_records]
+            ):
+                inst, _ = inst_records[idx]
+                other_inst, _ = inst_records[other_idx]
+                inst_region = inst_regions.get(idx)
+                if inst_region is None:
+                    inst_region = collect_instance_region(c, layer_, inst)
+                    inst_regions[idx] = inst_region
+                other_region = inst_regions.get(other_idx)
+                if other_region is None:
+                    other_region = collect_instance_region(c, layer_, other_inst)
+                    inst_regions[other_idx] = other_region
+                error_region_instances.insert(other_region & inst_region)
 
             if not error_region_shapes.is_empty():
                 any_layer_collision = True

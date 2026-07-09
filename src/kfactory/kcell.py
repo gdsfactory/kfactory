@@ -1581,7 +1581,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
             if diff.diff_xor.cells() > 0 or diff.layout_meta_diff:
                 diff_kcl = KCLayout(self.name + "_XOR")
                 diff_kcl.layout.assign(diff.diff_xor)
-                show(diff_kcl)
+                show(diff_kcl, name=f"{self.name}_XOR")
 
                 err_msg = (
                     f"Layout {self.name} cannot merge with layout "
@@ -3637,6 +3637,7 @@ def show(
     set_technology: bool = True,
     file_format: Literal["oas", "gds"] = "oas",
     markers: list[tuple[DShapeLike, MarkerConfig]] | None = None,
+    name: str | None = None,
 ) -> None:
     """Show GDS in klayout.
 
@@ -3664,23 +3665,24 @@ def show(
         library_save_options = save_layout_options()
 
     # Find the file that calls stack
-    try:
-        stk = inspect.getouterframes(inspect.currentframe())
-        frame = stk[2]
-        frame_filename_stem = Path(frame.filename).stem
-        if frame_filename_stem.startswith("<ipython-input"):  # IPython Case
-            name = "ipython"
-        elif frame.function != "<module>":
-            name = clean_name(frame_filename_stem + "_" + frame.function)
-        else:
-            name = clean_name(frame_filename_stem)
-    except Exception:
+    if name is None:
         try:
-            from __main__ import __file__ as mf
+            stk = inspect.getouterframes(inspect.currentframe())
+            frame = stk[2]
+            frame_filename_stem = Path(frame.filename).stem
+            if frame_filename_stem.startswith("<ipython-input"):  # IPython Case
+                name = "ipython"
+            elif frame.function != "<module>":
+                name = clean_name(frame_filename_stem + "_" + frame.function)
+            else:
+                name = clean_name(frame_filename_stem)
+        except Exception:
+            try:
+                from __main__ import __file__ as mf
 
-            name = clean_name(mf)
-        except ImportError:
-            name = "shell"
+                name = clean_name(mf)
+            except ImportError:
+                name = "shell"
 
     # Append name (and hash) for unique file paths
     if isinstance(layout, KCLayout) and layout.name:

@@ -1985,7 +1985,7 @@ class KCLayout(
                 if diff.diff_xor.cells() > 0:
                     diff_kcl = KCLayout(self.name + "_XOR")
                     diff_kcl.layout.assign(diff.diff_xor)
-                    show(diff_kcl)
+                    show(diff_kcl, name=f"{self.name}_XOR")
 
                     err_msg = (
                         f"Layout {self.name} cannot merge with layout "
@@ -2010,7 +2010,6 @@ class KCLayout(
 
                     raise MergeError(err_msg)
 
-            cells = set(self.cells("*"))
             saveopts = save_layout_options()
             saveopts.gds2_max_cellname_length = (
                 kdb.SaveLayoutOptions().gds2_max_cellname_length
@@ -2025,6 +2024,9 @@ class KCLayout(
             for kdb_cell in locked_cells:
                 kdb_cell.locked = True
             info, settings = self.get_meta_data()
+            existing_cells_by_name = {
+                c.name: c for c in self.layout.each_cell() if not c._destroyed()
+            }
 
             match update_kcl_meta_data:
                 case "overwrite":
@@ -2044,12 +2046,13 @@ class KCLayout(
                         ", available strategies are 'overwrite', 'skip', or 'drop'"
                     )
             meta_format = settings.get("meta_format") or config.meta_format
-            load_cells = {
-                cell
-                for c in layout_b.cells("*")
-                if (cell := self.layout_cell(c.name)) is not None
-            }
-            new_cells = load_cells - cells
+            load_cells_by_name: dict[str, kdb.Cell] = {}
+            new_cells: list[kdb.Cell] = []
+            for c in layout_b.each_cell():
+                if c.name in existing_cells_by_name:
+                    load_cells_by_name[c.name] = c
+                else:
+                    new_cells.append(c)
 
             if register_cells:
                 for c in sorted(new_cells, key=lambda _c: _c.hierarchy_levels()):
@@ -2058,8 +2061,8 @@ class KCLayout(
                         meta_format=meta_format,
                     )
 
-            for c in load_cells & cells:
-                kc = self.kcells[c.cell_index()]
+            for c in load_cells_by_name.values():
+                kc = self.kcells[existing_cells_by_name[c.name].cell_index()]
                 kc.get_meta_data(meta_format=meta_format)
 
             return lm
