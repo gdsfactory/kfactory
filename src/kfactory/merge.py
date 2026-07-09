@@ -37,6 +37,12 @@ class MergeDiff:
     layout_meta_diff: dict[str, MetaData] = field(init=False)
     cells_meta_diff: dict[str, dict[str, MetaData]] = field(init=False)
     kdiff: kdb.LayoutDiff = field(init=False)
+    _regions_a: dict[int, tuple[tuple[kdb.LayerInfo, kdb.Region], ...]] = field(
+        init=False, default_factory=dict
+    )
+    _regions_b: dict[int, tuple[tuple[kdb.LayerInfo, kdb.Region], ...]] = field(
+        init=False, default_factory=dict
+    )
     loglevel: LogLevel | int = field(default=LogLevel.CRITICAL)
     """Log level at which to log polygon errors."""
 
@@ -88,39 +94,25 @@ class MergeDiff:
         """Called when there is only an instance in the cell_a."""
         if self.loglevel is not None:
             logger.log(self.loglevel, f"Found {instance=} in {self.name_a} only.")
-        cell = self.layout_a.cell(instance.cell_index)
-
-        regions: list[kdb.Region] = []
-        layers = list(cell.layout().layer_indexes())
-        layer_infos = list(cell.layout().layer_infos())
-
-        for layer in layers:
-            r = kdb.Region()
-            r.insert(self.layout_a.cell(instance.cell_index).begin_shapes_rec(layer))
-            regions.append(r)
-
-        for trans in instance.each_cplx_trans():
-            for li, r in zip(layer_infos, regions, strict=False):
-                self.cell_a.shapes(self.diff_a.layer(li)).insert(r.transformed(trans))
+        _insert_transformed_instance_regions(
+            source_layout=self.layout_a,
+            target_layout=self.diff_a,
+            target_cell=self.cell_a,
+            instance=instance,
+            cache=self._regions_a,
+        )
 
     def on_instance_in_b_only(self, instance: kdb.CellInstArray, propid: int) -> None:
         """Called when there is only an instance in the cell_b."""
         if self.loglevel is not None:
             logger.log(self.loglevel, f"Found {instance=} in {self.name_b} only.")
-        cell = self.layout_b.cell(instance.cell_index)
-
-        regions: list[kdb.Region] = []
-        layers = list(cell.layout().layer_indexes())
-        layer_infos = list(cell.layout().layer_infos())
-
-        for layer in layers:
-            r = kdb.Region()
-            r.insert(self.layout_b.cell(instance.cell_index).begin_shapes_rec(layer))
-            regions.append(r)
-
-        for trans in instance.each_cplx_trans():
-            for li, r in zip(layer_infos, regions, strict=False):
-                self.cell_b.shapes(self.diff_b.layer(li)).insert(r.transformed(trans))
+        _insert_transformed_instance_regions(
+            source_layout=self.layout_b,
+            target_layout=self.diff_b,
+            target_cell=self.cell_b,
+            instance=instance,
+            cache=self._regions_b,
+        )
 
     def on_polygon_in_b_only(self, poly: kdb.Polygon, propid: int) -> None:
         """Called when there is only a polygon in the cell_b."""
@@ -190,3 +182,40 @@ class MergeDiff:
             | kdb.LayoutDiff.IgnoreDuplicates
             | kdb.LayoutDiff.WithMetaInfo,
         )
+
+
+def _insert_transformed_instance_regions(
+    *,
+    source_layout: kdb.Layout,
+    target_layout: kdb.Layout,
+    target_cell: kdb.Cell,
+    instance: kdb.CellInstArray,
+    cache: dict[int, tuple[tuple[kdb.LayerInfo, kdb.Region], ...]],
+) -> None:
+    regions = cache.get(instance.cell_index)
+    if regions is None:
+        regions = _collect_recursive_regions(source_layout, instance.cell_index)
+        cache[instance.cell_index] = regions
+
+    for trans in instance.each_cplx_trans():
+        for layer_info, region in regions:
+            target_cell.shapes(target_layout.layer(layer_info)).insert(
+                region.transformed(trans)
+            )
+
+
+def _collect_recursive_regions(
+    layout: kdb.Layout,
+    cell_index: int,
+) -> tuple[tuple[kdb.LayerInfo, kdb.Region], ...]:
+    cell = layout.cell(cell_index)
+    regions: list[tuple[kdb.LayerInfo, kdb.Region]] = []
+    for layer, layer_info in zip(
+        cell.layout().layer_indexes(),
+        cell.layout().layer_infos(),
+        strict=False,
+    ):
+        region = kdb.Region()
+        region.insert(cell.begin_shapes_rec(layer))
+        regions.append((layer_info, region))
+    return tuple(regions)
