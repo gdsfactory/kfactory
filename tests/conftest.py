@@ -3,7 +3,7 @@ from collections.abc import Callable, Iterator
 from functools import partial
 from pathlib import Path
 from threading import RLock
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 from warnings import warn
 
 import pytest
@@ -14,6 +14,16 @@ import kfactory as kf
 import kfactory.cells
 
 pytest_plugins = ["pytest_regressions"]
+
+
+class OASRegression(Protocol):
+    def __call__(
+        self,
+        c: kf.ProtoTKCell[Any],
+        tolerance: int = 0,
+        flatten: bool = False,
+        with_meta: bool = True,
+    ) -> None: ...
 
 
 class Layers(kf.LayerInfos):
@@ -250,7 +260,7 @@ def unlink_merge_read_oas() -> Iterator[None]:
 @pytest.fixture
 def oas_regression(
     file_regression: FileRegressionFixture,
-) -> Callable[[kf.ProtoTKCell[Any]], None]:
+) -> OASRegression:
     saveopts = kf.save_layout_options()
     saveopts.format = "OASIS"
 

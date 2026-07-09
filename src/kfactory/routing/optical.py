@@ -6,7 +6,16 @@ import inspect
 from collections.abc import Sequence
 from enum import IntEnum
 from functools import partial
-from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Literal,
+    Protocol,
+    TypedDict,
+    TypeGuard,
+    cast,
+    overload,
+)
 
 from .. import kdb, rdb
 from ..conf import (
@@ -44,7 +53,7 @@ from .route_ports import (
 from .steps import Step, Straight
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Callable, Sequence
 
     from ..factories import (
         SBendFactoryDBU,
@@ -70,6 +79,53 @@ _PENDING_POLYGON_REGIONS: dict[int, dict[kdb.LayerInfo, kdb.Region]] = {}
 _PENDING_POLYGON_HOLES: dict[int, dict[kdb.LayerInfo, kdb.Region]] = {}
 
 
+class _HasRoutingFastFactory(Protocol):
+    routing_fast_factory: StraightFactoryDBU
+
+
+class _RoutingFastParameterFactoryDBU(Protocol):
+    def __call__(
+        self, width: int, length: int, routing_fast: bool = False
+    ) -> ProtoTKCell[Any]: ...
+
+
+class _RoutingFastParameterFactoryUM(Protocol):
+    def __call__(
+        self, width: float, length: float, routing_fast: bool = False
+    ) -> ProtoTKCell[Any]: ...
+
+
+class _RoutingStraightFactoryDBU(Protocol):
+    supports_routing_fast: bool
+    supports_polygon_materialization: bool
+
+    def __call__(
+        self, width: int, length: int, routing_fast: bool = False
+    ) -> KCell: ...
+
+
+class _CachedRoutingStraightFactoryDBU:
+    def __init__(
+        self,
+        make_cell: Callable[[int, int, bool], KCell],
+        *,
+        supports_routing_fast: bool,
+        supports_polygon_materialization: bool,
+    ) -> None:
+        self._make_cell = make_cell
+        self._cache: dict[tuple[int, int], KCell] = {}
+        self.supports_routing_fast = supports_routing_fast
+        self.supports_polygon_materialization = supports_polygon_materialization
+
+    def __call__(self, width: int, length: int, routing_fast: bool = False) -> KCell:
+        key = (width, length)
+        straight_cell = self._cache.get(key)
+        if straight_cell is None:
+            straight_cell = self._make_cell(width, length, routing_fast)
+            self._cache[key] = straight_cell
+        return straight_cell
+
+
 class LoopSide(IntEnum):
     left = -1
     center = 0
@@ -91,20 +147,59 @@ class PathLengthConfig[T: (int, float)](TypedDict, total=False):
 
 
 def _get_routing_fast_straight_factory(
-    straight_factory: Any,
-) -> Any | None:
-    raw_factory = getattr(straight_factory, "routing_fast_factory", None)
-    if raw_factory is not None:
-        return raw_factory
-    if isinstance(straight_factory, partial):
-        raw_factory = getattr(straight_factory.func, "routing_fast_factory", None)
-        if raw_factory is not None:
-            return partial(
-                raw_factory,
-                *straight_factory.args,
-                **(straight_factory.keywords or {}),
-            )
+    straight_factory: object,
+) -> StraightFactoryDBU | None:
+    if _has_routing_fast_factory(straight_factory):
+        return straight_factory.routing_fast_factory
+    if isinstance(straight_factory, partial) and _has_routing_fast_factory(
+        straight_factory.func
+    ):
+        return partial(
+            straight_factory.func.routing_fast_factory,
+            *straight_factory.args,
+            **(straight_factory.keywords or {}),
+        )
     return None
+
+
+def _has_routing_fast_factory(factory: object) -> TypeGuard[_HasRoutingFastFactory]:
+    return hasattr(factory, "routing_fast_factory")
+
+
+def _accepts_routing_fast_parameter_dbu(
+    factory: Callable[..., object],
+) -> TypeGuard[_RoutingFastParameterFactoryDBU]:
+    try:
+        return "routing_fast" in inspect.signature(factory).parameters
+    except (TypeError, ValueError):
+        return False
+
+
+def _accepts_routing_fast_parameter_um(
+    factory: Callable[..., object],
+) -> TypeGuard[_RoutingFastParameterFactoryUM]:
+    try:
+        return "routing_fast" in inspect.signature(factory).parameters
+    except (TypeError, ValueError):
+        return False
+
+
+def _supports_routing_fast_factory(
+    factory: StraightFactoryDBU,
+) -> TypeGuard[_RoutingStraightFactoryDBU]:
+    return getattr(factory, "supports_routing_fast", False) is True
+
+
+def _supports_polygon_materialization_factory(
+    factory: StraightFactoryDBU,
+) -> TypeGuard[_RoutingStraightFactoryDBU]:
+    return getattr(factory, "supports_polygon_materialization", False) is True
+
+
+def _expect_kcell(cell: ProtoTKCell[Any], context: str) -> KCell:
+    if not isinstance(cell, KCell):
+        raise TypeError(f"{context} must return a KCell, got {type(cell).__name__}")
+    return cell
 
 
 def path_length_match(
@@ -513,50 +608,48 @@ def route_bundle(
         _raw_routing_fast_straight_factory = _get_routing_fast_straight_factory(
             straight_factory
         )
-        try:
-            _straight_factory_supports_routing_fast = (
-                "routing_fast" in inspect.signature(straight_factory).parameters
-            )
-        except (TypeError, ValueError):
-            _straight_factory_supports_routing_fast = False
+        _routing_fast_parameter_factory = (
+            straight_factory
+            if _accepts_routing_fast_parameter_dbu(straight_factory)
+            else None
+        )
 
         if (
             _raw_routing_fast_straight_factory is not None
-            or _straight_factory_supports_routing_fast
+            or _routing_fast_parameter_factory is not None
         ):
-            _straight_cell_cache: dict[tuple[int, int], KCell] = {}
 
-            def _straight_factory(
-                width: int, length: int, routing_fast: bool = False
+            def _make_straight_cell(
+                width: int, length: int, routing_fast: bool
             ) -> KCell:
-                key = (width, length)
-                straight_cell = _straight_cell_cache.get(key)
-                if straight_cell is None:
-                    if _raw_routing_fast_straight_factory is not None:
-                        straight_cell = cast(
-                            "KCell",
-                            _raw_routing_fast_straight_factory(
-                                width=width,
-                                length=length,
-                            ),
-                        )
-                    else:
-                        straight_cell = cast(
-                            "KCell",
-                            cast("Any", straight_factory)(
-                                width=width,
-                                length=length,
-                                routing_fast=True,
-                            ),
-                        )
-                    _straight_cell_cache[key] = straight_cell
-                return straight_cell
+                if _raw_routing_fast_straight_factory is not None:
+                    return _expect_kcell(
+                        _raw_routing_fast_straight_factory(
+                            width=width,
+                            length=length,
+                        ),
+                        "routing_fast_factory",
+                    )
+                if _routing_fast_parameter_factory is not None:
+                    return _expect_kcell(
+                        _routing_fast_parameter_factory(
+                            width=width,
+                            length=length,
+                            routing_fast=True,
+                        ),
+                        "straight_factory(routing_fast=True)",
+                    )
+                return _expect_kcell(
+                    straight_factory(width=width, length=length), "straight_factory"
+                )
 
-            cast("Any", _straight_factory).supports_routing_fast = True
-            cast("Any", _straight_factory).supports_polygon_materialization = (
-                _raw_routing_fast_straight_factory is not None
+            placer_kwargs["straight_factory"] = _CachedRoutingStraightFactoryDBU(
+                _make_straight_cell,
+                supports_routing_fast=True,
+                supports_polygon_materialization=(
+                    _raw_routing_fast_straight_factory is not None
+                ),
             )
-            placer_kwargs["straight_factory"] = _straight_factory
 
         try:
             return route_bundle_generic(
@@ -671,22 +764,15 @@ def route_bundle(
             ends = [c.kcl.to_dbu(cast("int|float", end)) for end in ends]
         ends = cast("int | list[int] | list[Step] | list[list[Step]]", ends)
 
-    try:
-        _straight_factory_supports_routing_fast = (
-            "routing_fast" in inspect.signature(straight_factory).parameters
-        )
-    except (TypeError, ValueError):
-        _straight_factory_supports_routing_fast = False
+    _routing_fast_parameter_factory_um = (
+        straight_factory
+        if _accepts_routing_fast_parameter_um(straight_factory)
+        else None
+    )
 
-    _straight_cell_cache: dict[tuple[int, int], KCell] = {}
-
-    def _straight_factory(width: int, length: int, routing_fast: bool = False) -> KCell:
-        key = (width, length)
-        straight_cell = _straight_cell_cache.get(key)
-        if straight_cell is not None:
-            return straight_cell
-        if _straight_factory_supports_routing_fast:
-            dkc = cast("Any", straight_factory)(
+    def _make_straight_cell(width: int, length: int, routing_fast: bool) -> KCell:
+        if _routing_fast_parameter_factory_um is not None:
+            dkc = _routing_fast_parameter_factory_um(
                 width=c.kcl.to_um(width),
                 length=c.kcl.to_um(length),
                 routing_fast=True,
@@ -695,13 +781,13 @@ def route_bundle(
             dkc = cast("StraightFactoryUM", straight_factory)(
                 width=c.kcl.to_um(width), length=c.kcl.to_um(length)
             )
-        straight_cell = c.kcl[dkc.cell_index()]
-        _straight_cell_cache[key] = straight_cell
-        return straight_cell
+        return c.kcl[dkc.cell_index()]
 
-    cast(
-        "Any", _straight_factory
-    ).supports_routing_fast = _straight_factory_supports_routing_fast
+    _straight_factory = _CachedRoutingStraightFactoryDBU(
+        _make_straight_cell,
+        supports_routing_fast=_routing_fast_parameter_factory_um is not None,
+        supports_polygon_materialization=False,
+    )
 
     bend90_cell = c.kcl[bend90_cell.cell_index()]
     if taper_cell is not None:
@@ -858,7 +944,7 @@ def _place_straight(
     length = abs(p1_route.trans.disp.x - p2_route.trans.disp.x) + abs(
         p1_route.trans.disp.y - p2_route.trans.disp.y
     )
-    if getattr(straight_factory, "supports_routing_fast", False):
+    if _supports_routing_fast_factory(straight_factory):
         ports = _place_straight_polygon(
             c=c,
             straight_factory=straight_factory,
@@ -872,9 +958,7 @@ def _place_straight(
         if ports is not None:
             route.length_straights += length
             return ports
-        wg = c << cast("Any", straight_factory)(
-            width=w, length=length, routing_fast=True
-        )
+        wg = c << straight_factory(width=w, length=length, routing_fast=True)
     else:
         wg = c << straight_factory(width=w, length=length)
     wg.purpose = purpose
@@ -906,7 +990,7 @@ def _place_straight_polygon(
     *,
     port_type: str,
 ) -> tuple[RoutePort, RoutePort] | None:
-    if not getattr(straight_factory, "supports_polygon_materialization", False):
+    if not _supports_polygon_materialization_factory(straight_factory):
         return None
     if (
         not p1.is_dbu
@@ -921,7 +1005,7 @@ def _place_straight_polygon(
     if not _is_manhattan(p2.trans.disp - p1.trans.disp):
         return None
 
-    straight_cell = cast("KCell", cast("Any", straight_factory)(width=w, length=length))
+    straight_cell = straight_factory(width=w, length=length)
     xs = straight_cell._base.ports[0].cross_section
     if xs is None:
         return None

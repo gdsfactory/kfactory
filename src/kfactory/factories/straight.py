@@ -26,7 +26,7 @@ from ..cross_section import (
     DCrossSectionSpecDict,
 )
 from ..enclosure import LayerEnclosure, extrude_path_cross_section
-from ..kcell import KCell
+from ..kcell import KCell, ProtoTKCell
 from ..layout import CellKWargs, KCLayout
 from ..port import BasePort, rename_by_direction, rename_clockwise
 from ..settings import Info
@@ -46,6 +46,7 @@ class StraightFactory(Protocol[KC_co]):
         self,
         *,
         length: dbu,
+        routing_fast: bool = False,
         cross_section: str
         | AnyCrossSectionInput
         | CrossSectionSpecDict
@@ -69,6 +70,46 @@ class StraightFactory(Protocol[KC_co]):
             enclosure: Definition of slab/excludes. [dbu] (legacy)
         """
         ...
+
+
+class _StraightFactoryWithRoutingFast[TKC: ProtoTKCell[Any]]:
+    __name__: str
+    __doc__: str | None
+    __module__: str
+
+    def __init__(
+        self,
+        factory: StraightFactory[TKC],
+        routing_fast_factory: StraightFactory[KCell],
+    ) -> None:
+        self._factory = factory
+        self.routing_fast_factory = routing_fast_factory
+        self.__name__ = factory.__name__
+        self.__doc__ = getattr(factory, "__doc__", None)
+        self.__module__ = getattr(factory, "__module__", __name__)
+
+    def __call__(
+        self,
+        *,
+        length: dbu,
+        routing_fast: bool = False,
+        cross_section: str
+        | AnyCrossSectionInput
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
+        | None = None,
+        width: dbu | None = None,
+        layer: kdb.LayerInfo | None = None,
+        enclosure: LayerEnclosure | None = None,
+    ) -> TKC:
+        return self._factory(
+            length=length,
+            routing_fast=routing_fast,
+            cross_section=cross_section,
+            width=width,
+            layer=layer,
+            enclosure=enclosure,
+        )
 
 
 @overload
@@ -266,6 +307,7 @@ def straight_dbu_factory(
     def routing_fast_straight(
         *,
         length: dbu,
+        routing_fast: bool = False,
         cross_section: str
         | AnyCrossSectionInput
         | CrossSectionSpecDict
@@ -285,5 +327,4 @@ def straight_dbu_factory(
             xs = kcl.get_icross_section(cross_section)
         return _straight_impl(xs.base, length, routing_fast=True)
 
-    cast("Any", straight).routing_fast_factory = routing_fast_straight
-    return straight
+    return _StraightFactoryWithRoutingFast[KC](straight, routing_fast_straight)
