@@ -936,7 +936,7 @@ def route_smart(
     if bboxes:
         for box in bboxes:
             box_region.insert(box)
-            box_region.merge()
+        box_region.merge()
     if sort_ports:
         if bboxes is None:
             logger.warning(
