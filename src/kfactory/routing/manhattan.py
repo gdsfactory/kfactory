@@ -2232,63 +2232,64 @@ def _route_to_side(
 
     def _sort_route(router: ManhattanRouterSide) -> int:
         y = (kdb.Trans(-router.t.angle, False, 0, 0) * router.t.disp).y
-        if clockwise:
-            return -y
-        return y
+        return -y if clockwise else y
 
     sorted_rs = sorted(routers, key=_sort_route)
     for rs in sorted_rs:
+        t = rs.t
         hw1 = rs.router.width // 2
         hw2 = rs.router.width - hw1
-        match rs.t.angle:
+        br = rs.router.bend90_radius
+        match t.angle:
             case 0:
                 s = (
                     bbox.right
                     + hw1
                     + separation
-                    - rs.t.disp.x
-                    - rs.router.bend90_radius
+                    - t.disp.x
+                    - br
                 )
             case 1:
-                s = bbox.top + hw1 + separation - rs.t.disp.y - rs.router.bend90_radius
+                s = bbox.top + hw1 + separation - t.disp.y - br
             case 2:
                 s = (
-                    rs.t.disp.x
+                    t.disp.x
                     - (bbox.left - hw1 - separation)
-                    - rs.router.bend90_radius
+                    - br
                 )
             case _:
                 s = (
-                    rs.t.disp.y
+                    t.disp.y
                     - (bbox.bottom - hw1 - separation)
-                    - rs.router.bend90_radius
+                    - br
                 )
         rs.straight(s)
         tv = rs.tv
+        ta = rs.ta
         x = tv.x
         y = tv.y
         if clockwise:
-            match rs.ta:
+            match ta:
                 case 3:
-                    if x >= rs.router.bend90_radius:
+                    if x >= br:
                         rs.straight_nobend(x)
-                    elif x > -rs.router.bend90_radius and not allow_sbends:
-                        rs.straight(rs.router.bend90_radius + x)
+                    elif x > -br and not allow_sbends:
+                        rs.straight(br + x)
                 case 0 if x > 0:
                     rs.straight(x)
-            if not (y == 0 and rs.ta == ANGLE_180 and x > 0):
+            if not (y == 0 and ta == ANGLE_180 and x > 0):
                 rs.left()
             bbox += rs.t * kdb.Point(0, -hw2)
         else:
-            match rs.ta:
+            match ta:
                 case 1:
-                    if x >= rs.router.bend90_radius:
+                    if x >= br:
                         rs.straight_nobend(x)
-                    elif x > -rs.router.bend90_radius and not allow_sbends:
-                        rs.straight(rs.router.bend90_radius + x)
+                    elif x > -br and not allow_sbends:
+                        rs.straight(br + x)
                 case 0 if x > 0:
                     rs.straight(x)
-            if not (y == 0 and rs.ta == ANGLE_180 and x > 0):
+            if not (y == 0 and ta == ANGLE_180 and x > 0):
                 rs.right()
             bbox += rs.t * kdb.Point(0, hw2)
 
