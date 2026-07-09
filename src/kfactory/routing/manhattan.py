@@ -17,7 +17,6 @@ from typing import (
 )
 
 import klayout.db as kdb
-import numpy as np
 
 from ..conf import (
     ANGLE_90,
@@ -2812,9 +2811,13 @@ def clean_points(
         v2 = p_n - p  # ty:ignore[unsupported-operator]
         v1 = p - p_p  # ty:ignore[unsupported-operator]
 
-        if (
-            (np.sign(v1.x) == np.sign(v2.x)) and (np.sign(v1.y) == np.sign(v2.y))
-        ) or v2.abs() == 0:
+        same_direction = (v1.x > 0) == (v2.x > 0) and (v1.x < 0) == (
+            v2.x < 0
+        )
+        same_direction = same_direction and (v1.y > 0) == (v2.y > 0) and (
+            v1.y < 0
+        ) == (v2.y < 0)
+        if same_direction or v2.abs() == 0:
             del_points.append(i - 1)
         else:
             p_p = p

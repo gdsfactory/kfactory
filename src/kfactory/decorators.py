@@ -493,13 +493,14 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
         def wrapped_cell(**params: Any) -> KC:
 
             _params_to_original(params)
+            name_params = {k: v for k, v in params.items() if k not in drop_params}
 
             old_future_name: str | None = None
             if set_name:
                 if basename is not None:
-                    name = get_cell_name(basename, **params)
+                    name = get_cell_name(basename, **name_params)
                 else:
-                    name = get_cell_name(self.name, **params)
+                    name = get_cell_name(self.name, **name_params)
                 old_future_name = kcl._future_cell_name
                 kcl._future_cell_name = name
                 if layout_cache:
@@ -798,13 +799,14 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
         def wrapped_cell(**params: Any) -> VK:
 
             _params_to_original(params)
+            name_params = {k: v for k, v in params.items() if k not in drop_params}
 
             old_future_name: str | None = None
             if set_name:
                 if basename is not None:
-                    name = get_cell_name(basename, **params)
+                    name = get_cell_name(basename, **name_params)
                 else:
-                    name = get_cell_name(self.name, **params)
+                    name = get_cell_name(self.name, **name_params)
                 old_future_name = kcl._future_cell_name
                 kcl._future_cell_name = name
                 logger.debug(f"Constructing {kcl._future_cell_name}")

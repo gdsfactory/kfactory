@@ -614,6 +614,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
 
     layer_sections: dict[kdb.LayerInfo, LayerSection]
     _name: str | None = PrivateAttr()
+    _unnamed_key: str | None = PrivateAttr(default=None)
     main_layer: kdb.LayerInfo | None
     bbox_sections: dict[kdb.LayerInfo, int]
 
@@ -746,6 +747,8 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         named enclosures as well lets the registry alias the structural signature
         to a named enclosure.
         """
+        if self._unnamed_key is not None:
+            return self._unnamed_key
         list_to_hash: list[tuple[str, ...]] = [(str(self.main_layer),)]
         for layer, layer_section in self.layer_sections.items():
             list_to_hash.append((str(layer), str(layer_section.sections)))
@@ -753,7 +756,8 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             self.bbox_sections.items(), key=lambda kv: str(kv[0])
         ):
             list_to_hash.append((str(layer), "bbox", str(offset)))
-        return sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]  # noqa: S324
+        self._unnamed_key = sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]  # noqa: S324
+        return self._unnamed_key
 
     def minkowski_region(
         self,

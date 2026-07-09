@@ -47,12 +47,15 @@ def get_length_from_area(layer: kdb.LayerInfo | None = None) -> LengthFunction:
     """
 
     def get_length_(route: ManhattanRoute) -> float:
-        if not route.instances:
+        if not route.instances and not route.polygons:
             return 0
         layer_ = layer or route.start_port.layer_info
 
         length: float = 0
         width = route.start_port.width
+
+        for polygon in route.polygons.get(layer_, ()):
+            length += polygon.area() / width
 
         for inst in route.instances:
             length += _get_area_from_layer(

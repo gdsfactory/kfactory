@@ -317,7 +317,7 @@ class InstancePorts(ProtoTInstancePorts[int]):
 
     @property
     def cell_ports(self) -> Ports:
-        return Ports(kcl=self.instance.cell.kcl, bases=self.instance.cell.ports.bases)
+        return cast("Ports", self.instance.cell.ports)
 
     def filter(
         self,
@@ -338,7 +338,7 @@ class InstancePorts(ProtoTInstancePorts[int]):
         return Port(base=super().__getitem__(key).base)
 
     def __iter__(self) -> Iterator[Port]:
-        yield from (p.to_itype() for p in self.each_port())
+        yield from cast("Iterator[Port]", self.each_port())
 
 
 class DInstancePorts(ProtoTInstancePorts[float]):
@@ -352,7 +352,7 @@ class DInstancePorts(ProtoTInstancePorts[float]):
 
     @property
     def cell_ports(self) -> DPorts:
-        return DPorts(kcl=self.instance.cell.kcl, bases=self.instance.cell.ports.bases)
+        return cast("DPorts", self.instance.cell.ports)
 
     def filter(
         self,
@@ -373,7 +373,7 @@ class DInstancePorts(ProtoTInstancePorts[float]):
         return DPort(base=super().__getitem__(key).base)
 
     def __iter__(self) -> Iterator[DPort]:
-        yield from (p.to_dtype() for p in self.each_port())
+        yield from cast("Iterator[DPort]", self.each_port())
 
 
 class VInstancePorts(ProtoInstancePorts[float, VInstance]):
@@ -402,9 +402,7 @@ class VInstancePorts(ProtoInstancePorts[float, VInstance]):
 
     @property
     def cell_ports(self) -> DPorts:
-        return DPorts(
-            kcl=self.instance.cell.ports.kcl, bases=self.instance.cell.ports.bases
-        )
+        return cast("DPorts", self.instance.cell.ports)
 
     def __len__(self) -> int:
         """Return Port count."""
