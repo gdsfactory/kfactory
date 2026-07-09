@@ -23,6 +23,7 @@ from typing import (
     overload,
 )
 
+import numpy as np
 from pydantic import (
     BaseModel,
     Field,
@@ -77,6 +78,7 @@ class Direction(IntEnum):
 
 
 _min_size = -sys.maxsize - 1
+_EXTRUDE_PATH_ARRAY_THRESHOLD = 64
 
 
 def is_callable_widths(
@@ -144,6 +146,18 @@ def _extrude_path_band_points(
         end_angle: optionally specify a custom ending angle if `None`
             will be autocalculated from the last two elements
     """
+    if len(path) >= _EXTRUDE_PATH_ARRAY_THRESHOLD:
+        return _extrude_path_band_points_array(path, lo, hi, start_angle, end_angle)
+    return _extrude_path_band_points_python(path, lo, hi, start_angle, end_angle)
+
+
+def _extrude_path_band_points_python(
+    path: Sequence[kdb.DPoint],
+    lo: float,
+    hi: float,
+    start_angle: float | None = None,
+    end_angle: float | None = None,
+) -> tuple[list[kdb.DPoint], list[kdb.DPoint]]:
     start = path[1] - path[0]
     end = path[-1] - path[-2]
     if end_angle is None:
@@ -173,6 +187,77 @@ def _extrude_path_band_points(
     vector_bot.append(_offset_point_from_angle(p_end, lo, end_angle))
 
     return vector_top, vector_bot
+
+
+def _extrude_path_band_points_array(
+    path: Sequence[kdb.DPoint],
+    lo: float,
+    hi: float,
+    start_angle: float | None = None,
+    end_angle: float | None = None,
+) -> tuple[list[kdb.DPoint], list[kdb.DPoint]]:
+    n = len(path)
+    xs = np.fromiter((p.x for p in path), dtype=np.float64, count=n)
+    ys = np.fromiter((p.y for p in path), dtype=np.float64, count=n)
+
+    top_x = np.empty(n, dtype=np.float64)
+    top_y = np.empty(n, dtype=np.float64)
+    bot_x = np.empty(n, dtype=np.float64)
+    bot_y = np.empty(n, dtype=np.float64)
+
+    if start_angle is None:
+        start_vector = kdb.DVector(xs[1] - xs[0], ys[1] - ys[0])
+        top_start = _offset_point_from_vector(path[0], hi, start_vector)
+        bot_start = _offset_point_from_vector(path[0], lo, start_vector)
+    else:
+        top_start = _offset_point_from_angle(path[0], hi, start_angle)
+        bot_start = _offset_point_from_angle(path[0], lo, start_angle)
+    top_x[0], top_y[0] = top_start.x, top_start.y
+    bot_x[0], bot_y[0] = bot_start.x, bot_start.y
+
+    if end_angle is None:
+        end_dx = xs[-1] - xs[-2]
+        end_dy = ys[-1] - ys[-2]
+        end_angle = math.degrees(math.degrees(math.atan2(end_dy, end_dx)))
+
+    mid_x = xs[1:-1]
+    mid_y = ys[1:-1]
+    dx = xs[2:] - xs[:-2]
+    dy = ys[2:] - ys[:-2]
+    length = np.hypot(dx, dy)
+    valid = length != 0
+
+    top_x_mid = mid_x.copy()
+    top_y_mid = mid_y + hi
+    bot_x_mid = mid_x.copy()
+    bot_y_mid = mid_y + lo
+    if np.any(valid):
+        inv_length = 1 / length[valid]
+        top_x_mid[valid] = mid_x[valid] - hi * dy[valid] * inv_length
+        top_y_mid[valid] = mid_y[valid] + hi * dx[valid] * inv_length
+        bot_x_mid[valid] = mid_x[valid] - lo * dy[valid] * inv_length
+        bot_y_mid[valid] = mid_y[valid] + lo * dx[valid] * inv_length
+
+    top_x[1:-1] = top_x_mid
+    top_y[1:-1] = top_y_mid
+    bot_x[1:-1] = bot_x_mid
+    bot_y[1:-1] = bot_y_mid
+
+    top_end = _offset_point_from_angle(path[-1], hi, end_angle)
+    bot_end = _offset_point_from_angle(path[-1], lo, end_angle)
+    top_x[-1], top_y[-1] = top_end.x, top_end.y
+    bot_x[-1], bot_y[-1] = bot_end.x, bot_end.y
+
+    return (
+        [
+            kdb.DPoint(x, y)
+            for x, y in zip(top_x.tolist(), top_y.tolist(), strict=False)
+        ],
+        [
+            kdb.DPoint(x, y)
+            for x, y in zip(bot_x.tolist(), bot_y.tolist(), strict=False)
+        ],
+    )
 
 
 def extrude_path_points(

@@ -152,7 +152,8 @@ def euler_bend_points(
         angle_amount=angle_amount, radius=radius, resolution=resolution
     )
     return [
-        kdb.DPoint(float(x), float(y)) for x, y in zip(x_vals, y_vals, strict=False)
+        kdb.DPoint(x, y)
+        for x, y in zip(x_vals.tolist(), y_vals.tolist(), strict=False)
     ]
 
 
@@ -212,10 +213,11 @@ def euler_sbend_points(
     right_y = (2 * orig_y[-1] - orig_y + extra_y * direction) * direction
 
     left_points = [
-        kdb.DPoint(float(x), float(y)) for x, y in zip(left_x, left_y, strict=False)
+        kdb.DPoint(x, y) for x, y in zip(left_x.tolist(), left_y.tolist(), strict=False)
     ]
     right_points = [
-        kdb.DPoint(float(x), float(y)) for x, y in zip(right_x, right_y, strict=False)
+        kdb.DPoint(x, y)
+        for x, y in zip(right_x.tolist(), right_y.tolist(), strict=False)
     ]
     return left_points + right_points[::-1]
 

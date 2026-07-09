@@ -74,15 +74,35 @@ def bezier_curve(
     control_points: Sequence[tuple[np.float64 | float, np.float64 | float]],
 ) -> list[kdb.DPoint]:
     """Calculates the backbone of a bezier bend."""
+    n = len(control_points) - 1
+    if n == 3:
+        p0, p1, p2, p3 = control_points
+        x0, y0 = p0
+        x1, y1 = p1
+        x2, y2 = p2
+        x3, y3 = p3
+
+        xs = (
+            (((x3 - 3 * x2 + 3 * x1 - x0) * t + 3 * (x2 - 2 * x1 + x0)) * t)
+            + 3 * (x1 - x0)
+        ) * t + x0
+        ys = (
+            (((y3 - 3 * y2 + 3 * y1 - y0) * t + 3 * (y2 - 2 * y1 + y0)) * t)
+            + 3 * (y1 - y0)
+        ) * t + y0
+        return [
+            kdb.DPoint(x, y)
+            for x, y in zip(xs.tolist(), ys.tolist(), strict=False)
+        ]
+
     xs = np.zeros(t.shape, dtype=np.float64)
     ys = np.zeros(t.shape, dtype=np.float64)
-    n = len(control_points) - 1
     for k in range(n + 1):
         ank = binom(n, k) * (1 - t) ** (n - k) * t**k
         xs += ank * control_points[k][0]
         ys += ank * control_points[k][1]
 
-    return [kdb.DPoint(float(x), float(y)) for x, y in zip(xs, ys, strict=False)]
+    return [kdb.DPoint(x, y) for x, y in zip(xs.tolist(), ys.tolist(), strict=False)]
 
 
 @overload

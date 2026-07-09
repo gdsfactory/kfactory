@@ -71,11 +71,10 @@ def _circular_backbone_points(
     *, radius: um, angle: deg, angle_step: deg
 ) -> list[kdb.DPoint]:
     points = max(int(angle // angle_step + 0.5), 1)
-    angles = np.linspace(0, angle, points, endpoint=True)
-    radians = np.deg2rad(angles)
+    radians = np.linspace(0, np.deg2rad(angle), points, endpoint=True)
     x = np.sin(radians) * radius
     y = (-np.cos(radians) + 1) * radius
-    return [kdb.DPoint(float(_x), float(_y)) for _x, _y in zip(x, y, strict=False)]
+    return [kdb.DPoint(_x, _y) for _x, _y in zip(x.tolist(), y.tolist(), strict=False)]
 
 
 @overload
