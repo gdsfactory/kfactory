@@ -5,7 +5,7 @@ import pytest
 import kfactory as kf
 
 
-def test_layout_annotation_decorators(kcl: kf.KCLayout) -> None:
+def test_layout_metadata_decorators(kcl: kf.KCLayout) -> None:
     @kcl.cell
     def mmi1x2(n: int = 2) -> kf.KCell:
         c = kcl.kcell()
@@ -21,11 +21,11 @@ def test_layout_annotation_decorators(kcl: kf.KCLayout) -> None:
         return "mmi-1x2"
 
     @kcl.ports_for("mmi1x2")
-    def ports(n: int = 2) -> list[kf.AnnotationPort]:
+    def ports(n: int = 2) -> list[kf.PortSpec]:
         return [
-            kf.AnnotationPort(name="o1", kind="optical", side="left"),
+            kf.PortSpec(name="o1", kind="optical", side="left"),
             *[
-                kf.AnnotationPort(name=f"o{idx + 2}", kind="optical", side="right")
+                kf.PortSpec(name=f"o{idx + 2}", kind="optical", side="right")
                 for idx in range(n)
             ],
         ]
@@ -41,14 +41,14 @@ def test_layout_annotation_decorators(kcl: kf.KCLayout) -> None:
         }
 
     factory = kcl.factories["mmi1x2"]
-    annotation = factory.get_annotation(n=3)
+    metadata = factory.get_metadata(n=3)
 
-    assert factory.has_annotation()
-    assert annotation.device_type == "mmi-1x2"
-    assert [p["name"] for p in annotation.ports] == ["o1", "o2", "o3", "o4"]
-    assert [p["side"] for p in annotation.ports] == ["left", "right", "right", "right"]
-    assert len(annotation.models) == 1
-    assert annotation.models[0]["module"] == "base_models"
+    assert factory.has_metadata()
+    assert metadata.device_type == "mmi-1x2"
+    assert [p["name"] for p in metadata.ports] == ["o1", "o2", "o3", "o4"]
+    assert [p["side"] for p in metadata.ports] == ["left", "right", "right", "right"]
+    assert len(metadata.models) == 1
+    assert metadata.models[0]["module"] == "base_models"
 
 
 def test_fqn_providers_and_prepend(kcl: kf.KCLayout) -> None:
@@ -80,12 +80,12 @@ def test_fqn_providers_and_prepend(kcl: kf.KCLayout) -> None:
     def tags() -> tuple[str, ...]:
         return ("fqn",)
 
-    annotation = factory.get_annotation()
+    metadata = factory.get_metadata()
 
     assert kcl.factories.get_by_qualified_name(factory.qualified_name) is factory
-    assert annotation.models[0]["module"] == "preferred_models"
-    assert annotation.models[1]["module"] == "base_models"
-    assert annotation.tags == ("fqn",)
+    assert metadata.models[0]["module"] == "preferred_models"
+    assert metadata.models[1]["module"] == "base_models"
+    assert metadata.tags == ("fqn",)
 
 
 def test_target_resolution_errors(kcl: kf.KCLayout) -> None:
@@ -106,7 +106,7 @@ def test_target_resolution_errors(kcl: kf.KCLayout) -> None:
     real_factory = kcl.factories.get_all_by_name("dup")[0]
 
     kcl.device_type_for(real_factory.qualified_name, lambda: "ckt")
-    assert real_factory.get_annotation().device_type == "ckt"
+    assert real_factory.get_metadata().device_type == "ckt"
 
 
 def test_provider_parameter_errors(kcl: kf.KCLayout) -> None:
@@ -119,10 +119,10 @@ def test_provider_parameter_errors(kcl: kf.KCLayout) -> None:
         return f"missing-{missing}"
 
     with pytest.raises(TypeError, match="requires parameters unavailable"):
-        kcl.factories["straight"].get_annotation(length=20)
+        kcl.factories["straight"].get_metadata(length=20)
 
 
-def test_vcell_annotations(kcl: kf.KCLayout) -> None:
+def test_vcell_metadata(kcl: kf.KCLayout) -> None:
     @kcl.vcell
     def virtual() -> kf.VKCell:
         return kcl.vkcell()
@@ -133,7 +133,7 @@ def test_vcell_annotations(kcl: kf.KCLayout) -> None:
 
     factory = kcl.virtual_factories["virtual"]
 
-    assert factory.get_annotation().device_type == "ckt"
+    assert factory.get_metadata().device_type == "ckt"
     assert [f.name for f in kcl.virtual_factories.annotated()] == ["virtual"]
 
 
@@ -148,8 +148,8 @@ def test_schematic_function_is_separate(kcl: kf.KCLayout) -> None:
     factory = kcl.factories["schematic_cell"]
 
     assert factory.schematic_driven()
-    assert not factory.has_annotation()
-    assert factory.get_annotation() == kf.CellAnnotation()
+    assert not factory.has_metadata()
+    assert factory.get_metadata() == kf.CellMetadata()
     assert isinstance(factory.get_schematic(), kf.DSchematic)
 
 
@@ -210,8 +210,8 @@ def test_display_as_dict(kcl: kf.KCLayout) -> None:
     def display() -> dict:
         return {"kind": "svg", "path": "/icons/comp.svg"}
 
-    annotation = kcl.factories["comp"].get_annotation()
-    assert annotation.display == {"kind": "svg", "path": "/icons/comp.svg"}
+    metadata = kcl.factories["comp"].get_metadata()
+    assert metadata.display == {"kind": "svg", "path": "/icons/comp.svg"}
 
 
 def test_models_are_plain_lists(kcl: kf.KCLayout) -> None:
@@ -226,7 +226,7 @@ def test_models_are_plain_lists(kcl: kf.KCLayout) -> None:
             {"language": "spice", "name": "dev_spice"},
         ]
 
-    annotation = kcl.factories["dev"].get_annotation()
-    assert len(annotation.models) == 2
-    assert annotation.models[0]["language"] == "sax"
-    assert annotation.models[1]["language"] == "spice"
+    metadata = kcl.factories["dev"].get_metadata()
+    assert len(metadata.models) == 2
+    assert metadata.models[0]["language"] == "sax"
+    assert metadata.models[1]["language"] == "spice"

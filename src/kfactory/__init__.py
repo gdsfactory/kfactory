@@ -12,9 +12,9 @@ import klayout.db as kdb
 from klayout import lay
 from klayout import rdb
 
-from .annotations import (
-    AnnotationPort,
-    CellAnnotation,
+from .cell_metadata import (
+    CellMetadata,
+    PortSpec,
 )
 from .conf import config, logger, CheckInstances
 from .cross_section import (
@@ -100,11 +100,11 @@ def __getattr__(name: str) -> ModuleType:
 
 
 __all__ = [
-    "AnnotationPort",
+    "CellMetadata",
     "AsymmetricCrossSection",
     "AsymmetricalCrossSection",
     "BaseKCell",
-    "CellAnnotation",
+    "PortSpec",
     "CheckInstances",
     "Constants",
     "CrossSection",

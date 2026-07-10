@@ -40,7 +40,7 @@ from . import (
     SymmetricalCrossSection,
     kdb,
 )
-from .annotations import CellAnnotation, _AnnotationProviderRecord, resolve_annotation
+from .cell_metadata import CellMetadata, _MetadataProviderRecord, resolve_metadata
 from .conf import CheckInstances, CheckUnnamedCells, logger
 from .exceptions import CellNameError
 from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
@@ -707,15 +707,21 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
             )
         return self._f_schematic(*args, **kwargs)
 
-    def annotation_providers(self) -> tuple[_AnnotationProviderRecord, ...]:
-        return self.kcl.annotation_providers_for(self)
+    def metadata_providers(self) -> tuple[_MetadataProviderRecord, ...]:
+        """Return all metadata provider records registered for this factory."""
+        return self.kcl.metadata_providers_for(self)
 
-    def has_annotation(self) -> bool:
-        return bool(self.annotation_providers())
+    def has_metadata(self) -> bool:
+        """Whether any metadata providers are registered for this factory."""
+        return bool(self.metadata_providers())
 
-    def get_annotation(
+    def get_metadata(
         self, *args: KCellParams.args, **kwargs: KCellParams.kwargs
-    ) -> CellAnnotation:
+    ) -> CellMetadata:
+        """Resolve all metadata providers into a single ``CellMetadata``.
+
+        Accepts the same parameters as the cell factory itself.
+        """
         params = _parse_params(
             self._sig_params.defaults,
             self._sig_params.names,
@@ -723,7 +729,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
             args,
             kwargs,
         )
-        return resolve_annotation(self.annotation_providers(), params)
+        return resolve_metadata(self.metadata_providers(), params)
 
 
 @final
@@ -956,15 +962,21 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
     def qualified_name(self) -> str:
         return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"
 
-    def annotation_providers(self) -> tuple[_AnnotationProviderRecord, ...]:
-        return self.kcl.annotation_providers_for(self)
+    def metadata_providers(self) -> tuple[_MetadataProviderRecord, ...]:
+        """Return all metadata provider records registered for this factory."""
+        return self.kcl.metadata_providers_for(self)
 
-    def has_annotation(self) -> bool:
-        return bool(self.annotation_providers())
+    def has_metadata(self) -> bool:
+        """Whether any metadata providers are registered for this factory."""
+        return bool(self.metadata_providers())
 
-    def get_annotation(
+    def get_metadata(
         self, *args: VKCellParams.args, **kwargs: VKCellParams.kwargs
-    ) -> CellAnnotation:
+    ) -> CellMetadata:
+        """Resolve all metadata providers into a single ``CellMetadata``.
+
+        Accepts the same parameters as the cell factory itself.
+        """
         params = _parse_params(
             self._sig_params.defaults,
             self._sig_params.names,
@@ -972,7 +984,7 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
             args,
             kwargs,
         )
-        return resolve_annotation(self.annotation_providers(), params)
+        return resolve_metadata(self.metadata_providers(), params)
 
 
 def _get_path(f: Callable[..., Any]) -> Path:

@@ -38,10 +38,10 @@ from pydantic import (
 )
 
 from . import __version__, kdb
-from .annotations import (
-    AnnotationProviderKind,
-    AnnotationRegistry,
-    _AnnotationProviderRecord,
+from .cell_metadata import (
+    MetadataProviderKind,
+    MetadataRegistry,
+    _MetadataProviderRecord,
 )
 from .conf import CheckInstances, CheckUnnamedCells, config, logger
 from .cross_section import (
@@ -187,7 +187,7 @@ class Factories[F: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]](
         return tuple(self._all)
 
     def annotated(self) -> tuple[F, ...]:
-        return tuple(factory for factory in self._all if factory.has_annotation())
+        return tuple(factory for factory in self._all if factory.has_metadata())
 
     def get_all_by_name(self, name: str) -> tuple[F, ...]:
         return tuple(factory for factory in self._all if factory.name == name)
@@ -314,8 +314,8 @@ class KCLayout(
     info: Info = Field(default_factory=Info)
     settings: KCellSettings = Field(frozen=True)
     _future_cell_name: str | None = PrivateAttr(default=None)
-    _annotation_registry: AnnotationRegistry = PrivateAttr(
-        default_factory=AnnotationRegistry
+    _metadata_registry: MetadataRegistry = PrivateAttr(
+        default_factory=MetadataRegistry
     )
 
     decorators: Decorators
@@ -488,15 +488,22 @@ class KCLayout(
         self.factories.lock()
         self.virtual_factories.lock()
 
-    def annotate_for(
+    def metadata_for(
         self,
         target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
         provider: Callable[..., Any] | None = None,
         *,
         replace: bool = False,
     ) -> Callable[..., Any]:
-        return self._register_annotation_provider(
-            "annotate", target, provider, replace=replace
+        """Register a full metadata provider for a cell factory.
+
+        The provider should return a ``CellMetadata`` or a dict with any
+        subset of its fields. Use the field-specific decorators
+        (``device_type_for``, ``ports_for``, etc.) when only one aspect
+        is being provided.
+        """
+        return self._register_metadata_provider(
+            "metadata", target, provider, replace=replace
         )
 
     def model_for(
@@ -506,7 +513,12 @@ class KCLayout(
         *,
         position: Literal["append", "prepend"] = "append",
     ) -> Callable[..., Any]:
-        return self._register_annotation_provider(
+        """Register a model provider for a cell factory.
+
+        Multiple model providers are concatenated. Use
+        ``position="prepend"`` to insert before existing models.
+        """
+        return self._register_metadata_provider(
             "model", target, provider, position=position
         )
 
@@ -517,7 +529,8 @@ class KCLayout(
         *,
         replace: bool = False,
     ) -> Callable[..., Any]:
-        return self._register_annotation_provider(
+        """Register a device-type provider for a cell factory."""
+        return self._register_metadata_provider(
             "device_type", target, provider, replace=replace
         )
 
@@ -528,7 +541,13 @@ class KCLayout(
         *,
         replace: bool = False,
     ) -> Callable[..., Any]:
-        return self._register_annotation_provider(
+        """Register a port-spec provider for a cell factory.
+
+        The provider should return a list of ``PortSpec`` dicts. Port
+        providers can be parametric — they may accept any subset of the
+        cell factory's parameters.
+        """
+        return self._register_metadata_provider(
             "ports", target, provider, replace=replace
         )
 
@@ -537,7 +556,8 @@ class KCLayout(
         target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
         provider: Callable[..., Any] | None = None,
     ) -> Callable[..., Any]:
-        return self._register_annotation_provider("tags", target, provider)
+        """Register a tags provider for a cell factory."""
+        return self._register_metadata_provider("tags", target, provider)
 
     def display_for(
         self,
@@ -546,22 +566,25 @@ class KCLayout(
         *,
         replace: bool = False,
     ) -> Callable[..., Any]:
-        return self._register_annotation_provider(
+        """Register a display-hint provider for a cell factory."""
+        return self._register_metadata_provider(
             "display", target, provider, replace=replace
         )
 
-    def metadata_for(
+    def info_for(
         self,
         target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
         provider: Callable[..., Any] | None = None,
     ) -> Callable[..., Any]:
-        return self._register_annotation_provider("metadata", target, provider)
+        """Register a free-form info provider for a cell factory."""
+        return self._register_metadata_provider("info", target, provider)
 
     def schematic_for(
         self,
         target: str | WrappedKCellFunc[Any, Any],
         provider: Callable[..., Any] | None = None,
     ) -> Callable[..., Any]:
+        """Attach a schematic function to a cell factory after registration."""
         factory = self._resolve_kcell_factory(target)
 
         def register(f: Callable[..., Any]) -> Callable[..., Any]:
@@ -595,26 +618,27 @@ class KCLayout(
             )
         return matches[0]
 
-    def annotation_providers_for(
+    def metadata_providers_for(
         self, factory: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]
-    ) -> tuple[_AnnotationProviderRecord, ...]:
-        return self._annotation_registry.providers_for(
+    ) -> tuple[_MetadataProviderRecord, ...]:
+        """Return all metadata provider records registered for a factory."""
+        return self._metadata_registry.providers_for(
             name=factory.name, qualified_name=factory.qualified_name, obj=factory
         )
 
-    def _register_annotation_provider(
+    def _register_metadata_provider(
         self,
-        kind: AnnotationProviderKind,
+        kind: MetadataProviderKind,
         target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
         provider: Callable[..., Any] | None = None,
         *,
         replace: bool = False,
         position: Literal["append", "prepend"] = "append",
     ) -> Callable[..., Any]:
-        target_kind, target_key = self._annotation_target_key(target)
+        target_kind, target_key = self._metadata_target_key(target)
 
         def register(f: Callable[..., Any]) -> Callable[..., Any]:
-            self._annotation_registry.add(
+            self._metadata_registry.add(
                 target_kind=target_kind,
                 target_key=target_key,
                 kind=kind,
@@ -628,7 +652,7 @@ class KCLayout(
             return register
         return register(provider)
 
-    def _annotation_target_key(
+    def _metadata_target_key(
         self, target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]
     ) -> tuple[Literal["name", "fqn", "object"], str | int]:
         if isinstance(target, str):
