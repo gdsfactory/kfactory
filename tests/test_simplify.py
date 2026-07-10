@@ -71,3 +71,17 @@ def test_simplify_single_point() -> None:
     points = [kdb.DPoint(0, 0)]
     simplified = dsimplify(points, 0.1)
     assert simplified == points
+
+
+def test_simplify_closed_polyline_preserves_shape() -> None:
+    points = [
+        kdb.Point(0, 0),
+        kdb.Point(10, 0),
+        kdb.Point(10, 10),
+        kdb.Point(0, 10),
+        kdb.Point(0, 0),
+    ]
+
+    simplified = simplify(points, 0.1)
+
+    assert simplified == points

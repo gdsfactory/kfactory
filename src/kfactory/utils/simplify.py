@@ -35,7 +35,17 @@ def _simplify_indices(
     dy = ys[end] - ys[start]
     norm = np.hypot(dx, dy)
     if norm == 0:
-        return [start, end]
+        xs_ = xs[start : end + 1]
+        ys_ = ys[start : end + 1]
+        dists = np.hypot(xs_ - xs[start], ys_ - ys[start])
+        ind_dist = start + int(np.argmax(dists))
+        maxd = float(dists[ind_dist - start])
+        return (
+            [start, end]
+            if maxd <= tolerance
+            else _simplify_indices(xs, ys, start, ind_dist, tolerance)
+            + _simplify_indices(xs, ys, ind_dist, end, tolerance)[1:]
+        )
 
     xs_ = xs[start : end + 1]
     ys_ = ys[start : end + 1]

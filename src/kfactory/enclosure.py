@@ -223,7 +223,7 @@ def _extrude_path_band_points_array(
     if end_angle is None:
         end_dx = xs[-1] - xs[-2]
         end_dy = ys[-1] - ys[-2]
-        end_angle = math.degrees(math.degrees(math.atan2(end_dy, end_dx)))
+        end_angle = math.degrees(math.atan2(end_dy, end_dx))
 
     mid_x = xs[1:-1]
     mid_y = ys[1:-1]
