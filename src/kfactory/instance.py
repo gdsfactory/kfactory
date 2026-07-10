@@ -418,7 +418,9 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
                 )
             op = Port(base=other.ports[other_port_name].base)  # ty:ignore[invalid-argument-type]
         if isinstance(port, ProtoPort):
-            p = Port(base=port.base.transformed(self.dcplx_trans.inverted()))
+            p = Port(
+                base=port.base.transformed(self.dcplx_trans.inverted(), copy_info=False)
+            )
         else:
             p = Port(base=self.cell.ports[port].base)
 
@@ -1096,7 +1098,9 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         else:
             op = Port(base=other.base)
         if isinstance(port, ProtoPort):
-            p = port.copy(self.trans.inverted()).to_itype()
+            p = Port(
+                base=port.base.transformed(self.trans.inverted(), copy_info=False)
+            ).to_itype()
         else:
             p = self.cell.ports[port].to_itype()
 

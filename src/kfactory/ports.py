@@ -426,9 +426,20 @@ class ICreatePort(ABC):
                 layer_info = self.kcl.layout.get_info(layer)
             assert layer_info is not None
             try:
-                xs = self.kcl.get_icross_section(
-                    CrossSectionSpecDict(layer=layer_info, width=width, unit="dbu")
+                cache_key = (
+                    layer_info.layer,
+                    layer_info.datatype,
+                    layer_info.name,
+                    width,
                 )
+                cached_xs = self.kcl._dbu_cross_section_cache.get(cache_key)
+                if cached_xs is None:
+                    xs = self.kcl.get_icross_section(
+                        CrossSectionSpecDict(layer=layer_info, width=width, unit="dbu")
+                    )
+                    self.kcl._dbu_cross_section_cache[cache_key] = xs
+                else:
+                    xs = cached_xs
             except ValidationError as e:
                 raise ValueError(
                     "Port width needs to be even to snap to grid properly "
@@ -751,7 +762,7 @@ class Ports(ProtoPorts[int], ICreatePort):
                 equivalent) to `False`.
         """
         if port.kcl == self.kcl:
-            base = port.base.model_copy()
+            base = port.base._copy()
             if not keep_mirror:
                 if base.trans is not None:
                     base.trans.mirror = False
@@ -765,7 +776,7 @@ class Ports(ProtoPorts[int], ICreatePort):
             dcplx_trans = port.dcplx_trans.dup()
             if not keep_mirror:
                 dcplx_trans.mirror = False
-            base = port.base.model_copy()
+            base = port.base._copy()
             base.trans = kdb.Trans.R0
             base.dcplx_trans = None
             base.kcl = self.kcl
@@ -815,7 +826,7 @@ class Ports(ProtoPorts[int], ICreatePort):
         self, rename_function: Callable[[Sequence[Port]], None] | None = None
     ) -> Self:
         """Get a copy of each port."""
-        bases = [b.__copy__() for b in self._bases]
+        bases = [b._copy() for b in self._bases]
         if rename_function is not None:
             rename_function([Port(base=b) for b in bases])
         return self.__class__(bases=bases, kcl=self.kcl)
@@ -883,7 +894,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
                 equivalent) to `False`.
         """
         if port.kcl == self.kcl:
-            base = port.base.model_copy()
+            base = port.base._copy()
             if not keep_mirror:
                 if base.trans is not None:
                     base.trans.mirror = False
@@ -897,7 +908,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
             dcplx_trans = port.dcplx_trans.dup()
             if not keep_mirror:
                 dcplx_trans.mirror = False
-            base = port.base.model_copy()
+            base = port.base._copy()
             base.trans = kdb.Trans.R0
             base.dcplx_trans = None
             base.kcl = self.kcl
@@ -945,7 +956,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
         self, rename_function: Callable[[Sequence[DPort]], None] | None = None
     ) -> Self:
         """Get a copy of each port."""
-        bases = [b.__copy__() for b in self._bases]
+        bases = [b._copy() for b in self._bases]
         if rename_function is not None:
             rename_function([DPort(base=b) for b in bases])
         return self.__class__(bases=bases, kcl=self.kcl)

@@ -26,9 +26,9 @@ from ..cross_section import (
     DCrossSectionSpecDict,
 )
 from ..enclosure import LayerEnclosure, extrude_path_cross_section
-from ..kcell import KCell
+from ..kcell import KCell, ProtoTKCell
 from ..layout import CellKWargs, KCLayout
-from ..port import rename_by_direction, rename_clockwise
+from ..port import BasePort, rename_by_direction, rename_clockwise
 from ..settings import Info
 from ..typings import KC, KC_co, MetaData, dbu
 from .utils import (
@@ -46,6 +46,7 @@ class StraightFactory(Protocol[KC_co]):
         self,
         *,
         length: dbu,
+        routing_fast: bool = False,
         cross_section: str
         | AnyCrossSectionInput
         | CrossSectionSpecDict
@@ -69,6 +70,46 @@ class StraightFactory(Protocol[KC_co]):
             enclosure: Definition of slab/excludes. [dbu] (legacy)
         """
         ...
+
+
+class _StraightFactoryWithRoutingFast[TKC: ProtoTKCell[Any]]:
+    __name__: str
+    __doc__: str | None
+    __module__: str
+
+    def __init__(
+        self,
+        factory: StraightFactory[TKC],
+        routing_fast_factory: StraightFactory[KCell],
+    ) -> None:
+        self._factory = factory
+        self.routing_fast_factory = routing_fast_factory
+        self.__name__ = factory.__name__
+        self.__doc__ = getattr(factory, "__doc__", None)
+        self.__module__ = getattr(factory, "__module__", __name__)
+
+    def __call__(
+        self,
+        *,
+        length: dbu,
+        routing_fast: bool = False,
+        cross_section: str
+        | AnyCrossSectionInput
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
+        | None = None,
+        width: dbu | None = None,
+        layer: kdb.LayerInfo | None = None,
+        enclosure: LayerEnclosure | None = None,
+    ) -> TKC:
+        return self._factory(
+            length=length,
+            routing_fast=routing_fast,
+            cross_section=cross_section,
+            width=width,
+            layer=layer,
+            enclosure=enclosure,
+        )
 
 
 @overload
@@ -149,6 +190,9 @@ def straight_dbu_factory(
         elif kcl.rename_function == rename_by_direction:
             cell_kwargs["ports"] = {"left": ["W0"], "right": ["E0"]}
     cell_kwargs.setdefault("basename", "straight")
+    cast("dict[str, Any]", cell_kwargs).setdefault(
+        "drop_params", ("self", "cls", "routing_fast")
+    )
     basename = cell_kwargs["basename"]
 
     if output_type is not None:
@@ -156,10 +200,10 @@ def straight_dbu_factory(
     else:
         cell = kcl.cell(output_type=cast("type[KC]", KCell), **cell_kwargs)
 
-    @cell
-    def _straight(
-        cross_section: str | AnyCrossSectionInput,
+    def _straight_impl(
+        xs: Any,
         length: dbu,
+        routing_fast: bool = False,
     ) -> KCell:
         """Waveguide defined by a cross section."""
         c = kcl.kcell()
@@ -172,43 +216,75 @@ def straight_dbu_factory(
             )
             length = -length
 
-        xs = kcl.get_base_cross_section(cross_section)
-
         extrude_path_cross_section(
             c, [kdb.DPoint(0.0, 0.0), kdb.DPoint(kcl.to_um(length), 0.0)], xs
         )
 
-        c.create_port(
-            name="o1",
-            trans=kdb.Trans(2, False, 0, 0),
-            cross_section=xs,
-            port_type=port_type,
-        )
-        c.create_port(
-            name="o2",
-            trans=kdb.Trans(0, False, length, 0),
-            cross_section=xs,
-            port_type=port_type,
-        )
+        if not routing_fast:
+            c.create_port(
+                name="o1",
+                trans=kdb.Trans(2, False, 0, 0),
+                cross_section=xs,
+                port_type=port_type,
+            )
+            c.create_port(
+                name="o2",
+                trans=kdb.Trans(0, False, length, 0),
+                cross_section=xs,
+                port_type=port_type,
+            )
 
-        _info: dict[str, MetaData] = {
-            "width_um": kcl.to_um(xs.width),
-            "length_um": kcl.to_um(length),
-            "width_dbu": xs.width,
-            "length_dbu": length,
-        }
-        _info.update(_additional_info_func(cross_section=xs, length=length))
-        _info.update(_additional_info)
-        c.info = Info(**_info)
+            _info: dict[str, MetaData] = {
+                "width_um": kcl.to_um(xs.width),
+                "length_um": kcl.to_um(length),
+                "width_dbu": xs.width,
+                "length_dbu": length,
+            }
+            _info.update(_additional_info_func(cross_section=xs, length=length))
+            _info.update(_additional_info)
+            c.info = Info(**_info)
 
-        c.boundary = kdb.DPolygon(c.dbbox())
-        c.auto_rename_ports()
+            c.boundary = kdb.DPolygon(c.dbbox())
+            c.auto_rename_ports()
+        else:
+            c._base.ports.extend(
+                [
+                    BasePort(
+                        name="o1",
+                        kcl=kcl,
+                        cross_section=xs,
+                        trans=kdb.Trans(2, False, 0, 0),
+                        port_type=port_type,
+                    ),
+                    BasePort(
+                        name="o2",
+                        kcl=kcl,
+                        cross_section=xs,
+                        trans=kdb.Trans(0, False, length, 0),
+                        port_type=port_type,
+                    ),
+                ]
+            )
         return c
+
+    @cell
+    def _straight(
+        cross_section: str | AnyCrossSectionInput,
+        length: dbu,
+        routing_fast: bool = False,
+    ) -> KCell:
+        """Waveguide defined by a cross section."""
+        return _straight_impl(
+            kcl.get_base_cross_section(cross_section),
+            length,
+            routing_fast=routing_fast,
+        )
 
     @kcl.generic_factory(name=basename)
     def straight(
         *,
         length: dbu,
+        routing_fast: bool = False,
         cross_section: str
         | AnyCrossSectionInput
         | CrossSectionSpecDict
@@ -226,6 +302,29 @@ def straight_dbu_factory(
             xs = cross_section_from_width(kcl, width, layer, enclosure)
         else:
             xs = kcl.get_icross_section(cross_section)
-        return _straight(cross_section=xs, length=length)
+        return _straight(cross_section=xs, length=length, routing_fast=routing_fast)
 
-    return straight
+    def routing_fast_straight(
+        *,
+        length: dbu,
+        routing_fast: bool = False,
+        cross_section: str
+        | AnyCrossSectionInput
+        | CrossSectionSpecDict
+        | DCrossSectionSpecDict
+        | None = None,
+        width: dbu | None = None,
+        layer: kdb.LayerInfo | None = None,
+        enclosure: LayerEnclosure | None = None,
+    ) -> KCell:
+        if cross_section is None:
+            if width is None or layer is None:
+                raise ValueError(
+                    "Provide a cross_section, or width and layer (legacy call)."
+                )
+            xs = cross_section_from_width(kcl, width, layer, enclosure)
+        else:
+            xs = kcl.get_icross_section(cross_section)
+        return _straight_impl(xs.base, length, routing_fast=True)
+
+    return _StraightFactoryWithRoutingFast[KC](straight, routing_fast_straight)

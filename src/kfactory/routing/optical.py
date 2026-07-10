@@ -2,9 +2,20 @@
 
 from __future__ import annotations
 
+import inspect
 from collections.abc import Sequence
 from enum import IntEnum
-from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast, overload
+from functools import partial
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Literal,
+    Protocol,
+    TypedDict,
+    TypeGuard,
+    cast,
+    overload,
+)
 
 from .. import kdb, rdb
 from ..conf import (
@@ -17,6 +28,7 @@ from ..conf import (
 from ..instance import Instance, ProtoTInstance
 from ..instance_group import InstanceGroup, ProtoTInstanceGroup
 from ..kcell import DKCell, KCell, ProtoTKCell
+from ..port import Port
 from .generic import ManhattanRoute, PlacerFunction, get_radius
 from .generic import (
     route_bundle as route_bundle_generic,
@@ -27,10 +39,21 @@ from .manhattan import (
     route_manhattan,
     route_smart,
 )
+from .route_ports import (
+    RoutePort,
+    port_for_connect,
+    route_port,
+)
+from .route_ports import (
+    instance_route_port as _instance_route_port,
+)
+from .route_ports import (
+    instance_route_port_by_name as _instance_route_port_by_name,
+)
 from .steps import Step, Straight
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Callable, Sequence
 
     from ..factories import (
         SBendFactoryDBU,
@@ -38,7 +61,7 @@ if TYPE_CHECKING:
         StraightFactoryDBU,
         StraightFactoryUM,
     )
-    from ..port import DPort, Port
+    from ..port import BasePort, DPort, Port
     from ..schematic import Constraint
     from ..typings import dbu, um
     from .utils import RouteDebug
@@ -51,6 +74,56 @@ __all__ = [
     "route_loopback",
     "vec_angle",
 ]
+
+_PENDING_POLYGON_REGIONS: dict[int, dict[kdb.LayerInfo, kdb.Region]] = {}
+_PENDING_POLYGON_HOLES: dict[int, dict[kdb.LayerInfo, kdb.Region]] = {}
+
+
+class _HasRoutingFastFactory(Protocol):
+    routing_fast_factory: StraightFactoryDBU
+
+
+class _RoutingFastParameterFactoryDBU(Protocol):
+    def __call__(
+        self, width: int, length: int, routing_fast: bool = False
+    ) -> ProtoTKCell[Any]: ...
+
+
+class _RoutingFastParameterFactoryUM(Protocol):
+    def __call__(
+        self, width: float, length: float, routing_fast: bool = False
+    ) -> ProtoTKCell[Any]: ...
+
+
+class _RoutingStraightFactoryDBU(Protocol):
+    supports_routing_fast: bool
+    supports_polygon_materialization: bool
+
+    def __call__(
+        self, width: int, length: int, routing_fast: bool = False
+    ) -> KCell: ...
+
+
+class _CachedRoutingStraightFactoryDBU:
+    def __init__(
+        self,
+        make_cell: Callable[[int, int, bool], KCell],
+        *,
+        supports_routing_fast: bool,
+        supports_polygon_materialization: bool,
+    ) -> None:
+        self._make_cell = make_cell
+        self._cache: dict[tuple[int, int], KCell] = {}
+        self.supports_routing_fast = supports_routing_fast
+        self.supports_polygon_materialization = supports_polygon_materialization
+
+    def __call__(self, width: int, length: int, routing_fast: bool = False) -> KCell:
+        key = (width, length)
+        straight_cell = self._cache.get(key)
+        if straight_cell is None:
+            straight_cell = self._make_cell(width, length, routing_fast)
+            self._cache[key] = straight_cell
+        return straight_cell
 
 
 class LoopSide(IntEnum):
@@ -71,6 +144,62 @@ class PathLengthConfig[T: (int, float)](TypedDict, total=False):
     element: int
     loop_position: int
     total_length: int
+
+
+def _get_routing_fast_straight_factory(
+    straight_factory: object,
+) -> StraightFactoryDBU | None:
+    if _has_routing_fast_factory(straight_factory):
+        return straight_factory.routing_fast_factory
+    if isinstance(straight_factory, partial) and _has_routing_fast_factory(
+        straight_factory.func
+    ):
+        return partial(
+            straight_factory.func.routing_fast_factory,
+            *straight_factory.args,
+            **(straight_factory.keywords or {}),
+        )
+    return None
+
+
+def _has_routing_fast_factory(factory: object) -> TypeGuard[_HasRoutingFastFactory]:
+    return hasattr(factory, "routing_fast_factory")
+
+
+def _accepts_routing_fast_parameter_dbu(
+    factory: Callable[..., object],
+) -> TypeGuard[_RoutingFastParameterFactoryDBU]:
+    try:
+        return "routing_fast" in inspect.signature(factory).parameters
+    except (TypeError, ValueError):
+        return False
+
+
+def _accepts_routing_fast_parameter_um(
+    factory: Callable[..., object],
+) -> TypeGuard[_RoutingFastParameterFactoryUM]:
+    try:
+        return "routing_fast" in inspect.signature(factory).parameters
+    except (TypeError, ValueError):
+        return False
+
+
+def _supports_routing_fast_factory(
+    factory: StraightFactoryDBU,
+) -> TypeGuard[_RoutingStraightFactoryDBU]:
+    return getattr(factory, "supports_routing_fast", False) is True
+
+
+def _supports_polygon_materialization_factory(
+    factory: StraightFactoryDBU,
+) -> TypeGuard[_RoutingStraightFactoryDBU]:
+    return getattr(factory, "supports_polygon_materialization", False) is True
+
+
+def _expect_kcell(cell: ProtoTKCell[Any], context: str) -> KCell:
+    if not isinstance(cell, KCell):
+        raise TypeError(f"{context} must return a KCell, got {type(cell).__name__}")
+    return cell
 
 
 def path_length_match(
@@ -441,8 +570,8 @@ def route_bundle(
     if bboxes is None:
         bboxes = []
     bend90_radius = get_radius(bend90_cell.ports.filter(port_type=place_port_type))
-    start_ports_ = [p.base.model_copy() for p in start_ports]
-    end_ports_ = [p.base.model_copy() for p in end_ports]
+    start_ports_ = [p.base._copy(copy_info=False) for p in start_ports]
+    end_ports_ = [p.base._copy(copy_info=False) for p in end_ports]
     if sbend_factory is None:
         placer: PlacerFunction = place_manhattan
         placer_kwargs: dict[str, Any] = {
@@ -476,6 +605,52 @@ def route_bundle(
             "sbend_factory": sbend_factory,
         }
     if isinstance(c, KCell):
+        _raw_routing_fast_straight_factory = _get_routing_fast_straight_factory(
+            straight_factory
+        )
+        _routing_fast_parameter_factory = (
+            straight_factory
+            if _accepts_routing_fast_parameter_dbu(straight_factory)
+            else None
+        )
+
+        if (
+            _raw_routing_fast_straight_factory is not None
+            or _routing_fast_parameter_factory is not None
+        ):
+
+            def _make_straight_cell(
+                width: int, length: int, routing_fast: bool
+            ) -> KCell:
+                if _raw_routing_fast_straight_factory is not None:
+                    return _expect_kcell(
+                        _raw_routing_fast_straight_factory(
+                            width=width,
+                            length=length,
+                        ),
+                        "routing_fast_factory",
+                    )
+                if _routing_fast_parameter_factory is not None:
+                    return _expect_kcell(
+                        _routing_fast_parameter_factory(
+                            width=width,
+                            length=length,
+                            routing_fast=True,
+                        ),
+                        "straight_factory(routing_fast=True)",
+                    )
+                return _expect_kcell(
+                    straight_factory(width=width, length=length), "straight_factory"
+                )
+
+            placer_kwargs["straight_factory"] = _CachedRoutingStraightFactoryDBU(
+                _make_straight_cell,
+                supports_routing_fast=True,
+                supports_polygon_materialization=(
+                    _raw_routing_fast_straight_factory is not None
+                ),
+            )
+
         try:
             return route_bundle_generic(
                 c=c,
@@ -589,11 +764,30 @@ def route_bundle(
             ends = [c.kcl.to_dbu(cast("int|float", end)) for end in ends]
         ends = cast("int | list[int] | list[Step] | list[list[Step]]", ends)
 
-    def _straight_factory(width: int, length: int) -> KCell:
-        dkc = cast("StraightFactoryUM", straight_factory)(
-            width=c.kcl.to_um(width), length=c.kcl.to_um(length)
-        )
+    _routing_fast_parameter_factory_um = (
+        straight_factory
+        if _accepts_routing_fast_parameter_um(straight_factory)
+        else None
+    )
+
+    def _make_straight_cell(width: int, length: int, routing_fast: bool) -> KCell:
+        if _routing_fast_parameter_factory_um is not None:
+            dkc = _routing_fast_parameter_factory_um(
+                width=c.kcl.to_um(width),
+                length=c.kcl.to_um(length),
+                routing_fast=True,
+            )
+        else:
+            dkc = cast("StraightFactoryUM", straight_factory)(
+                width=c.kcl.to_um(width), length=c.kcl.to_um(length)
+            )
         return c.kcl[dkc.cell_index()]
+
+    _straight_factory = _CachedRoutingStraightFactoryDBU(
+        _make_straight_cell,
+        supports_routing_fast=_routing_fast_parameter_factory_um is not None,
+        supports_polygon_materialization=False,
+    )
 
     bend90_cell = c.kcl[bend90_cell.cell_index()]
     if taper_cell is not None:
@@ -736,30 +930,284 @@ def _place_straight(
     purpose: str | None,
     w: int,
     route: ManhattanRoute,
-    p1: Port,
-    p2: Port,
+    p1: Port | RoutePort,
+    p2: Port | RoutePort,
     route_width: int | None,
     *,
     port_type: str,
     allow_width_mismatch: bool,
     allow_layer_mismatch: bool,
     allow_type_mismatch: bool,
-) -> tuple[Port, Port]:
-    length = int((p1.trans.disp.to_p() - p2.trans.disp.to_p()).length())
-    wg = c << straight_factory(width=w, length=length)
+) -> tuple[RoutePort, RoutePort]:
+    p1_route = route_port(p1)
+    p2_route = route_port(p2)
+    length = abs(p1_route.trans.disp.x - p2_route.trans.disp.x) + abs(
+        p1_route.trans.disp.y - p2_route.trans.disp.y
+    )
+    if _supports_routing_fast_factory(straight_factory):
+        ports = _place_straight_polygon(
+            c=c,
+            straight_factory=straight_factory,
+            w=w,
+            length=length,
+            route=route,
+            p1=p1_route,
+            p2=p2_route,
+            port_type=port_type,
+        )
+        if ports is not None:
+            route.length_straights += length
+            return ports
+        wg = c << straight_factory(width=w, length=length, routing_fast=True)
+    else:
+        wg = c << straight_factory(width=w, length=length)
     wg.purpose = purpose
-    wg_p1, _ = (v for v in wg.ports if v.port_type == port_type)
-    wg.connect(
-        wg_p1,
-        p1,
-        allow_width_mismatch=route_width is not None or allow_width_mismatch,
+    allow_width_mismatch = route_width is not None or allow_width_mismatch
+    _connect_straight_instance(
+        wg,
+        p1_route,
+        allow_width_mismatch=allow_width_mismatch,
         allow_layer_mismatch=allow_layer_mismatch,
         allow_type_mismatch=allow_type_mismatch,
     )
-    wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
+    wg_p1 = _instance_route_port(wg, 0)
+    wg_p2 = _instance_route_port(wg, 1)
+    if wg_p1.port_type != port_type or wg_p2.port_type != port_type:
+        raise ValueError(f"straight_factory returned unexpected ports for {port_type=}")
     route.instances.append(wg)
     route.length_straights += length
     return wg_p1, wg_p2
+
+
+def _place_straight_polygon(
+    c: KCell,
+    straight_factory: StraightFactoryDBU,
+    w: int,
+    length: int,
+    route: ManhattanRoute,
+    p1: RoutePort,
+    p2: RoutePort,
+    *,
+    port_type: str,
+) -> tuple[RoutePort, RoutePort] | None:
+    if not _supports_polygon_materialization_factory(straight_factory):
+        return None
+    if (
+        not p1.is_dbu
+        or not p2.is_dbu
+        or p1.width != w
+        or p2.width != w
+        or p1.port_type != port_type
+        or p2.port_type != port_type
+    ):
+        return None
+
+    if not _is_manhattan(p2.trans.disp - p1.trans.disp):
+        return None
+
+    straight_cell = straight_factory(width=w, length=length)
+    xs = straight_cell._base.ports[0].cross_section
+    if xs is None:
+        return None
+    if not p1.base.any_cross_section.main_layer.is_equivalent(
+        xs.main_layer
+    ) or not p2.base.any_cross_section.main_layer.is_equivalent(xs.main_layer):
+        return None
+
+    _queue_straight_cross_section_polygons(route, xs, p1, p2)
+    return (
+        RoutePort(base=p1.base, trans=p1.trans * kdb.Trans.R180, dbu=True),
+        RoutePort(base=p2.base, trans=p2.trans * kdb.Trans.R180, dbu=True),
+    )
+
+
+def _queue_straight_cross_section_polygons(
+    route: ManhattanRoute,
+    xs: Any,
+    p1: RoutePort,
+    p2: RoutePort,
+) -> None:
+    points = [p1.trans.disp.to_p(), p2.trans.disp.to_p()]
+    route_id = id(route)
+    pending_regions = _PENDING_POLYGON_REGIONS.setdefault(route_id, {})
+    pending_holes = _PENDING_POLYGON_HOLES.setdefault(route_id, {})
+
+    _queue_path_region(pending_regions, xs.main_layer, points, xs.width)
+    for layer, layer_section in xs.enclosure.layer_sections.items():
+        for section in layer_section.sections:
+            _queue_path_region(
+                pending_regions,
+                layer,
+                points,
+                xs.width + 2 * section.d_max,
+            )
+            if section.d_min is not None:
+                inner_width = xs.width + 2 * section.d_min
+                if inner_width > 0:
+                    _queue_path_region(
+                        pending_holes,
+                        layer,
+                        points,
+                        inner_width,
+                    )
+
+
+def _queue_path_region(
+    regions: dict[kdb.LayerInfo, kdb.Region],
+    layer: kdb.LayerInfo,
+    points: list[kdb.Point],
+    width: int,
+) -> None:
+    region = regions.get(layer)
+    if region is None:
+        region = kdb.Region()
+        regions[layer] = region
+    region.insert(kdb.Path(points, width))
+
+
+def _insert_route_polygons(c: KCell, route: ManhattanRoute) -> None:
+    route_id = id(route)
+    pending_regions = _PENDING_POLYGON_REGIONS.pop(route_id, None)
+    if not pending_regions:
+        return
+    pending_holes = _PENDING_POLYGON_HOLES.pop(route_id, {})
+    for layer, pending_region in pending_regions.items():
+        holes = pending_holes.get(layer)
+        region = pending_region
+        if holes is not None:
+            region -= holes
+        region.merge()
+        c.shapes(c.kcl.layer(layer)).insert(region)
+        route.polygons.setdefault(layer, []).extend(region.each())
+
+
+def _connect_straight_instance(
+    wg: Instance,
+    target: RoutePort,
+    *,
+    allow_width_mismatch: bool,
+    allow_layer_mismatch: bool,
+    allow_type_mismatch: bool,
+) -> None:
+    local_base = wg.cell._base.ports[0]
+    target_base = target.base
+
+    if _supports_direct_straight_connect(
+        local_base, target
+    ) and _ports_match_for_direct_connect(
+        local_base,
+        target_base,
+        allow_width_mismatch=allow_width_mismatch,
+        allow_layer_mismatch=allow_layer_mismatch,
+        allow_type_mismatch=allow_type_mismatch,
+    ):
+        _directly_connect_straight(wg, local_base, target)
+        return
+
+    _connect_instance_with_checks(
+        wg,
+        local_base,
+        target,
+        allow_width_mismatch=allow_width_mismatch,
+        allow_layer_mismatch=allow_layer_mismatch,
+        allow_type_mismatch=allow_type_mismatch,
+    )
+
+
+def _supports_direct_straight_connect(
+    local_base: BasePort,
+    target: RoutePort,
+) -> bool:
+    """Whether routing can apply the default `Instance.connect` transform directly."""
+    target_base = target.base
+    return (
+        config.connect_use_mirror
+        and config.connect_use_angle
+        and local_base.trans is not None
+        and target.is_dbu
+        and local_base.dcplx_trans is None
+        and target_base.dcplx_trans is None
+        and local_base.asymmetric_cross_section is None
+        and target_base.asymmetric_cross_section is None
+    )
+
+
+def _ports_match_for_direct_connect(
+    local_base: BasePort,
+    target_base: BasePort,
+    *,
+    allow_width_mismatch: bool,
+    allow_layer_mismatch: bool,
+    allow_type_mismatch: bool,
+) -> bool:
+    """Mirror the cheap compatibility checks needed before direct connection."""
+    local_xs = local_base.any_cross_section
+    target_xs = target_base.any_cross_section
+    return (
+        (local_base.is_symmetric() == target_base.is_symmetric())
+        and (local_xs.width == target_xs.width or allow_width_mismatch)
+        and (
+            local_xs.main_layer.is_equivalent(target_xs.main_layer)
+            or allow_layer_mismatch
+        )
+        and (local_base.port_type == target_base.port_type or allow_type_mismatch)
+    )
+
+
+def _directly_connect_straight(
+    wg: Instance,
+    local_base: BasePort,
+    target: RoutePort,
+) -> None:
+    """Apply the same transform as `Instance.connect(..., mirror=False)`."""
+    assert local_base.trans is not None
+    wg.trans = target.trans * kdb.Trans.R180 * local_base.trans.inverted()
+
+
+def _connect_instance_with_checks(
+    wg: Instance,
+    local_base: BasePort,
+    target: Port | RoutePort,
+    *,
+    allow_width_mismatch: bool,
+    allow_layer_mismatch: bool,
+    allow_type_mismatch: bool,
+) -> None:
+    wg.connect(
+        Port(base=local_base),
+        port_for_connect(target),
+        allow_width_mismatch=allow_width_mismatch,
+        allow_layer_mismatch=allow_layer_mismatch,
+        allow_type_mismatch=allow_type_mismatch,
+    )
+
+
+def _copy_port_for_placement(
+    port: Port | RoutePort,
+    post_trans: kdb.Trans = kdb.Trans.R0,
+) -> Port:
+    return Port(
+        base=port_for_connect(port).base.transformed(
+            post_trans=post_trans,
+            copy_info=False,
+        )
+    )
+
+
+def _copy_polar_for_placement(
+    port: Port | RoutePort,
+    d: int = 0,
+    d_orth: int = 0,
+    angle: int = 2,
+    mirror: bool = False,
+) -> Port:
+    return _copy_port_for_placement(port, kdb.Trans(angle, mirror, d, d_orth))
+
+
+def _copy_route_endpoint(port: Port | RoutePort) -> Port:
+    if isinstance(port, RoutePort):
+        return port.to_port()
+    return Port(base=port.base.transformed(copy_info=False))
 
 
 def _place_sbend(
@@ -768,14 +1216,14 @@ def _place_sbend(
     purpose: str | None,
     w: int,
     route: ManhattanRoute,
-    p1: Port,
-    p2: Port,
+    p1: Port | RoutePort,
+    p2: Port | RoutePort,
     *,
     allow_width_mismatch: bool,
     allow_layer_mismatch: bool,
     allow_type_mismatch: bool,
 ) -> tuple[Port, Port]:
-    p1_ = p1.copy()
+    p1_ = _copy_port_for_placement(p1)
     p1_.trans.mirror = False
     delta_p = p1_.trans.inverted() * p2.trans.disp.to_p()
 
@@ -796,7 +1244,7 @@ def _place_sbend(
         )
     sp1, sp2 = sbend_group.ports[0], sbend_group.ports[1]
 
-    sp1_ = sp1.copy_polar()
+    sp1_ = _copy_polar_for_placement(sp1)
     sp1_.trans.mirror = False
     sbg_delta_p = sp1_.trans.inverted() * sp2.trans.disp.to_p()
     if delta_p.y == sbg_delta_p.y:
@@ -831,8 +1279,8 @@ def _place_tapered_straight(
     taper_cell: KCell,
     purpose: str | None,
     route: ManhattanRoute,
-    p1: Port,
-    p2: Port,
+    p1: Port | RoutePort,
+    p2: Port | RoutePort,
     route_width: int | None,
     taper_ports: tuple[Port, Port],
     *,
@@ -840,14 +1288,16 @@ def _place_tapered_straight(
     allow_width_mismatch: bool,
     allow_layer_mismatch: bool,
     allow_type_mismatch: bool,
-) -> tuple[Port, Port]:
+) -> tuple[RoutePort, RoutePort]:
     taperp1, taperp2 = taper_ports
-    length = int((p1.trans.disp.to_p() - p2.trans.disp.to_p()).length())
+    p1_route = route_port(p1)
+    p2_route = route_port(p2)
+    length = int((p1_route.trans.disp.to_p() - p2_route.trans.disp.to_p()).length())
     t1 = c << taper_cell
     t1.purpose = purpose
     t1.connect(
         taperp1.name,
-        p1,
+        port_for_connect(p1),
         allow_width_mismatch=route_width is not None or allow_width_mismatch,
         allow_layer_mismatch=allow_layer_mismatch,
         allow_type_mismatch=allow_type_mismatch,
@@ -857,7 +1307,7 @@ def _place_tapered_straight(
     t2.purpose = purpose
     t2.connect(
         taperp1.name,
-        p2,
+        port_for_connect(p2),
         allow_width_mismatch=route_width is not None or allow_width_mismatch,
         allow_layer_mismatch=allow_layer_mismatch,
         allow_type_mismatch=allow_type_mismatch,
@@ -866,8 +1316,8 @@ def _place_tapered_straight(
     route.n_taper += 2
     l_ = int(length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2)
     if l_ != 0:
-        p1_ = t1.ports[taperp2.name]
-        p2_ = t2.ports[taperp2.name]
+        p1_ = _instance_route_port_by_name(t1, taperp2.name)
+        p2_ = _instance_route_port_by_name(t2, taperp2.name)
         _place_straight(
             c=c,
             straight_factory=straight_factory,
@@ -883,7 +1333,10 @@ def _place_tapered_straight(
             allow_type_mismatch=allow_type_mismatch,
         )
 
-    return t1.ports[taperp1.name], t2.ports[taperp1.name]
+    return (
+        _instance_route_port_by_name(t1, taperp1.name),
+        _instance_route_port_by_name(t2, taperp1.name),
+    )
 
 
 def _place_tapered_sbend_or_straight(
@@ -892,8 +1345,8 @@ def _place_tapered_sbend_or_straight(
     taper_cell: KCell,
     purpose: str | None,
     route: ManhattanRoute,
-    p1: Port,
-    p2: Port,
+    p1: Port | RoutePort,
+    p2: Port | RoutePort,
     route_width: int | None,
     taper_ports: tuple[Port, Port],
     *,
@@ -902,12 +1355,14 @@ def _place_tapered_sbend_or_straight(
     allow_type_mismatch: bool,
 ) -> tuple[Port, Port]:
     taperp1, taperp2 = taper_ports
-    length = int((p1.trans.disp.to_p() - p2.trans.disp.to_p()).length())
+    p1_route = route_port(p1)
+    p2_route = route_port(p2)
+    length = int((p1_route.trans.disp.to_p() - p2_route.trans.disp.to_p()).length())
     t1 = c << taper_cell
     t1.purpose = purpose
     t1.connect(
         taperp1.name,
-        p1,
+        port_for_connect(p1),
         allow_width_mismatch=route_width is not None or allow_width_mismatch,
         allow_layer_mismatch=allow_layer_mismatch,
         allow_type_mismatch=allow_type_mismatch,
@@ -917,7 +1372,7 @@ def _place_tapered_sbend_or_straight(
     t2.purpose = purpose
     t2.connect(
         taperp1.name,
-        p2,
+        port_for_connect(p2),
         allow_width_mismatch=route_width is not None or allow_width_mismatch,
         allow_layer_mismatch=allow_layer_mismatch,
         allow_type_mismatch=allow_type_mismatch,
@@ -984,8 +1439,8 @@ def place_manhattan(
             "place_manhattan needs to be passed a fixed bend90 cell with two optical"
             " ports which are 90° apart from each other with port_type 'port_type'."
         )
-    route_start_port = p1.copy()
-    route_end_port = p2.copy()
+    route_start_port = _copy_port_for_placement(p1)
+    route_end_port = _copy_port_for_placement(p2)
     if p1.base.trans is None:
         logger.warning(
             f"{p1=} is not a manhattan port (either off-grid or angle not a multiple of"
@@ -1065,7 +1520,7 @@ def place_manhattan(
                 " the bend's ports"
             )
         route = ManhattanRoute(
-            backbone=list(pts).copy(),
+            backbone=list(pts),
             start_port=route_start_port,
             end_port=route_end_port,
             instances=[],
@@ -1074,7 +1529,7 @@ def place_manhattan(
         )
     else:
         route = ManhattanRoute(
-            backbone=list(pts).copy(),
+            backbone=list(pts),
             start_port=route_start_port,
             end_port=route_end_port,
             instances=[],
@@ -1101,8 +1556,8 @@ def place_manhattan(
                 purpose=purpose,
                 w=w,
                 route=route,
-                p1=route.start_port.copy_polar(),
-                p2=route.end_port.copy_polar(),
+                p1=p1,
+                p2=p2,
                 route_width=w,
                 port_type=port_type,
                 allow_width_mismatch=allow_width_mismatch,
@@ -1116,8 +1571,8 @@ def place_manhattan(
                 purpose=purpose,
                 taper_ports=(taperp1, taperp2),
                 route=route,
-                p1=route.start_port.copy_polar(),
-                p2=route.end_port.copy_polar(),
+                p1=p1,
+                p2=p2,
                 route_width=w,
                 port_type=port_type,
                 allow_width_mismatch=allow_width_mismatch,
@@ -1125,10 +1580,9 @@ def place_manhattan(
                 allow_type_mismatch=allow_type_mismatch,
                 taper_cell=taper_cell,
             )
-        p1_.name = "route_start"
-        p2_.name = "route_end"
         route.start_port = p1
         route.end_port = p2
+        _insert_route_polygons(c, route)
         return route
 
     # in other cases, place the bend and then route
@@ -1170,7 +1624,7 @@ def place_manhattan(
                 f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
             )
         bend90.transform(kdb.Trans(ang, mirror, pt.x, pt.y) * b90c.inverted())
-        new_bend_port = bend90.ports[b90p1.name]
+        new_bend_port = _instance_route_port_by_name(bend90, b90p1.name)
         length = int((new_bend_port.trans.disp - old_bend_port.trans.disp).length())
         if length > 0:
             if (
@@ -1210,11 +1664,11 @@ def place_manhattan(
                     allow_type_mismatch=allow_type_mismatch,
                 )
             if i == 1:
-                route.start_port = p1_
+                route.start_port = _copy_route_endpoint(p1_)
         route.instances.append(bend90)
         old_pt = pt
-        old_bend_port = bend90.ports[b90p2.name]
-    length = int((bend90.ports[b90p2.name].trans.disp - p2.trans.disp).length())
+        old_bend_port = _instance_route_port_by_name(bend90, b90p2.name)
+    length = int((old_bend_port.trans.disp - p2.trans.disp).length())
     if length > 0:
         if (
             taper_cell is None
@@ -1252,11 +1706,12 @@ def place_manhattan(
                 allow_layer_mismatch=allow_layer_mismatch,
                 allow_type_mismatch=allow_type_mismatch,
             )
-        route.end_port = p2_.copy()
+        route.end_port = _copy_route_endpoint(p2_)
     else:
-        route.end_port = old_bend_port.copy()
+        route.end_port = _copy_route_endpoint(old_bend_port)
     route.start_port.name = "route_start"
     route.end_port.name = "route_end"
+    _insert_route_polygons(c, route)
     return route
 
 
@@ -1307,10 +1762,10 @@ def place_manhattan_with_sbends(
         raise ValueError(
             "place_manhattan_with_sbends needs to be passed a sbend_function."
         )
-    route_start_port = p1.copy()
+    route_start_port = _copy_port_for_placement(p1)
     route_start_port.name = "route_start"
     route_start_port.trans.angle = (route_start_port.angle + 2) % 4
-    route_end_port = p2.copy()
+    route_end_port = _copy_port_for_placement(p2)
     route_end_port.name = "route_end"
     route_end_port.trans.angle = (route_end_port.angle + 2) % 4
 
@@ -1373,7 +1828,7 @@ def place_manhattan_with_sbends(
                 " the bend's ports"
             )
         route = ManhattanRoute(
-            backbone=list(pts).copy(),
+            backbone=list(pts),
             start_port=route_start_port,
             end_port=route_end_port,
             instances=[],
@@ -1382,7 +1837,7 @@ def place_manhattan_with_sbends(
         )
     else:
         route = ManhattanRoute(
-            backbone=list(pts).copy(),
+            backbone=list(pts),
             start_port=route_start_port,
             end_port=route_end_port,
             instances=[],
@@ -1406,7 +1861,9 @@ def place_manhattan_with_sbends(
                 w=w,
                 route=route,
                 p1=old_bend_port,
-                p2=old_bend_port.copy_polar(d=sbend_vec.x, d_orth=sbend_vec.y, angle=2),
+                p2=_copy_polar_for_placement(
+                    old_bend_port, d=sbend_vec.x, d_orth=sbend_vec.y, angle=2
+                ),
                 allow_width_mismatch=allow_width_mismatch,
                 allow_layer_mismatch=allow_layer_mismatch,
                 allow_type_mismatch=allow_type_mismatch,
@@ -1425,8 +1882,8 @@ def place_manhattan_with_sbends(
                     purpose=purpose,
                     w=w,
                     route=route,
-                    p1=route.start_port.copy_polar(),
-                    p2=route.end_port.copy_polar(),
+                    p1=p1,
+                    p2=p2,
                     route_width=w,
                     port_type=port_type,
                     allow_width_mismatch=allow_width_mismatch,
@@ -1440,8 +1897,8 @@ def place_manhattan_with_sbends(
                     purpose=purpose,
                     taper_ports=(taperp1, taperp2),
                     route=route,
-                    p1=route.start_port.copy_polar(),
-                    p2=route.end_port.copy_polar(),
+                    p1=p1,
+                    p2=p2,
                     route_width=w,
                     port_type=port_type,
                     allow_width_mismatch=allow_width_mismatch,
@@ -1453,6 +1910,7 @@ def place_manhattan_with_sbends(
         p2.name = "route_end"
         route.start_port = p1
         route.end_port = p2
+        _insert_route_polygons(c, route)
         return route
 
     # in other cases, place the bend and then route
@@ -1464,8 +1922,8 @@ def place_manhattan_with_sbends(
         vec = pt - old_pt
         if _is_sbend_vec(vec):
             sbend_vec = (kdb.Trans(-old_angle, False, 0, 0) * vec.to_p()).to_v()
-            bend_port = old_bend_port.copy_polar(
-                d=sbend_vec.x, d_orth=sbend_vec.y, angle=2
+            bend_port = _copy_polar_for_placement(
+                old_bend_port, d=sbend_vec.x, d_orth=sbend_vec.y, angle=2
             )
             p1_, p2_ = _place_sbend(
                 c=c,
@@ -1482,13 +1940,13 @@ def place_manhattan_with_sbends(
             old_pt = pt
             old_bend_port = p2_
             if i == 1:
-                route.start_port = p1_
+                route.start_port = _copy_route_endpoint(p1_)
             continue
 
         vec_n = new_pt - pt
 
         if _is_sbend_vec(vec_n):
-            new_bend_port = old_bend_port.copy_polar(int(vec.length()))
+            new_bend_port = _copy_polar_for_placement(old_bend_port, int(vec.length()))
             length = int((new_bend_port.trans.disp - old_bend_port.trans.disp).length())
             if length > 0:
                 if (
@@ -1562,7 +2020,7 @@ def place_manhattan_with_sbends(
                 f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
             )
         bend90.transform(kdb.Trans(ang, mirror, pt.x, pt.y) * b90c.inverted())
-        new_bend_port = bend90.ports[b90p1.name]
+        new_bend_port = _instance_route_port_by_name(bend90, b90p1.name)
         length = int((new_bend_port.trans.disp - old_bend_port.trans.disp).length())
         if length > 0:
             if (
@@ -1602,14 +2060,16 @@ def place_manhattan_with_sbends(
                     allow_type_mismatch=allow_type_mismatch,
                 )
             if i == 1:
-                route.start_port = p1_
+                route.start_port = _copy_route_endpoint(p1_)
         route.instances.append(bend90)
         old_pt = pt
-        old_bend_port = bend90.ports[b90p2.name]
+        old_bend_port = _instance_route_port_by_name(bend90, b90p2.name)
     vec = pts[-1] - pts[-2]
     if _is_sbend_vec(vec):
         sbend_vec = (old_bend_port.trans.inverted() * pts[-1]).to_v()
-        bend_port = old_bend_port.copy_polar(d=sbend_vec.x, d_orth=sbend_vec.y, angle=2)
+        bend_port = _copy_polar_for_placement(
+            old_bend_port, d=sbend_vec.x, d_orth=sbend_vec.y, angle=2
+        )
         _place_sbend(
             c=c,
             sbend_factory=sbend_factory,
@@ -1662,11 +2122,12 @@ def place_manhattan_with_sbends(
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
                 )
-            route.end_port = p2_.copy()
+            route.end_port = _copy_route_endpoint(p2_)
         else:
-            route.end_port = old_bend_port.copy()
+            route.end_port = _copy_route_endpoint(old_bend_port)
     route.start_port.name = "route_start"
     route.end_port.name = "route_end"
+    _insert_route_polygons(c, route)
     return route
 
 

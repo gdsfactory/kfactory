@@ -17,7 +17,6 @@ from typing import (
 )
 
 import klayout.db as kdb
-import numpy as np
 
 from ..conf import (
     ANGLE_90,
@@ -937,7 +936,7 @@ def route_smart(
     if bboxes:
         for box in bboxes:
             box_region.insert(box)
-            box_region.merge()
+        box_region.merge()
     if sort_ports:
         if bboxes is None:
             logger.warning(
@@ -1304,6 +1303,7 @@ def route_smart(
         for r in all_routers
     ]
     _router_extra_bbox: list[kdb.Box | None] = [None] * len(all_routers)
+    _router_index = {id(router): i for i, router in enumerate(all_routers)}
     _max_overlap_retries = 5
     for _retry_attempt in range(_max_overlap_retries):
         if _retry_attempt > 0:
@@ -1665,22 +1665,28 @@ def route_smart(
         # extend the affected routers' router_bbox via _router_extra_bbox
         # so the next attempt will bundle them together.
         _bundle_regions: list[kdb.Region] = []
+        _bundle_bboxes: list[kdb.Box] = []
         for _bundle in bundled_routers:
             _region = kdb.Region()
+            _bbox = kdb.Box()
             for _router in _bundle:
                 _pts = list(_router.start.pts) + list(reversed(_router.end.pts))
                 if len(_pts) >= 2:
                     _path = kdb.Path(_pts, _router.width)
                     _region.insert(_path.polygon())
+                    _bbox += _path.bbox()
             _bundle_regions.append(_region)
+            _bundle_bboxes.append(_bbox)
         _found_overlap = False
         for _bi in range(len(_bundle_regions)):
             for _bj in range(_bi + 1, len(_bundle_regions)):
+                if (_bundle_bboxes[_bi] & _bundle_bboxes[_bj]).empty():
+                    continue
                 _inter = _bundle_regions[_bi] & _bundle_regions[_bj]
                 if not _inter.is_empty():
                     _overlap_bbox = _inter.bbox()
                     for _router in bundled_routers[_bi] + bundled_routers[_bj]:
-                        _idx = all_routers.index(_router)
+                        _idx = _router_index[id(_router)]
                         _existing = _router_extra_bbox[_idx]
                         if _existing is None:
                             _router_extra_bbox[_idx] = _overlap_bbox.dup()
@@ -2225,63 +2231,50 @@ def _route_to_side(
 
     def _sort_route(router: ManhattanRouterSide) -> int:
         y = (kdb.Trans(-router.t.angle, False, 0, 0) * router.t.disp).y
-        if clockwise:
-            return -y
-        return y
+        return -y if clockwise else y
 
     sorted_rs = sorted(routers, key=_sort_route)
     for rs in sorted_rs:
+        t = rs.t
         hw1 = rs.router.width // 2
         hw2 = rs.router.width - hw1
-        match rs.t.angle:
+        br = rs.router.bend90_radius
+        match t.angle:
             case 0:
-                s = (
-                    bbox.right
-                    + hw1
-                    + separation
-                    - rs.t.disp.x
-                    - rs.router.bend90_radius
-                )
+                s = bbox.right + hw1 + separation - t.disp.x - br
             case 1:
-                s = bbox.top + hw1 + separation - rs.t.disp.y - rs.router.bend90_radius
+                s = bbox.top + hw1 + separation - t.disp.y - br
             case 2:
-                s = (
-                    rs.t.disp.x
-                    - (bbox.left - hw1 - separation)
-                    - rs.router.bend90_radius
-                )
+                s = t.disp.x - (bbox.left - hw1 - separation) - br
             case _:
-                s = (
-                    rs.t.disp.y
-                    - (bbox.bottom - hw1 - separation)
-                    - rs.router.bend90_radius
-                )
+                s = t.disp.y - (bbox.bottom - hw1 - separation) - br
         rs.straight(s)
         tv = rs.tv
+        ta = rs.ta
         x = tv.x
         y = tv.y
         if clockwise:
-            match rs.ta:
+            match ta:
                 case 3:
-                    if x >= rs.router.bend90_radius:
+                    if x >= br:
                         rs.straight_nobend(x)
-                    elif x > -rs.router.bend90_radius and not allow_sbends:
-                        rs.straight(rs.router.bend90_radius + x)
+                    elif x > -br and not allow_sbends:
+                        rs.straight(br + x)
                 case 0 if x > 0:
                     rs.straight(x)
-            if not (y == 0 and rs.ta == ANGLE_180 and x > 0):
+            if not (y == 0 and ta == ANGLE_180 and x > 0):
                 rs.left()
             bbox += rs.t * kdb.Point(0, -hw2)
         else:
-            match rs.ta:
+            match ta:
                 case 1:
-                    if x >= rs.router.bend90_radius:
+                    if x >= br:
                         rs.straight_nobend(x)
-                    elif x > -rs.router.bend90_radius and not allow_sbends:
-                        rs.straight(rs.router.bend90_radius + x)
+                    elif x > -br and not allow_sbends:
+                        rs.straight(br + x)
                 case 0 if x > 0:
                     rs.straight(x)
-            if not (y == 0 and rs.ta == ANGLE_180 and x > 0):
+            if not (y == 0 and ta == ANGLE_180 and x > 0):
                 rs.right()
             bbox += rs.t * kdb.Point(0, hw2)
 
@@ -2804,9 +2797,11 @@ def clean_points(
         v2 = p_n - p  # ty:ignore[unsupported-operator]
         v1 = p - p_p  # ty:ignore[unsupported-operator]
 
-        if (
-            (np.sign(v1.x) == np.sign(v2.x)) and (np.sign(v1.y) == np.sign(v2.y))
-        ) or v2.abs() == 0:
+        same_direction = (v1.x > 0) == (v2.x > 0) and (v1.x < 0) == (v2.x < 0)
+        same_direction = (
+            same_direction and (v1.y > 0) == (v2.y > 0) and (v1.y < 0) == (v2.y < 0)
+        )
+        if same_direction or v2.abs() == 0:
             del_points.append(i - 1)
         else:
             p_p = p

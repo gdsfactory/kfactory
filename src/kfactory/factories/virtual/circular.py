@@ -3,8 +3,6 @@
 from collections.abc import Callable
 from typing import Any, Protocol
 
-import numpy as np
-
 from ... import kdb
 from ...conf import logger
 from ...cross_section import (
@@ -17,6 +15,7 @@ from ...kcell import VKCell
 from ...layout import KCLayout
 from ...settings import Info
 from ...typings import MetaData, deg, um
+from ..circular import _circular_backbone_points
 from ..utils import (
     _is_additional_info_func,
     cross_section_from_width,
@@ -125,18 +124,9 @@ def virtual_bend_circular_factory(
             angle = -angle
 
         xs = kcl.get_base_cross_section(cross_section)
-        backbone = [
-            kdb.DPoint(x, y)
-            for x, y in [
-                [
-                    np.sin(_angle / 180 * np.pi) * radius,
-                    (-np.cos(_angle / 180 * np.pi) + 1) * radius,
-                ]
-                for _angle in np.linspace(
-                    0, angle, int(angle // angle_step + 0.5), endpoint=True
-                )
-            ]
-        ]
+        backbone = _circular_backbone_points(
+            radius=radius, angle=angle, angle_step=angle_step
+        )
 
         extrude_backbone_cross_section(
             c,

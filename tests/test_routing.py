@@ -7,7 +7,7 @@ import pytest
 
 import kfactory as kf
 from kfactory.routing.utils import RouteDebug
-from tests.conftest import Layers
+from tests.conftest import Layers, OASRegression
 
 smart_bundle_routing_params = [
     (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
@@ -32,7 +32,7 @@ def test_route_length_match(
     loop_side: int,
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
     layers: Layers,
     kcl: kf.KCLayout,
 ) -> None:
@@ -76,7 +76,7 @@ def test_route_length_match(
         ],
         route_name="path_length_matching",
     )
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_route_length_match_errors() -> None:
@@ -96,7 +96,7 @@ def test_route_bundle(
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     kcl: kf.KCLayout,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
 ) -> None:
     c = kcl.kcell("TEST_ROUTE_BUNDLE")
 
@@ -151,7 +151,7 @@ def test_route_bundle(
         assert np.isclose(route.length, length)
 
     c.auto_rename_ports()
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_route_length_straight(
@@ -160,7 +160,7 @@ def test_route_length_straight(
     straight_factory_dbu: Callable[..., kf.KCell],
     kcl: kf.KCLayout,
     layers: Layers,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
 ) -> None:
     c = kcl.kcell("TEST_ROUTE_BUNDLE_AREA_LENGTH")
     p1 = kf.Port(name="o1", width=1000, trans=kf.kdb.Trans.R0, layer_info=layers.WG)
@@ -178,7 +178,7 @@ def test_route_length_straight(
     )
 
     assert [r.length for r in routes] == [10_000]
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_route_bundle_route_width(
@@ -186,7 +186,7 @@ def test_route_bundle_route_width(
     bend90_euler_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     kcl: kf.KCLayout,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
 ) -> None:
     c = kcl.kcell("TEST_ROUTE_BUNDLE")
 
@@ -229,7 +229,7 @@ def test_route_bundle_route_width(
         c.add_port(port=route.end_port)
 
     c.auto_rename_ports()
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_route_length(
@@ -237,7 +237,7 @@ def test_route_length(
     straight_factory_dbu: Callable[..., kf.KCell],
     optical_port: kf.Port,
     taper: kf.KCell,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
     kcl: kf.KCLayout,
 ) -> None:
     x, y, angle2 = (55000, 70000, 2)
@@ -264,7 +264,7 @@ def test_route_length(
     assert route.length_straights == 30196
     assert route.length_backbone == 125000
     assert route.n_bend90 == 2
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 _test_smart_routing_kcl = kf.KCLayout("TEST_SMART_ROUTING", infos=Layers)
@@ -296,7 +296,7 @@ def test_smart_routing(
     z: bool,
     p1: bool,
     p2: bool,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
     kcl: kf.KCLayout,
 ) -> None:
     """Tests all possible smart routing configs."""
@@ -473,7 +473,7 @@ def test_smart_routing(
             c.show()
         case _:
             rf()
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_custom_router(
@@ -551,7 +551,7 @@ def test_route_smart_waypoints_trans_sort(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_smart_route_waypoints_trans_sort")
@@ -583,14 +583,14 @@ def test_route_smart_waypoints_trans_sort(
         waypoints=kf.kdb.Trans(250_000, 0),
         sort_ports=True,
     )
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_route_smart_waypoints_pts_sort(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_smart_route_waypoints_pts_sort")
@@ -622,7 +622,7 @@ def test_route_smart_waypoints_pts_sort(
         waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
         sort_ports=True,
     )
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_route_waypoints_non_manhattan(
@@ -677,7 +677,7 @@ def test_route_smart_waypoints_trans(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_smart_route_waypoints_trans")
@@ -709,14 +709,14 @@ def test_route_smart_waypoints_trans(
         bend90_cell=bend90_small,
         waypoints=kf.kdb.Trans(250_000, 0),
     )
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_route_smart_waypoints_pts(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_smart_route_waypoints_pts")
@@ -748,13 +748,13 @@ def test_route_smart_waypoints_pts(
         bend90_cell=bend90_small,
         waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
     )
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_route_generic_reorient(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_route_generic_reorient")
@@ -794,7 +794,7 @@ def test_route_generic_reorient(
         end_angles=end_angles,
     )
 
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_placer_error(
@@ -1398,7 +1398,7 @@ def test_route_bundle_single_return(
     straight_factory_dbu: Callable[..., kf.KCell],
     optical_port: kf.Port,
     taper: kf.KCell,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
     kcl: kf.KCLayout,
 ) -> None:
     x, y, angle2 = (0, 7000, 0)
@@ -1418,7 +1418,7 @@ def test_route_bundle_single_return(
         taper_cell=taper,
         allow_width_mismatch=True,
     )[0]
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_route_bundle_multi_return(
@@ -1426,7 +1426,7 @@ def test_route_bundle_multi_return(
     straight_factory_dbu: Callable[..., kf.KCell],
     optical_port: kf.Port,
     taper: kf.KCell,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
@@ -1473,7 +1473,7 @@ def test_route_bundle_multi_return(
         sort_ports=False,
         bboxes=[b1, b2],
     )[0]
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)
 
 
 def test_route_bundle_multi_return_opposite(
@@ -1481,7 +1481,7 @@ def test_route_bundle_multi_return_opposite(
     straight_factory_dbu: Callable[..., kf.KCell],
     optical_port: kf.Port,
     taper: kf.KCell,
-    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: OASRegression,
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
@@ -1527,4 +1527,4 @@ def test_route_bundle_multi_return_opposite(
         sort_ports=False,
         bboxes=[b1, b2],
     )[0]
-    oas_regression(c)
+    oas_regression(c, flatten=True, with_meta=False)

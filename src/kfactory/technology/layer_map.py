@@ -151,8 +151,10 @@ def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
         layer=(kl.source_layer, kl.source_datatype),
         frame_color=Color(hex(kl.frame_color)) if kl.frame_color else None,
         fill_color=Color(hex(kl.fill_color)) if kl.fill_color else None,
-        dither_pattern=index2dither[kl.dither_pattern],  # ty:ignore[invalid-argument-type]
-        line_style=index2line.get(kl.line_style, "solid"),  # ty:ignore[invalid-argument-type]
+        dither_pattern=kl.dither_pattern,
+        line_style=kl.line_style
+        if kl.line_style in index2line
+        else line2index["solid"],
         visible=kl.visible,
         width=kl.width,
         xfill=kl.xfill,

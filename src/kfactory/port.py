@@ -10,11 +10,6 @@ from abc import ABC, abstractmethod
 from enum import IntEnum, IntFlag, auto
 from typing import TYPE_CHECKING, Any, Literal, Self, overload
 
-from pydantic import (
-    BaseModel,
-    model_serializer,
-    model_validator,
-)
 from typing_extensions import TypedDict
 
 from . import kdb, rdb
@@ -35,12 +30,18 @@ from .settings import Info
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable
+    from collections.abc import Callable, Iterable, Mapping
 
     from .kcell import AnyTKCell, KCell
     from .layer import LayerEnum
     from .layout import KCLayout
     from .typings import Angle, TPort
+
+
+def _new_info(info: dict[str, Any] | None) -> Info:
+    if not info:
+        return Info.model_construct()
+    return Info(**info)
 
 
 def create_port_error(
@@ -134,7 +135,7 @@ class BasePortDict(TypedDict):
     port_type: str
 
 
-class BasePort(BaseModel, arbitrary_types_allowed=True):
+class BasePort:
     """Class representing the base port.
 
     This does not have any knowledge of units. Exactly one of
@@ -142,16 +143,64 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     must be set, mirroring the `trans` / `dcplx_trans` pattern.
     """
 
-    name: str
-    kcl: KCLayout
-    cross_section: SymmetricalCrossSection | None = None
-    asymmetric_cross_section: AsymmetricalCrossSection | None = None
-    trans: kdb.Trans | None = None
-    dcplx_trans: kdb.DCplxTrans | None = None
-    info: Info = Info()
-    port_type: str
+    __slots__ = (
+        "asymmetric_cross_section",
+        "cross_section",
+        "dcplx_trans",
+        "info",
+        "kcl",
+        "name",
+        "port_type",
+        "trans",
+    )
 
-    @model_validator(mode="after")
+    def __init__(
+        self,
+        *,
+        name: str,
+        kcl: KCLayout,
+        cross_section: SymmetricalCrossSection | None = None,
+        asymmetric_cross_section: AsymmetricalCrossSection | None = None,
+        trans: kdb.Trans | None = None,
+        dcplx_trans: kdb.DCplxTrans | None = None,
+        info: Info | dict[str, Any] | None = None,
+        port_type: str,
+    ) -> None:
+        self.name = name
+        self.kcl = kcl
+        self.cross_section = cross_section
+        self.asymmetric_cross_section = asymmetric_cross_section
+        self.trans = trans
+        self.dcplx_trans = dcplx_trans
+        self.info = info if isinstance(info, Info) else _new_info(info)
+        self.port_type = port_type
+        self.check_exclusivity()
+
+    @classmethod
+    def _construct(
+        cls,
+        *,
+        name: str,
+        kcl: KCLayout,
+        cross_section: SymmetricalCrossSection | None = None,
+        asymmetric_cross_section: AsymmetricalCrossSection | None = None,
+        trans: kdb.Trans | None = None,
+        dcplx_trans: kdb.DCplxTrans | None = None,
+        info: Info | None = None,
+        port_type: str,
+    ) -> BasePort:
+        """Construct a port base after callers have normalized valid fields."""
+        base = cls.__new__(cls)
+        base.name = name
+        base.kcl = kcl
+        base.cross_section = cross_section
+        base.asymmetric_cross_section = asymmetric_cross_section
+        base.trans = trans
+        base.dcplx_trans = dcplx_trans
+        base.info = info if info is not None else Info.model_construct()
+        base.port_type = port_type
+        return base
+
     def check_exclusivity(self) -> Self:
         """Check that exactly one trans and exactly one cross_section is set."""
         if self.trans is None and self.dcplx_trans is None:
@@ -182,32 +231,67 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
 
     def __copy__(self) -> BasePort:
         """Copy the BasePort."""
-        return BasePort(
+        return self._copy()
+
+    def _copy(
+        self,
+        *,
+        update: Mapping[str, Any] | None = None,
+        copy_info: bool = True,
+        deep_info: bool = False,
+    ) -> BasePort:
+        info = self.info.model_copy(deep=deep_info) if copy_info else self.info
+        base = BasePort._construct(
             name=self.name,
             kcl=self.kcl,
             cross_section=self.cross_section,
             asymmetric_cross_section=self.asymmetric_cross_section,
             trans=self.trans.dup() if self.trans else None,
             dcplx_trans=self.dcplx_trans.dup() if self.dcplx_trans else None,
-            info=self.info.model_copy(),
+            info=info,
             port_type=self.port_type,
         )
+        if update:
+            for key, value in update.items():
+                setattr(base, key, value)
+        return base
+
+    def model_copy(
+        self, *, update: Mapping[str, Any] | None = None, deep: bool = False
+    ) -> Self:
+        """Copy the BasePort with duplicated KLayout transforms.
+
+        Pydantic's generic ``model_copy`` is optimized for Python object graphs, but
+        ports need explicit ``dup()`` calls for mutable KLayout transform objects.
+        Keeping this as the canonical copy path also makes high-volume routing
+        copies cheaper than going through pydantic internals.
+        """
+        return self._copy(update=update, deep_info=deep)  # ty:ignore[invalid-return-type]
 
     def transformed(
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        *,
+        copy_info: bool = True,
     ) -> BasePort:
         """Get a transformed copy of the BasePort."""
-        base = self.__copy__()
+        info = self.info.model_copy() if copy_info else self.info
         if (
-            base.trans is not None
+            self.trans is not None
             and isinstance(trans, kdb.Trans)
             and isinstance(post_trans, kdb.Trans)
         ):
-            base.trans = trans * base.trans * post_trans
-            base.dcplx_trans = None
-            return base
+            return BasePort._construct(
+                name=self.name,
+                kcl=self.kcl,
+                cross_section=self.cross_section,
+                asymmetric_cross_section=self.asymmetric_cross_section,
+                trans=trans * self.trans * post_trans,
+                dcplx_trans=None,
+                info=info,
+                port_type=self.port_type,
+            )
         if isinstance(trans, kdb.Trans):
             trans = kdb.DCplxTrans(trans.to_dtype(self.kcl.dbu))
         if isinstance(post_trans, kdb.Trans):
@@ -216,9 +300,16 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             t=self.trans.to_dtype(self.kcl.dbu)  # ty:ignore[unresolved-attribute]
         )
 
-        base.trans = None
-        base.dcplx_trans = trans * dcplx_trans * post_trans
-        return base
+        return BasePort._construct(
+            name=self.name,
+            kcl=self.kcl,
+            cross_section=self.cross_section,
+            asymmetric_cross_section=self.asymmetric_cross_section,
+            trans=None,
+            dcplx_trans=trans * dcplx_trans * post_trans,
+            info=info,
+            port_type=self.port_type,
+        )
 
     def transform(
         self,
@@ -247,7 +338,6 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         base.dcplx_trans = trans * dcplx_trans * post_trans
         return self
 
-    @model_serializer()
     def ser_model(self) -> BasePortDict:
         """Serialize the BasePort."""
         trans = self.trans.dup() if self.trans is not None else None
@@ -261,6 +351,20 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             dcplx_trans=dcplx_trans,
             info=self.info.model_copy(),
             port_type=self.port_type,
+        )
+
+    def model_dump(self, *, exclude_none: bool = False, **_: Any) -> dict[str, Any]:
+        """Serialize the BasePort using the subset of Pydantic's API we rely on."""
+        data = dict(self.ser_model())
+        if exclude_none:
+            return {key: value for key, value in data.items() if value is not None}
+        return data
+
+    def __repr__(self) -> str:
+        trans = self.trans if self.trans is not None else self.dcplx_trans
+        return (
+            f"BasePort(name={self.name!r}, trans={trans!r}, "
+            f"port_type={self.port_type!r})"
         )
 
     def get_trans(self) -> kdb.Trans:
@@ -906,13 +1010,11 @@ class Port(ProtoPort[int]):
         base: BasePort | None = None,
     ) -> None:
         """Create a port from dbu or um based units."""
-        if info is None:
-            info = {}
         if base is not None:
             self._base = base
             return
         if port is not None:
-            self._base = port.base.__copy__()
+            self._base = port.base._copy()
             return
 
         if name is None:
@@ -920,7 +1022,7 @@ class Port(ProtoPort[int]):
                 "Port must have a name. Only when passing another port or port base"
                 " name can be None."
             )
-        info_ = Info(**info)
+        info_ = _new_info(info)
         from .layout import get_default_kcl
 
         kcl_ = kcl or get_default_kcl()
@@ -949,7 +1051,7 @@ class Port(ProtoPort[int]):
             sym_xs = cross_section.base
         if trans is not None:
             trans_ = kdb.Trans.from_s(trans) if isinstance(trans, str) else trans.dup()
-            self._base = BasePort(
+            self._base = BasePort._construct(
                 name=name,
                 kcl=kcl_,
                 cross_section=sym_xs,
@@ -963,7 +1065,7 @@ class Port(ProtoPort[int]):
                 dcplx_trans_ = kdb.DCplxTrans.from_s(dcplx_trans)
             else:
                 dcplx_trans_ = dcplx_trans.dup()
-            self._base = BasePort(
+            self._base = BasePort._construct(
                 name=name,
                 kcl=kcl_,
                 cross_section=sym_xs,
@@ -976,7 +1078,7 @@ class Port(ProtoPort[int]):
         elif angle is not None:
             assert center is not None
             trans_ = kdb.Trans(angle, mirror_x, *center)
-            self._base = BasePort(
+            self._base = BasePort._construct(
                 name=name,
                 kcl=kcl_,
                 cross_section=sym_xs,
@@ -1273,13 +1375,11 @@ class DPort(ProtoPort[float]):
         base: BasePort | None = None,
     ) -> None:
         """Create a port from dbu or um based units."""
-        if info is None:
-            info = {}
         if base is not None:
             self._base = base
             return
         if port is not None:
-            self._base = port.base.__copy__()
+            self._base = port.base._copy()
             return
 
         if name is None:
@@ -1287,7 +1387,7 @@ class DPort(ProtoPort[float]):
                 "DPort must have a name. Only when passing another port or port base"
                 " name can be None."
             )
-        info_ = Info(**info)
+        info_ = _new_info(info)
 
         from .layout import get_default_kcl
 
@@ -1322,7 +1422,7 @@ class DPort(ProtoPort[float]):
             sym_xs = cross_section.base
         if trans is not None:
             trans_ = kdb.Trans.from_s(trans) if isinstance(trans, str) else trans.dup()
-            self._base = BasePort(
+            self._base = BasePort._construct(
                 name=name,
                 kcl=kcl_,
                 cross_section=sym_xs,
@@ -1336,7 +1436,7 @@ class DPort(ProtoPort[float]):
                 dcplx_trans_ = kdb.DCplxTrans.from_s(dcplx_trans)
             else:
                 dcplx_trans_ = dcplx_trans.dup()
-            self._base = BasePort(
+            self._base = BasePort._construct(
                 name=name,
                 kcl=kcl_,
                 cross_section=sym_xs,
@@ -1349,7 +1449,7 @@ class DPort(ProtoPort[float]):
         else:
             assert center is not None
             dcplx_trans_ = kdb.DCplxTrans.R0
-            self._base = BasePort(
+            self._base = BasePort._construct(
                 name=name,
                 kcl=kcl_,
                 cross_section=sym_xs,

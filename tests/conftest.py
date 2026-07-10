@@ -3,7 +3,7 @@ from collections.abc import Callable, Iterator
 from functools import partial
 from pathlib import Path
 from threading import RLock
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 from warnings import warn
 
 import pytest
@@ -14,6 +14,16 @@ import kfactory as kf
 import kfactory.cells
 
 pytest_plugins = ["pytest_regressions"]
+
+
+class OASRegression(Protocol):
+    def __call__(
+        self,
+        c: kf.ProtoTKCell[Any],
+        tolerance: int = 0,
+        flatten: bool = False,
+        with_meta: bool = True,
+    ) -> None: ...
 
 
 class Layers(kf.LayerInfos):
@@ -250,7 +260,7 @@ def unlink_merge_read_oas() -> Iterator[None]:
 @pytest.fixture
 def oas_regression(
     file_regression: FileRegressionFixture,
-) -> Callable[[kf.ProtoTKCell[Any]], None]:
+) -> OASRegression:
     saveopts = kf.save_layout_options()
     saveopts.format = "OASIS"
 
@@ -264,6 +274,8 @@ def oas_regression(
     def _check(
         c: kf.ProtoTKCell[Any],
         tolerance: int = 0,
+        flatten: bool = False,
+        with_meta: bool = True,
     ) -> None:
         c.kcl.layout.clear_meta_info()
 
@@ -271,7 +283,13 @@ def oas_regression(
             c.write_bytes(saveopts, convert_external_cells=True),
             binary=True,
             extension=".oas",
-            check_fn=partial(_layout_xor, tolerance=tolerance, raises=raises),
+            check_fn=partial(
+                _layout_xor,
+                tolerance=tolerance,
+                raises=raises,
+                flatten=flatten,
+                with_meta=with_meta,
+            ),
         )
         kf.config.write_kfactory_settings = write_settings
 
@@ -303,6 +321,8 @@ def _layout_xor(
     path_b: Path,
     tolerance: int = 0,
     raises: Literal["error", "warning"] = "error",
+    flatten: bool = False,
+    with_meta: bool = True,
 ) -> None:
     diff = kf.kdb.LayoutDiff()
     ly_a = kf.kdb.Layout()
@@ -310,11 +330,15 @@ def _layout_xor(
     ly_b = kf.kdb.Layout()
     ly_b.read(str(path_b))
 
-    flags = (
-        kf.kdb.LayoutDiff.Verbose
-        | kf.kdb.LayoutDiff.WithMetaInfo
-        | kf.kdb.LayoutDiff.NoLayerNames
-    )
+    if flatten:
+        for ly in (ly_a, ly_b):
+            top_cell = ly.top_cell()
+            if top_cell is not None:
+                top_cell.flatten(True)
+
+    flags = kf.kdb.LayoutDiff.Verbose | kf.kdb.LayoutDiff.NoLayerNames
+    if with_meta:
+        flags |= kf.kdb.LayoutDiff.WithMetaInfo
 
     if not diff.compare(ly_a, ly_b, flags=flags, tolerance=tolerance):
         match raises:

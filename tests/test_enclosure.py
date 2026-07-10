@@ -235,3 +235,20 @@ def test_extrude_path_cross_section_asymmetric(
     assert kf.kdb.Region(c.shapes(kcl.layer(layers.WGCLAD))).bbox() == kf.kdb.Box(
         0, -100, length_dbu, 900
     )
+
+
+def test_extrude_path_points_long_path_matches_explicit_end_angle() -> None:
+    path = [kf.kdb.DPoint(float(i), 0.0) for i in range(63)] + [
+        kf.kdb.DPoint(63.0, 1.0),
+        kf.kdb.DPoint(64.0, 2.0),
+    ]
+    width = 2.0
+    end_angle = 45.0
+
+    implicit_top, implicit_bot = kf.enclosure.extrude_path_points(path, width)
+    explicit_top, explicit_bot = kf.enclosure.extrude_path_points(
+        path, width, end_angle=end_angle
+    )
+
+    assert implicit_top[-1] == explicit_top[-1]
+    assert implicit_bot[-1] == explicit_bot[-1]

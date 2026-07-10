@@ -86,7 +86,7 @@ from .kcell import (
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
 from .pin import BasePin
-from .port import BasePort, ProtoPort, rename_clockwise_multi
+from .port import ProtoPort, rename_clockwise_multi
 from .routing.generic import ManhattanRoute
 from .serialization import get_function_name
 from .settings import Info, KCellSettings
@@ -294,6 +294,12 @@ class KCLayout(
     info: Info = Field(default_factory=Info)
     settings: KCellSettings = Field(frozen=True)
     _future_cell_name: str | None = PrivateAttr(default=None)
+    _dbu_cross_section_cache: dict[
+        tuple[int, int, str, int], CrossSection | AsymmetricCrossSection
+    ] = PrivateAttr(default_factory=dict)
+    _dbu_cross_section_from_width_cache: dict[
+        tuple[int, int, str, int, tuple[str | None, str] | None], CrossSection
+    ] = PrivateAttr(default_factory=dict)
 
     decorators: Decorators
     default_cell_output_type: type[KCell | DKCell] = KCell
@@ -1691,6 +1697,8 @@ class KCLayout(
                 # `layers` hasn't been materialized yet.
                 with contextlib.suppress(AttributeError):
                     del self.layers
+                self._dbu_cross_section_cache.clear()
+                self._dbu_cross_section_from_width_cache.clear()
                 _ = self.layers  # make sure the layers are computed
         elif hasattr(self.layout, name):
             self.layout.__setattr__(name, value)
@@ -1710,6 +1718,8 @@ class KCLayout(
             c.locked = False
         self.layout.clear()
         self.tkcells = {}
+        self._dbu_cross_section_cache.clear()
+        self._dbu_cross_section_from_width_cache.clear()
 
         if keep_layers:
             with contextlib.suppress(AttributeError):
@@ -1985,7 +1995,7 @@ class KCLayout(
                 if diff.diff_xor.cells() > 0:
                     diff_kcl = KCLayout(self.name + "_XOR")
                     diff_kcl.layout.assign(diff.diff_xor)
-                    show(diff_kcl)
+                    show(diff_kcl, name=f"{self.name}_XOR")
 
                     err_msg = (
                         f"Layout {self.name} cannot merge with layout "
@@ -2010,7 +2020,6 @@ class KCLayout(
 
                     raise MergeError(err_msg)
 
-            cells = set(self.cells("*"))
             saveopts = save_layout_options()
             saveopts.gds2_max_cellname_length = (
                 kdb.SaveLayoutOptions().gds2_max_cellname_length
@@ -2025,6 +2034,9 @@ class KCLayout(
             for kdb_cell in locked_cells:
                 kdb_cell.locked = True
             info, settings = self.get_meta_data()
+            existing_cells_by_name = {
+                c.name: c for c in self.layout.each_cell() if not c._destroyed()
+            }
 
             match update_kcl_meta_data:
                 case "overwrite":
@@ -2044,12 +2056,13 @@ class KCLayout(
                         ", available strategies are 'overwrite', 'skip', or 'drop'"
                     )
             meta_format = settings.get("meta_format") or config.meta_format
-            load_cells = {
-                cell
-                for c in layout_b.cells("*")
-                if (cell := self.layout_cell(c.name)) is not None
-            }
-            new_cells = load_cells - cells
+            load_cells_by_name: dict[str, kdb.Cell] = {}
+            new_cells: list[kdb.Cell] = []
+            for c in layout_b.each_cell():
+                if c.name in existing_cells_by_name:
+                    load_cells_by_name[c.name] = c
+                else:
+                    new_cells.append(c)
 
             if register_cells:
                 for c in sorted(new_cells, key=lambda _c: _c.hierarchy_levels()):
@@ -2058,8 +2071,8 @@ class KCLayout(
                         meta_format=meta_format,
                     )
 
-            for c in load_cells & cells:
-                kc = self.kcells[c.cell_index()]
+            for c in load_cells_by_name.values():
+                kc = self.kcells[existing_cells_by_name[c.name].cell_index()]
                 kc.get_meta_data(meta_format=meta_format)
 
             return lm
@@ -2453,6 +2466,45 @@ class KCLayout(
             return AsymmetricCrossSection(kcl=self, base=xs)
         return CrossSection(kcl=self, base=xs)
 
+    def get_icross_section_from_width(
+        self,
+        width: int,
+        layer: kdb.LayerInfo,
+        enclosure: LayerEnclosure | None = None,
+    ) -> CrossSection:
+        """Get a cached dbu cross section from legacy width/layer/enclosure args."""
+        enclosure_key: tuple[str | None, str] | None
+        if enclosure is None:
+            enclosure_key = None
+        else:
+            enclosure_key = (enclosure._name, enclosure.unnamed_key)
+        cache_key = (
+            layer.layer,
+            layer.datatype,
+            layer.name,
+            width,
+            enclosure_key,
+        )
+        xs = self._dbu_cross_section_from_width_cache.get(cache_key)
+        if xs is not None:
+            return xs
+        spec: CrossSectionSpecDict = {
+            "layer": layer,
+            "width": width,
+            "unit": "dbu",
+        }
+        if enclosure is not None:
+            spec["sections"] = [
+                (sec_layer, section.d_max)
+                if section.d_min is None
+                else (sec_layer, section.d_min, section.d_max)
+                for sec_layer, layer_section in enclosure.layer_sections.items()
+                for section in layer_section.sections
+            ]
+        xs = self.get_icross_section(spec, symmetrical=True)
+        self._dbu_cross_section_from_width_cache[cache_key] = xs
+        return xs
+
     @overload
     def get_dcross_section(
         self,
@@ -2614,7 +2666,6 @@ CrossSectionModel.model_rebuild()
 TKCell.model_rebuild()
 TVCell.model_rebuild()
 BasePin.model_rebuild()
-BasePort.model_rebuild()
 BaseKCell.model_rebuild()
 LayerEnclosureModel.model_rebuild()
 

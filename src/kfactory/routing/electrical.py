@@ -221,8 +221,8 @@ def route_bundle(
     if bboxes is None:
         bboxes = []
 
-    start_ports_ = [p.base.model_copy() for p in start_ports]
-    end_ports_ = [p.base.model_copy() for p in end_ports]
+    start_ports_ = [p.base._copy(copy_info=False) for p in start_ports]
+    end_ports_ = [p.base._copy(copy_info=False) for p in end_ports]
 
     if isinstance(c, KCell):
         try:

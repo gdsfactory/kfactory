@@ -67,6 +67,16 @@ class BendCircularFactory(Protocol[KC_co]):
         ...
 
 
+def _circular_backbone_points(
+    *, radius: um, angle: deg, angle_step: deg
+) -> list[kdb.DPoint]:
+    points = max(int(angle // angle_step + 0.5), 1)
+    radians = np.linspace(0, np.deg2rad(angle), points, endpoint=True)
+    x = np.sin(radians) * radius
+    y = (-np.cos(radians) + 1) * radius
+    return [kdb.DPoint(_x, _y) for _x, _y in zip(x.tolist(), y.tolist(), strict=False)]
+
+
 @overload
 def bend_circular_factory(
     kcl: KCLayout,
@@ -169,19 +179,9 @@ def bend_circular_factory(
             angle = -angle
 
         xs = kcl.get_base_cross_section(cross_section)
-
-        backbone = [
-            kdb.DPoint(x, y)
-            for x, y in [
-                [
-                    np.sin(_angle / 180 * np.pi) * r,
-                    (-np.cos(_angle / 180 * np.pi) + 1) * r,
-                ]
-                for _angle in np.linspace(
-                    0, angle, int(angle // angle_step + 0.5), endpoint=True
-                )
-            ]
-        ]
+        backbone = _circular_backbone_points(
+            radius=r, angle=angle, angle_step=angle_step
+        )
 
         extrude_path_cross_section(c, backbone, xs, start_angle=0, end_angle=angle)
 

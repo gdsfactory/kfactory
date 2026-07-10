@@ -1621,9 +1621,24 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
 
         connections = self.connections
 
-        islands, instance_connections = _get_island_connections(
-            instances=self.instances, connections=connections
-        )
+        dbu_schematic: Schematic | None = None
+        dbu_instance_connections: defaultdict[str, list[Connection[int]]] | None = None
+        um_schematic: DSchematic | None = None
+        um_instance_connections: defaultdict[str, list[Connection[float]]] | None = None
+        if _is_int_schematic(self):
+            dbu_schematic = self
+            islands, dbu_instance_connections = _get_island_connections(
+                instances=dbu_schematic.instances,
+                connections=dbu_schematic.connections,
+            )
+        elif _is_um_schematic(self):
+            um_schematic = self
+            islands, um_instance_connections = _get_island_connections(
+                instances=um_schematic.instances,
+                connections=um_schematic.connections,
+            )
+        else:
+            raise ValueError(f"Unsupported schematic unit {self.unit!r}")
 
         placed_insts: set[str] = set()
         placed_ports: set[str] = set()
@@ -1651,23 +1666,43 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         for i, island in enumerate(unique_islands):
             logger.debug("Placing island {} of schema {}, {}", i, self.name, island)
             if island not in placed_islands:
-                _place_island(
-                    c,
-                    schematic_island=island,
-                    instances=instances,
-                    connections=instance_connections,
-                    schematic_instances=self.instances,  # ty:ignore[invalid-argument-type]
-                    placed_insts=placed_insts,
-                    placed_ports=placed_ports,
-                    schematic=self,  # ty:ignore[invalid-argument-type]
-                    cross_sections=cross_sections,
-                    factories=factories,
-                    place_unknown=place_unknown,
-                )
+                if dbu_schematic is not None and dbu_instance_connections is not None:
+                    _place_dbu_island(
+                        c,
+                        schematic_island=island,
+                        instances=instances,
+                        connections=dbu_instance_connections,
+                        placed_insts=placed_insts,
+                        placed_ports=placed_ports,
+                        schematic=dbu_schematic,
+                        cross_sections=cross_sections,
+                        factories=factories,
+                        place_unknown=place_unknown,
+                    )
+                elif um_schematic is not None and um_instance_connections is not None:
+                    _place_um_island(
+                        c,
+                        schematic_island=island,
+                        instances=instances,
+                        connections=um_instance_connections,
+                        placed_insts=placed_insts,
+                        placed_ports=placed_ports,
+                        schematic=um_schematic,
+                        cross_sections=cross_sections,
+                        factories=factories,
+                        place_unknown=place_unknown,
+                    )
+                else:
+                    raise ValueError(f"Unsupported schematic unit {self.unit!r}")
                 placed_islands.append(island)
                 placed_insts |= island
 
         nets_per_route = self.routes_nets()
+        constraints_by_route_name: dict[str, list[Constraint]] = defaultdict(list)
+        for ct in self.constraints:
+            for route_name in ct.route_names:
+                constraints_by_route_name[route_name].append(ct)
+        is_kcell_output = issubclass(output_type, KCell)
 
         # routes
         route_results: dict[str, list[Any]] = {}
@@ -1692,22 +1727,20 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     resolved_port_list.append(p)
                 resolved_ports.append(tuple(resolved_port_list))
             route_c = output_type(base=c.base)
-            relevant_constraints = [
-                ct for ct in self.constraints if route.name in ct.route_names
-            ]
+            relevant_constraints = constraints_by_route_name.get(route.name, [])
             extra_kwargs: dict[str, Any] = (
                 {"constraints": relevant_constraints} if relevant_constraints else {}
             )
-            if isinstance(route_c, KCell):
+            if is_kcell_output:
                 result = routing_strategies[route.routing_strategy](
-                    output_type(base=c.base),
+                    route_c,
                     resolved_ports,
                     **route.settings,
                     **extra_kwargs,
                 )
             else:
                 result = routing_strategies[route.routing_strategy](
-                    output_type(base=c.base),
+                    route_c,
                     [
                         tuple(DKCellPort(base=p.base) for p in net_ports)
                         for net_ports in resolved_ports
@@ -2446,12 +2479,12 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         return [net for net in self.nets if isinstance(net, Connection)]
 
 
-def _get_instance_orientation[T: (int, float)](
+def _get_instance_orientation(
     instance: str,
-    schematic: TSchematic[T],
+    schematic: TSchematic[Any],
     visited_instances: set[str],
     get_port_orientation_f: Callable[..., dict[str | None, float]],
-    instance_connections: defaultdict[str, list[Connection[T]]] | None = None,
+    instance_connections: defaultdict[str, list[Connection[Any]]] | None = None,
     instance_orientations: dict[str, float] | None = None,
 ) -> float | None:
     s_inst = schematic.instances[instance]
@@ -2469,17 +2502,20 @@ def _get_instance_orientation[T: (int, float)](
                 get_port_orientation_f=get_port_orientation_f,
             )
         return placement.orientation
+    connections_by_instance: defaultdict[str, list[Connection[Any]]]
     if instance_connections is None:
-        _, instance_connections = _get_island_connections(
+        _, connections_by_instance = _get_island_connections(
             schematic.instances, schematic.connections
         )
+    else:
+        connections_by_instance = instance_connections
 
     visited_instances |= {instance}
     potential_instances: set[str] = set()
 
     s_inst_sign = -1 if s_inst.mirror else 1
 
-    for connection in instance_connections[instance]:
+    for connection in connections_by_instance[instance]:
         if isinstance(connection.net[0], Port):
             if isinstance(connection.net[0].orientation, PortRef):
                 continue
@@ -2543,13 +2579,13 @@ def _get_instance_orientation[T: (int, float)](
             continue
         orientation = _get_instance_orientation(
             inst,
-            schematic,  # ty:ignore[invalid-argument-type]
+            schematic,
             visited_instances_,
             get_port_orientation_f=get_port_orientation_f,
-            instance_connections=instance_connections,  # ty:ignore[invalid-argument-type]
+            instance_connections=connections_by_instance,
         )
         if orientation is not None:
-            for connection in instance_connections[instance]:
+            for connection in connections_by_instance[instance]:
                 if isinstance(connection.net[0], Port):
                     continue
                 if connection.net[0].instance == inst:
@@ -2819,38 +2855,113 @@ def _is_int_schematic(s: TSchematic[Any]) -> TypeGuard[Schematic[int]]:
     return s.unit == "dbu"
 
 
+def _is_um_schematic(s: TSchematic[Any]) -> TypeGuard[DSchematic]:
+    return s.unit == "um"
+
+
+def _get_dbu_placement(schematic: Schematic, instance: str) -> Placement[int] | None:
+    placement = schematic.instances[instance].placement
+    if isinstance(placement, Placement):
+        return cast("Placement[int]", placement)
+    return None
+
+
+def _get_um_placement(schematic: DSchematic, instance: str) -> Placement[float] | None:
+    placement = schematic.instances[instance].placement
+    if isinstance(placement, Placement):
+        return cast("Placement[float]", placement)
+    return None
+
+
+type _SchematicCrossSections = Mapping[
+    str,
+    CrossSection | DCrossSection | AsymmetricCrossSection | DAsymmetricCrossSection,
+]
+type _SchematicFactories = (
+    Mapping[str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]]
+    | None
+)
+
+
+def _place_dbu_island(
+    c: KCell,
+    schematic_island: set[str],
+    instances: dict[str, Instance | VInstance],
+    connections: dict[str, list[Connection[int]]],
+    placed_insts: set[str],
+    placed_ports: set[str],
+    schematic: Schematic,
+    cross_sections: _SchematicCrossSections,
+    factories: _SchematicFactories = None,
+    place_unknown: bool = False,
+) -> set[str]:
+    return _place_island(
+        c,
+        schematic_island=schematic_island,
+        instances=instances,
+        connections=connections,
+        placed_insts=placed_insts,
+        placed_ports=placed_ports,
+        schematic=schematic,
+        cross_sections=cross_sections,
+        factories=factories,
+        place_unknown=place_unknown,
+    )
+
+
+def _place_um_island(
+    c: KCell,
+    schematic_island: set[str],
+    instances: dict[str, Instance | VInstance],
+    connections: dict[str, list[Connection[float]]],
+    placed_insts: set[str],
+    placed_ports: set[str],
+    schematic: DSchematic,
+    cross_sections: _SchematicCrossSections,
+    factories: _SchematicFactories = None,
+    place_unknown: bool = False,
+) -> set[str]:
+    return _place_island(
+        c,
+        schematic_island=schematic_island,
+        instances=instances,
+        connections=connections,
+        placed_insts=placed_insts,
+        placed_ports=placed_ports,
+        schematic=schematic,
+        cross_sections=cross_sections,
+        factories=factories,
+        place_unknown=place_unknown,
+    )
+
+
 def _place_island[T: (int, float)](
     c: KCell,
     schematic_island: set[str],
     instances: dict[str, Instance | VInstance],
     connections: dict[str, list[Connection[T]]],
-    schematic_instances: dict[str, SchematicInstance[T]],
     placed_insts: set[str],
     placed_ports: set[str],
     schematic: TSchematic[T],
-    cross_sections: Mapping[
-        str,
-        CrossSection | DCrossSection | AsymmetricCrossSection | DAsymmetricCrossSection,
-    ],
-    factories: Mapping[
-        str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
-    ]
-    | None = None,
+    cross_sections: _SchematicCrossSections,
+    factories: _SchematicFactories = None,
     place_unknown: bool = False,
 ) -> set[str]:
     target_length = len(schematic_island)
 
     for inst in schematic_island:
-        schema_inst = schematic_instances[inst]
+        schema_inst = schematic.instances[inst]
         kinst = _create_kinst(c, schema_inst, factories=factories)
         instances[inst] = kinst
         p = schema_inst.placement
         if isinstance(p, Placement):
-            p = cast("Placement[int]", p)
             logger.debug("Placing {}", schema_inst.name)
 
             if p.is_placeable(placed_insts, placed_ports):
                 if _is_int_schematic(schematic):
+                    p = _get_dbu_placement(schematic, inst)
+                    if p is None:
+                        continue
                     if isinstance(p.x, PortRef):
                         x: float = KCellPort(
                             base=instances[p.x.instance].ports[p.x.port].base
@@ -2865,6 +2976,8 @@ def _place_island[T: (int, float)](
                             case _:
                                 x = bb.center().x
                     else:
+                        if not isinstance(p.x, int | float):
+                            raise TypeError(f"Unsupported placement x value {p.x!r}")
                         x = p.x
                     if isinstance(p.y, PortRef):
                         y: float = KCellPort(
@@ -2880,6 +2993,8 @@ def _place_island[T: (int, float)](
                             case _:
                                 y = bb.center().y
                     else:
+                        if not isinstance(p.y, int | float):
+                            raise TypeError(f"Unsupported placement y value {p.y!r}")
                         y = p.y
                     if isinstance(p.orientation, PortRef):
                         rot: float = (
@@ -2934,36 +3049,53 @@ def _place_island[T: (int, float)](
                             * kdb.ICplxTrans(-kdb.Vector(_x, _y))
                         )
                 else:
+                    if not _is_um_schematic(schematic):
+                        raise ValueError(
+                            f"Unsupported schematic unit {schematic.unit!r}"
+                        )
+                    p = _get_um_placement(schematic, inst)
+                    if p is None:
+                        continue
+                    x_d: float
                     if isinstance(p.x, PortRef):
-                        x = DKCellPort(
-                            base=instances[p.x.instance].ports[p.x.port].base
-                        ).x
+                        x_d = float(
+                            DKCellPort(
+                                base=instances[p.x.instance].ports[p.x.port].base
+                            ).x
+                        )
                     elif isinstance(p.x, AnchorRefX):
                         bb = instances[p.x.instance].dbbox()
                         match p.x.x:
                             case "left":
-                                x = bb.left
+                                x_d = float(bb.left)
                             case "right":
-                                x = bb.right
+                                x_d = float(bb.right)
                             case _:
-                                x = bb.center().x
+                                x_d = float(bb.center().x)
                     else:
-                        x = p.x
+                        if not isinstance(p.x, int | float):
+                            raise TypeError(f"Unsupported placement x value {p.x!r}")
+                        x_d = float(p.x)
+                    y_d: float
                     if isinstance(p.y, PortRef):
-                        y = DKCellPort(
-                            base=instances[p.y.instance].ports[p.y.port].base
-                        ).y
+                        y_d = float(
+                            DKCellPort(
+                                base=instances[p.y.instance].ports[p.y.port].base
+                            ).y
+                        )
                     elif isinstance(p.y, AnchorRefY):
                         bb = instances[p.y.instance].dbbox()
                         match p.y.y:
                             case "bottom":
-                                y = bb.bottom
+                                y_d = float(bb.bottom)
                             case "top":
-                                y = bb.top
+                                y_d = float(bb.top)
                             case _:
-                                y = bb.center().y
+                                y_d = float(bb.center().y)
                     else:
-                        y = p.y
+                        if not isinstance(p.y, int | float):
+                            raise TypeError(f"Unsupported placement y value {p.y!r}")
+                        y_d = float(p.y)
                     if isinstance(p.orientation, PortRef):
                         drot: float = (
                             instances[p.orientation.instance]
@@ -2972,13 +3104,15 @@ def _place_island[T: (int, float)](
                         )
                     else:
                         drot = p.orientation
+                    dx_d = float(p.dx)
+                    dy_d = float(p.dy)
                     if p.anchor is None:
                         kinst.transform(
                             kdb.DCplxTrans(
                                 mag=1,
                                 rot=drot,
-                                x=x + p.dx,
-                                y=y + p.dy,
+                                x=x_d + dx_d,
+                                y=y_d + dy_d,
                             )
                         )
                     elif isinstance(p.anchor, PortAnchor):
@@ -2986,8 +3120,8 @@ def _place_island[T: (int, float)](
                             kdb.DCplxTrans(
                                 mag=1,
                                 rot=drot,
-                                x=x + p.dx,
-                                y=y + p.dy,
+                                x=x_d + dx_d,
+                                y=y_d + dy_d,
                             )
                             * kdb.DCplxTrans(
                                 -kinst.ports[p.anchor.port].dcplx_trans.disp
@@ -3017,8 +3151,8 @@ def _place_island[T: (int, float)](
                             kdb.DCplxTrans(
                                 mag=1,
                                 rot=drot,
-                                x=x + p.dx,
-                                y=y + p.dy,
+                                x=x_d + dx_d,
+                                y=y_d + dy_d,
                             )
                             * kdb.DCplxTrans(-kdb.DVector(_dx, _dy))
                         )
