@@ -416,7 +416,10 @@ def port_mismatch_check(
             if n == 1:
                 if layer in cell_ports and coord in cell_ports[layer]:
                     cell_port = cell_ports[layer][coord][0]
-                    result = check_connection(cell_port, ports[0][0])
+                    result = check_connection(
+                        cell_port,  # ty:ignore[invalid-argument-type]
+                        ports[0][0],  # ty:ignore[invalid-argument-type]
+                    )
                     emit_mismatch(
                         result,
                         lc,
@@ -429,7 +432,10 @@ def port_mismatch_check(
                     )
                 # Dangling case is handled by dangling_ports_check.
             elif n == 2:
-                result = check_connection(ports[0][0], ports[1][0])
+                result = check_connection(
+                    ports[0][0],  # ty:ignore[invalid-argument-type]
+                    ports[1][0],  # ty:ignore[invalid-argument-type]
+                )
                 emit_mismatch(
                     result,
                     lc,
