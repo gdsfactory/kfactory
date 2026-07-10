@@ -16,6 +16,7 @@ from . import kdb, rdb
 from .layer import LayerEnum
 from .port import create_port_error, port_polygon
 from .ports import Ports
+from .spatial import collect_instance_region, iter_overlapping_bbox_pairs
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -707,42 +708,24 @@ def instance_overlap_check(
 
     for layer in _iter_check_layers(cell, layers):
         error_region = kdb.Region()
-        inst_regions: dict[int, kdb.Region] = {}
-        inst_region = kdb.Region()
-        for i, inst in enumerate(cell.insts):
-            inst_region_ = kdb.Region(inst.ibbox(layer))
-            inst_shapes: kdb.Region | None = None
-            if not (inst_region & inst_region_).is_empty():
-                if inst_shapes is None:
-                    inst_shapes = kdb.Region()
-                    shape_it = cell.begin_shapes_rec_overlapping(
-                        layer, inst.bbox(layer)
-                    )
-                    shape_it.select_cells([inst.cell.cell_index()])
-                    shape_it.min_depth = 1
-                    shape_it.shape_flags = kdb.Shapes.SRegions
-                    for _it in shape_it.each():
-                        if _it.path()[0].inst() == inst.instance:
-                            inst_shapes.insert(
-                                _it.shape().polygon.transformed(_it.trans())
-                            )
-                for j, _reg in inst_regions.items():
-                    if _reg & inst_region_:
-                        reg_ = kdb.Region()
-                        shape_it = cell.begin_shapes_rec_touching(
-                            layer, (_reg & inst_region_).bbox()
-                        )
-                        shape_it.select_cells([cell.insts[j].cell.cell_index()])
-                        shape_it.min_depth = 1
-                        shape_it.shape_flags = kdb.Shapes.SRegions
-                        for _it in shape_it.each():
-                            if _it.path()[0].inst() == cell.insts[j].instance:
-                                reg_.insert(
-                                    _it.shape().polygon.transformed(_it.trans())
-                                )
-                        error_region.insert(reg_ & inst_shapes)
-            inst_region += inst_region_
-            inst_regions[i] = inst_region_
+        inst_records: list[tuple[ProtoTInstance[Any], kdb.Box]] = [
+            (inst, inst.ibbox(layer)) for inst in cell.insts
+        ]
+        inst_cache: dict[int, kdb.Region] = {}
+        for idx, other_idx in iter_overlapping_bbox_pairs(
+            [bbox for _, bbox in inst_records]
+        ):
+            inst, _ = inst_records[idx]
+            other_inst, _ = inst_records[other_idx]
+            inst_region = inst_cache.get(idx)
+            if inst_region is None:
+                inst_region = collect_instance_region(cell, layer, inst)
+                inst_cache[idx] = inst_region
+            other_region = inst_cache.get(other_idx)
+            if other_region is None:
+                other_region = collect_instance_region(cell, layer, other_inst)
+                inst_cache[other_idx] = other_region
+            error_region.insert(other_region & inst_region)
 
         if not error_region.is_empty():
             sc = _get_or_create_subcategory(db_, layer_cat(layer), "InstanceOverlap")
@@ -785,11 +768,17 @@ def shape_instance_overlap_check(
     for layer in _iter_check_layers(cell, layers):
         error_region = kdb.Region()
         reg = kdb.Region(cell.shapes(layer))
+        if reg.is_empty():
+            continue
+        reg_bbox = reg.bbox()
+        reg_bbox_region = kdb.Region(reg_bbox)
         for inst in cell.insts:
             inst_region_ = kdb.Region(inst.ibbox(layer))
-            if (inst_region_ & reg).is_empty():
+            if (inst_region_ & reg_bbox_region).is_empty():
                 continue
-            rec_it = cell.begin_shapes_rec_touching(layer, (inst_region_ & reg).bbox())
+            rec_it = cell.begin_shapes_rec_touching(
+                layer, (inst_region_ & reg_bbox_region).bbox()
+            )
             rec_it.min_depth = 1
             error_region += kdb.Region(rec_it) & reg
 
