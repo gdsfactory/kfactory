@@ -105,4 +105,4 @@ def instance_route_port(inst: Instance, port_index: int) -> RoutePort:
 
 
 def instance_route_port_by_name(inst: Instance, name: str | None) -> RoutePort:
-    return RoutePort.from_instance_port(inst, inst.cell.ports._get_base_by_name(name))
+    return RoutePort.from_instance_port(inst, inst.cell.ports[name].base)

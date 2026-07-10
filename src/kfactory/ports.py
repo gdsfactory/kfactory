@@ -73,7 +73,6 @@ class ProtoPorts[T: (int, float)](Protocol):
     _kcl: KCLayout
     _locked: bool
     _bases: list[BasePort]
-    _name_cache: dict[str | None, BasePort]
 
     @overload
     def __init__(self, *, kcl: KCLayout) -> None: ...
@@ -94,22 +93,12 @@ class ProtoPorts[T: (int, float)](Protocol):
         bases: list[BasePort] | None = None,
     ) -> None: ...
 
-    @overload
-    def __init__(
-        self,
-        *,
-        kcl: KCLayout,
-        bases: list[BasePort],
-        name_cache: dict[str | None, BasePort],
-    ) -> None: ...
-
     def __init__(
         self,
         *,
         kcl: KCLayout,
         ports: Iterable[ProtoPort[Any]] | None = None,
         bases: list[BasePort] | None = None,
-        name_cache: dict[str | None, BasePort] | None = None,
     ) -> None:
         """Initialize the Ports.
 
@@ -125,7 +114,6 @@ class ProtoPorts[T: (int, float)](Protocol):
             self._bases = [p.base for p in ports]
         else:
             self._bases = []
-        self._name_cache = name_cache if name_cache is not None else {}
         self._locked = False
 
     def __len__(self) -> int:
@@ -136,30 +124,6 @@ class ProtoPorts[T: (int, float)](Protocol):
     def bases(self) -> list[BasePort]:
         """Get the bases."""
         return self._bases
-
-    def _rebuild_name_cache(self) -> dict[str | None, BasePort]:
-        self._name_cache.clear()
-        for base in self._bases:
-            self._name_cache.setdefault(base.name, base)
-        return self._name_cache
-
-    def _get_base_by_name(self, key: str | None) -> BasePort:
-        name_cache = self._name_cache
-        if not name_cache and self._bases:
-            self._rebuild_name_cache()
-
-        base = name_cache.get(key)
-        if base is not None and base.name == key:
-            return base
-
-        name_cache = self._rebuild_name_cache()
-        base = name_cache.get(key)
-        if base is not None:
-            return base
-        raise KeyError(key)
-
-    def _add_to_name_cache(self, base: BasePort) -> None:
-        self._name_cache.setdefault(base.name, base)
 
     @property
     def kcl(self) -> KCLayout:
@@ -262,16 +226,11 @@ class ProtoPorts[T: (int, float)](Protocol):
             return port.base in self._bases
         if isinstance(port, BasePort):
             return port in self._bases
-        try:
-            self._get_base_by_name(port)
-        except KeyError:
-            return False
-        return True
+        return any(_port.name == port for _port in self._bases)
 
     def clear(self) -> None:
         """Deletes all ports."""
         self._bases.clear()
-        self._name_cache.clear()
 
     def __eq__(self, other: object) -> bool:
         """Support for `ports1 == ports2` comparisons."""
@@ -812,7 +771,6 @@ class Ports(ProtoPorts[int], ICreatePort):
             if name is not None:
                 base.name = name
             self._bases.append(base)
-            self._add_to_name_cache(base)
             port_ = Port(base=base)
         else:
             dcplx_trans = port.dcplx_trans.dup()
@@ -837,7 +795,6 @@ class Ports(ProtoPorts[int], ICreatePort):
             port_ = Port(base=base)
             port_.dcplx_trans = dcplx_trans
             self._bases.append(port_.base)
-            self._add_to_name_cache(port_.base)
         return port_
 
     def get_all_named(self) -> Mapping[str, Port]:
@@ -858,8 +815,8 @@ class Ports(ProtoPorts[int], ICreatePort):
         if isinstance(key, slice):
             return self.__class__(bases=self._bases[key], kcl=self.kcl)
         try:
-            return Port(base=self._get_base_by_name(key))
-        except KeyError as e:
+            return Port(base=next(filter(lambda base: base.name == key, self._bases)))
+        except StopIteration as e:
             raise KeyError(
                 f"{key=} is not a valid port name or index. "
                 f"Available ports: {[v.name for v in self._bases]}"
@@ -946,7 +903,6 @@ class DPorts(ProtoPorts[float], DCreatePort):
             if name is not None:
                 base.name = name
             self._bases.append(base)
-            self._add_to_name_cache(base)
             port_ = DPort(base=base)
         else:
             dcplx_trans = port.dcplx_trans.dup()
@@ -969,7 +925,6 @@ class DPorts(ProtoPorts[float], DCreatePort):
             port_ = DPort(base=base)
             port_.dcplx_trans = dcplx_trans
             self._bases.append(port_.base)
-            self._add_to_name_cache(port_.base)
         return port_
 
     def get_all_named(self) -> Mapping[str, DPort]:
@@ -990,8 +945,8 @@ class DPorts(ProtoPorts[float], DCreatePort):
         if isinstance(key, slice):
             return self.__class__(bases=self._bases[key], kcl=self.kcl)
         try:
-            return DPort(base=self._get_base_by_name(key))
-        except KeyError as e:
+            return DPort(base=next(filter(lambda base: base.name == key, self._bases)))
+        except StopIteration as e:
             raise KeyError(
                 f"{key=} is not a valid port name or index. "
                 f"Available ports: {[v.name for v in self._bases]}"

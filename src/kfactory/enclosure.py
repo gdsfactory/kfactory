@@ -160,33 +160,38 @@ def _extrude_path_band_points_python(
 ) -> tuple[list[kdb.DPoint], list[kdb.DPoint]]:
     start = path[1] - path[0]
     end = path[-1] - path[-2]
+    if start_angle is None:
+        start_angle = np.rad2deg(np.arctan2(start.y, start.x))
     if end_angle is None:
-        end_angle = math.degrees(math.degrees(math.atan2(end.y, end.x)))
+        end_angle = np.rad2deg(np.rad2deg(np.arctan2(end.y, end.x)))
 
     p_start = path[0]
-    if start_angle is None:
-        vector_top = [_offset_point_from_vector(p_start, hi, start)]
-        vector_bot = [_offset_point_from_vector(p_start, lo, start)]
-    else:
-        vector_top = [_offset_point_from_angle(p_start, hi, start_angle)]
-        vector_bot = [_offset_point_from_angle(p_start, lo, start_angle)]
+    p_end = path[-1]
+    start_trans = kdb.DCplxTrans(1, start_angle, False, p_start.x, p_start.y)
+    end_trans = kdb.DCplxTrans(1, end_angle, False, p_end.x, p_end.y)
+
+    top_vector = kdb.DCplxTrans(kdb.DVector(0, hi))
+    bot_vector = kdb.DCplxTrans(kdb.DVector(0, lo))
+    vector_top = [start_trans * top_vector]
+    vector_bot = [start_trans * bot_vector]
 
     p_old = path[0]
     p = path[1]
 
-    for i in range(2, len(path)):
-        p_new = path[i]
+    for point in path[2:]:
+        p_new = point
         v = p_new - p_old
-        vector_top.append(_offset_point_from_vector(p, hi, v))
-        vector_bot.append(_offset_point_from_vector(p, lo, v))
+        angle = np.rad2deg(np.arctan2(v.y, v.x))
+        transformation = kdb.DCplxTrans(1, angle, False, p.x, p.y)
+        vector_top.append(transformation * top_vector)
+        vector_bot.append(transformation * bot_vector)
         p_old = p
         p = p_new
 
-    p_end = path[-1]
-    vector_top.append(_offset_point_from_angle(p_end, hi, end_angle))
-    vector_bot.append(_offset_point_from_angle(p_end, lo, end_angle))
+    vector_top.append(end_trans * top_vector)
+    vector_bot.append(end_trans * bot_vector)
 
-    return vector_top, vector_bot
+    return [v.disp.to_p() for v in vector_top], [v.disp.to_p() for v in vector_bot]
 
 
 def _extrude_path_band_points_array(
@@ -421,58 +426,59 @@ def extrude_path_dynamic_points(
     """
     start = path[1] - path[0]
     end = path[-1] - path[-2]
+    if start_angle is None:
+        start_angle = np.rad2deg(np.arctan2(start.y, start.x))
     if end_angle is None:
-        end_angle = math.degrees(math.degrees(math.atan2(end.y, end.x)))
+        end_angle = np.rad2deg(np.rad2deg(np.arctan2(end.y, end.x)))
 
     p_start = path[0]
+    p_end = path[-1]
+
+    start_trans = kdb.DCplxTrans(1, start_angle, False, p_start.x, p_start.y)
+    end_trans = kdb.DCplxTrans(1, end_angle, False, p_end.x, p_end.y)
 
     if callable(widths):
         length = sum(((p2 - p1).abs() for p2, p1 in itertools.pairwise(path)))
         z: float = 0
-        offset = widths(z / length) / 2  # ty:ignore[call-top-callable, unsupported-operator]
-        if start_angle is None:
-            vector_top = [_offset_point_from_vector(p_start, offset, start)]
-            vector_bot = [_offset_point_from_vector(p_start, -offset, start)]
-        else:
-            vector_top = [_offset_point_from_angle(p_start, offset, start_angle)]
-            vector_bot = [_offset_point_from_angle(p_start, -offset, start_angle)]
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable, unsupported-operator]
+        vector_top = [start_trans * ref_vector]
+        vector_bot = [start_trans * kdb.DCplxTrans.R180 * ref_vector]
         p_old = path[0]
         p = path[1]
         z += (p - p_old).abs()
-        for i in range(2, len(path)):
-            offset = widths(z / length) / 2  # ty:ignore[call-top-callable, unsupported-operator]
-            p_new = path[i]
+        for point in path[2:]:
+            ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable, unsupported-operator]
+            p_new = point
             v = p_new - p_old
-            vector_top.append(_offset_point_from_vector(p, offset, v))
-            vector_bot.append(_offset_point_from_vector(p, -offset, v))
+            angle = np.rad2deg(np.arctan2(v.y, v.x))
+            transformation = kdb.DCplxTrans(1, angle, False, p.x, p.y)
+            vector_top.append(transformation * ref_vector)
+            vector_bot.append(transformation * kdb.DCplxTrans.R180 * ref_vector)
             z += (p_new - p).abs()
             p_old = p
             p = p_new
-        offset = widths(z / length) / 2  # ty:ignore[call-top-callable, unsupported-operator]
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable, unsupported-operator]
     else:
-        offset = widths[0] / 2
-        if start_angle is None:
-            vector_top = [_offset_point_from_vector(p_start, offset, start)]
-            vector_bot = [_offset_point_from_vector(p_start, -offset, start)]
-        else:
-            vector_top = [_offset_point_from_angle(p_start, offset, start_angle)]
-            vector_bot = [_offset_point_from_angle(p_start, -offset, start_angle)]
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[0] / 2))
+        vector_top = [start_trans * ref_vector]
+        vector_bot = [start_trans * kdb.DCplxTrans.R180 * ref_vector]
         p_old = path[0]
         p = path[1]
-        for i, w in zip(range(2, len(path)), widths[1:-1], strict=False):
-            offset = w / 2
-            p_new = path[i]
+        for point, w in zip(path[2:], widths[1:-1], strict=False):
+            ref_vector = kdb.DCplxTrans(kdb.DVector(0, w / 2))
+            p_new = point
             v = p_new - p_old
-            vector_top.append(_offset_point_from_vector(p, offset, v))
-            vector_bot.append(_offset_point_from_vector(p, -offset, v))
+            angle = np.rad2deg(np.arctan2(v.y, v.x))
+            transformation = kdb.DCplxTrans(1, angle, False, p.x, p.y)
+            vector_top.append(transformation * ref_vector)
+            vector_bot.append(transformation * kdb.DCplxTrans.R180 * ref_vector)
             p_old = p
             p = p_new
-        offset = widths[-1] / 2
-    p_end = path[-1]
-    vector_top.append(_offset_point_from_angle(p_end, offset, end_angle))
-    vector_bot.append(_offset_point_from_angle(p_end, -offset, end_angle))
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[-1] / 2))
+    vector_top.append(end_trans * ref_vector)
+    vector_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_vector)
 
-    return vector_top, vector_bot
+    return [v.disp.to_p() for v in vector_top], [v.disp.to_p() for v in vector_bot]
 
 
 def extrude_path_dynamic(
