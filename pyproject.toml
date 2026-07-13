@@ -167,6 +167,7 @@ skip = "pyproject.toml, uv.lock"
 [tool.ty]
 src.exclude = [ "docs", "src/kfactory/widgets/interactive.py", "tests/gdsfactory-yaml-pics" ]
 src.include = [ "docs", "src", "tests" ]
+environment.python-platform = "all"
 
 [tool.pytest]
 ini_options.testpaths = [ "src", "tests" ]
