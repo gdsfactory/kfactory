@@ -43,23 +43,23 @@ optional-dependencies.ci = [
   "pytest-randomly>=4.1,<4.2",
   "pytest-regressions>=2.11,<2.12",
   "pytest-xdist>=3.8,<3.9",
-  "types-cachetools>=7.0.0.20260518,<7.1",
-  "types-requests>=2.33.0.20260518,<2.34",
+  "types-cachetools>=7.0.0.20260713,<7.1",
+  "types-requests>=2.33.0.20260712,<2.34",
   "uv>=0.11.28,<0.12",
 ]
 optional-dependencies.dev = [
   "kfactory[ci]",
   "pre-commit>=4.6,<4.7",
   "python-lsp-server[all]>=1.14,<1.15",
-  "ruff>=0.15.20,<0.16",
-  "rust-just~=1.55.1",
+  "ruff>=0.15.21,<0.16",
+  "rust-just~=1.56.0",
   "scipy-stubs>=1.18,<1.19",
   "tbump>=6.11,<6.12",
-  "ty>=0.0.57,<0.1",
-  "types-cachetools>=7.0.0.20260518,<7.1",
-  "types-docutils>=0.22.3.20260518,<0.23",
+  "ty>=0.0.59,<0.1",
+  "types-cachetools>=7.0.0.20260713,<7.1",
+  "types-docutils>=0.22.3.20260712,<0.23",
   "types-pygments>=2.20.0.20260518,<2.21",
-  "types-requests>=2.33.0.20260518,<2.34",
+  "types-requests>=2.33.0.20260712,<2.34",
   "types-setuptools>=83.0.0.20260706,<83.1",
 ]
 optional-dependencies.docs = [
@@ -70,10 +70,10 @@ optional-dependencies.docs = [
   "kfactory[notebooks]",                     # transitively pulls in kfactory[ipy]
   "mkdocs-literate-nav>=0.6.3,<0.7",
   "mkdocs-video>=1.5,<1.6",
-  "mkdocstrings[python]>=1.0.4,<1.1",
+  "mkdocstrings[python]>=1.0.6,<1.1",
   "pymdown-extensions>=11.0.1,<11.1",
-  "ruff>=0.15.20,<0.16",
-  "zensical>=0.0.47,<0.1",
+  "ruff>=0.15.21,<0.16",
+  "zensical>=0.0.50,<0.1",
 ]
 optional-dependencies.ipy = [
   "ipyevents>=2.0.4,<2.1",
