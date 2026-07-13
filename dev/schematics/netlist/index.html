@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.45">
+      <meta name="generator" content="zensical-0.0.47">
     
     
       
@@ -32,7 +32,7 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.fba56155.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5e19f6ca.min.css">
       
         
           
@@ -5646,9 +5646,11 @@ A <code>NetlistPort</code> identifies a cell-level port by name.</p>
   s1: component=&#39;straight&#39;  settings={&#39;length&#39;: 15000, &#39;width&#39;: 500}
   s2: component=&#39;straight&#39;  settings={&#39;length&#39;: 15000, &#39;width&#39;: 500}
 
-Nets (2):
+Nets (4):
   net[0]: b1.o1 — s1.o2
   net[1]: b1.o2 — s2.o1
+  net[2]: s1.o1
+  net[3]: s2.o2
 
 Top-level ports (0): []
 </code></pre></div>
@@ -5822,7 +5824,7 @@ instance ordering stable so the JSON output is reproducible.</p>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">nl</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>{&quot;instances&quot;:{&quot;s1&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;straight&quot;,&quot;settings&quot;:{&quot;length&quot;:15000,&quot;width&quot;:500}},&quot;x1&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;cross&quot;,&quot;settings&quot;:{&quot;length&quot;:10000,&quot;width&quot;:500}},&quot;x2&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;cross&quot;,&quot;settings&quot;:{&quot;length&quot;:10000,&quot;width&quot;:500}}},&quot;nets&quot;:[[{&quot;instance&quot;:&quot;s1&quot;,&quot;port&quot;:&quot;o1&quot;},{&quot;instance&quot;:&quot;x1&quot;,&quot;port&quot;:&quot;o1&quot;}],[{&quot;instance&quot;:&quot;s1&quot;,&quot;port&quot;:&quot;o2&quot;},{&quot;instance&quot;:&quot;x2&quot;,&quot;port&quot;:&quot;o3&quot;}]],&quot;ports&quot;:[]}
+<div class="highlight"><pre><span></span><code>{&quot;instances&quot;:{&quot;s1&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;straight&quot;,&quot;settings&quot;:{&quot;length&quot;:15000,&quot;width&quot;:500}},&quot;x1&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;cross&quot;,&quot;settings&quot;:{&quot;length&quot;:10000,&quot;width&quot;:500}},&quot;x2&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;cross&quot;,&quot;settings&quot;:{&quot;length&quot;:10000,&quot;width&quot;:500}}},&quot;nets&quot;:[[{&quot;instance&quot;:&quot;s1&quot;,&quot;port&quot;:&quot;o1&quot;},{&quot;instance&quot;:&quot;x1&quot;,&quot;port&quot;:&quot;o1&quot;}],[{&quot;instance&quot;:&quot;s1&quot;,&quot;port&quot;:&quot;o2&quot;},{&quot;instance&quot;:&quot;x2&quot;,&quot;port&quot;:&quot;o3&quot;}],[{&quot;instance&quot;:&quot;x1&quot;,&quot;port&quot;:&quot;o2&quot;}],[{&quot;instance&quot;:&quot;x1&quot;,&quot;port&quot;:&quot;o3&quot;}],[{&quot;instance&quot;:&quot;x1&quot;,&quot;port&quot;:&quot;o4&quot;}],[{&quot;instance&quot;:&quot;x2&quot;,&quot;port&quot;:&quot;o1&quot;}],[{&quot;instance&quot;:&quot;x2&quot;,&quot;port&quot;:&quot;o2&quot;}],[{&quot;instance&quot;:&quot;x2&quot;,&quot;port&quot;:&quot;o4&quot;}]],&quot;ports&quot;:[]}
 </code></pre></div>
 <p>The JSON contains three top-level keys:</p>
 <ul>
@@ -5992,10 +5994,10 @@ Nets:
     
       
       
-      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.b6b7e04f.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.6e5f0216.min.js"></script>
+      <script src="../../assets/javascripts/bundle.0df4f2d0.min.js"></script>
       
     
   </body>

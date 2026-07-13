@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.45">
+      <meta name="generator" content="zensical-0.0.47">
     
     
       
@@ -32,7 +32,7 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.fba56155.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5e19f6ca.min.css">
       
         
           
@@ -5521,7 +5521,9 @@ declarative description.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">kfnetlist</span><span class="w"> </span><span class="kn">import</span> <span class="n">PortRef</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 </code></pre></div>
 <h2 id="setting-up-a-pdk">Setting up a PDK</h2>
 <p>Schematics work inside a <code>KCLayout</code> (PDK).  Cell functions registered on the PDK are
@@ -5673,21 +5675,30 @@ netlist reflects the actual geometry — not just the schematic intent.</p>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== </span><span class="si">{</span><span class="n">cell_name</span><span class="si">}</span><span class="s2"> ===&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  instances: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">instances</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">nets</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  net[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">instance</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">n</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;  net[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">instance</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">PortRef</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&gt;&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">n</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ports: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">net</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>=== chain_of_three ===
   instances: [&#39;b1&#39;, &#39;s1&#39;, &#39;s2&#39;]
   net[0]: [&#39;b1.o1&#39;, &#39;s1.o2&#39;]
   net[1]: [&#39;b1.o2&#39;, &#39;s2.o1&#39;]
+  net[2]: [&#39;s1.o1&#39;]
+  net[3]: [&#39;s2.o2&#39;]
   ports: []
 
 === straight_W500_L20000 ===
   instances: []
+  net[0]: [&#39;&lt;o1&gt;&#39;]
+  net[1]: [&#39;&lt;o2&gt;&#39;]
   ports: [&#39;o1&#39;, &#39;o2&#39;]
 
 === bend90_W500_R10000 ===
   instances: []
+  net[0]: [&#39;&lt;o1&gt;&#39;]
+  net[1]: [&#39;&lt;o2&gt;&#39;]
   ports: [&#39;o1&#39;, &#39;o2&#39;]
 </code></pre></div>
 <h2 id="schematic-netlist-vs-extracted-netlist-lvs">Schematic netlist vs extracted netlist (LVS)</h2>
@@ -5713,6 +5724,12 @@ with explicit nets to demonstrate the LVS flow.</p>
 
     <span class="c1"># connect() both places s2 and records the connectivity in the schematic model</span>
     <span class="n">s2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">s1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Expose the two free ends as top-level ports.  Without this the extracted</span>
+    <span class="c1"># netlist reports them as dangling single-port nets, which would not match</span>
+    <span class="c1"># the declared schematic netlist during LVS.</span>
+    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">schematic</span>
 
@@ -5743,7 +5760,7 @@ layout without the schematic machinery.  This is useful for:</p>
 <span class="n">generated</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">code_str</span><span class="p">()</span>
 <span class="n">Code</span><span class="p">(</span><span class="n">generated</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-07-07 06:59:24.582[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2252[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+<div class="highlight"><pre><span></span><code>[32m2026-07-13 08:44:28.958[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2252[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -5914,10 +5931,10 @@ copy it into any file that imports the same PDK and it will produce an identical
     
       
       
-      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.b6b7e04f.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.6e5f0216.min.js"></script>
+      <script src="../../assets/javascripts/bundle.0df4f2d0.min.js"></script>
       
     
   </body>
