@@ -34,6 +34,7 @@
                   - circular: reference/factories/virtual/circular.md
                   - euler: reference/factories/virtual/euler.md
                   - straight: reference/factories/virtual/straight.md
+          - factory_metadata: reference/factory_metadata.md
           - geometry: reference/geometry.md
           - grid: reference/grid.md
           - instance: reference/instance.md
