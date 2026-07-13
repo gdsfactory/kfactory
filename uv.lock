@@ -1010,7 +1010,7 @@ requires-dist = [
     { name = "kfactory", extras = ["ci"], marker = "extra == 'dev'" },
     { name = "kfactory", extras = ["ipy"], marker = "extra == 'notebooks'" },
     { name = "kfactory", extras = ["notebooks"], marker = "extra == 'docs'" },
-    { name = "kfnetlist", specifier = ">=0.2.1" },
+    { name = "kfnetlist", specifier = ">=0.2.2" },
     { name = "klayout", specifier = ">=0.30.9,<0.31" },
     { name = "loguru", specifier = ">=0.7.3,<0.8" },
     { name = "mkdocs-literate-nav", marker = "extra == 'docs'", specifier = ">=0.6.3,<0.7" },
@@ -1065,15 +1065,15 @@ dev = [
 
 [[package]]
 name = "kfnetlist"
-version = "0.2.1"
+version = "0.2.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/75/b6/6e95a63a8ae67fe883dd092f01be41d90d1a1a57fd3c48e1bd23d4da5baf/kfnetlist-0.2.1.tar.gz", hash = "sha256:31c01a26ff6494f4c39bd49f1c564829353db81eebd69afa3c8c624468f19f97", size = 172350, upload-time = "2026-06-30T08:36:48.692Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d2/80/6c1ec7ba4160c61ffaf710943fc25cc1b096ebe50233edf20f8258fd5a8d/kfnetlist-0.2.2.tar.gz", hash = "sha256:9ae38fc262867daa9d06cbda3efff3f1c00504227480d4ab92c379bf0d13b84e", size = 184421, upload-time = "2026-07-13T07:37:03.628Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fd/c5/f744f79e2075628e74d0f4ad7081be7fa5215ec2fd5cd2eeb6595605c3a8/kfnetlist-0.2.1-cp312-abi3-macosx_10_12_x86_64.whl", hash = "sha256:187066fc50fba45aa96987b511d437527515c6ec366644515bb4dfce4005df25", size = 525247, upload-time = "2026-06-30T08:36:41.75Z" },
-    { url = "https://files.pythonhosted.org/packages/a5/b4/f97d3ce8ee91fc1a0e79493fd4522559f6519c7eefa4f0d05b348bf58fb3/kfnetlist-0.2.1-cp312-abi3-macosx_11_0_arm64.whl", hash = "sha256:937b309ece56beef61a746b004c26763468685a1d31a787d14fdc568865220cf", size = 499640, upload-time = "2026-06-30T08:36:43.352Z" },
-    { url = "https://files.pythonhosted.org/packages/ef/bb/88af8024aba9b831c5584bbf9d342a5af8c163013cd0e4348ab6d4e1dbf4/kfnetlist-0.2.1-cp312-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c25496bd009babc5905286435964e77c9982e5c516825e0263cc579d2482db38", size = 528666, upload-time = "2026-06-30T08:36:44.911Z" },
-    { url = "https://files.pythonhosted.org/packages/fb/78/6a30f40280ce8672ddeda8e89173aa87fbbcaeb24274b7635ba4cbae7d5a/kfnetlist-0.2.1-cp312-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:826c3ec7b272eee9c93e50ead97cf59c7646497a2eaeb20d74286cc9d70dae35", size = 545529, upload-time = "2026-06-30T08:36:46.192Z" },
-    { url = "https://files.pythonhosted.org/packages/01/ba/56e645df391ce6f376c393fafb9cf5cf12f99982757f92b11faec4e10a39/kfnetlist-0.2.1-cp312-abi3-win_amd64.whl", hash = "sha256:361e006ec6947ddfa6e0cdb9e3bf89a467b5836acebb2d13be8819520bf4ce82", size = 416584, upload-time = "2026-06-30T08:36:47.455Z" },
+    { url = "https://files.pythonhosted.org/packages/9e/c1/591bf4433eb6ed36a375c1c8322ec73cc759ab31839c83efac435876c55e/kfnetlist-0.2.2-cp312-abi3-macosx_10_12_x86_64.whl", hash = "sha256:df4d4d138f796b4e6957194d2598654c90cee11d931e8ad2aa220a108555ae73", size = 605038, upload-time = "2026-07-13T07:36:56.468Z" },
+    { url = "https://files.pythonhosted.org/packages/e1/0d/b89f0ebaa30d46b14e2fdfbecb7a51afadc51913822209794f938140abaf/kfnetlist-0.2.2-cp312-abi3-macosx_11_0_arm64.whl", hash = "sha256:fbaafd1cac298fa5b05ade6d5d764d363f9d1d5314428e876eeda1afac3c5a3c", size = 572532, upload-time = "2026-07-13T07:36:58.142Z" },
+    { url = "https://files.pythonhosted.org/packages/12/f6/da7b9274d1ce01597fc38cdaf01d152e283f99e9420877a10ca8a28c5708/kfnetlist-0.2.2-cp312-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0d9f0558537d8f53dcef81395f43b32aec525a812ee29b8b5b552739d0a8e2c4", size = 588358, upload-time = "2026-07-13T07:36:59.555Z" },
+    { url = "https://files.pythonhosted.org/packages/f4/ec/668945d0c21c9eb5fa64efcf52cd98fafdda72e3edbbe3458e7cb8a96001/kfnetlist-0.2.2-cp312-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3c72a1e26a72a4e3d0b57cc63f6a7c60b47b7397122147a0a5c044d8a0a15aea", size = 608655, upload-time = "2026-07-13T07:37:00.987Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/46/ef0e5a0c31dd1861ee5b8fed042ed705ae08f27aceb55cb3fd87cdf40e88/kfnetlist-0.2.2-cp312-abi3-win_amd64.whl", hash = "sha256:6788a491686aac13c59c2de3ba2721b6495fc68b13b98ddc0fa81ca1d30f8a2b", size = 496245, upload-time = "2026-07-13T07:37:02.262Z" },
 ]
 
 [[package]]
