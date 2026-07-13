@@ -12,6 +12,10 @@ import klayout.db as kdb
 from klayout import lay
 from klayout import rdb
 
+from .factory_metadata import (
+    FactoryMetadata,
+    PortSpec,
+)
 from .conf import config, logger, CheckInstances
 from .cross_section import (
     AsymmetricCrossSection,
@@ -121,6 +125,7 @@ __all__ = [
     "DPorts",
     "DSchema",
     "DSchematic",
+    "FactoryMetadata",
     "Info",
     "Instance",
     "InstanceGroup",
@@ -139,6 +144,7 @@ __all__ = [
     "Pin",
     "Pins",
     "Port",
+    "PortSpec",
     "Ports",
     "ProtoPin",
     "ProtoPort",
