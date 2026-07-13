@@ -40,9 +40,13 @@ from . import (
     SymmetricalCrossSection,
     kdb,
 )
-from .cell_metadata import CellMetadata, _MetadataProviderRecord, resolve_metadata
 from .conf import CheckInstances, CheckUnnamedCells, logger
 from .exceptions import CellNameError
+from .factory_metadata import (
+    FactoryMetadata,
+    _FactoryMetadataProviderRecord,
+    resolve_metadata,
+)
 from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
 from .serialization import (
     DecoratorDict,
@@ -681,7 +685,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
 
     @property
     def qualified_name(self) -> str:
-        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"
+        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"  # ty:ignore[unresolved-attribute]
 
     def prune(self) -> None:
         cells = [c for c in self.cache.values() if not c._destroyed()]
@@ -707,7 +711,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
             )
         return self._f_schematic(*args, **kwargs)
 
-    def metadata_providers(self) -> tuple[_MetadataProviderRecord, ...]:
+    def metadata_providers(self) -> tuple[_FactoryMetadataProviderRecord, ...]:
         """Return all metadata provider records registered for this factory."""
         return self.kcl.metadata_providers_for(self)
 
@@ -717,8 +721,8 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
 
     def get_metadata(
         self, *args: KCellParams.args, **kwargs: KCellParams.kwargs
-    ) -> CellMetadata:
-        """Resolve all metadata providers into a single ``CellMetadata``.
+    ) -> FactoryMetadata:
+        """Resolve all metadata providers into a single ``FactoryMetadata``.
 
         Accepts the same parameters as the cell factory itself.
         """
@@ -960,9 +964,9 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
 
     @property
     def qualified_name(self) -> str:
-        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"
+        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"  # ty:ignore[unresolved-attribute]
 
-    def metadata_providers(self) -> tuple[_MetadataProviderRecord, ...]:
+    def metadata_providers(self) -> tuple[_FactoryMetadataProviderRecord, ...]:
         """Return all metadata provider records registered for this factory."""
         return self.kcl.metadata_providers_for(self)
 
@@ -972,8 +976,8 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
 
     def get_metadata(
         self, *args: VKCellParams.args, **kwargs: VKCellParams.kwargs
-    ) -> CellMetadata:
-        """Resolve all metadata providers into a single ``CellMetadata``.
+    ) -> FactoryMetadata:
+        """Resolve all metadata providers into a single ``FactoryMetadata``.
 
         Accepts the same parameters as the cell factory itself.
         """

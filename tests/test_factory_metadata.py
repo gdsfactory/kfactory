@@ -134,7 +134,7 @@ def test_vcell_metadata(kcl: kf.KCLayout) -> None:
     factory = kcl.virtual_factories["virtual"]
 
     assert factory.get_metadata().device_type == "ckt"
-    assert [f.name for f in kcl.virtual_factories.annotated()] == ["virtual"]
+    assert [f.name for f in kcl.virtual_factories.with_metadata()] == ["virtual"]
 
 
 def test_schematic_function_is_separate(kcl: kf.KCLayout) -> None:
@@ -149,7 +149,7 @@ def test_schematic_function_is_separate(kcl: kf.KCLayout) -> None:
 
     assert factory.schematic_driven()
     assert not factory.has_metadata()
-    assert factory.get_metadata() == kf.CellMetadata()
+    assert factory.get_metadata() == kf.FactoryMetadata()
     assert isinstance(factory.get_schematic(), kf.DSchematic)
 
 

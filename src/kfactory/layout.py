@@ -38,11 +38,6 @@ from pydantic import (
 )
 
 from . import __version__, kdb
-from .cell_metadata import (
-    MetadataProviderKind,
-    MetadataRegistry,
-    _MetadataProviderRecord,
-)
 from .conf import CheckInstances, CheckUnnamedCells, config, logger
 from .cross_section import (
     AsymmetricalCrossSection,
@@ -74,6 +69,11 @@ from .enclosure import (
     LayerEnclosureSpec,
 )
 from .exceptions import FactoriesLockedError, MergeError
+from .factory_metadata import (
+    FactoryMetadataProviderKind,
+    FactoryMetadataRegistry,
+    _FactoryMetadataProviderRecord,
+)
 from .kcell import (
     AnyTKCell,
     BaseKCell,
@@ -186,8 +186,12 @@ class Factories[F: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]](
     def all(self) -> tuple[F, ...]:
         return tuple(self._all)
 
-    def annotated(self) -> tuple[F, ...]:
-        return tuple(factory for factory in self._all if factory.has_metadata())
+    def with_metadata(self) -> tuple[F, ...]:
+        return tuple(
+            factory
+            for factory in self._all
+            if factory.has_metadata()  # ty:ignore[invalid-argument-type]
+        )
 
     def get_all_by_name(self, name: str) -> tuple[F, ...]:
         return tuple(factory for factory in self._all if factory.name == name)
@@ -314,8 +318,8 @@ class KCLayout(
     info: Info = Field(default_factory=Info)
     settings: KCellSettings = Field(frozen=True)
     _future_cell_name: str | None = PrivateAttr(default=None)
-    _metadata_registry: MetadataRegistry = PrivateAttr(
-        default_factory=MetadataRegistry
+    _metadata_registry: FactoryMetadataRegistry = PrivateAttr(
+        default_factory=FactoryMetadataRegistry
     )
 
     decorators: Decorators
@@ -497,7 +501,7 @@ class KCLayout(
     ) -> Callable[..., Any]:
         """Register a full metadata provider for a cell factory.
 
-        The provider should return a ``CellMetadata`` or a dict with any
+        The provider should return a ``FactoryMetadata`` or a dict with any
         subset of its fields. Use the field-specific decorators
         (``device_type_for``, ``ports_for``, etc.) when only one aspect
         is being provided.
@@ -620,7 +624,7 @@ class KCLayout(
 
     def metadata_providers_for(
         self, factory: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]
-    ) -> tuple[_MetadataProviderRecord, ...]:
+    ) -> tuple[_FactoryMetadataProviderRecord, ...]:
         """Return all metadata provider records registered for a factory."""
         return self._metadata_registry.providers_for(
             name=factory.name, qualified_name=factory.qualified_name, obj=factory
@@ -628,7 +632,7 @@ class KCLayout(
 
     def _register_metadata_provider(
         self,
-        kind: MetadataProviderKind,
+        kind: FactoryMetadataProviderKind,
         target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
         provider: Callable[..., Any] | None = None,
         *,
