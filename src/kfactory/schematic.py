@@ -1659,10 +1659,10 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     schematic_island=island,
                     instances=instances,
                     connections=instance_connections,
-                    schematic_instances=self.instances,  # ty:ignore[invalid-argument-type]
+                    schematic_instances=self.instances,
                     placed_insts=placed_insts,
                     placed_ports=placed_ports,
-                    schematic=self,  # ty:ignore[invalid-argument-type]
+                    schematic=self,
                     cross_sections=cross_sections,
                     factories=factories,
                     place_unknown=place_unknown,
@@ -2537,10 +2537,10 @@ def _get_instance_orientation[T: (int, float)](
             continue
         orientation = _get_instance_orientation(
             inst,
-            schematic,  # ty:ignore[invalid-argument-type]
+            schematic,
             visited_instances_,
             get_port_orientation_f=get_port_orientation_f,
-            instance_connections=instance_connections,  # ty:ignore[invalid-argument-type]
+            instance_connections=instance_connections,
         )
         if orientation is not None:
             for connection in instance_connections[instance]:
