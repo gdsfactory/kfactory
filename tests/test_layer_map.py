@@ -48,17 +48,17 @@ def test_layer_properties_model_defaults() -> None:
 
 
 def test_layer_properties_model_dither_string() -> None:
-    lp = LayerPropertiesModel(name="WG", layer=(1, 0), dither_pattern="solid")  # ty:ignore[invalid-argument-type]
+    lp = LayerPropertiesModel(name="WG", layer=(1, 0), dither_pattern="solid")
     assert lp.dither_pattern == dither2index["solid"]
 
 
 def test_layer_properties_model_line_style_string() -> None:
-    lp = LayerPropertiesModel(name="WG", layer=(1, 0), line_style="dotted")  # ty:ignore[invalid-argument-type]
+    lp = LayerPropertiesModel(name="WG", layer=(1, 0), line_style="dotted")
     assert lp.line_style == line2index["dotted"]
 
 
 def test_layer_properties_model_color_to_frame_fill() -> None:
-    lp = LayerPropertiesModel(name="WG", layer=(1, 0), color="#ff0000")  # ty:ignore[unknown-argument]
+    lp = LayerPropertiesModel(name="WG", layer=(1, 0), color="#ff0000")
     assert lp.frame_color is not None
     assert lp.fill_color is not None
 
@@ -68,9 +68,9 @@ def test_layer_properties_model_color_overrides() -> None:
     lp = LayerPropertiesModel(
         name="WG",
         layer=(1, 0),
-        color="#ff0000",  # ty:ignore[unknown-argument]
-        fill_color="#00ff00",  # ty:ignore[invalid-argument-type]
-        frame_color="#0000ff",  # ty:ignore[invalid-argument-type]
+        color="#ff0000",
+        fill_color="#00ff00",
+        frame_color="#0000ff",
     )
     assert lp.fill_color is not None
     assert lp.fill_color.as_hex().startswith("#0")
@@ -126,8 +126,8 @@ def test_lp2kl_with_colors() -> None:
     lp = LayerPropertiesModel(
         name="WG",
         layer=(1, 0),
-        frame_color="#abcdef",  # ty:ignore[invalid-argument-type]
-        fill_color="#123456",  # ty:ignore[invalid-argument-type]
+        frame_color="#abcdef",
+        fill_color="#123456",
     )
     kl = lp2kl(lp)
     # KLayout may store with alpha bits; compare only the low 24 bits
@@ -140,8 +140,8 @@ def test_lp2kl_with_short_hex_colors() -> None:
     lp = LayerPropertiesModel(
         name="WG",
         layer=(1, 0),
-        frame_color="red",  # ty:ignore[invalid-argument-type]
-        fill_color="red",  # ty:ignore[invalid-argument-type]
+        frame_color="red",
+        fill_color="red",
     )
     kl = lp2kl(lp)
     assert kl.frame_color > 0
