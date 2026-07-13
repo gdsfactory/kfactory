@@ -317,8 +317,8 @@ def _coerce_ports(value: Any) -> tuple[PortSpec, ...]:
     if value is None:
         return ()
     if isinstance(value, Mapping):
-        return (dict(value),)  # type: ignore[return-value]
-    return tuple(dict(p) if isinstance(p, Mapping) else p for p in value)  # type: ignore[return-value]
+        return (dict(value),)  # ty:ignore[invalid-return-type]
+    return tuple(dict(p) if isinstance(p, Mapping) else p for p in value)  # ty:ignore[invalid-return-type]
 
 
 def _coerce_models(value: Any) -> list:

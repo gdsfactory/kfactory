@@ -187,7 +187,11 @@ class Factories[F: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]](
         return tuple(self._all)
 
     def with_metadata(self) -> tuple[F, ...]:
-        return tuple(factory for factory in self._all if factory.has_metadata())
+        return tuple(
+            factory
+            for factory in self._all
+            if factory.has_metadata()  # ty:ignore[invalid-argument-type]
+        )
 
     def get_all_by_name(self, name: str) -> tuple[F, ...]:
         return tuple(factory for factory in self._all if factory.name == name)

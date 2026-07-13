@@ -685,7 +685,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
 
     @property
     def qualified_name(self) -> str:
-        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"
+        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"  # ty:ignore[unresolved-attribute]
 
     def prune(self) -> None:
         cells = [c for c in self.cache.values() if not c._destroyed()]
@@ -964,7 +964,7 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
 
     @property
     def qualified_name(self) -> str:
-        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"
+        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"  # ty:ignore[unresolved-attribute]
 
     def metadata_providers(self) -> tuple[_FactoryMetadataProviderRecord, ...]:
         """Return all metadata provider records registered for this factory."""
