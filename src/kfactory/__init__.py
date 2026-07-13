@@ -12,8 +12,8 @@ import klayout.db as kdb
 from klayout import lay
 from klayout import rdb
 
-from .cell_metadata import (
-    CellMetadata,
+from .factory_metadata import (
+    FactoryMetadata,
     PortSpec,
 )
 from .conf import config, logger, CheckInstances
@@ -100,11 +100,9 @@ def __getattr__(name: str) -> ModuleType:
 
 
 __all__ = [
-    "CellMetadata",
     "AsymmetricCrossSection",
     "AsymmetricalCrossSection",
     "BaseKCell",
-    "PortSpec",
     "CheckInstances",
     "Constants",
     "CrossSection",
@@ -127,6 +125,7 @@ __all__ = [
     "DPorts",
     "DSchema",
     "DSchematic",
+    "FactoryMetadata",
     "Info",
     "Instance",
     "InstanceGroup",
@@ -145,6 +144,7 @@ __all__ = [
     "Pin",
     "Pins",
     "Port",
+    "PortSpec",
     "Ports",
     "ProtoPin",
     "ProtoPort",

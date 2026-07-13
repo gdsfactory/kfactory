@@ -1,4 +1,4 @@
-"""Cell metadata provider system.
+"""Factory metadata provider system.
 
 Provides a provider-based system for attaching structured metadata
 (device type, ports, models, tags, display hints) to cell factories
@@ -23,7 +23,7 @@ type JSONSerializable = (
     | Mapping[str, "JSONSerializable"]
     | None
 )
-type MetadataProviderKind = Literal[
+type FactoryMetadataProviderKind = Literal[
     "metadata",
     "model",
     "device_type",
@@ -53,7 +53,7 @@ class PortSpec(TypedDict):
     aliases: NotRequired[tuple[str, ...]]
 
 
-class CellMetadata(BaseModel):
+class FactoryMetadata(BaseModel):
     """Resolved metadata for a cell factory.
 
     Aggregated from all registered providers for a given factory.
@@ -70,7 +70,7 @@ class CellMetadata(BaseModel):
 
 
 @dataclass(frozen=True, slots=True)
-class _CellMetadataPatch:
+class _FactoryMetadataPatch:
     device_type: str | None = None
     ports: tuple[PortSpec, ...] | None = None
     models: list | None = None
@@ -81,21 +81,21 @@ class _CellMetadataPatch:
 
 
 @dataclass(frozen=True, slots=True)
-class _MetadataProviderRecord:
+class _FactoryMetadataProviderRecord:
     target_kind: Literal["name", "fqn", "object"]
     target_key: str | int
-    kind: MetadataProviderKind
+    kind: FactoryMetadataProviderKind
     provider: Callable[..., Any]
     replace: bool = False
     position: Literal["append", "prepend"] = "append"
     order: int = 0
 
 
-class MetadataRegistry:
+class FactoryMetadataRegistry:
     """Stores metadata provider registrations and resolves them per factory."""
 
     def __init__(self) -> None:
-        self._records: list[_MetadataProviderRecord] = []
+        self._records: list[_FactoryMetadataProviderRecord] = []
         self._counter = 0
 
     def add(
@@ -103,7 +103,7 @@ class MetadataRegistry:
         *,
         target_kind: Literal["name", "fqn", "object"],
         target_key: str | int,
-        kind: MetadataProviderKind,
+        kind: FactoryMetadataProviderKind,
         provider: Callable[..., Any],
         replace: bool = False,
         position: Literal["append", "prepend"] = "append",
@@ -113,7 +113,7 @@ class MetadataRegistry:
             raise ValueError(f"Unknown model provider position: {position!r}")
         self._counter += 1
         self._records.append(
-            _MetadataProviderRecord(
+            _FactoryMetadataProviderRecord(
                 target_kind=target_kind,
                 target_key=target_key,
                 kind=kind,
@@ -131,7 +131,7 @@ class MetadataRegistry:
         name: str,
         qualified_name: str,
         obj: object,
-    ) -> tuple[_MetadataProviderRecord, ...]:
+    ) -> tuple[_FactoryMetadataProviderRecord, ...]:
         """Return all provider records matching a factory by name, FQN, or identity."""
         object_id = id(obj)
         return tuple(
@@ -177,43 +177,43 @@ def call_provider(provider: Callable[..., Any], params: dict[str, Any]) -> Any:
 
 
 def provider_result_to_patch(
-    record: _MetadataProviderRecord, result: Any
-) -> _CellMetadataPatch:
+    record: _FactoryMetadataProviderRecord, result: Any
+) -> _FactoryMetadataPatch:
     """Convert a provider's return value into a metadata patch."""
     match record.kind:
         case "metadata":
             return _metadata_result_to_patch(result)
         case "model":
             models = _coerce_models(result)
-            return _CellMetadataPatch(
+            return _FactoryMetadataPatch(
                 models=models,
                 models_position=record.position,
             )
         case "device_type":
-            return _CellMetadataPatch(
+            return _FactoryMetadataPatch(
                 device_type=None if result is None else str(result)
             )
         case "ports":
-            return _CellMetadataPatch(ports=_coerce_ports(result))
+            return _FactoryMetadataPatch(ports=_coerce_ports(result))
         case "tags":
-            return _CellMetadataPatch(tags=_coerce_tags(result))
+            return _FactoryMetadataPatch(tags=_coerce_tags(result))
         case "display":
-            return _CellMetadataPatch(
+            return _FactoryMetadataPatch(
                 display=None if result is None else _coerce_display(result)
             )
         case "info":
             if result is None:
-                return _CellMetadataPatch()
+                return _FactoryMetadataPatch()
             if not isinstance(result, Mapping):
                 raise TypeError("info provider must return a mapping.")
-            return _CellMetadataPatch(info={str(k): v for k, v in result.items()})
+            return _FactoryMetadataPatch(info={str(k): v for k, v in result.items()})
 
 
 def resolve_metadata(
-    providers: Iterable[_MetadataProviderRecord],
+    providers: Iterable[_FactoryMetadataProviderRecord],
     params: dict[str, Any],
-) -> CellMetadata:
-    """Resolve all providers for a factory into a single CellMetadata."""
+) -> FactoryMetadata:
+    """Resolve all providers for a factory into a single FactoryMetadata."""
     device_type: str | None = None
     ports: tuple[PortSpec, ...] | None = None
     models: list = []
@@ -262,7 +262,7 @@ def resolve_metadata(
                     raise ValueError(f"Conflicting metadata info key: {key!r}.")
                 info[key] = value
 
-    return CellMetadata(
+    return FactoryMetadata(
         device_type=device_type,
         ports=ports or (),
         models=models,
@@ -272,11 +272,11 @@ def resolve_metadata(
     )
 
 
-def _metadata_result_to_patch(result: Any) -> _CellMetadataPatch:
+def _metadata_result_to_patch(result: Any) -> _FactoryMetadataPatch:
     if result is None:
-        return _CellMetadataPatch()
-    if isinstance(result, CellMetadata):
-        return _CellMetadataPatch(
+        return _FactoryMetadataPatch()
+    if isinstance(result, FactoryMetadata):
+        return _FactoryMetadataPatch(
             device_type=result.device_type,
             ports=result.ports,
             models=list(result.models),
@@ -286,10 +286,10 @@ def _metadata_result_to_patch(result: Any) -> _CellMetadataPatch:
         )
     if not isinstance(result, Mapping):
         raise TypeError(
-            "metadata_for provider must return a mapping or CellMetadata."
+            "metadata_for provider must return a mapping or FactoryMetadata."
         )
 
-    return _CellMetadataPatch(
+    return _FactoryMetadataPatch(
         device_type=(
             None
             if result.get("device_type") is None
