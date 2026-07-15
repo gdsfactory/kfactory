@@ -295,6 +295,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     kcl: KCLayout
     function_name: str | None = None
     basename: str | None = None
+    _ports_name_cache: dict[str | None, BasePort] = PrivateAttr(default_factory=dict)
 
     @property
     @abstractmethod
@@ -576,6 +577,8 @@ class TKCell(BaseKCell):
 
     @locked.setter
     def locked(self, value: bool) -> None:
+        if self.kdb_cell.is_locked() != value:
+            self._ports_name_cache.clear()
         self.kdb_cell.locked = value
 
     def __repr__(self) -> str:
@@ -729,6 +732,8 @@ class TVCell(BaseKCell):
 
     @locked.setter
     def locked(self, value: bool) -> None:
+        if self._locked != value:
+            self._ports_name_cache.clear()
         self._locked = value
 
     @property
@@ -2541,8 +2546,9 @@ def _check_pin_ports_in_cell(
     cell: ProtoTKCell[Any], ports: Iterable[ProtoPort[Any]], *, pin_name: str
 ) -> None:
     cell_ports = cell.base.ports
+    cell_port_ids = {id(port) for port in cell_ports}
     for port in ports:
-        if port.base not in cell_ports:
+        if id(port.base) not in cell_port_ids:
             raise ValueError(
                 f"Cannot create pin {pin_name!r}: port {port!r} is not a port"
                 f" of cell {cell.name!r}. Add it via cell.create_port/add_port"
@@ -2611,13 +2617,18 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
     @property
     def ports(self) -> DPorts:
         """Ports associated with the cell."""
-        return DPorts(kcl=self.kcl, bases=self._base.ports)
+        return DPorts(
+            kcl=self.kcl,
+            bases=self._base.ports,
+            name_cache=self._base._ports_name_cache if self.locked else None,
+        )
 
     @ports.setter
     def ports(self, new_ports: Iterable[ProtoPort[Any]]) -> None:
         if self.locked:
             raise LockedError(self)
         self._base.ports = [port.base for port in new_ports]
+        self._base._ports_name_cache.clear()
 
     @property
     def pins(self) -> DPins:
@@ -2799,13 +2810,18 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
     @property
     def ports(self) -> Ports:
         """Ports associated with the cell."""
-        return Ports(kcl=self.kcl, bases=self._base.ports)
+        return Ports(
+            kcl=self.kcl,
+            bases=self._base.ports,
+            name_cache=self._base._ports_name_cache if self.locked else None,
+        )
 
     @ports.setter
     def ports(self, new_ports: Iterable[ProtoPort[Any]]) -> None:
         if self.locked:
             raise LockedError(self)
         self._base.ports = [port.base for port in new_ports]
+        self._base._ports_name_cache.clear()
 
     @property
     def pins(self) -> Pins:
@@ -3255,13 +3271,18 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
     @property
     def ports(self) -> DPorts:
         """Ports associated with the cell."""
-        return DPorts(kcl=self.kcl, bases=self._base.ports)
+        return DPorts(
+            kcl=self.kcl,
+            bases=self._base.ports,
+            name_cache=self._base._ports_name_cache if self.locked else None,
+        )
 
     @ports.setter
     def ports(self, new_ports: Iterable[ProtoPort[Any]]) -> None:
         if self.locked:
             raise LockedError(self)
         self._base.ports = [port.base for port in new_ports]
+        self._base._ports_name_cache.clear()
 
     @property
     def pins(self) -> DPins:
