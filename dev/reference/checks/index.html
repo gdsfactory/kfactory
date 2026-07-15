@@ -4701,6 +4701,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../spatial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  spatial
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -4713,10 +4740,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_36" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_37" >
         
           
-          <label class="md-nav__link" for="__nav_9_1_36" id="__nav_9_1_36_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9_1_37" id="__nav_9_1_37_label" tabindex="0">
             
   
   
@@ -4733,8 +4760,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_36_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_36">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_37_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_37">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4877,10 +4904,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_39" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_40" >
         
           
-          <label class="md-nav__link" for="__nav_9_1_39" id="__nav_9_1_39_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9_1_40" id="__nav_9_1_40_label" tabindex="0">
             
   
   
@@ -4897,8 +4924,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_39_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_39">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_40_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_40">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -5068,10 +5095,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_40" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_41" >
         
           
-          <label class="md-nav__link" for="__nav_9_1_40" id="__nav_9_1_40_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9_1_41" id="__nav_9_1_41_label" tabindex="0">
             
   
   
@@ -5088,8 +5115,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_40_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_40">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_41_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_41">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -5559,14 +5586,7 @@ Typical use is multi-contact pads where <code>e1</code>, <code>e2</code>, <code>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/checks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">569</span>
-<span class="normal">570</span>
-<span class="normal">571</span>
-<span class="normal">572</span>
-<span class="normal">573</span>
-<span class="normal">574</span>
-<span class="normal">575</span>
-<span class="normal">576</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">576</span>
 <span class="normal">577</span>
 <span class="normal">578</span>
 <span class="normal">579</span>
@@ -5653,7 +5673,14 @@ Typical use is multi-contact pads where <code>e1</code>, <code>e2</code>, <code>
 <span class="normal">660</span>
 <span class="normal">661</span>
 <span class="normal">662</span>
-<span class="normal">663</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dangling_ports_check</span><span class="p">(</span>
+<span class="normal">663</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dangling_ports_check</span><span class="p">(</span>
     <span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">port_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -5859,14 +5886,7 @@ of another instance are reported under <code>InstanceOverlap</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/checks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">682</span>
-<span class="normal">683</span>
-<span class="normal">684</span>
-<span class="normal">685</span>
-<span class="normal">686</span>
-<span class="normal">687</span>
-<span class="normal">688</span>
-<span class="normal">689</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">689</span>
 <span class="normal">690</span>
 <span class="normal">691</span>
 <span class="normal">692</span>
@@ -5922,18 +5942,7 @@ of another instance are reported under <code>InstanceOverlap</code>.</p>
 <span class="normal">742</span>
 <span class="normal">743</span>
 <span class="normal">744</span>
-<span class="normal">745</span>
-<span class="normal">746</span>
-<span class="normal">747</span>
-<span class="normal">748</span>
-<span class="normal">749</span>
-<span class="normal">750</span>
-<span class="normal">751</span>
-<span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
-<span class="normal">755</span>
-<span class="normal">756</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">instance_overlap_check</span><span class="p">(</span>
+<span class="normal">745</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">instance_overlap_check</span><span class="p">(</span>
     <span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -5961,42 +5970,24 @@ of another instance are reported under <code>InstanceOverlap</code>.</p>
 
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">_iter_check_layers</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
         <span class="n">error_region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">()</span>
-        <span class="n">inst_regions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">inst_region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inst</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">insts</span><span class="p">):</span>
-            <span class="n">inst_region_</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">inst</span><span class="o">.</span><span class="n">ibbox</span><span class="p">(</span><span class="n">layer</span><span class="p">))</span>
-            <span class="n">inst_shapes</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">inst_region</span> <span class="o">&amp;</span> <span class="n">inst_region_</span><span class="p">)</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">inst_shapes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">inst_shapes</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">()</span>
-                    <span class="n">shape_it</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">begin_shapes_rec_overlapping</span><span class="p">(</span>
-                        <span class="n">layer</span><span class="p">,</span> <span class="n">inst</span><span class="o">.</span><span class="n">bbox</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
-                    <span class="p">)</span>
-                    <span class="n">shape_it</span><span class="o">.</span><span class="n">select_cells</span><span class="p">([</span><span class="n">inst</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()])</span>
-                    <span class="n">shape_it</span><span class="o">.</span><span class="n">min_depth</span> <span class="o">=</span> <span class="mi">1</span>
-                    <span class="n">shape_it</span><span class="o">.</span><span class="n">shape_flags</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Shapes</span><span class="o">.</span><span class="n">SRegions</span>
-                    <span class="k">for</span> <span class="n">_it</span> <span class="ow">in</span> <span class="n">shape_it</span><span class="o">.</span><span class="n">each</span><span class="p">():</span>
-                        <span class="k">if</span> <span class="n">_it</span><span class="o">.</span><span class="n">path</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">inst</span><span class="p">()</span> <span class="o">==</span> <span class="n">inst</span><span class="o">.</span><span class="n">instance</span><span class="p">:</span>
-                            <span class="n">inst_shapes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                                <span class="n">_it</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">_it</span><span class="o">.</span><span class="n">trans</span><span class="p">())</span>
-                            <span class="p">)</span>
-                <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">_reg</span> <span class="ow">in</span> <span class="n">inst_regions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="n">_reg</span> <span class="o">&amp;</span> <span class="n">inst_region_</span><span class="p">:</span>
-                        <span class="n">reg_</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">()</span>
-                        <span class="n">shape_it</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">begin_shapes_rec_touching</span><span class="p">(</span>
-                            <span class="n">layer</span><span class="p">,</span> <span class="p">(</span><span class="n">_reg</span> <span class="o">&amp;</span> <span class="n">inst_region_</span><span class="p">)</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
-                        <span class="p">)</span>
-                        <span class="n">shape_it</span><span class="o">.</span><span class="n">select_cells</span><span class="p">([</span><span class="n">cell</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()])</span>
-                        <span class="n">shape_it</span><span class="o">.</span><span class="n">min_depth</span> <span class="o">=</span> <span class="mi">1</span>
-                        <span class="n">shape_it</span><span class="o">.</span><span class="n">shape_flags</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Shapes</span><span class="o">.</span><span class="n">SRegions</span>
-                        <span class="k">for</span> <span class="n">_it</span> <span class="ow">in</span> <span class="n">shape_it</span><span class="o">.</span><span class="n">each</span><span class="p">():</span>
-                            <span class="k">if</span> <span class="n">_it</span><span class="o">.</span><span class="n">path</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">inst</span><span class="p">()</span> <span class="o">==</span> <span class="n">cell</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">instance</span><span class="p">:</span>
-                                <span class="n">reg_</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                                    <span class="n">_it</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">_it</span><span class="o">.</span><span class="n">trans</span><span class="p">())</span>
-                                <span class="p">)</span>
-                        <span class="n">error_region</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">reg_</span> <span class="o">&amp;</span> <span class="n">inst_shapes</span><span class="p">)</span>
-            <span class="n">inst_region</span> <span class="o">+=</span> <span class="n">inst_region_</span>
-            <span class="n">inst_regions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">inst_region_</span>
+        <span class="n">inst_records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">ProtoTInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">inst</span><span class="o">.</span><span class="n">ibbox</span><span class="p">(</span><span class="n">layer</span><span class="p">))</span> <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">insts</span>
+        <span class="p">]</span>
+        <span class="n">inst_cache</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">other_idx</span> <span class="ow">in</span> <span class="n">iter_overlapping_bbox_pairs</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">bbox</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">bbox</span> <span class="ow">in</span> <span class="n">inst_records</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="n">inst</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">inst_records</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">other_inst</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">inst_records</span><span class="p">[</span><span class="n">other_idx</span><span class="p">]</span>
+            <span class="n">inst_region</span> <span class="o">=</span> <span class="n">inst_cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">inst_region</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">inst_region</span> <span class="o">=</span> <span class="n">collect_instance_region</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">inst</span><span class="p">)</span>
+                <span class="n">inst_cache</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">inst_region</span>
+            <span class="n">other_region</span> <span class="o">=</span> <span class="n">inst_cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">other_idx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">other_region</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">other_region</span> <span class="o">=</span> <span class="n">collect_instance_region</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">other_inst</span><span class="p">)</span>
+                <span class="n">inst_cache</span><span class="p">[</span><span class="n">other_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">other_region</span>
+            <span class="n">error_region</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">other_region</span> <span class="o">&amp;</span> <span class="n">inst_region</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">error_region</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
             <span class="n">sc</span> <span class="o">=</span> <span class="n">_get_or_create_subcategory</span><span class="p">(</span><span class="n">db_</span><span class="p">,</span> <span class="n">layer_cat</span><span class="p">(</span><span class="n">layer</span><span class="p">),</span> <span class="s2">&quot;InstanceOverlap&quot;</span><span class="p">)</span>
@@ -6285,8 +6276,7 @@ a via stack are intentional.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/checks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">258</span>
-<span class="normal">259</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">259</span>
 <span class="normal">260</span>
 <span class="normal">261</span>
 <span class="normal">262</span>
@@ -6491,7 +6481,14 @@ a via stack are intentional.</p>
 <span class="normal">461</span>
 <span class="normal">462</span>
 <span class="normal">463</span>
-<span class="normal">464</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">port_mismatch_check</span><span class="p">(</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">port_mismatch_check</span><span class="p">(</span>
     <span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">port_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6651,7 +6648,10 @@ a via stack are intentional.</p>
             <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">cell_ports</span> <span class="ow">and</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">cell_ports</span><span class="p">[</span><span class="n">layer</span><span class="p">]:</span>
                     <span class="n">cell_port</span> <span class="o">=</span> <span class="n">cell_ports</span><span class="p">[</span><span class="n">layer</span><span class="p">][</span><span class="n">coord</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">result</span> <span class="o">=</span> <span class="n">check_connection</span><span class="p">(</span><span class="n">cell_port</span><span class="p">,</span> <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">check_connection</span><span class="p">(</span>
+                        <span class="n">cell_port</span><span class="p">,</span>
+                        <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="p">)</span>
                     <span class="n">emit_mismatch</span><span class="p">(</span>
                         <span class="n">result</span><span class="p">,</span>
                         <span class="n">lc</span><span class="p">,</span>
@@ -6664,7 +6664,10 @@ a via stack are intentional.</p>
                     <span class="p">)</span>
                 <span class="c1"># Dangling case is handled by dangling_ports_check.</span>
             <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="n">check_connection</span><span class="p">(</span><span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ports</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">check_connection</span><span class="p">(</span>
+                    <span class="n">ports</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">ports</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="p">)</span>
                 <span class="n">emit_mismatch</span><span class="p">(</span>
                     <span class="n">result</span><span class="p">,</span>
                     <span class="n">lc</span><span class="p">,</span>
@@ -6809,7 +6812,18 @@ instances are reported under <code>CellShapeInstanceOverlap</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/checks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">759</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span>
+<span class="normal">759</span>
 <span class="normal">760</span>
 <span class="normal">761</span>
 <span class="normal">762</span>
@@ -6850,12 +6864,7 @@ instances are reported under <code>CellShapeInstanceOverlap</code>.</p>
 <span class="normal">797</span>
 <span class="normal">798</span>
 <span class="normal">799</span>
-<span class="normal">800</span>
-<span class="normal">801</span>
-<span class="normal">802</span>
-<span class="normal">803</span>
-<span class="normal">804</span>
-<span class="normal">805</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">shape_instance_overlap_check</span><span class="p">(</span>
+<span class="normal">800</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">shape_instance_overlap_check</span><span class="p">(</span>
     <span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6884,11 +6893,17 @@ instances are reported under <code>CellShapeInstanceOverlap</code>.</p>
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">_iter_check_layers</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
         <span class="n">error_region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">()</span>
         <span class="n">reg</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">reg</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="k">continue</span>
+        <span class="n">reg_bbox</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+        <span class="n">reg_bbox_region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">reg_bbox</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">insts</span><span class="p">:</span>
             <span class="n">inst_region_</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">inst</span><span class="o">.</span><span class="n">ibbox</span><span class="p">(</span><span class="n">layer</span><span class="p">))</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">inst_region_</span> <span class="o">&amp;</span> <span class="n">reg</span><span class="p">)</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">inst_region_</span> <span class="o">&amp;</span> <span class="n">reg_bbox_region</span><span class="p">)</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
                 <span class="k">continue</span>
-            <span class="n">rec_it</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">begin_shapes_rec_touching</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="p">(</span><span class="n">inst_region_</span> <span class="o">&amp;</span> <span class="n">reg</span><span class="p">)</span><span class="o">.</span><span class="n">bbox</span><span class="p">())</span>
+            <span class="n">rec_it</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">begin_shapes_rec_touching</span><span class="p">(</span>
+                <span class="n">layer</span><span class="p">,</span> <span class="p">(</span><span class="n">inst_region_</span> <span class="o">&amp;</span> <span class="n">reg_bbox_region</span><span class="p">)</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span>
+            <span class="p">)</span>
             <span class="n">rec_it</span><span class="o">.</span><span class="n">min_depth</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">error_region</span> <span class="o">+=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">rec_it</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">reg</span>
 
