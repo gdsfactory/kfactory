@@ -381,31 +381,29 @@ print(
 straight.plot()
 
 # %% [markdown]
-# ### Chaining: `o2 → o1` requires `mirror=True`
+# ### Chaining: `o2 → o1` works by default
 #
-# Connecting `inst_b.o1` to `inst_a.o2` is the natural chain. But with
-# asymmetric ports the connect transform must be M90 (mirror) — R180 would
-# flip the left/right halves of the profile.
+# Connecting `inst_b.o1` to `inst_a.o2` is the natural chain. With the port
+# convention above, `o2` already carries the `mirror` flag, so the join between
+# the two ports is an M90 (mirror) transform — exactly what an asymmetric
+# profile needs to keep its left/right halves aligned. `connect` does **not**
+# copy the other port's mirror flag onto the instance; it simply honors the
+# per-port frames, so the default `connect` succeeds and neither instance ends
+# up with a mirror flag.
 #
-# kfactory checks this **geometrically** by computing the to-be-applied trans
-# and comparing the world-frame "right" direction of both ports. If they don't
-# match, it raises `AsymmetricMirrorRequiredError`.
+# kfactory validates this by requiring the two connected asymmetric ports to
+# have opposite mirror flags in world space. If they'd line up with the same
+# orientation (an R180 join, which flips the profile), it raises
+# `AsymmetricMirrorRequiredError`.
 
 # %%
 parent_chain = kf.KCell(name="asym_chain_ok")
 ia = parent_chain << straight
 ib = parent_chain << straight
 
-# Default (mirror=False) → raises
-try:
-    ib.connect("o1", ia, "o2")
-except AsymmetricMirrorRequiredError as e:
-    print("WITHOUT mirror=True, default connect raises:")
-    print(f"  AsymmetricMirrorRequiredError: {e}\n")
-
-# With mirror=True → succeeds, neither instance ends up with a mirror flag
-ib.connect("o1", ia, "o2", mirror=True)
-print("WITH mirror=True:")
+# Default connect → succeeds, neither instance ends up with a mirror flag
+ib.connect("o1", ia, "o2")
+print("Default connect:")
 print(f"  ia.trans: {ia.trans}  (mirror={ia.trans.mirror})")
 print(f"  ib.trans: {ib.trans}  (mirror={ib.trans.mirror})")
 parent_chain.plot()
@@ -473,13 +471,14 @@ except CrossSectionSymmetryMismatchError as e:
 # | Scenario | Default `connect()` | `connect(mirror=True)` |
 # |---|---|---|
 # | sym ↔ sym | works | works |
-# | asym o2 → asym o1 (chain) | `AsymmetricMirrorRequiredError` | works, no instance mirrored |
+# | asym o2 → asym o1 (chain) | works, no instance mirrored | `AsymmetricMirrorRequiredError` |
 # | asym o1 ↔ asym o1 | `AsymmetricMirrorRequiredError` | works, one instance mirrored |
 # | sym ↔ asym | `CrossSectionSymmetryMismatchError` (not bypassable) | same error |
 #
-# The check is a **geometric** one: kfactory computes the would-be instance
-# trans, derives the world-frame "right" direction of both ports' profiles, and
-# raises if they don't align.
+# The check is on the **mirror flags**: kfactory requires the two connected
+# asymmetric ports to end up with opposite mirror orientations (an M90 join). A
+# natural `o2 → o1` chain already satisfies this via the port frames, so it
+# works by default and adding `mirror=True` would over-mirror it and raise.
 
 # %% [markdown]
 # ## Summary
