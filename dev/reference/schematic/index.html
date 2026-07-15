@@ -7673,19 +7673,19 @@ constraint-specific visualisation.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/schematic.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2648</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2642</span>
+<span class="normal">2643</span>
+<span class="normal">2644</span>
+<span class="normal">2645</span>
+<span class="normal">2646</span>
+<span class="normal">2647</span>
+<span class="normal">2648</span>
 <span class="normal">2649</span>
 <span class="normal">2650</span>
 <span class="normal">2651</span>
 <span class="normal">2652</span>
 <span class="normal">2653</span>
-<span class="normal">2654</span>
-<span class="normal">2655</span>
-<span class="normal">2656</span>
-<span class="normal">2657</span>
-<span class="normal">2658</span>
-<span class="normal">2659</span>
-<span class="normal">2660</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DSchema</span><span class="p">(</span><span class="n">DSchematic</span><span class="p">):</span>
+<span class="normal">2654</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DSchema</span><span class="p">(</span><span class="n">DSchematic</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated alias for `DSchematic` (will be removed in kfactory 2.0).&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -7869,17 +7869,17 @@ constraint-specific visualisation.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/schematic.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2620</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2614</span>
+<span class="normal">2615</span>
+<span class="normal">2616</span>
+<span class="normal">2617</span>
+<span class="normal">2618</span>
+<span class="normal">2619</span>
+<span class="normal">2620</span>
 <span class="normal">2621</span>
 <span class="normal">2622</span>
 <span class="normal">2623</span>
-<span class="normal">2624</span>
-<span class="normal">2625</span>
-<span class="normal">2626</span>
-<span class="normal">2627</span>
-<span class="normal">2628</span>
-<span class="normal">2629</span>
-<span class="normal">2630</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DSchematic</span><span class="p">(</span><span class="n">TSchematic</span><span class="p">[</span><span class="n">um</span><span class="p">]):</span>
+<span class="normal">2624</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DSchematic</span><span class="p">(</span><span class="n">TSchematic</span><span class="p">[</span><span class="n">um</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schematic with a base unit of um for placements.&quot;&quot;&quot;</span>
 
     <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;um&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;um&quot;</span>
@@ -10694,19 +10694,19 @@ instance ports via <code>PortRef</code>/<code>PortArrayRef</code>.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/schematic.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2633</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2627</span>
+<span class="normal">2628</span>
+<span class="normal">2629</span>
+<span class="normal">2630</span>
+<span class="normal">2631</span>
+<span class="normal">2632</span>
+<span class="normal">2633</span>
 <span class="normal">2634</span>
 <span class="normal">2635</span>
 <span class="normal">2636</span>
 <span class="normal">2637</span>
 <span class="normal">2638</span>
-<span class="normal">2639</span>
-<span class="normal">2640</span>
-<span class="normal">2641</span>
-<span class="normal">2642</span>
-<span class="normal">2643</span>
-<span class="normal">2644</span>
-<span class="normal">2645</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Schema</span><span class="p">(</span><span class="n">Schematic</span><span class="p">):</span>
+<span class="normal">2639</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Schema</span><span class="p">(</span><span class="n">Schematic</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated alias for `Schematic` (will be removed in kfactory 2.0).&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -10890,17 +10890,17 @@ instance ports via <code>PortRef</code>/<code>PortArrayRef</code>.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/schematic.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2607</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2601</span>
+<span class="normal">2602</span>
+<span class="normal">2603</span>
+<span class="normal">2604</span>
+<span class="normal">2605</span>
+<span class="normal">2606</span>
+<span class="normal">2607</span>
 <span class="normal">2608</span>
 <span class="normal">2609</span>
 <span class="normal">2610</span>
-<span class="normal">2611</span>
-<span class="normal">2612</span>
-<span class="normal">2613</span>
-<span class="normal">2614</span>
-<span class="normal">2615</span>
-<span class="normal">2616</span>
-<span class="normal">2617</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Schematic</span><span class="p">(</span><span class="n">TSchematic</span><span class="p">[</span><span class="n">dbu</span><span class="p">]):</span>
+<span class="normal">2611</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Schematic</span><span class="p">(</span><span class="n">TSchematic</span><span class="p">[</span><span class="n">dbu</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schematic with a base unit of dbu for placements.&quot;&quot;&quot;</span>
 
     <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;dbu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;dbu&quot;</span>
@@ -13549,13 +13549,7 @@ referencing and creation of the cell.</p>
 <span class="normal">2437</span>
 <span class="normal">2438</span>
 <span class="normal">2439</span>
-<span class="normal">2440</span>
-<span class="normal">2441</span>
-<span class="normal">2442</span>
-<span class="normal">2443</span>
-<span class="normal">2444</span>
-<span class="normal">2445</span>
-<span class="normal">2446</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TSchematic</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">):</span>
+<span class="normal">2440</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TSchematic</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schematic of a cell / component.</span>
 
 <span class="sd">    Attributes:</span>
@@ -13697,6 +13691,7 @@ referencing and creation of the cell.</p>
             <span class="o">|</span> <span class="n">AsymmetricCrossSection</span>
             <span class="o">|</span> <span class="n">DAsymmetricCrossSection</span><span class="p">,</span>
         <span class="p">],</span>
+        <span class="n">instances</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span> <span class="o">|</span> <span class="n">VInstance</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BasePort</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Materialize a schematic-level port on `cell`.</span>
 
@@ -13708,23 +13703,25 @@ referencing and creation of the cell.</p>
 <span class="sd">          references), then creates the port via `cell.create_port`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">target_instance</span><span class="p">(</span><span class="n">port_ref</span><span class="p">:</span> <span class="n">PortRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instance</span> <span class="o">|</span> <span class="n">VInstance</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">instances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">instances</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+            <span class="n">inst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">cell</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">inst</span><span class="o">.</span><span class="n">virtual</span>
+                <span class="k">else</span> <span class="n">cell</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+            <span class="p">)</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">PortArrayRef</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">virtual</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">cell</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
-                    <span class="n">port</span><span class="o">=</span><span class="n">cell</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ia</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ib</span><span class="p">],</span>
-                    <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">base</span>
             <span class="k">return</span> <span class="n">cell</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
-                <span class="n">port</span><span class="o">=</span><span class="n">cell</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ia</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ib</span><span class="p">],</span>
+                <span class="n">port</span><span class="o">=</span><span class="n">target_instance</span><span class="p">(</span><span class="n">port</span><span class="p">)</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ia</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ib</span><span class="p">],</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="p">)</span><span class="o">.</span><span class="n">base</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">PortRef</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">virtual</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">cell</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
-                    <span class="n">port</span><span class="o">=</span><span class="n">cell</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">base</span>
             <span class="k">return</span> <span class="n">cell</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
-                <span class="n">port</span><span class="o">=</span><span class="n">cell</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span>
+                <span class="n">port</span><span class="o">=</span><span class="n">target_instance</span><span class="p">(</span><span class="n">port</span><span class="p">)</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span>
             <span class="p">)</span><span class="o">.</span><span class="n">base</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">PortRef</span><span class="p">):</span>
@@ -14232,6 +14229,7 @@ referencing and creation of the cell.</p>
                 <span class="n">placed_islands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">island</span><span class="p">)</span>
                 <span class="n">placed_insts</span> <span class="o">|=</span> <span class="n">island</span>
 
+        <span class="n">cell_ports_by_name</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">get_all_named</span><span class="p">()</span>
         <span class="n">nets_per_route</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">routes_nets</span><span class="p">()</span>
 
         <span class="c1"># routes</span>
@@ -14242,14 +14240,9 @@ referencing and creation of the cell.</p>
                 <span class="n">resolved_port_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">KCellPort</span> <span class="o">|</span> <span class="n">DKCellPort</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">port_ref</span> <span class="ow">in</span> <span class="n">net</span><span class="o">.</span><span class="n">net</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port_ref</span><span class="p">,</span> <span class="n">Port</span><span class="p">):</span>
-                        <span class="n">p</span><span class="p">:</span> <span class="n">KCellPort</span> <span class="o">|</span> <span class="n">DKCellPort</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                        <span class="n">p</span><span class="p">:</span> <span class="n">KCellPort</span> <span class="o">|</span> <span class="n">DKCellPort</span> <span class="o">=</span> <span class="n">cell_ports_by_name</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">inst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-                        <span class="n">target</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="n">c</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-                            <span class="k">if</span> <span class="n">inst</span><span class="o">.</span><span class="n">virtual</span>
-                            <span class="k">else</span> <span class="n">c</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-                        <span class="p">)</span>
+                        <span class="n">target</span> <span class="o">=</span> <span class="n">instances</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
                         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port_ref</span><span class="p">,</span> <span class="n">PortArrayRef</span><span class="p">):</span>
                             <span class="n">p</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">port_ref</span><span class="o">.</span><span class="n">ia</span><span class="p">,</span> <span class="n">port_ref</span><span class="o">.</span><span class="n">ib</span><span class="p">]</span>
                         <span class="k">else</span><span class="p">:</span>
@@ -14308,25 +14301,20 @@ referencing and creation of the cell.</p>
                 <span class="p">)</span>
 
         <span class="c1"># verify connections</span>
+        <span class="n">cell_ports_by_name</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">get_all_named</span><span class="p">()</span>
         <span class="n">port_connection_transformation_errors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">connection_transformation_errors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">connections</span><span class="p">:</span>
             <span class="n">c1</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">net</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">c2</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">net</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">Port</span><span class="p">):</span>
-                <span class="n">p1</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-                <span class="n">p2</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">port</span><span class="p">]</span>
+                <span class="n">p1</span> <span class="o">=</span> <span class="n">cell_ports_by_name</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">p2</span> <span class="o">=</span> <span class="n">instances</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">port</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">p1</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">!=</span> <span class="n">p2</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="p">:</span>
                     <span class="n">port_connection_transformation_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">virtual</span><span class="p">:</span>
-                    <span class="n">inst1</span><span class="p">:</span> <span class="n">Instance</span> <span class="o">|</span> <span class="n">VInstance</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">inst1</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">virtual</span><span class="p">:</span>
-                    <span class="n">inst2</span><span class="p">:</span> <span class="n">Instance</span> <span class="o">|</span> <span class="n">VInstance</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">inst2</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+                <span class="n">inst1</span> <span class="o">=</span> <span class="n">instances</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+                <span class="n">inst2</span> <span class="o">=</span> <span class="n">instances</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">PortArrayRef</span><span class="p">):</span>
                     <span class="n">p1</span> <span class="o">=</span> <span class="n">inst1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">c1</span><span class="o">.</span><span class="n">ia</span><span class="p">,</span> <span class="n">c1</span><span class="o">.</span><span class="n">ib</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -14402,12 +14390,12 @@ referencing and creation of the cell.</p>
                     <span class="p">)</span>
                 <span class="n">c</span><span class="o">.</span><span class="n">create_pin</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">pin_name</span><span class="p">,</span>
-                    <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">cell_port_names</span><span class="p">],</span>
+                    <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="n">cell_ports_by_name</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">cell_port_names</span><span class="p">],</span>
                     <span class="n">pin_type</span><span class="o">=</span><span class="n">inst_pin</span><span class="o">.</span><span class="n">pin_type</span><span class="p">,</span>
                     <span class="n">info</span><span class="o">=</span><span class="n">inst_pin</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pin_def</span><span class="o">.</span><span class="n">ports</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span>
+                <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pin_def</span><span class="o">.</span><span class="n">ports</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cell_ports_by_name</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Cannot materialize pin </span><span class="si">{</span><span class="n">pin_name</span><span class="si">!r}</span><span class="s2">: port(s) &quot;</span>
@@ -14415,7 +14403,7 @@ referencing and creation of the cell.</p>
                     <span class="p">)</span>
                 <span class="n">c</span><span class="o">.</span><span class="n">create_pin</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">pin_name</span><span class="p">,</span>
-                    <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pin_def</span><span class="o">.</span><span class="n">ports</span><span class="p">],</span>
+                    <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="n">cell_ports_by_name</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pin_def</span><span class="o">.</span><span class="n">ports</span><span class="p">],</span>
                     <span class="n">pin_type</span><span class="o">=</span><span class="n">pin_def</span><span class="o">.</span><span class="n">pin_type</span><span class="p">,</span>
                     <span class="n">info</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pin_def</span><span class="o">.</span><span class="n">info</span><span class="p">),</span>
                 <span class="p">)</span>
@@ -15131,7 +15119,13 @@ the constraint already exist in the schematic.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1864</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1858</span>
+<span class="normal">1859</span>
+<span class="normal">1860</span>
+<span class="normal">1861</span>
+<span class="normal">1862</span>
+<span class="normal">1863</span>
+<span class="normal">1864</span>
 <span class="normal">1865</span>
 <span class="normal">1866</span>
 <span class="normal">1867</span>
@@ -15153,13 +15147,7 @@ the constraint already exist in the schematic.</p>
 <span class="normal">1883</span>
 <span class="normal">1884</span>
 <span class="normal">1885</span>
-<span class="normal">1886</span>
-<span class="normal">1887</span>
-<span class="normal">1888</span>
-<span class="normal">1889</span>
-<span class="normal">1890</span>
-<span class="normal">1891</span>
-<span class="normal">1892</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">:</span> <span class="n">Constraint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Constraint</span><span class="p">:</span>
+<span class="normal">1886</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">:</span> <span class="n">Constraint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Constraint</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a constraint on this schematic.</span>
 
 <span class="sd">    Validates that all ``route_names`` and ``instance_names`` referenced by</span>
@@ -15287,10 +15275,7 @@ the constraint already exist in the schematic.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1271</span>
-<span class="normal">1272</span>
-<span class="normal">1273</span>
-<span class="normal">1274</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1274</span>
 <span class="normal">1275</span>
 <span class="normal">1276</span>
 <span class="normal">1277</span>
@@ -15300,7 +15285,10 @@ the constraint already exist in the schematic.</p>
 <span class="normal">1281</span>
 <span class="normal">1282</span>
 <span class="normal">1283</span>
-<span class="normal">1284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">pin</span><span class="p">:</span> <span class="n">PinRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1284</span>
+<span class="normal">1285</span>
+<span class="normal">1286</span>
+<span class="normal">1287</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">pin</span><span class="p">:</span> <span class="n">PinRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Expose an existing instance pin as a schematic top-level pin.</span>
 
 <span class="sd">    Args:</span>
@@ -15603,7 +15591,13 @@ that belong to the same net.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1894</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1888</span>
+<span class="normal">1889</span>
+<span class="normal">1890</span>
+<span class="normal">1891</span>
+<span class="normal">1892</span>
+<span class="normal">1893</span>
+<span class="normal">1894</span>
 <span class="normal">1895</span>
 <span class="normal">1896</span>
 <span class="normal">1897</span>
@@ -15635,13 +15629,7 @@ that belong to the same net.</p>
 <span class="normal">1923</span>
 <span class="normal">1924</span>
 <span class="normal">1925</span>
-<span class="normal">1926</span>
-<span class="normal">1927</span>
-<span class="normal">1928</span>
-<span class="normal">1929</span>
-<span class="normal">1930</span>
-<span class="normal">1931</span>
-<span class="normal">1932</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_route</span><span class="p">(</span>
+<span class="normal">1926</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_route</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">nets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">PortRef</span><span class="p">]],</span>
@@ -15804,7 +15792,13 @@ that belong to the same net.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1972</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1966</span>
+<span class="normal">1967</span>
+<span class="normal">1968</span>
+<span class="normal">1969</span>
+<span class="normal">1970</span>
+<span class="normal">1971</span>
+<span class="normal">1972</span>
 <span class="normal">1973</span>
 <span class="normal">1974</span>
 <span class="normal">1975</span>
@@ -16082,13 +16076,7 @@ that belong to the same net.</p>
 <span class="normal">2247</span>
 <span class="normal">2248</span>
 <span class="normal">2249</span>
-<span class="normal">2250</span>
-<span class="normal">2251</span>
-<span class="normal">2252</span>
-<span class="normal">2253</span>
-<span class="normal">2254</span>
-<span class="normal">2255</span>
-<span class="normal">2256</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">code_str</span><span class="p">(</span>
+<span class="normal">2250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">code_str</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">imports</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">_schematic_default_imports</span><span class="p">,</span>
     <span class="n">kfactory_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -16573,10 +16561,7 @@ not fully deterministic, therefore this is disabled by default.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1557</span>
-<span class="normal">1558</span>
-<span class="normal">1559</span>
-<span class="normal">1560</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1560</span>
 <span class="normal">1561</span>
 <span class="normal">1562</span>
 <span class="normal">1563</span>
@@ -16872,13 +16857,7 @@ not fully deterministic, therefore this is disabled by default.</p>
 <span class="normal">1853</span>
 <span class="normal">1854</span>
 <span class="normal">1855</span>
-<span class="normal">1856</span>
-<span class="normal">1857</span>
-<span class="normal">1858</span>
-<span class="normal">1859</span>
-<span class="normal">1860</span>
-<span class="normal">1861</span>
-<span class="normal">1862</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_cell</span><span class="p">(</span>
+<span class="normal">1856</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_cell</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">],</span>
     <span class="n">factories</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span>
@@ -16991,6 +16970,7 @@ not fully deterministic, therefore this is disabled by default.</p>
             <span class="n">placed_islands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">island</span><span class="p">)</span>
             <span class="n">placed_insts</span> <span class="o">|=</span> <span class="n">island</span>
 
+    <span class="n">cell_ports_by_name</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">get_all_named</span><span class="p">()</span>
     <span class="n">nets_per_route</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">routes_nets</span><span class="p">()</span>
 
     <span class="c1"># routes</span>
@@ -17001,14 +16981,9 @@ not fully deterministic, therefore this is disabled by default.</p>
             <span class="n">resolved_port_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">KCellPort</span> <span class="o">|</span> <span class="n">DKCellPort</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">port_ref</span> <span class="ow">in</span> <span class="n">net</span><span class="o">.</span><span class="n">net</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port_ref</span><span class="p">,</span> <span class="n">Port</span><span class="p">):</span>
-                    <span class="n">p</span><span class="p">:</span> <span class="n">KCellPort</span> <span class="o">|</span> <span class="n">DKCellPort</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                    <span class="n">p</span><span class="p">:</span> <span class="n">KCellPort</span> <span class="o">|</span> <span class="n">DKCellPort</span> <span class="o">=</span> <span class="n">cell_ports_by_name</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">inst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-                    <span class="n">target</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">c</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-                        <span class="k">if</span> <span class="n">inst</span><span class="o">.</span><span class="n">virtual</span>
-                        <span class="k">else</span> <span class="n">c</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-                    <span class="p">)</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">instances</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port_ref</span><span class="p">,</span> <span class="n">PortArrayRef</span><span class="p">):</span>
                         <span class="n">p</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">port_ref</span><span class="o">.</span><span class="n">ia</span><span class="p">,</span> <span class="n">port_ref</span><span class="o">.</span><span class="n">ib</span><span class="p">]</span>
                     <span class="k">else</span><span class="p">:</span>
@@ -17067,25 +17042,20 @@ not fully deterministic, therefore this is disabled by default.</p>
             <span class="p">)</span>
 
     <span class="c1"># verify connections</span>
+    <span class="n">cell_ports_by_name</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">get_all_named</span><span class="p">()</span>
     <span class="n">port_connection_transformation_errors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">connection_transformation_errors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">connections</span><span class="p">:</span>
         <span class="n">c1</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">net</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">c2</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">net</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">Port</span><span class="p">):</span>
-            <span class="n">p1</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-            <span class="n">p2</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">port</span><span class="p">]</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="n">cell_ports_by_name</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">p2</span> <span class="o">=</span> <span class="n">instances</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">port</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">p1</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">!=</span> <span class="n">p2</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="p">:</span>
                 <span class="n">port_connection_transformation_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">virtual</span><span class="p">:</span>
-                <span class="n">inst1</span><span class="p">:</span> <span class="n">Instance</span> <span class="o">|</span> <span class="n">VInstance</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">inst1</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">virtual</span><span class="p">:</span>
-                <span class="n">inst2</span><span class="p">:</span> <span class="n">Instance</span> <span class="o">|</span> <span class="n">VInstance</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">inst2</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+            <span class="n">inst1</span> <span class="o">=</span> <span class="n">instances</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+            <span class="n">inst2</span> <span class="o">=</span> <span class="n">instances</span><span class="p">[</span><span class="n">c2</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">PortArrayRef</span><span class="p">):</span>
                 <span class="n">p1</span> <span class="o">=</span> <span class="n">inst1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">c1</span><span class="o">.</span><span class="n">ia</span><span class="p">,</span> <span class="n">c1</span><span class="o">.</span><span class="n">ib</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
@@ -17161,12 +17131,12 @@ not fully deterministic, therefore this is disabled by default.</p>
                 <span class="p">)</span>
             <span class="n">c</span><span class="o">.</span><span class="n">create_pin</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">pin_name</span><span class="p">,</span>
-                <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">cell_port_names</span><span class="p">],</span>
+                <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="n">cell_ports_by_name</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">cell_port_names</span><span class="p">],</span>
                 <span class="n">pin_type</span><span class="o">=</span><span class="n">inst_pin</span><span class="o">.</span><span class="n">pin_type</span><span class="p">,</span>
                 <span class="n">info</span><span class="o">=</span><span class="n">inst_pin</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pin_def</span><span class="o">.</span><span class="n">ports</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span>
+            <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pin_def</span><span class="o">.</span><span class="n">ports</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cell_ports_by_name</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Cannot materialize pin </span><span class="si">{</span><span class="n">pin_name</span><span class="si">!r}</span><span class="s2">: port(s) &quot;</span>
@@ -17174,7 +17144,7 @@ not fully deterministic, therefore this is disabled by default.</p>
                 <span class="p">)</span>
             <span class="n">c</span><span class="o">.</span><span class="n">create_pin</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">pin_name</span><span class="p">,</span>
-                <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pin_def</span><span class="o">.</span><span class="n">ports</span><span class="p">],</span>
+                <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="n">cell_ports_by_name</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pin_def</span><span class="o">.</span><span class="n">ports</span><span class="p">],</span>
                 <span class="n">pin_type</span><span class="o">=</span><span class="n">pin_def</span><span class="o">.</span><span class="n">pin_type</span><span class="p">,</span>
                 <span class="n">info</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pin_def</span><span class="o">.</span><span class="n">info</span><span class="p">),</span>
             <span class="p">)</span>
@@ -17313,10 +17283,7 @@ not fully deterministic, therefore this is disabled by default.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1286</span>
-<span class="normal">1287</span>
-<span class="normal">1288</span>
-<span class="normal">1289</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1289</span>
 <span class="normal">1290</span>
 <span class="normal">1291</span>
 <span class="normal">1292</span>
@@ -17342,7 +17309,10 @@ not fully deterministic, therefore this is disabled by default.</p>
 <span class="normal">1312</span>
 <span class="normal">1313</span>
 <span class="normal">1314</span>
-<span class="normal">1315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_connection</span><span class="p">(</span>
+<span class="normal">1315</span>
+<span class="normal">1316</span>
+<span class="normal">1317</span>
+<span class="normal">1318</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_connection</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">port1</span><span class="p">:</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">port2</span><span class="p">:</span> <span class="n">PortRef</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create and register a connection between two instance ports.</span>
@@ -17830,10 +17800,7 @@ empty, or any port name is not present in <code>self.ports</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1231</span>
-<span class="normal">1232</span>
-<span class="normal">1233</span>
-<span class="normal">1234</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1234</span>
 <span class="normal">1235</span>
 <span class="normal">1236</span>
 <span class="normal">1237</span>
@@ -17868,7 +17835,10 @@ empty, or any port name is not present in <code>self.ports</code>.</p>
 <span class="normal">1266</span>
 <span class="normal">1267</span>
 <span class="normal">1268</span>
-<span class="normal">1269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_pin</span><span class="p">(</span>
+<span class="normal">1269</span>
+<span class="normal">1270</span>
+<span class="normal">1271</span>
+<span class="normal">1272</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_pin</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -18062,10 +18032,7 @@ netlist is sorted for stable output.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1317</span>
-<span class="normal">1318</span>
-<span class="normal">1319</span>
-<span class="normal">1320</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1320</span>
 <span class="normal">1321</span>
 <span class="normal">1322</span>
 <span class="normal">1323</span>
@@ -18154,7 +18121,10 @@ netlist is sorted for stable output.</p>
 <span class="normal">1406</span>
 <span class="normal">1407</span>
 <span class="normal">1408</span>
-<span class="normal">1409</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">netlist</span><span class="p">(</span>
+<span class="normal">1409</span>
+<span class="normal">1410</span>
+<span class="normal">1411</span>
+<span class="normal">1412</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">netlist</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">add_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">factories</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]]</span>
@@ -18271,6 +18241,8 @@ netlist is sorted for stable output.</p>
         <span class="o">|</span> <span class="n">AsymmetricCrossSection</span>
         <span class="o">|</span> <span class="n">DAsymmetricCrossSection</span><span class="p">,</span>
     <span class="p">],</span>
+    <span class="n">instances</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span> <span class="o">|</span> <span class="n">VInstance</span><span class="p">]</span>
+    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BasePort</span>
 </code></pre></div>
 
@@ -18393,7 +18365,10 @@ netlist is sorted for stable output.</p>
 <span class="normal">1226</span>
 <span class="normal">1227</span>
 <span class="normal">1228</span>
-<span class="normal">1229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">place_port</span><span class="p">(</span>
+<span class="normal">1229</span>
+<span class="normal">1230</span>
+<span class="normal">1231</span>
+<span class="normal">1232</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">place_port</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">cell</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
@@ -18404,6 +18379,7 @@ netlist is sorted for stable output.</p>
         <span class="o">|</span> <span class="n">AsymmetricCrossSection</span>
         <span class="o">|</span> <span class="n">DAsymmetricCrossSection</span><span class="p">,</span>
     <span class="p">],</span>
+    <span class="n">instances</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span> <span class="o">|</span> <span class="n">VInstance</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BasePort</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Materialize a schematic-level port on `cell`.</span>
 
@@ -18415,23 +18391,25 @@ netlist is sorted for stable output.</p>
 <span class="sd">      references), then creates the port via `cell.create_port`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">target_instance</span><span class="p">(</span><span class="n">port_ref</span><span class="p">:</span> <span class="n">PortRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instance</span> <span class="o">|</span> <span class="n">VInstance</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">instances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">instances</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+        <span class="n">inst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">inst</span><span class="o">.</span><span class="n">virtual</span>
+            <span class="k">else</span> <span class="n">cell</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">port_ref</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span>
+        <span class="p">)</span>
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">PortArrayRef</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">virtual</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cell</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
-                <span class="n">port</span><span class="o">=</span><span class="n">cell</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ia</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ib</span><span class="p">],</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">base</span>
         <span class="k">return</span> <span class="n">cell</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
-            <span class="n">port</span><span class="o">=</span><span class="n">cell</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ia</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ib</span><span class="p">],</span>
+            <span class="n">port</span><span class="o">=</span><span class="n">target_instance</span><span class="p">(</span><span class="n">port</span><span class="p">)</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ia</span><span class="p">,</span> <span class="n">port</span><span class="o">.</span><span class="n">ib</span><span class="p">],</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">base</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">PortRef</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">virtual</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cell</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
-                <span class="n">port</span><span class="o">=</span><span class="n">cell</span><span class="o">.</span><span class="n">vinsts</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">base</span>
         <span class="k">return</span> <span class="n">cell</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
-            <span class="n">port</span><span class="o">=</span><span class="n">cell</span><span class="o">.</span><span class="n">insts</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span>
+            <span class="n">port</span><span class="o">=</span><span class="n">target_instance</span><span class="p">(</span><span class="n">port</span><span class="p">)</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">port</span><span class="o">.</span><span class="n">port</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span>
         <span class="p">)</span><span class="o">.</span><span class="n">base</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">PortRef</span><span class="p">):</span>
@@ -18645,7 +18623,12 @@ netlist is sorted for stable output.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3200</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3195</span>
+<span class="normal">3196</span>
+<span class="normal">3197</span>
+<span class="normal">3198</span>
+<span class="normal">3199</span>
+<span class="normal">3200</span>
 <span class="normal">3201</span>
 <span class="normal">3202</span>
 <span class="normal">3203</span>
@@ -18663,12 +18646,7 @@ netlist is sorted for stable output.</p>
 <span class="normal">3215</span>
 <span class="normal">3216</span>
 <span class="normal">3217</span>
-<span class="normal">3218</span>
-<span class="normal">3219</span>
-<span class="normal">3220</span>
-<span class="normal">3221</span>
-<span class="normal">3222</span>
-<span class="normal">3223</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_schematic</span><span class="p">(</span>
+<span class="normal">3218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_schematic</span><span class="p">(</span>
     <span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span> <span class="s2">&quot;um&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;dbu&quot;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schematic</span> <span class="o">|</span> <span class="n">DSchematic</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a schematic from a YAML file.</span>

@@ -5602,7 +5602,7 @@ when <code>create_cell</code> runs.</p>
 <span class="n">cell</span> <span class="o">=</span> <span class="n">forwarded_ports</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cell ports:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">ports</span><span class="p">])</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>cell ports: [&#39;left&#39;, &#39;right&#39;]
+<div class="highlight"><pre><span></span><code>cell ports: [&#39;right&#39;, &#39;left&#39;]
 </code></pre></div>
 <p>Inside the schematic, the entries are <code>PortRef</code> objects pointing at the underlying
 instance:</p>

@@ -5880,6 +5880,8 @@ You can build one directly using an existing <code>LayerEnclosure</code>:</p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;radius:  </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs_rib</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>layers:  [SLAB (3/0), WGCLAD (2/0)]
+
+
 radius:  15.0 µm
 </code></pre></div>
 <h2 id="5-multi-layer-and-annular-sections">5 · Multi-layer and annular sections</h2>
@@ -6172,8 +6174,6 @@ checks, and it's not bypassable by <code>allow_width_mismatch=True</code>.</p>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  CrossSectionSymmetryMismatchError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Symmetric ↔ asymmetric connect raises:
-
-
   CrossSectionSymmetryMismatchError: Cross section symmetry mismatch between ports &#39;o1&#39; (asymmetric) and &#39;o2&#39; (symmetric). Symmetric and asymmetric cross sections cannot be connected.
 </code></pre></div>
 <h3 id="summary-of-asymmetric-port-behavior">Summary of asymmetric port behavior</h3>
