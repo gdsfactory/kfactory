@@ -47,23 +47,6 @@ if TYPE_CHECKING:
 __all__ = ["DInstance", "Instance", "ProtoInstance", "ProtoTInstance", "VInstance"]
 
 
-def _right_dir_trans(t: kdb.Trans) -> tuple[int, int]:
-    """Return the port's "right" unit direction in world coords.
-
-    A port faces +x in its local frame; its profile extends in y, with `+y`
-    being the "right" side. Applying `t` to the unit `+y` vector gives the
-    world-frame right direction.
-    """
-    v = t.trans(kdb.Point(0, 1)) - t.trans(kdb.Point(0, 0))
-    return (v.x, v.y)
-
-
-def _right_dir_dcplx(t: kdb.DCplxTrans) -> tuple[float, float]:
-    """DCplxTrans equivalent of `_right_dir_trans`. See its docstring."""
-    v = t.trans(kdb.DPoint(0, 1)) - t.trans(kdb.DPoint(0, 0))
-    return (v.x, v.y)
-
-
 class ProtoInstance[T: (int, float)](GeometricObject[T]):
     """Base class for instances."""
 
@@ -444,81 +427,75 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
         )
         if p.base.dcplx_trans or op.base.dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-            extra_dmirror_y: float | None = None
             match (use_mirror, use_angle):
                 case True, True:
-                    candidate = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                    dcplx_trans = (
+                        op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                    )
                 case False, True:
                     dconn_trans = (
                         kdb.DCplxTrans.M90
                         if mirror ^ self.dcplx_trans.mirror
                         else kdb.DCplxTrans.R180
                     )
-                    opt = op.dcplx_trans
-                    opt.mirror = False
-                    candidate = opt * dconn_trans * p.dcplx_trans.inverted()
+                    op_dcplx_trans = op.dcplx_trans
+                    op_dcplx_trans.mirror = False
+                    dcplx_trans = (
+                        op_dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                    )
                 case False, False:
-                    candidate = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+                    dcplx_trans = kdb.DCplxTrans(
+                        op.dcplx_trans.disp - p.dcplx_trans.disp
+                    )
                 case True, False:
-                    candidate = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
-                    extra_dmirror_y = op.dcplx_trans.disp.y
+                    dcplx_trans = kdb.DCplxTrans(
+                        op.dcplx_trans.disp - p.dcplx_trans.disp
+                    )
                 case _:
                     raise NotImplementedError("This shouldn't happen")
-
+            self._instance.dcplx_trans = dcplx_trans
             if same_asym:
-                final = candidate
-                if extra_dmirror_y is not None:
-                    final = kdb.DCplxTrans(1, 0, True, 0, 2 * extra_dmirror_y) * final
-                p_world = final * p.dcplx_trans
-                if _right_dir_dcplx(p_world) != _right_dir_dcplx(op.dcplx_trans):
-                    raise AsymmetricMirrorRequiredError(p, op)
-
-            self._instance.dcplx_trans = candidate
-            if extra_dmirror_y is not None:
-                self.dmirror_y(extra_dmirror_y)
-
+                try:
+                    p_ = self[p.name]
+                except Exception:
+                    logger.warning(
+                        f"Couldn't find port {p.name!r} in instance, skipping asymmetry"
+                        " compatibility check."
+                    )
+                else:
+                    if not p_.mirror != op.mirror:
+                        raise AsymmetricMirrorRequiredError(p, op)
         else:
             conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
-            extra_dmirror_y_t: float | None = None
             match (use_mirror, use_angle):
                 case True, True:
-                    candidate_t = op.trans * conn_trans * p.trans.inverted()
+                    trans = op.trans * conn_trans * p.trans.inverted()
                 case False, True:
                     conn_trans = (
                         kdb.Trans.M90 if mirror ^ self.trans.mirror else kdb.Trans.R180
                     )
-                    op = op.copy()
-                    op.trans.mirror = False
-                    candidate_t = op.trans * conn_trans * p.trans.inverted()
+                    op_trans = op.copy().trans
+                    op_trans.mirror = False
+                    trans = op_trans * conn_trans * p.trans.inverted()
                 case False, False:
-                    candidate_t = kdb.Trans(op.trans.disp - p.trans.disp)
+                    trans = kdb.Trans(op.trans.disp - p.trans.disp)
                 case True, False:
-                    candidate_t = kdb.Trans(op.trans.disp - p.trans.disp)
-                    extra_dmirror_y_t = op.dcplx_trans.disp.y
+                    trans = kdb.Trans(op.trans.disp - p.trans.disp)
                 case _:
                     raise NotImplementedError("This shouldn't happen")
 
+            self._instance.trans = trans
             if same_asym:
-                if extra_dmirror_y_t is not None:
-                    # dmirror_y converts inst trans to DCplxTrans; model that.
-                    final_dcplx = kdb.DCplxTrans(
-                        1, 0, True, 0, 2 * extra_dmirror_y_t
-                    ) * kdb.DCplxTrans(candidate_t.to_dtype(self.cell.kcl.dbu))
-                    p_world_d = final_dcplx * kdb.DCplxTrans(
-                        p.trans.to_dtype(self.cell.kcl.dbu)
+                try:
+                    p_ = self[p.name]
+                except Exception:
+                    logger.warning(
+                        f"Couldn't find port {p.name!r} in instance, skipping asymmetry"
+                        " compatibility check."
                     )
-                    if _right_dir_dcplx(p_world_d) != _right_dir_dcplx(
-                        kdb.DCplxTrans(op.trans.to_dtype(self.cell.kcl.dbu))
-                    ):
-                        raise AsymmetricMirrorRequiredError(p, op)
                 else:
-                    p_world_t = candidate_t * p.trans
-                    if _right_dir_trans(p_world_t) != _right_dir_trans(op.trans):
+                    if not p_.mirror != op.mirror:
                         raise AsymmetricMirrorRequiredError(p, op)
-
-            self._instance.trans = candidate_t
-            if extra_dmirror_y_t is not None:
-                self.dmirror_y(extra_dmirror_y_t)
 
         return self
 
@@ -1116,10 +1093,9 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             and p.base.asymmetric_cross_section == op.base.asymmetric_cross_section
         )
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-        extra_dmirror_y: float | None = None
         match (use_mirror, use_angle):
             case True, True:
-                candidate = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                dcplx_trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
             case False, True:
                 dconn_trans = (
                     kdb.DCplxTrans.M90
@@ -1128,27 +1104,26 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 )
                 opt = op.dcplx_trans
                 opt.mirror = False
-                candidate = opt * dconn_trans * p.dcplx_trans.inverted()
+                dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
             case False, False:
-                candidate = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+                dcplx_trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
             case True, False:
-                candidate = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
-                extra_dmirror_y = op.dcplx_trans.disp.y
+                dcplx_trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
             case _:
                 raise NotImplementedError("This shouldn't happen")
 
+        self.trans = dcplx_trans
         if same_asym:
-            final = candidate
-            if extra_dmirror_y is not None:
-                final = kdb.DCplxTrans(1, 0, True, 0, 2 * extra_dmirror_y) * final
-            p_world = final * p.dcplx_trans
-            if _right_dir_dcplx(p_world) != _right_dir_dcplx(op.dcplx_trans):
-                raise AsymmetricMirrorRequiredError(p, op)
-
-        self.trans = candidate
-        if extra_dmirror_y is not None:
-            self.mirror_y(extra_dmirror_y)
-
+            try:
+                p_ = self[p.name]
+            except Exception:
+                logger.warning(
+                    f"Couldn't find port {p.name!r} in instance, skipping asymmetry"
+                    " compatibility check."
+                )
+            else:
+                if not p_.mirror != op.mirror:
+                    raise AsymmetricMirrorRequiredError(p, op)
         return self
 
     def transform(

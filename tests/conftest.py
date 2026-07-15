@@ -319,7 +319,7 @@ def _layout_xor(
     if not diff.compare(ly_a, ly_b, flags=flags, tolerance=tolerance):
         match raises:
             case "error":
-                raise AttributeError(
+                raise AssertionError(
                     f"Layouts {str(path_a)!r} and {str(path_b)!r} differ!"
                 )
             case "warning":
