@@ -4,7 +4,7 @@ requires = [ "build", "setuptools>=83", "setuptools-scm[toml]>=10.2" ]
 
 [project]
 name = "kfactory"
-version = "3.0.0rc4"
+version = "3.0.0"
 description = "KLayout API implementation of gdsfactory"
 readme = "README.md"
 authors = [ { name = "gdsfactory community", email = "contact@gdsfactory.com" } ]
@@ -204,7 +204,7 @@ git.message_template = "Bump to {new_version}"
 git.tag_template = "v{new_version}"
 # Uncomment this if your project is hosted on GitHub:
 # github_url = "https://github.com/<user or organization>/<project>/"
-version.current = "3.0.0rc4"
+version.current = "3.0.0"
 # Example of a semver regexp.
 # Make sure this matches current_version before
 # using tbump
