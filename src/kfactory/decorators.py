@@ -42,6 +42,11 @@ from . import (
 )
 from .conf import CheckInstances, CheckUnnamedCells, logger
 from .exceptions import CellNameError
+from .factory_metadata import (
+    FactoryMetadata,
+    _FactoryMetadataProviderRecord,
+    resolve_metadata,
+)
 from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
 from .serialization import (
     DecoratorDict,
@@ -381,6 +386,8 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
     lvs_equivalent_ports: list[list[str]] | None = None
     ports_definition: PortsDefinition | None = None
     tags: set[str]
+    signature: inspect.Signature
+    _sig_params: SignatureParams
 
     def __init__(
         self,
@@ -434,6 +441,8 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
 
         # Pre-compute static signature metadata once at decoration time
         sig_params = SignatureParams(sig)
+        self.signature = sig
+        self._sig_params = sig_params
         # Resolve annotations to concrete types for the type-hint serializers.
         # Guard against ``NameError`` etc. raised by ``from __future__ import
         # annotations`` functions whose hints reference ``TYPE_CHECKING``-only
@@ -674,6 +683,10 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
     def file(self) -> Path:
         return _get_path(self._f_orig)
 
+    @property
+    def qualified_name(self) -> str:
+        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"  # ty:ignore[unresolved-attribute]
+
     def prune(self) -> None:
         cells = [c for c in self.cache.values() if not c._destroyed()]
         caller_cis = {
@@ -698,6 +711,30 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
             )
         return self._f_schematic(*args, **kwargs)
 
+    def metadata_providers(self) -> tuple[_FactoryMetadataProviderRecord, ...]:
+        """Return all metadata provider records registered for this factory."""
+        return self.kcl.metadata_providers_for(self)
+
+    def has_metadata(self) -> bool:
+        """Whether any metadata providers are registered for this factory."""
+        return bool(self.metadata_providers())
+
+    def get_metadata(
+        self, *args: KCellParams.args, **kwargs: KCellParams.kwargs
+    ) -> FactoryMetadata:
+        """Resolve all metadata providers into a single ``FactoryMetadata``.
+
+        Accepts the same parameters as the cell factory itself.
+        """
+        params = _parse_params(
+            self._sig_params.defaults,
+            self._sig_params.names,
+            self.kcl,
+            args,
+            kwargs,
+        )
+        return resolve_metadata(self.metadata_providers(), params)
+
 
 @final
 class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
@@ -710,6 +747,8 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
     lvs_equivalent_ports: list[list[str]] | None = None
     ports_definition: PortsDefinition | None = None
     tags: set[str]
+    signature: inspect.Signature
+    _sig_params: SignatureParams
 
     def __init__(
         self,
@@ -756,6 +795,8 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
 
         # Pre-compute static signature metadata once at decoration time
         sig_params = SignatureParams(sig)
+        self.signature = sig
+        self._sig_params = sig_params
         # Resolve annotations to concrete types for the type-hint serializers (see
         # the equivalent block in ``WrappedKCellFunc``); an unresolvable hint simply
         # opts out of hint-based serialization rather than breaking decoration.
@@ -920,6 +961,34 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
     @functools.cached_property
     def file(self) -> Path:
         return _get_path(self._f_orig)
+
+    @property
+    def qualified_name(self) -> str:
+        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"  # ty:ignore[unresolved-attribute]
+
+    def metadata_providers(self) -> tuple[_FactoryMetadataProviderRecord, ...]:
+        """Return all metadata provider records registered for this factory."""
+        return self.kcl.metadata_providers_for(self)
+
+    def has_metadata(self) -> bool:
+        """Whether any metadata providers are registered for this factory."""
+        return bool(self.metadata_providers())
+
+    def get_metadata(
+        self, *args: VKCellParams.args, **kwargs: VKCellParams.kwargs
+    ) -> FactoryMetadata:
+        """Resolve all metadata providers into a single ``FactoryMetadata``.
+
+        Accepts the same parameters as the cell factory itself.
+        """
+        params = _parse_params(
+            self._sig_params.defaults,
+            self._sig_params.names,
+            self.kcl,
+            args,
+            kwargs,
+        )
+        return resolve_metadata(self.metadata_providers(), params)
 
 
 def _get_path(f: Callable[..., Any]) -> Path:
