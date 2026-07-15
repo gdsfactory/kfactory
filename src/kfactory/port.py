@@ -396,13 +396,35 @@ class ProtoPort[T: (int, float)](ABC):
 
     @property
     @abstractmethod
-    def cross_section(self) -> TCrossSection[T]:
-        """Get the symmetric cross section of the port. Raises if asymmetric."""
+    def cross_section(self) -> TCrossSection[T] | TAsymmetricCrossSection[T]:
+        """Get the cross section of the port, symmetric or asymmetric.
+
+        Returns the symmetric cross section if the port carries one, otherwise
+        the asymmetric cross section. Use `symmetric_cross_section` or
+        `asymmetric_cross_section` to require a specific kind (raising if the
+        port carries the other kind).
+        """
         ...
 
     @cross_section.setter
     @abstractmethod
     def cross_section(
+        self,
+        value: SymmetricalCrossSection
+        | AsymmetricalCrossSection
+        | TCrossSection[Any]
+        | TAsymmetricCrossSection[Any],
+    ) -> None: ...
+
+    @property
+    @abstractmethod
+    def symmetric_cross_section(self) -> TCrossSection[T]:
+        """Get the symmetric cross section of the port. Raises if asymmetric."""
+        ...
+
+    @symmetric_cross_section.setter
+    @abstractmethod
+    def symmetric_cross_section(
         self, value: SymmetricalCrossSection | TCrossSection[Any]
     ) -> None: ...
 
@@ -1052,7 +1074,43 @@ class Port(ProtoPort[int]):
         return self.iwidth
 
     @property
-    def cross_section(self) -> CrossSection:
+    def cross_section(self) -> CrossSection | AsymmetricCrossSection:
+        """Get the cross section of the port, symmetric or asymmetric.
+
+        Returns the symmetric cross section if the port carries one, otherwise
+        the asymmetric cross section. Use `symmetric_cross_section` or
+        `asymmetric_cross_section` to require a specific kind.
+        """
+        if self._base.cross_section is not None:
+            return CrossSection(kcl=self._base.kcl, base=self._base.cross_section)
+        assert self._base.asymmetric_cross_section is not None
+        return AsymmetricCrossSection(
+            kcl=self._base.kcl, base=self._base.asymmetric_cross_section
+        )
+
+    @cross_section.setter
+    def cross_section(
+        self,
+        value: SymmetricalCrossSection
+        | AsymmetricalCrossSection
+        | TCrossSection[Any]
+        | TAsymmetricCrossSection[Any],
+    ) -> None:
+        if isinstance(value, SymmetricalCrossSection):
+            self._base.cross_section = value
+            self._base.asymmetric_cross_section = None
+        elif isinstance(value, AsymmetricalCrossSection):
+            self._base.asymmetric_cross_section = value
+            self._base.cross_section = None
+        elif isinstance(value, TAsymmetricCrossSection):
+            self._base.asymmetric_cross_section = value.base
+            self._base.cross_section = None
+        else:
+            self._base.cross_section = value.base
+            self._base.asymmetric_cross_section = None
+
+    @property
+    def symmetric_cross_section(self) -> CrossSection:
         """Get the symmetric cross section of the port.
 
         Raises:
@@ -1065,8 +1123,8 @@ class Port(ProtoPort[int]):
             )
         return CrossSection(kcl=self._base.kcl, base=self._base.cross_section)
 
-    @cross_section.setter
-    def cross_section(
+    @symmetric_cross_section.setter
+    def symmetric_cross_section(
         self, value: SymmetricalCrossSection | TCrossSection[Any]
     ) -> None:
         if isinstance(value, SymmetricalCrossSection):
@@ -1085,7 +1143,7 @@ class Port(ProtoPort[int]):
         if self._base.asymmetric_cross_section is None:
             raise TypeError(
                 f"Port {self.name!r} carries a symmetric cross section."
-                " Use `cross_section` instead."
+                " Use `symmetric_cross_section` instead."
             )
         return AsymmetricCrossSection(
             kcl=self._base.kcl, base=self._base.asymmetric_cross_section
@@ -1429,7 +1487,43 @@ class DPort(ProtoPort[float]):
         return self.dwidth
 
     @property
-    def cross_section(self) -> DCrossSection:
+    def cross_section(self) -> DCrossSection | DAsymmetricCrossSection:
+        """Get the cross section of the port, symmetric or asymmetric.
+
+        Returns the symmetric cross section if the port carries one, otherwise
+        the asymmetric cross section. Use `symmetric_cross_section` or
+        `asymmetric_cross_section` to require a specific kind.
+        """
+        if self._base.cross_section is not None:
+            return DCrossSection(kcl=self._base.kcl, base=self._base.cross_section)
+        assert self._base.asymmetric_cross_section is not None
+        return DAsymmetricCrossSection(
+            kcl=self._base.kcl, base=self._base.asymmetric_cross_section
+        )
+
+    @cross_section.setter
+    def cross_section(
+        self,
+        value: SymmetricalCrossSection
+        | AsymmetricalCrossSection
+        | TCrossSection[Any]
+        | TAsymmetricCrossSection[Any],
+    ) -> None:
+        if isinstance(value, SymmetricalCrossSection):
+            self._base.cross_section = value
+            self._base.asymmetric_cross_section = None
+        elif isinstance(value, AsymmetricalCrossSection):
+            self._base.asymmetric_cross_section = value
+            self._base.cross_section = None
+        elif isinstance(value, TAsymmetricCrossSection):
+            self._base.asymmetric_cross_section = value.base
+            self._base.cross_section = None
+        else:
+            self._base.cross_section = value.base
+            self._base.asymmetric_cross_section = None
+
+    @property
+    def symmetric_cross_section(self) -> DCrossSection:
         """Get the symmetric cross section of the port.
 
         Raises:
@@ -1442,8 +1536,8 @@ class DPort(ProtoPort[float]):
             )
         return DCrossSection(kcl=self._base.kcl, base=self._base.cross_section)
 
-    @cross_section.setter
-    def cross_section(
+    @symmetric_cross_section.setter
+    def symmetric_cross_section(
         self, value: SymmetricalCrossSection | TCrossSection[Any]
     ) -> None:
         if isinstance(value, SymmetricalCrossSection):
@@ -1462,7 +1556,7 @@ class DPort(ProtoPort[float]):
         if self._base.asymmetric_cross_section is None:
             raise TypeError(
                 f"Port {self.name!r} carries a symmetric cross section."
-                " Use `cross_section` instead."
+                " Use `symmetric_cross_section` instead."
             )
         return DAsymmetricCrossSection(
             kcl=self._base.kcl, base=self._base.asymmetric_cross_section
