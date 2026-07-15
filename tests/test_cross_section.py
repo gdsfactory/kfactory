@@ -399,10 +399,12 @@ def test_create_port_with_asymmetric_cross_section() -> None:
     p = c.ports["o1"]
     assert not p.is_symmetric()
     assert p.asymmetric_cross_section == acs
+    # generic accessor returns the asymmetric cross section without raising
+    assert p.cross_section == acs
     assert p.base.cross_section is None
     assert p.base.asymmetric_cross_section is acs
     with pytest.raises(TypeError, match="asymmetric"):
-        _ = p.cross_section
+        _ = p.symmetric_cross_section
 
 
 def test_port_accessor_setters_route_correctly() -> None:

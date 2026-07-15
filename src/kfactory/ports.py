@@ -771,7 +771,7 @@ class Ports(ProtoPorts[int], ICreatePort):
             base.kcl = self.kcl
             if port.is_symmetric():
                 base.cross_section = self.kcl.get_symmetrical_cross_section(
-                    port.cross_section.base.to_dtype(port.kcl)
+                    port.symmetric_cross_section.base.to_dtype(port.kcl)
                 )
                 base.asymmetric_cross_section = None
             else:
@@ -903,7 +903,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
             base.kcl = self.kcl
             if port.is_symmetric():
                 base.cross_section = self.kcl.get_symmetrical_cross_section(
-                    port.cross_section.base.to_dtype(port.kcl)
+                    port.symmetric_cross_section.base.to_dtype(port.kcl)
                 )
                 base.asymmetric_cross_section = None
             else:

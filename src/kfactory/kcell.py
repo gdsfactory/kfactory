@@ -1135,10 +1135,12 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 if cell.kcl.dbu != self.kcl.dbu:
                     for port, lib_port in zip(kcell.ports, cell.ports, strict=False):
                         if lib_port.is_symmetric():
-                            port.cross_section = CrossSection(
+                            port.symmetric_cross_section = CrossSection(
                                 kcl=kcell.kcl,
                                 base=cell.kcl.get_symmetrical_cross_section(
-                                    lib_port.cross_section.base.to_dtype(cell.kcl)
+                                    lib_port.symmetric_cross_section.base.to_dtype(
+                                        cell.kcl
+                                    )
                                 ),
                             )
                         else:
