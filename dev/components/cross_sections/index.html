@@ -6104,15 +6104,17 @@ match, it raises <code>AsymmetricMirrorRequiredError</code>.</p>
 <span class="n">parent_chain</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>WITHOUT mirror=True, default connect raises:
+
+
   AsymmetricMirrorRequiredError: Cannot connect ports &#39;o1&#39; and &#39;o2&#39; carrying the same asymmetric cross section without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
 
 WITH mirror=True:
   ia.trans: r0 0,0  (mirror=False)
-  ib.trans: r0 5000,0  (mirror=False)
+  ib.trans: m0 5000,0  (mirror=True)
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../cross_sections/output_24_1.png" /></p>
+<img alt="png" src="../cross_sections/output_24_2.png" /></p>
 <h3 id="o1-o1-still-possible-but-one-instance-ends-up-mirrored"><code>o1 ↔ o1</code>: still possible, but one instance ends up mirrored</h3>
 <p>Connecting two of the same kind of end (both <code>R180</code>) needs <code>mirror=True</code>
 too, but the result has one of the two instances flipped.</p>
@@ -6172,8 +6174,6 @@ checks, and it's not bypassable by <code>allow_width_mismatch=True</code>.</p>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  CrossSectionSymmetryMismatchError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Symmetric ↔ asymmetric connect raises:
-
-
   CrossSectionSymmetryMismatchError: Cross section symmetry mismatch between ports &#39;o1&#39; (asymmetric) and &#39;o2&#39; (symmetric). Symmetric and asymmetric cross sections cannot be connected.
 </code></pre></div>
 <h3 id="summary-of-asymmetric-port-behavior">Summary of asymmetric port behavior</h3>
