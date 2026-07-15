@@ -251,7 +251,7 @@ class Settings(BaseSettings):
     cell_layout_cache: bool = False
     cell_overwrite_existing: bool = False
     connect_use_angle: bool = True
-    connect_use_mirror: bool = True
+    connect_use_mirror: bool = False
     check_instances: CheckInstances = CheckInstances.RAISE
     check_unnamed_cells: CheckUnnamedCells = CheckUnnamedCells.WARNING
     max_cellname_length: int = 99
