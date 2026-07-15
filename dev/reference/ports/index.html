@@ -7248,7 +7248,7 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
             <span class="n">base</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span>
             <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
                 <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
-                    <span class="n">port</span><span class="o">.</span><span class="n">cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
+                    <span class="n">port</span><span class="o">.</span><span class="n">symmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
                 <span class="p">)</span>
                 <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
@@ -7579,7 +7579,7 @@ equivalent) to <code>False</code>.</p>
         <span class="n">base</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span>
         <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
             <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
-                <span class="n">port</span><span class="o">.</span><span class="n">cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
+                <span class="n">port</span><span class="o">.</span><span class="n">symmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
@@ -8929,7 +8929,7 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
             <span class="n">base</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span>
             <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
                 <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
-                    <span class="n">port</span><span class="o">.</span><span class="n">cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
+                    <span class="n">port</span><span class="o">.</span><span class="n">symmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
                 <span class="p">)</span>
                 <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
@@ -9262,7 +9262,7 @@ equivalent) to <code>False</code>.</p>
         <span class="n">base</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span>
         <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
             <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
-                <span class="n">port</span><span class="o">.</span><span class="n">cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
+                <span class="n">port</span><span class="o">.</span><span class="n">symmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
