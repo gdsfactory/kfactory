@@ -2155,7 +2155,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         from kfnetlist.extract import l2n_elec as _kfnetlist_l2n_elec
 
         return _kfnetlist_l2n_elec(
-            self,  # ty:ignore[invalid-argument-type]
+            self,
             mark_port_types=mark_port_types,
             connectivity=connectivity,
             port_mapping=port_mapping,
@@ -2179,10 +2179,8 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         from kfnetlist.extract import extract as _kfnetlist_extract
 
         return _kfnetlist_extract(
-            self,  # ty:ignore[invalid-argument-type]
-            wrap_kdb_instance=lambda i: Instance(  # ty:ignore[invalid-argument-type]
-                kcl=self.kcl, instance=i
-            ),
+            self,
+            wrap_kdb_instance=lambda i: Instance(kcl=self.kcl, instance=i),
             port_types=port_types,
             mark_port_types=mark_port_types,
             connectivity=connectivity,
@@ -2201,7 +2199,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         from kfnetlist.extract import get_optical_nets as _kfnetlist_get_optical_nets
 
         return _kfnetlist_get_optical_nets(
-            self,  # ty:ignore[invalid-argument-type]
+            self,
             port_types=port_types,
             allow_width_mismatch=allow_width_mismatch,
         )
