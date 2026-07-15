@@ -38,6 +38,8 @@
 # | `kf.KCLayout.schematic_cell` | Decorator that turns a schematic factory into a cached cell |
 
 # %%
+from kfnetlist import PortRef
+
 import kfactory as kf
 
 # %% [markdown]
@@ -213,7 +215,10 @@ for cell_name, net in netlist.items():
     print(f"\n=== {cell_name} ===")
     print(f"  instances: {list(net.instances.keys())}")
     for i, n in enumerate(net.nets):
-        print(f"  net[{i}]: {[f'{p.instance}.{p.port}' for p in n]}")
+        print(
+            f"  net[{i}]: "
+            f"{[f'{p.instance}.{p.port}' if isinstance(p, PortRef) else f'<{p.name}>' for p in n]}"
+        )
     print(f"  ports: {[p.name for p in net.ports]}")
 
 # %% [markdown]
@@ -244,6 +249,12 @@ def lvs_example() -> kf.Schematic:
 
     # connect() both places s2 and records the connectivity in the schematic model
     s2.connect("o1", s1.ports["o2"])
+
+    # Expose the two free ends as top-level ports.  Without this the extracted
+    # netlist reports them as dangling single-port nets, which would not match
+    # the declared schematic netlist during LVS.
+    schematic.add_port("o1", port=s1.ports["o1"])
+    schematic.add_port("o2", port=s2.ports["o2"])
 
     return schematic
 

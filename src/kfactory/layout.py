@@ -69,6 +69,11 @@ from .enclosure import (
     LayerEnclosureSpec,
 )
 from .exceptions import FactoriesLockedError, MergeError
+from .factory_metadata import (
+    FactoryMetadataProviderKind,
+    FactoryMetadataRegistry,
+    _FactoryMetadataProviderRecord,
+)
 from .kcell import (
     AnyTKCell,
     BaseKCell,
@@ -177,6 +182,25 @@ class Factories[F: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]](
 
     def get_by_tag(self, tag: str) -> list[F]:
         return [self._all[idx] for idx in self._by_tag[tag]]
+
+    def all(self) -> tuple[F, ...]:
+        return tuple(self._all)
+
+    def with_metadata(self) -> tuple[F, ...]:
+        return tuple(
+            factory
+            for factory in self._all
+            if factory.has_metadata()  # ty:ignore[invalid-argument-type]
+        )
+
+    def get_all_by_name(self, name: str) -> tuple[F, ...]:
+        return tuple(factory for factory in self._all if factory.name == name)
+
+    def get_by_qualified_name(self, qualified_name: str) -> F | None:
+        for factory in self._all:
+            if factory.qualified_name == qualified_name:
+                return factory
+        return None
 
     def __iter__(self) -> Iterator[str]:
         return iter(self._by_name)
@@ -294,6 +318,9 @@ class KCLayout(
     info: Info = Field(default_factory=Info)
     settings: KCellSettings = Field(frozen=True)
     _future_cell_name: str | None = PrivateAttr(default=None)
+    _metadata_registry: FactoryMetadataRegistry = PrivateAttr(
+        default_factory=FactoryMetadataRegistry
+    )
 
     decorators: Decorators
     default_cell_output_type: type[KCell | DKCell] = KCell
@@ -464,6 +491,200 @@ class KCLayout(
         """
         self.factories.lock()
         self.virtual_factories.lock()
+
+    def metadata_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        replace: bool = False,
+    ) -> Callable[..., Any]:
+        """Register a full metadata provider for a cell factory.
+
+        The provider should return a ``FactoryMetadata`` or a dict with any
+        subset of its fields. Use the field-specific decorators
+        (``device_type_for``, ``ports_for``, etc.) when only one aspect
+        is being provided.
+        """
+        return self._register_metadata_provider(
+            "metadata", target, provider, replace=replace
+        )
+
+    def model_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        position: Literal["append", "prepend"] = "append",
+    ) -> Callable[..., Any]:
+        """Register a model provider for a cell factory.
+
+        Multiple model providers are concatenated. Use
+        ``position="prepend"`` to insert before existing models.
+        """
+        return self._register_metadata_provider(
+            "model", target, provider, position=position
+        )
+
+    def device_type_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        replace: bool = False,
+    ) -> Callable[..., Any]:
+        """Register a device-type provider for a cell factory."""
+        return self._register_metadata_provider(
+            "device_type", target, provider, replace=replace
+        )
+
+    def ports_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        replace: bool = False,
+    ) -> Callable[..., Any]:
+        """Register a port-spec provider for a cell factory.
+
+        The provider should return a list of ``PortSpec`` dicts. Port
+        providers can be parametric — they may accept any subset of the
+        cell factory's parameters.
+        """
+        return self._register_metadata_provider(
+            "ports", target, provider, replace=replace
+        )
+
+    def tags_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+    ) -> Callable[..., Any]:
+        """Register a tags provider for a cell factory."""
+        return self._register_metadata_provider("tags", target, provider)
+
+    def display_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        replace: bool = False,
+    ) -> Callable[..., Any]:
+        """Register a display-hint provider for a cell factory."""
+        return self._register_metadata_provider(
+            "display", target, provider, replace=replace
+        )
+
+    def info_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+    ) -> Callable[..., Any]:
+        """Register a free-form info provider for a cell factory."""
+        return self._register_metadata_provider("info", target, provider)
+
+    def schematic_for(
+        self,
+        target: str | WrappedKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+    ) -> Callable[..., Any]:
+        """Attach a schematic function to a cell factory after registration."""
+        factory = self._resolve_kcell_factory(target)
+
+        def register(f: Callable[..., Any]) -> Callable[..., Any]:
+            factory._f_schematic = f
+            return f
+
+        if provider is None:
+            return register
+        return register(provider)
+
+    def _resolve_kcell_factory(
+        self, target: str | WrappedKCellFunc[Any, Any]
+    ) -> WrappedKCellFunc[Any, Any]:
+        if not isinstance(target, str):
+            if target in self.factories:
+                return target
+            raise KeyError(f"Unknown factory target {target!r}.")
+
+        if "." in target:
+            factory = self.factories.get_by_qualified_name(target)
+            if factory is None:
+                raise KeyError(f"Unknown factory FQN {target!r}.")
+            return factory
+
+        matches = self.factories.get_all_by_name(target)
+        if not matches:
+            raise KeyError(f"Unknown factory name {target!r}.")
+        if len(matches) > 1:
+            raise ValueError(
+                f"Ambiguous factory name {target!r}; use a fully-qualified name."
+            )
+        return matches[0]
+
+    def metadata_providers_for(
+        self, factory: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]
+    ) -> tuple[_FactoryMetadataProviderRecord, ...]:
+        """Return all metadata provider records registered for a factory."""
+        return self._metadata_registry.providers_for(
+            name=factory.name, qualified_name=factory.qualified_name, obj=factory
+        )
+
+    def _register_metadata_provider(
+        self,
+        kind: FactoryMetadataProviderKind,
+        target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any],
+        provider: Callable[..., Any] | None = None,
+        *,
+        replace: bool = False,
+        position: Literal["append", "prepend"] = "append",
+    ) -> Callable[..., Any]:
+        target_kind, target_key = self._metadata_target_key(target)
+
+        def register(f: Callable[..., Any]) -> Callable[..., Any]:
+            self._metadata_registry.add(
+                target_kind=target_kind,
+                target_key=target_key,
+                kind=kind,
+                provider=f,
+                replace=replace,
+                position=position,
+            )
+            return f
+
+        if provider is None:
+            return register
+        return register(provider)
+
+    def _metadata_target_key(
+        self, target: str | WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]
+    ) -> tuple[Literal["name", "fqn", "object"], str | int]:
+        if isinstance(target, str):
+            if "." in target:
+                factory = self.factories.get_by_qualified_name(target)
+                virtual_factory = self.virtual_factories.get_by_qualified_name(target)
+                matches = [f for f in (factory, virtual_factory) if f is not None]
+                if not matches:
+                    raise KeyError(f"Unknown factory FQN {target!r}.")
+                if len(matches) > 1:
+                    raise ValueError(f"Ambiguous factory FQN {target!r}.")
+                return "fqn", target
+
+            matches = [
+                *self.factories.get_all_by_name(target),
+                *self.virtual_factories.get_all_by_name(target),
+            ]
+            if not matches:
+                raise KeyError(f"Unknown factory name {target!r}.")
+            if len(matches) > 1:
+                raise ValueError(
+                    f"Ambiguous factory name {target!r}; use a fully-qualified name."
+                )
+            return "name", target
+
+        if target in self.factories or target in self.virtual_factories:
+            return "object", id(target)
+        raise KeyError(f"Unknown factory target {target!r}.")
 
     def create_layer_enclosure(
         self,
