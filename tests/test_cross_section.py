@@ -726,7 +726,7 @@ def test_connect_asym_to_asym_requires_mirror_when_misaligned() -> None:
     b.create_port(name="o1", width=500, layer_info=layer, trans=kf.kdb.Trans.R0)
     acs = kcl.get_asymmetrical_cross_section(
         kf.AsymmetricalCrossSection(
-            layer=layer, section_min=-250, section_max=250, name="asym_r0"
+            layer=layer, section_min=-221, section_max=250, name="asym_r0"
         )
     )
     a.ports["o1"].asymmetric_cross_section = acs
@@ -746,10 +746,11 @@ def _make_asym_wg(kcl: kf.KCLayout, name: str) -> kf.KCell:
     layer = kf.kdb.LayerInfo(1, 0, "WG")
     acs = kcl.get_asymmetrical_cross_section(
         kf.AsymmetricalCrossSection(
-            layer=layer, section_min=-250, section_max=250, name="aw500"
+            layer=layer, section_min=-221, section_max=250, name="aw500"
         )
     )
     c = kcl.kcell(name)
+    c.shapes(layer).insert(kf.kdb.Box(0, -221, 1000, 250))
     c.create_port(
         name="o1", width=500, layer_info=layer, trans=kf.kdb.Trans(2, False, 0, 0)
     )
@@ -769,12 +770,14 @@ def test_asym_waveguide_chain_o2_to_o1_with_mirror_true() -> None:
     a = parent << wg
     b = parent << wg
 
-    # default connect fails — profiles would misalign
+    b.mirror()
+    # default succeeds and produces a "no-mirror" instance chain
     with pytest.raises(AsymmetricMirrorRequiredError):
         b.connect("o1", a, "o2")
+    b.mirror()
+    # default connect fails — profiles would misalign
+    b.connect("o1", a, "o2")
 
-    # mirror=True succeeds and produces a "no-mirror" instance chain
-    b.connect("o1", a, "o2", mirror=True)
     assert not a.trans.mirror
     assert not b.trans.mirror
 
@@ -807,7 +810,7 @@ def test_asym_connect_check_ignores_input_mirror_flag_when_use_mirror_false() ->
     layer = kf.kdb.LayerInfo(1, 0, "WG")
     acs = kcl.get_asymmetrical_cross_section(
         kf.AsymmetricalCrossSection(
-            layer=layer, section_min=-250, section_max=250, name="asym_um"
+            layer=layer, section_min=-221, section_max=250, name="asym_um"
         )
     )
     parent = kcl.kcell("parent_um")
@@ -826,8 +829,11 @@ def test_asym_connect_check_ignores_input_mirror_flag_when_use_mirror_false() ->
     ia.trans = kf.kdb.Trans(0, True, 0, 0)
     with pytest.raises(AsymmetricMirrorRequiredError):
         ia.connect("o1", ib, "o1", mirror=True, use_mirror=False)
+
+    ia.trans.mirror = False
+
     # With existing mirror=True and mirror=False, effective is M90 — passes.
-    ia.connect("o1", ib, "o1", mirror=False, use_mirror=False)
+    ia.connect("o1", ib, "o1", mirror=True, use_mirror=False)
 
 
 # --- Named/unnamed canonicalization ---------------------------------------
