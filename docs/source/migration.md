@@ -10,8 +10,14 @@
   See [Path-Length Matching](routing/path_length.md).
 - **Asymmetrical cross-sections** — `AsymmetricCrossSection` allows non-symmetric waveguide profiles.
   See [Cross-Sections](components/cross_sections.md).
-- **Netlist extraction as a separate package** — netlist generation now lives in [kfnetlist](https://github.com/gdsfactory/kfnetlist), a standalone package.
+- **Netlist extraction as a separate package** — netlist generation now lives in [kfnetlist](https://github.com/gdsfactory/kfnetlist), a standalone package that is pulled in as a dependency.
   See [Netlist & I/O](schematics/netlist.md).
+- **Factory metadata** — the new `FactoryMetadata` / `PortSpec` API captures structured metadata (including port specs) for factories.
+- **Connectivity checks module** — connectivity checking now lives in its own `kfactory.checks` module.
+
+#### Behavior Changes
+
+- **`connect()` ignores port mirror flags by default** — `config.connect_use_mirror` now defaults to `False` (was `True` in 2.x). See [Default `connect()` mirror behavior](#default-connect-mirror-behavior).
 
 #### Improved Features
 
@@ -27,20 +33,27 @@
 
 ---
 
-### Migrating from 2.5.x
+### Migrating from 2.5.x or 2.6.x
 
-The sections below cover breaking changes and how to update your code.
+The sections below cover breaking changes and how to update your code. All of them
+apply when upgrading from either 2.5.x or 2.6.x. Changes that landed specifically in
+the 2.6.x → 3.0 window (and so are new relative to a 2.6.x code base) are marked
+**(new in 3.0)**.
 
 #### Change Summary
 
 | Area | What changed | Before (2.x) | After (3.0) |
 |---|---|---|---|
+| **Python** | Minimum version raised **(new in 3.0)** | Python 3.11 | Python 3.12 |
 | **Module** | `virtual.utils` moved | `kfactory.factories.virtual.utils` | `kfactory.factories.utils` |
 | **Routing** | `route_L` / `route_elec` removed | `route_elec(cell, p1, p2)` | `route_bundle(cell, [p1], [p2])` |
 | **Routing** | `routing.optical.route` removed | `route(cell, p1, p2, ...)` | `route_bundle(cell, [p1], [p2], ...)` |
-| **Routing** | `place90` deprecated | `place90(cell, p1, p2, pts)` | `place_manhattan(cell, p1, p2, pts)` |
-| **Parameters** | `start_straights` deprecated | `start_straights=100` | `starts=100` |
-| **Parameters** | `end_straights` deprecated | `end_straights=100` | `ends=100` |
+| **Routing** | `place90` removed | `place90(cell, p1, p2, pts)` | `place_manhattan(cell, p1, p2, pts)` |
+| **Parameters** | `start_straights` removed | `start_straights=100` | `starts=100` |
+| **Parameters** | `end_straights` removed | `end_straights=100` | `ends=100` |
+| **Instances** | `connect()` ignores mirror by default **(new in 3.0)** | mirror flag applied | `use_mirror=True` / `config.connect_use_mirror=True` |
+| **Netlist** | `kfactory.netlist` module removed **(new in 3.0)** | `from kfactory.netlist import Netlist` | `from kfnetlist import Netlist` (or `kf.Netlist`) |
+| **Schematics** | `get_schematic` removed **(new in 3.0)** | `kf.get_schematic(...)` | use `Schematic` directly |
 | **Schematics** | Routing via `KCLayout` registry | — | `@kcl.routing_strategy` + `schematic.add_route(...)` |
 
 #### Module Reorganization
@@ -88,12 +101,13 @@ route_bundle(
 )
 ```
 
-#### Deprecated Parameters in `route_bundle`
+#### Removed Parameters in `route_bundle`
 
-In both `routing.optical.route_bundle` and `routing.electrical.route_bundle`:
+In both `routing.optical.route_bundle` and `routing.electrical.route_bundle`, the
+parameters that were deprecated in 2.x have been removed:
 
-- `start_straights` is deprecated — use `starts` instead
-- `end_straights` is deprecated — use `ends` instead
+- `start_straights` removed — use `starts` instead
+- `end_straights` removed — use `ends` instead
 
 ```python
 # Before (2.x)
@@ -103,9 +117,9 @@ route_bundle(cell, start_ports, end_ports, separation=..., start_straights=100, 
 route_bundle(cell, start_ports, end_ports, separation=..., starts=100, ends=100, ...)
 ```
 
-#### Deprecated `place90`
+#### Removed `place90`
 
-`routing.optical.place90` is deprecated. Use `place_manhattan` instead.
+`routing.optical.place90` has been removed. Use `place_manhattan` instead.
 
 ```python
 # Before (2.x)
@@ -115,6 +129,57 @@ place90(cell, p1, p2, pts, ...)
 # After (3.0)
 from kfactory.routing.optical import place_manhattan
 place_manhattan(cell, p1, p2, pts, ...)
+```
+
+#### Default `connect()` mirror behavior
+
+`config.connect_use_mirror` now defaults to `False` (it was `True` in 2.x). This means
+`Instance.connect(...)` no longer applies the mirror flag carried by the target port by
+default. Connections that previously relied on that implicit mirroring will place
+instances differently.
+
+To restore the old behavior, either opt in per call or flip the global config:
+
+```python
+import kfactory as kf
+
+# Per connection
+inst.connect("o1", other_inst, "o2", use_mirror=True)
+
+# Globally (matches 2.x default)
+kf.config.connect_use_mirror = True
+```
+
+#### `kfactory.netlist` module removed
+
+Netlist extraction moved to the standalone [kfnetlist](https://github.com/gdsfactory/kfnetlist)
+package (installed automatically as a dependency). The in-tree `kfactory.netlist` module
+no longer exists. `kf.Netlist` is still re-exported for convenience.
+
+```python
+# Before (2.x)
+from kfactory.netlist import Netlist
+
+# After (3.0)
+from kfnetlist import Netlist
+# or
+import kfactory as kf
+kf.Netlist
+```
+
+#### Removed `get_schematic`
+
+The `get_schematic` helper has been removed from the public API. Construct a `Schematic`
+directly instead.
+
+```python
+# Before (2.x)
+import kfactory as kf
+schematic = kf.get_schematic(...)
+
+# After (3.0)
+import kfactory as kf
+schematic = kf.Schematic(kcl=kcl)
 ```
 
 #### Routing Interface for Schematics
