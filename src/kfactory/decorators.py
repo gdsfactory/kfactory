@@ -649,6 +649,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                         if direction in self.ports_definition:
                             port_names.extend(self.ports_definition[direction])  # ty:ignore[invalid-key]
 
+                    found_errors = False
                     for port in cell.ports:
                         if port.name not in port_names:
                             found_errors = True
