@@ -58,7 +58,7 @@ def test_layer_properties_model_line_style_string() -> None:
 
 
 def test_layer_properties_model_color_to_frame_fill() -> None:
-    lp = LayerPropertiesModel(name="WG", layer=(1, 0), color="#ff0000")
+    lp = LayerPropertiesModel(name="WG", layer=(1, 0))
     assert lp.frame_color is not None
     assert lp.fill_color is not None
 
@@ -68,7 +68,6 @@ def test_layer_properties_model_color_overrides() -> None:
     lp = LayerPropertiesModel(
         name="WG",
         layer=(1, 0),
-        color="#ff0000",
         fill_color="#00ff00",
         frame_color="#0000ff",
     )

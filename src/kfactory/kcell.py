@@ -3539,6 +3539,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
         autoformat_from_file_extension: bool = True,
+        deduplicate_cell_names: bool = False,
     ) -> None:
         """Write a KCell to a GDS.
 
@@ -3560,6 +3561,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             convert_external_cells=convert_external_cells,
             set_meta_data=set_meta_data,
             autoformat_from_file_extension=autoformat_from_file_extension,
+            deduplicate_cell_names=deduplicate_cell_names,
         )
 
     def l2n(
