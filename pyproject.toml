@@ -199,6 +199,7 @@ file = [
   { src = "pyproject.toml", search = 'version = "{current_version}"' },
   { src = "pyproject.toml", search = 'current = "{current_version}"' },
   { src = "src/kfactory/__init__.py" },
+  { src = "README.md", search = "KFactory {current_version}" },
 ]
 git.message_template = "Bump to {new_version}"
 git.tag_template = "v{new_version}"
