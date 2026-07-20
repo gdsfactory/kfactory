@@ -353,6 +353,7 @@ class ProtoKCell[T: (int, float), TB: BaseKCell[Any]](GeometricObject[T], ABC):
         convert_external_cells: bool = ...,
         set_meta_data: bool = ...,
         autoformat_from_file_extension: bool = ...,
+        deduplicate_cell_names: bool = ...,
     ) -> None: ...
 
     @property
