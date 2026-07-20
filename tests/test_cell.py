@@ -257,6 +257,66 @@ def test_cell_decorator_error(
     kf.config.logfilter.regex = regex
 
 
+@pytest.mark.parametrize("virtual", [False, True], ids=["cell", "vcell"])
+def test_future_cell_name_restored_on_error(
+    kcl: kf.KCLayout,
+    virtual: bool,
+) -> None:
+    """A raising cell function must not leak ``_future_cell_name``."""
+    assert kcl._future_cell_name is None
+
+    if virtual:
+
+        @kcl.vcell
+        def raising_cell(radius: int = 5) -> kf.VKCell:
+            raise ValueError("min_bend_radius < radius_min")
+    else:
+
+        @kcl.cell
+        def raising_cell(radius: int = 5) -> kf.KCell:
+            # Mimic gdsfactory's bend_s refusing to build a too-tight bend.
+            raise ValueError("min_bend_radius < radius_min")
+
+    regex = kf.config.logfilter.regex
+    kf.config.logfilter.regex = (
+        r"^An error has been caught in function 'wrapper_autocell'"
+    )
+    try:
+        with pytest.raises(ValueError):
+            raising_cell()
+    finally:
+        kf.config.logfilter.regex = regex
+
+    assert kcl._future_cell_name is None
+
+
+def test_future_cell_name_restored_on_none_return(
+    kcl: kf.KCLayout,
+) -> None:
+    """A cell function returning ``None`` must not leak ``_future_cell_name``.
+
+    The ``cell is None`` ``TypeError`` is raised from inside the decorator, after
+    ``_future_cell_name`` has been set; it must be restored like any other error.
+    """
+    assert kcl._future_cell_name is None
+
+    @kcl.cell
+    def none_cell(radius: int = 5) -> kf.KCell:  # ty:ignore[invalid-return-type]
+        kcl.kcell()
+
+    regex = kf.config.logfilter.regex
+    kf.config.logfilter.regex = (
+        r"^An error has been caught in function 'wrapper_autocell'"
+    )
+    try:
+        with pytest.raises(TypeError):
+            none_cell()
+    finally:
+        kf.config.logfilter.regex = regex
+
+    assert kcl._future_cell_name is None
+
+
 def test_info(
     kcl: kf.KCLayout,
     oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
