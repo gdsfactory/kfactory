@@ -5757,8 +5757,10 @@ Placements:
 <h3 id="yaml-round-trip-with-read_schematic">YAML round-trip with <code>read_schematic</code></h3>
 <p>Schematics are typically stored as YAML files for version control.  <code>kf.read_schematic</code>
 loads them back into a <code>Schematic</code> (or <code>DSchematic</code> when <code>unit="um"</code>).</p>
-<p><code>Schematic</code> is also a Pydantic model, so <code>model_validate</code> works directly with a
-dictionary from <code>yaml.safe_load</code> — or you can use the convenience <code>read_schematic</code> helper.</p>
+<p>Use <code>Schematic.from_pic_yml</code> to load a <code>pic.yml</code>-style dictionary (it sanitizes
+legacy keys before validation), or use the convenience <code>read_schematic</code> helper.
+Plain <code>model_validate</code> expects the internal schema and will not translate
+<code>pic.yml</code>-specific fields like <code>connections</code> or <code>port</code>-based placements.</p>
 <div class="highlight"><pre><span></span><code><span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
     <span class="n">yaml_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;l_path.yaml&quot;</span>
 

@@ -5355,6 +5355,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#removed-schema-dschema-aliases" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Removed <code>Schema</code> / <code>DSchema</code> Aliases
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-picyml-files-from_pic_yml" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Loading <code>pic.yml</code> Files — <code>from_pic_yml</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#routing-interface-for-schematics" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -5671,6 +5693,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#removed-schema-dschema-aliases" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Removed <code>Schema</code> / <code>DSchema</code> Aliases
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-picyml-files-from_pic_yml" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Loading <code>pic.yml</code> Files — <code>from_pic_yml</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#routing-interface-for-schematics" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -5860,6 +5904,18 @@ the 2.6.x → 3.0 window (and so are new relative to a 2.6.x code base) are mark
 </tr>
 <tr>
 <td><strong>Schematics</strong></td>
+<td><code>Schema</code> / <code>DSchema</code> aliases removed <strong>(new in 3.0)</strong></td>
+<td><code>kf.Schema(...)</code></td>
+<td><code>kf.Schematic(...)</code></td>
+</tr>
+<tr>
+<td><strong>Schematics</strong></td>
+<td><code>pic.yml</code> loading via <code>from_pic_yml</code> <strong>(new in 3.0)</strong></td>
+<td><code>Schematic.model_validate(yaml_dict)</code></td>
+<td><code>Schematic.from_pic_yml(yaml_dict)</code></td>
+</tr>
+<tr>
+<td><strong>Schematics</strong></td>
 <td>Routing via <code>KCLayout</code> registry</td>
 <td>—</td>
 <td><code>@kcl.routing_strategy</code> + <code>schematic.add_route(...)</code></td>
@@ -5966,6 +6022,48 @@ directly instead.</p>
 <span class="c1"># After (3.0)</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="removed-schema-dschema-aliases">Removed <code>Schema</code> / <code>DSchema</code> Aliases</h4>
+<p>The deprecated <code>Schema</code> and <code>DSchema</code> classes (aliases for <code>Schematic</code> and <code>DSchematic</code>)
+have been removed. They were deprecated in kfactory 2.0.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Before (2.x)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
+<span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schema</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
+<span class="n">dschematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">DSchema</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
+
+<span class="c1"># After (3.0)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
+<span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
+<span class="n">dschematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">DSchematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="loading-picyml-files-from_pic_yml">Loading <code>pic.yml</code> Files — <code>from_pic_yml</code></h4>
+<p><code>Schematic.model_validate()</code> no longer translates <code>pic.yml</code>-specific keys
+(e.g. <code>connections</code>, <code>port</code>-based placements with <code>xmin</code>/<code>xmax</code>/<code>ymin</code>/<code>ymax</code>,
+string-form port and pin references). Use the new <code>from_pic_yml()</code> static method
+instead — it sanitizes the dictionary through <code>sanitize_pic_yml()</code> before validation.</p>
+<p><code>model_validate()</code> still works for dictionaries that already use the internal schema
+(e.g. round-tripping via <code>model_dump()</code>).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">ruamel.yaml</span><span class="w"> </span><span class="kn">import</span> <span class="n">YAML</span>
+
+<span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">(</span><span class="n">typ</span><span class="o">=</span><span class="s2">&quot;safe&quot;</span><span class="p">)</span>
+
+<span class="c1"># Before (2.x) — model_validate handled pic.yml keys automatically</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;pic.yml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+
+<span class="c1"># After (3.0) — use from_pic_yml for pic.yml dictionaries</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;pic.yml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="o">.</span><span class="n">from_pic_yml</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+
+<span class="c1"># Or use the convenience helper (unchanged)</span>
+<span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">read_schematic</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;pic.yml&quot;</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>The standalone <code>sanitize_pic_yml()</code> function is also available for custom pipelines:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.schematic</span><span class="w"> </span><span class="kn">import</span> <span class="n">sanitize_pic_yml</span>
+
+<span class="n">raw</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;pic.yml&quot;</span><span class="p">))</span>
+<span class="n">sanitized</span> <span class="o">=</span> <span class="n">sanitize_pic_yml</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+<span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">sanitized</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="routing-interface-for-schematics">Routing Interface for Schematics</h4>
 <p>In order to enable routing in schematics, routing strategy functions must be registered

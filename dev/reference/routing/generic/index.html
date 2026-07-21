@@ -6772,21 +6772,6 @@ For orientation of 0 degrees it will create the following front for 4 ports:</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>sort_ports</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Automatically sort ports.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
                 <code>on_collision</code>
             </td>
             <td>
@@ -7393,8 +7378,7 @@ is not manhattan or the elements cannot be fitted.</p>
 <span class="normal">568</span>
 <span class="normal">569</span>
 <span class="normal">570</span>
-<span class="normal">571</span>
-<span class="normal">572</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_bundle</span><span class="p">(</span>
+<span class="normal">571</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_bundle</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
     <span class="n">start_ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BasePort</span><span class="p">],</span>
@@ -7464,7 +7448,6 @@ is not manhattan or the elements cannot be fitted.</p>
 <span class="sd">        start_ports: List of start ports.</span>
 <span class="sd">        end_ports: List of end ports.</span>
 <span class="sd">        route_width: Width of the route. If None, the width of the ports is used.</span>
-<span class="sd">        sort_ports: Automatically sort ports.</span>
 <span class="sd">        on_collision: Define what to do on routing collision. Default behaviour is to</span>
 <span class="sd">            open send the layout of c to klive and open an error lyrdb with the</span>
 <span class="sd">            collisions. &quot;error&quot; will simply raise an error. None will ignore any error.</span>
