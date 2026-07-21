@@ -65,3 +65,7 @@ demo.gds
 *.obtained.gds.gz
 *.obtained.yml
 *.obtained.yaml
+
+
+# pre-commit
+.lycheecache

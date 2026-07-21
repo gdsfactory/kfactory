@@ -1,0 +1,17 @@
+scheme = ["https", "http"]
+
+exclude = [
+    "http://localhost.*",
+    "http://127\\.0\\.0\\.1.*",
+    "https?://example\\.com.*",
+    "https://github\\.com/Packer-Guy/rpack",
+    "https://klayout\\.de.*",
+]
+
+include_mail = false
+cache = true
+max_concurrency = 32
+
+# Some hosts (e.g. klayout.de) return 403 to lychee's default user agent.
+# Pretend to be a browser. (lychee already uses GET by default.)
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
