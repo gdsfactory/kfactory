@@ -1,15 +1,7 @@
-exclude_path = [
-    "changelog\\.d/.*",
-    "CHANGELOG\\.md",
-    ".github/release-drafter\\.yml",
-    "docs/overrides/.*",
-]
-
 exclude = [
     "http://localhost.*",
     "http://127\\.0\\.0\\.1.*",
     "https?://example\\.com.*",
-    # rpack repo moved/deleted
     "https://github\\.com/Packer-Guy/rpack",
 ]
 
