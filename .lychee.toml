@@ -5,6 +5,7 @@ exclude = [
     "http://127\\.0\\.0\\.1.*",
     "https?://example\\.com.*",
     "https://github\\.com/Packer-Guy/rpack",
+    "https://klayout\\.de.*",
 ]
 
 include_mail = false
