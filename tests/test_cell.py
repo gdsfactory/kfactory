@@ -91,6 +91,23 @@ def test_nested_dict_list(
     oas_regression(c)
 
 
+def test_cell_preserves_dictionary_order(kcl: kf.KCLayout) -> None:
+    received: list[list[str]] = []
+
+    @kcl.cell
+    def ordered_dict_cell(arg: dict[str, int]) -> kf.KCell:
+        received.append(list(arg))
+        return kcl.kcell()
+
+    first = ordered_dict_cell({"one": 1, "two": 2})
+    second = ordered_dict_cell({"two": 2, "one": 1})
+
+    assert received == [["one", "two"], ["two", "one"]]
+    assert list(first.settings["arg"]) == ["one", "two"]
+    assert list(second.settings["arg"]) == ["two", "one"]
+    assert first is not second
+
+
 def test_no_snap(
     layers: Layers,
     oas_regression: Callable[[kf.ProtoTKCell[Any]], None],

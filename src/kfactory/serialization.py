@@ -44,7 +44,13 @@ class DecoratorDict(UserDict[Hashable, Any]):
 
     def __hash__(self) -> int:
         """Hash the dictionary."""
-        return hash(tuple(sorted(self.data.items())))
+        return hash(tuple(self.data.items()))
+
+    def __eq__(self, other: object) -> bool:
+        """Compare both dictionary items and their insertion order."""
+        return isinstance(other, DecoratorDict) and tuple(self.items()) == tuple(
+            other.items()
+        )
 
     def __reduce__(self) -> tuple[type[DecoratorDict], tuple[dict[Hashable, Any]]]:
         return (DecoratorDict, (self.data,))
@@ -151,7 +157,7 @@ def to_hashable(
     """Convert a `dict` to a `DecoratorDict`."""
     if isinstance(d, dict):
         ud = DecoratorDict()
-        for item, value in sorted(d.items()):
+        for item, value in d.items():
             if isinstance(value, dict | list):
                 value_: Any = to_hashable(value)
             else:
