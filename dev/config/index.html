@@ -5520,7 +5520,7 @@
 
 
 <h1 id="config">Config</h1>
-<p>The config is managed by a pydantic <a href="https://docs.pydantic.dev/latest/usage/settings/"><code>SettingsModel</code></a>. Entries can be set through changing <code>kfactory.config</code></p>
+<p>The config is managed by a pydantic <a href="https://docs.pydantic.dev/latest/concepts/pydantic_settings/"><code>SettingsModel</code></a>. Entries can be set through changing <code>kfactory.config</code></p>
 <p>The config can configure the logger and display type of the jupyter widget among other things.</p>
 <p>Settings can be configured through environment variables or a <code>.env</code> file in the working directory.</p>
 <h2 id="environment-variable-quick-reference">Environment Variable Quick Reference</h2>
@@ -5743,7 +5743,7 @@ keep_position: A boolean that, if True, tells KLayout to keep the current window
 <p>Log outputs can be filtered either by setting a minimum level or by regex. The minimum level is configured in <code>kfactory.config.logfilter.level</code>.
 Instead of configuring it through python, it can also be configured from an environment variable. By default the log level is set to "INFO",
 so anything below "INFO" is not sent to an output. This can be configured either by setting the level in python, through dotenv
-(<a href="https://docs.pydantic.dev/latest/usage/settings/#dotenv-env-support">untested</a>), or through environment variables.</p>
+(<a href="https://docs.pydantic.dev/latest/concepts/pydantic_settings/#dotenv-env-support">untested</a>), or through environment variables.</p>
 <table>
 <thead>
 <tr>
