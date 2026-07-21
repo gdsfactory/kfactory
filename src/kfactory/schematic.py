@@ -2330,17 +2330,20 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         return [net for net in self.nets if isinstance(net, Connection)]
 
     @staticmethod
-    @staticmethod
     def from_pic_yml(
         data: dict[str, Any], *, strict: bool | None = None
     ) -> TSchematic[T]:
-        """Validate a pydantic model instance.
+        """Load a schematic from a ``pic.yml``-style dictionary.
+
+        The dictionary is run through :func:`sanitize_pic_yml` before
+        validation so that legacy keys (``connections``, ``port``-based
+        placements, etc.) are translated to the current schema.
 
         Args:
             data: The dict to validate.
             strict: Whether to enforce types strictly.
         """
-        return TSchematic[T].model_validate(data, strict=strict)
+        return TSchematic[T].model_validate(sanitize_pic_yml(data), strict=strict)
 
 
 def _get_instance_orientation[T: (int, float)](
