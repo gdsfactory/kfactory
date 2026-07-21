@@ -357,7 +357,6 @@ def route_bundle(
         start_ports: List of start ports.
         end_ports: List of end ports.
         route_width: Width of the route. If None, the width of the ports is used.
-        sort_ports: Automatically sort ports.
         on_collision: Define what to do on routing collision. Default behaviour is to
             open send the layout of c to klive and open an error lyrdb with the
             collisions. "error" will simply raise an error. None will ignore any error.

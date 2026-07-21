@@ -37,7 +37,7 @@
 #
 # Under the hood a cross-section wraps a `LayerEnclosure`.  The enclosure defines all
 # the `sections`; the cross-section adds the core `width` and routing hints.
-# See [Layer Enclosures](layer_enclosure.py) for the enclosure details.
+# See [Layer Enclosures](../enclosures/layer_enclosure.py) for the enclosure details.
 #
 # ## Three cross-section classes
 #
@@ -496,8 +496,8 @@ except CrossSectionSymmetryMismatchError as e:
 #
 # | Topic | Where |
 # |-------|-------|
-# | Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](layer_enclosure.py) |
-# | Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](kcell_enclosure.py) |
+# | Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](../enclosures/layer_enclosure.py) |
+# | Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](../enclosures/kcell_enclosure.py) |
 # | Straight waveguide (uses xs) | [Components: Straight](cells/factories/straight.py) |
 # | Width tapers (uses xs) | [Components: Tapers](cells/factories/taper.py) |
 # | Routing with cross-sections | [Routing: Overview](../routing/overview.py) |

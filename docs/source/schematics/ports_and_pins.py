@@ -287,7 +287,7 @@ pins:
 from ruamel.yaml import YAML
 
 yaml = YAML(typ="safe")
-schematic = kf.Schematic.model_validate(yaml.load(yaml_str))
+schematic = kf.Schematic.from_pic_yml(yaml.load(yaml_str))
 
 print("ports:", {n: type(p).__name__ for n, p in schematic.ports.items()})
 print("pins:", {n: type(p).__name__ for n, p in schematic.pins.items()})

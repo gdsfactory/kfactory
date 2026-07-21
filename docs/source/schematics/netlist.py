@@ -199,8 +199,10 @@ for name, placement in data.get("placements", {}).items():
 # Schematics are typically stored as YAML files for version control.  `kf.read_schematic`
 # loads them back into a `Schematic` (or `DSchematic` when `unit="um"`).
 #
-# `Schematic` is also a Pydantic model, so `model_validate` works directly with a
-# dictionary from `yaml.safe_load` — or you can use the convenience `read_schematic` helper.
+# Use `Schematic.from_pic_yml` to load a `pic.yml`-style dictionary (it sanitizes
+# legacy keys before validation), or use the convenience `read_schematic` helper.
+# Plain `model_validate` expects the internal schema and will not translate
+# `pic.yml`-specific fields like `connections` or `port`-based placements.
 
 # %%
 with tempfile.TemporaryDirectory() as tmpdir:

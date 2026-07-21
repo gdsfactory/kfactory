@@ -74,7 +74,7 @@ ports:
   o1: mmi_short,o2
   o2: mmi_short,o3
 """  # noqa: E501
-    schematic = kf.DSchematic.model_validate(yaml.load(schema_yaml))
+    schematic = kf.DSchematic.from_pic_yml(yaml.load(schema_yaml))
     for inst in schematic.instances.values():
         _ = inst.parent_schematic.name
 
@@ -1554,7 +1554,6 @@ def test_schematic_pin_yaml_round_trip(kcl: kf.KCLayout) -> None:
     schematic.add_pin(name="forwarded", pin=a.pins["dc"])
 
     dumped = schematic.model_dump()
-    dumped.pop("unit", None)
     reloaded = kf.Schematic.model_validate(dumped)
 
     bus = reloaded.pins["bus"]
@@ -1580,7 +1579,7 @@ instances:
 pins:
   forwarded: s,dc
 """
-    schematic = kf.DSchematic.model_validate(yaml.load(schema_yaml))
+    schematic = kf.DSchematic.from_pic_yml(yaml.load(schema_yaml))
     fwd = schematic.pins["forwarded"]
     assert isinstance(fwd, kf.schematic.PinRef)
     assert fwd.instance == "s"
