@@ -2330,8 +2330,17 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         return [net for net in self.nets if isinstance(net, Connection)]
 
     @staticmethod
-    def from_pic_yml(data: dict[str, Any]) -> TSchematic[T]:
-        return TSchematic[T].model_validate(**data)
+    @staticmethod
+    def from_pic_yml(
+        data: dict[str, Any], *, strict: bool | None = None
+    ) -> TSchematic[T]:
+        """Validate a pydantic model instance.
+
+        Args:
+            data: The dict to validate.
+            strict: Whether to enforce types strictly.
+        """
+        return TSchematic[T].model_validate(data, strict=strict)
 
 
 def _get_instance_orientation[T: (int, float)](
@@ -2498,8 +2507,14 @@ class Schematic(TSchematic[dbu]):
     unit: Literal["dbu"] = "dbu"
 
     @staticmethod
-    def from_pic_yml(data: dict[str, Any]) -> Schematic:
-        return Schematic.model_validate(sanitize_pic_yml(data))
+    def from_pic_yml(data: dict[str, Any], *, strict: bool | None = None) -> Schematic:
+        """Validate a pydantic model instance.
+
+        Args:
+            data: The dict to validate.
+            strict: Whether to enforce types strictly.
+        """
+        return Schematic.model_validate(sanitize_pic_yml(data), strict=strict)
 
 
 class DSchematic(TSchematic[um]):
@@ -2508,8 +2523,14 @@ class DSchematic(TSchematic[um]):
     unit: Literal["um"] = "um"
 
     @staticmethod
-    def from_pic_yml(data: dict[str, Any]) -> DSchematic:
-        return DSchematic.model_validate(sanitize_pic_yml(data))
+    def from_pic_yml(data: dict[str, Any], *, strict: bool | None = None) -> DSchematic:
+        """Validate a pydantic model instance.
+
+        Args:
+            data: The dict to validate.
+            strict: Whether to enforce types strictly.
+        """
+        return DSchematic.model_validate(sanitize_pic_yml(data), strict=strict)
 
 
 def _create_kinst[T: (int, float)](
@@ -3072,8 +3093,8 @@ def read_schematic(
     with file.open(mode="rt") as f:
         yaml_dict = yaml.load(f)
         if unit == "dbu":
-            return Schematic.model_validate(yaml_dict, strict=True)
-        return DSchematic.model_validate(yaml_dict)
+            return Schematic.from_pic_yml(yaml_dict, strict=True)
+        return DSchematic.from_pic_yml(yaml_dict)
 
 
 def _get_full_settings(
