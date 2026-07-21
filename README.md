@@ -49,7 +49,7 @@ This installs the development environment and sets up pre-commit hooks.
 
 Full documentation is available at [gdsfactory.github.io/kfactory](https://gdsfactory.github.io/kfactory).
 
-Upgrading from an earlier version? See the [migration guide](migration.md).
+Upgrading from an earlier version? See the [migration guide](docs/source/migration.md).
 
 ## License
 

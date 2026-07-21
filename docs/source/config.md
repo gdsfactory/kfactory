@@ -1,6 +1,6 @@
 # Config
 
-The config is managed by a pydantic [`SettingsModel`](https://docs.pydantic.dev/latest/usage/settings/). Entries can be set through changing `kfactory.config`
+The config is managed by a pydantic [`SettingsModel`](https://docs.pydantic.dev/latest/concepts/pydantic_settings/). Entries can be set through changing `kfactory.config`
 
 The config can configure the logger and display type of the jupyter widget among other things.
 
@@ -123,7 +123,7 @@ Available log levels are "TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR"
 Log outputs can be filtered either by setting a minimum level or by regex. The minimum level is configured in `kfactory.config.logfilter.level`.
 Instead of configuring it through python, it can also be configured from an environment variable. By default the log level is set to "INFO",
 so anything below "INFO" is not sent to an output. This can be configured either by setting the level in python, through dotenv
-([untested](https://docs.pydantic.dev/latest/usage/settings/#dotenv-env-support)), or through environment variables.
+([untested](https://docs.pydantic.dev/latest/concepts/pydantic_settings/#dotenv-env-support)), or through environment variables.
 
 | Logging Function                  | Minimum `kfactory.config.logfilter.level` |
 |-----------------------------------|-------------------------------------------|

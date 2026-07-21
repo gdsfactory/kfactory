@@ -7,11 +7,11 @@
 #### New Features
 
 - **Routing constraints & path-length matching** — the new `PathLengthMatch` constraint API enables length-matched bundle routing directly.
-  See [Path-Length Matching](routing/path_length.md).
+  See [Path-Length Matching](routing/path_length.py).
 - **Asymmetrical cross-sections** — `AsymmetricCrossSection` allows non-symmetric waveguide profiles.
-  See [Cross-Sections](components/cross_sections.md).
+  See [Cross-Sections](components/cross_sections.py).
 - **Netlist extraction as a separate package** — netlist generation now lives in [kfnetlist](https://github.com/gdsfactory/kfnetlist), a standalone package that is pulled in as a dependency.
-  See [Netlist & I/O](schematics/netlist.md).
+  See [Netlist & I/O](schematics/netlist.py).
 - **Factory metadata** — the new `FactoryMetadata` / `PortSpec` API captures structured metadata (including port specs) for factories.
 - **Connectivity checks module** — connectivity checking now lives in its own `kfactory.checks` module.
 
@@ -22,9 +22,9 @@
 #### Improved Features
 
 - **Schematics** — tighter pin integration, virtual schematic connections, and the `@kcl.routing_strategy` registry for schematic-driven routing.
-  See [Schematics Overview](schematics/overview.md).
+  See [Schematics Overview](schematics/overview.py).
 - **Bundle routing** — expanded documentation and tutorial.
-  See [Bundle Routing Tutorial](routing/bundle.md).
+  See [Bundle Routing Tutorial](routing/bundle.py).
 
 #### Infrastructure
 

@@ -1,11 +1,18 @@
-exclude_path = ["changelog\\.d/.*", "CHANGELOG\\.md"]
+exclude_path = [
+    "changelog\\.d/.*",
+    "CHANGELOG\\.md",
+    ".github/release-drafter\\.yml",
+    "docs/overrides/.*",
+]
 
 exclude = [
-    # localhost / example URLs
     "http://localhost.*",
     "http://127\\.0\\.0\\.1.*",
     "https?://example\\.com.*",
+    # rpack repo moved/deleted
+    "https://github\\.com/Packer-Guy/rpack",
 ]
 
+include_mail = false
 cache = true
 max_concurrency = 32
