@@ -607,8 +607,6 @@ def route_manhattan(
         bend90_radius: The radius or (symmetrical) dimension of 90° bend. [dbu]
         start_steps: Steps to take at the beginning of the route. [dbu]
         end_steps: Steps to take at the end of the route. [dbu]
-        max_tries: Maximum number of tries to calculate a manhattan route before
-            giving up
         invert: Invert the direction in which to route. In the normal behavior,
             route manhattan will try to take turns first. If true, it will try
             to route straight as long as possible
