@@ -47,6 +47,11 @@ repos:
       - id: codespell
         additional_dependencies:
           - tomli
+  - repo: https://github.com/lycheeverse/lychee.git
+    rev: lychee-v0.24.2
+    hooks:
+      - id: lychee
+        args: ["--no-progress"]
   - repo: https://github.com/PyCQA/bandit
     rev: 1.9.4
     hooks:

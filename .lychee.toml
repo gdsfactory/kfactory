@@ -1,0 +1,11 @@
+exclude_path = ["changelog\\.d/.*", "CHANGELOG\\.md"]
+
+exclude = [
+    # localhost / example URLs
+    "http://localhost.*",
+    "http://127\\.0\\.0\\.1.*",
+    "https?://example\\.com.*",
+]
+
+cache = true
+max_concurrency = 32
