@@ -1024,6 +1024,29 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     unit: Literal["dbu", "um"]
     info: dict[str, JSONSerializable] = Field(default_factory=dict)
 
+    @model_validator(mode="before")
+    @classmethod
+    def val_schematic(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            instances = data.get("instances", {})
+            for name, instance in instances.items():
+                if isinstance(instance, dict):
+                    instance["name"] = name
+            ports = data.get("ports", {})
+            for name, port in ports.items():
+                if isinstance(port, dict) and "instance" not in port:
+                    port["name"] = name
+            pins = data.get("pins", {})
+            for name, pin in pins.items():
+                if isinstance(pin, dict) and "instance" not in pin:
+                    pin["name"] = name
+            routes = data.get("routes", {})
+            for name, route in routes.items():
+                if isinstance(route, dict):
+                    route["name"] = name
+
+        return data
+
     def create_inst(
         self,
         name: str,
@@ -1410,139 +1433,6 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 nl.add_net(net)
         nl.sort()
         return nl
-
-    @model_validator(mode="before")
-    @classmethod
-    def _validate_schematic(cls, data: dict[str, Any]) -> dict[str, Any]:
-        data.pop("warnings", None)
-        if not isinstance(data, dict):
-            return data
-        if "kcl" in data and isinstance(data["kcl"], str):
-            data["kcl"] = kcls[data["kcl"]]
-        instances = data.get("instances")
-        if instances:
-            for name, instance in instances.items():
-                instance["name"] = name
-                instance.pop("info", None)
-
-        nets: list[dict[str, str]] = data.get("nets", [])
-        built_nets: list[RouteNet[T] | Connection[T] | VirtualConnection[T]] = []
-        data["nets"] = built_nets
-        if nets:
-            built_nets.extend(
-                [
-                    VirtualConnection[T](
-                        net=(
-                            _get_instance_and_port(net["p1"]),
-                            _get_instance_and_port(net["p2"]),
-                        )
-                    )
-                    for net in nets
-                ]
-            )
-
-        connections = data.pop("connections", None)
-        if connections is not None and isinstance(connections, dict):
-            built_nets.extend(
-                [
-                    Connection[T](
-                        net=(
-                            _get_instance_and_port(conn_ref1),
-                            _get_instance_and_port(conn_ref2),
-                        )
-                    )
-                    for conn_ref1, conn_ref2 in connections.items()
-                ]
-            )
-        routes = data.get("routes")
-        if routes:
-            for name, route in routes.items():
-                route["name"] = name
-                built_nets.extend(
-                    [
-                        RouteNet[T](
-                            route=name,
-                            net=(
-                                _get_instance_and_port(link1),
-                                _get_instance_and_port(link2),
-                            ),
-                        )
-                        for link1, link2 in route["links"].items()
-                    ]
-                )
-                route.pop("links")
-        placements = data.get("placements")
-        if placements:
-            for placement in placements.values():
-                if "port" in placement:
-                    port = placement.pop("port")
-                    if port in [
-                        "ce",
-                        "cw",
-                        "nc",
-                        "ne",
-                        "nw",
-                        "sc",
-                        "se",
-                        "sw",
-                        "center",
-                        "cc",
-                    ]:
-                        placement["anchor"] = _anchor_mapping[port]
-                    else:
-                        placement["anchor"] = {"port": port}
-                anchor: FixedAnchorDict = placement.get("anchor", {})
-                if "xmin" in placement:
-                    anchor["x"] = "left"
-                    placement["x"] = placement.pop("xmin")
-                elif "xmax" in placement:
-                    anchor["x"] = "right"
-                    placement["y"] = placement.pop("xmax")
-                if "ymin" in placement:
-                    anchor["y"] = "bottom"
-                    placement["y"] = placement.pop("ymin")
-                elif "ymax" in placement:
-                    anchor["y"] = "top"
-                    placement["y"] = placement.pop("ymax")
-                if anchor:
-                    placement["anchor"] = anchor
-                x_ = placement.get("x")
-                if isinstance(x_, str):
-                    inst, port = x_.rsplit(",", 1)
-                    if port in ["east", "center", "west"]:
-                        placement["x"] = {
-                            "instance": inst,
-                            "x": _anchorref_mapping[port],
-                        }
-                    else:
-                        placement["x"] = {"instance": inst, "port": port}
-                y_ = placement.get("y")
-                if isinstance(y_, str):
-                    inst, port = x_.rsplit(",", 1)
-                    if port in ["bottom", "center", "top"]:
-                        placement["x"] = {
-                            "instance": inst,
-                            "y": _anchorref_mapping[port],
-                        }
-                    else:
-                        placement["y"] = {"instance": inst, "port": port}
-
-                if isinstance(placement.get("y"), str):
-                    raise NotImplementedError
-        ports = data.get("ports")
-        if ports:
-            for name, port_val in ports.items():
-                if isinstance(port_val, str):
-                    ports[name] = _get_instance_and_port(port_val)
-        pins = data.get("pins")
-        if pins:
-            for name, pin in pins.items():
-                if isinstance(pin, str):
-                    inst, pname = pin.rsplit(",", 1)
-                    pins[name] = {"instance": inst, "pin": pname}
-                elif isinstance(pin, dict) and "ports" in pin:
-                    pin["name"] = name
-        return data
 
     @field_serializer("placements")
     @classmethod
@@ -2439,6 +2329,22 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     def connections(self) -> list[Connection[T]]:
         return [net for net in self.nets if isinstance(net, Connection)]
 
+    @staticmethod
+    def from_pic_yml(
+        data: dict[str, Any], *, strict: bool | None = None
+    ) -> TSchematic[T]:
+        """Load a schematic from a ``pic.yml``-style dictionary.
+
+        The dictionary is run through :func:`sanitize_pic_yml` before
+        validation so that legacy keys (``connections``, ``port``-based
+        placements, etc.) are translated to the current schema.
+
+        Args:
+            data: The dict to validate.
+            strict: Whether to enforce types strictly.
+        """
+        return TSchematic[T].model_validate(sanitize_pic_yml(data), strict=strict)
+
 
 def _get_instance_orientation[T: (int, float)](
     instance: str,
@@ -2603,12 +2509,15 @@ class Schematic(TSchematic[dbu]):
 
     unit: Literal["dbu"] = "dbu"
 
-    def __init__(self, **data: Any) -> None:
-        if "unit" in data:
-            raise ValueError(
-                "Cannot set the unit direct. It needs to be set by the class init."
-            )
-        super().__init__(unit="dbu", **data)
+    @staticmethod
+    def from_pic_yml(data: dict[str, Any], *, strict: bool | None = None) -> Schematic:
+        """Validate a pydantic model instance.
+
+        Args:
+            data: The dict to validate.
+            strict: Whether to enforce types strictly.
+        """
+        return Schematic.model_validate(sanitize_pic_yml(data), strict=strict)
 
 
 class DSchematic(TSchematic[um]):
@@ -2616,42 +2525,15 @@ class DSchematic(TSchematic[um]):
 
     unit: Literal["um"] = "um"
 
-    def __init__(self, **data: Any) -> None:
-        if "unit" in data:
-            raise ValueError(
-                "Cannot set the unit direct. It needs to be set by the class init."
-            )
-        super().__init__(unit="um", **data)
+    @staticmethod
+    def from_pic_yml(data: dict[str, Any], *, strict: bool | None = None) -> DSchematic:
+        """Validate a pydantic model instance.
 
-
-class Schema(Schematic):
-    """Deprecated alias for `Schematic` (will be removed in kfactory 2.0)."""
-
-    def __init__(self, **data: Any) -> None:
-        logger.warning(
-            "Schema is deprecated, please use Schematic. "
-            "It will be removed in kfactory 2.0"
-        )
-        if "unit" in data:
-            raise ValueError(
-                "Cannot set the unit direct. It needs to be set by the class init."
-            )
-        super().__init__(**data)
-
-
-class DSchema(DSchematic):
-    """Deprecated alias for `DSchematic` (will be removed in kfactory 2.0)."""
-
-    def __init__(self, **data: Any) -> None:
-        logger.warning(
-            "DSchema is deprecated, please use DSchematic. "
-            "It will be removed in kfactory 2.0"
-        )
-        if "unit" in data:
-            raise ValueError(
-                "Cannot set the unit direct. It needs to be set by the class init."
-            )
-        super().__init__(**data)
+        Args:
+            data: The dict to validate.
+            strict: Whether to enforce types strictly.
+        """
+        return DSchematic.model_validate(sanitize_pic_yml(data), strict=strict)
 
 
 def _create_kinst[T: (int, float)](
@@ -3214,8 +3096,8 @@ def read_schematic(
     with file.open(mode="rt") as f:
         yaml_dict = yaml.load(f)
         if unit == "dbu":
-            return Schematic.model_validate(yaml_dict, strict=True)
-        return DSchematic.model_validate(yaml_dict)
+            return Schematic.from_pic_yml(yaml_dict, strict=True)
+        return DSchematic.from_pic_yml(yaml_dict)
 
 
 def _get_full_settings(
@@ -3298,3 +3180,135 @@ def _get_instance_and_port(s: str) -> PortRef:
             ib=int(match.group(3)),
         )
     return PortRef(instance=instance, port=port)
+
+
+def sanitize_pic_yml[T: (int, float)](data: dict[str, Any]) -> dict[str, Any]:
+    data.pop("warnings", None)
+    if not isinstance(data, dict):
+        return data
+    if "kcl" in data and isinstance(data["kcl"], str):
+        data["kcl"] = kcls[data["kcl"]]
+    instances = data.get("instances")
+    if instances:
+        for name, instance in instances.items():
+            instance["name"] = name
+            instance.pop("info", None)
+
+    nets: list[dict[str, str]] = data.get("nets", [])
+    built_nets: list[RouteNet[T] | Connection[T] | VirtualConnection[T]] = []
+    data["nets"] = built_nets
+    if nets:
+        built_nets.extend(
+            [
+                VirtualConnection[T](
+                    net=(
+                        _get_instance_and_port(net["p1"]),
+                        _get_instance_and_port(net["p2"]),
+                    )
+                )
+                for net in nets
+            ]
+        )
+
+    connections = data.pop("connections", None)
+    if connections is not None and isinstance(connections, dict):
+        built_nets.extend(
+            [
+                Connection[T](
+                    net=(
+                        _get_instance_and_port(conn_ref1),
+                        _get_instance_and_port(conn_ref2),
+                    )
+                )
+                for conn_ref1, conn_ref2 in connections.items()
+            ]
+        )
+    routes = data.get("routes")
+    if routes:
+        for name, route in routes.items():
+            route["name"] = name
+            built_nets.extend(
+                [
+                    RouteNet[T](
+                        route=name,
+                        net=(
+                            _get_instance_and_port(link1),
+                            _get_instance_and_port(link2),
+                        ),
+                    )
+                    for link1, link2 in route["links"].items()
+                ]
+            )
+            route.pop("links")
+    placements = data.get("placements")
+    if placements:
+        for placement in placements.values():
+            if "port" in placement:
+                port = placement.pop("port")
+                if port in [
+                    "ce",
+                    "cw",
+                    "nc",
+                    "ne",
+                    "nw",
+                    "sc",
+                    "se",
+                    "sw",
+                    "center",
+                    "cc",
+                ]:
+                    placement["anchor"] = _anchor_mapping[port]
+                else:
+                    placement["anchor"] = {"port": port}
+            anchor: FixedAnchorDict = placement.get("anchor", {})
+            if "xmin" in placement:
+                anchor["x"] = "left"
+                placement["x"] = placement.pop("xmin")
+            elif "xmax" in placement:
+                anchor["x"] = "right"
+                placement["y"] = placement.pop("xmax")
+            if "ymin" in placement:
+                anchor["y"] = "bottom"
+                placement["y"] = placement.pop("ymin")
+            elif "ymax" in placement:
+                anchor["y"] = "top"
+                placement["y"] = placement.pop("ymax")
+            if anchor:
+                placement["anchor"] = anchor
+            x_ = placement.get("x")
+            if isinstance(x_, str):
+                inst, port = x_.rsplit(",", 1)
+                if port in ["east", "center", "west"]:
+                    placement["x"] = {
+                        "instance": inst,
+                        "x": _anchorref_mapping[port],
+                    }
+                else:
+                    placement["x"] = {"instance": inst, "port": port}
+            y_ = placement.get("y")
+            if isinstance(y_, str):
+                inst, port = x_.rsplit(",", 1)
+                if port in ["bottom", "center", "top"]:
+                    placement["x"] = {
+                        "instance": inst,
+                        "y": _anchorref_mapping[port],
+                    }
+                else:
+                    placement["y"] = {"instance": inst, "port": port}
+
+            if isinstance(placement.get("y"), str):
+                raise NotImplementedError
+    ports = data.get("ports")
+    if ports:
+        for name, port_val in ports.items():
+            if isinstance(port_val, str):
+                ports[name] = _get_instance_and_port(port_val)
+    pins = data.get("pins")
+    if pins:
+        for name, pin in pins.items():
+            if isinstance(pin, str):
+                inst, pname = pin.rsplit(",", 1)
+                pins[name] = {"instance": inst, "pin": pname}
+            elif isinstance(pin, dict) and "ports" in pin:
+                pin["name"] = name
+    return data

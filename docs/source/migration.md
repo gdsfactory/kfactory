@@ -7,11 +7,11 @@
 #### New Features
 
 - **Routing constraints & path-length matching** — the new `PathLengthMatch` constraint API enables length-matched bundle routing directly.
-  See [Path-Length Matching](routing/path_length.md).
+  See [Path-Length Matching](routing/path_length.py).
 - **Asymmetrical cross-sections** — `AsymmetricCrossSection` allows non-symmetric waveguide profiles.
-  See [Cross-Sections](components/cross_sections.md).
+  See [Cross-Sections](components/cross_sections.py).
 - **Netlist extraction as a separate package** — netlist generation now lives in [kfnetlist](https://github.com/gdsfactory/kfnetlist), a standalone package that is pulled in as a dependency.
-  See [Netlist & I/O](schematics/netlist.md).
+  See [Netlist & I/O](schematics/netlist.py).
 - **Factory metadata** — the new `FactoryMetadata` / `PortSpec` API captures structured metadata (including port specs) for factories.
 - **Connectivity checks module** — connectivity checking now lives in its own `kfactory.checks` module.
 
@@ -22,9 +22,9 @@
 #### Improved Features
 
 - **Schematics** — tighter pin integration, virtual schematic connections, and the `@kcl.routing_strategy` registry for schematic-driven routing.
-  See [Schematics Overview](schematics/overview.md).
+  See [Schematics Overview](schematics/overview.py).
 - **Bundle routing** — expanded documentation and tutorial.
-  See [Bundle Routing Tutorial](routing/bundle.md).
+  See [Bundle Routing Tutorial](routing/bundle.py).
 
 #### Infrastructure
 
@@ -54,6 +54,8 @@ the 2.6.x → 3.0 window (and so are new relative to a 2.6.x code base) are mark
 | **Instances** | `connect()` ignores mirror by default **(new in 3.0)** | mirror flag applied | `use_mirror=True` / `config.connect_use_mirror=True` |
 | **Netlist** | `kfactory.netlist` module removed **(new in 3.0)** | `from kfactory.netlist import Netlist` | `from kfnetlist import Netlist` (or `kf.Netlist`) |
 | **Schematics** | `get_schematic` removed **(new in 3.0)** | `kf.get_schematic(...)` | use `Schematic` directly |
+| **Schematics** | `Schema` / `DSchema` aliases removed **(new in 3.0)** | `kf.Schema(...)` | `kf.Schematic(...)` |
+| **Schematics** | `pic.yml` loading via `from_pic_yml` **(new in 3.0)** | `Schematic.model_validate(yaml_dict)` | `Schematic.from_pic_yml(yaml_dict)` |
 | **Schematics** | Routing via `KCLayout` registry | — | `@kcl.routing_strategy` + `schematic.add_route(...)` |
 
 #### Module Reorganization
@@ -180,6 +182,60 @@ schematic = kf.get_schematic(...)
 # After (3.0)
 import kfactory as kf
 schematic = kf.Schematic(kcl=kcl)
+```
+
+#### Removed `Schema` / `DSchema` Aliases
+
+The deprecated `Schema` and `DSchema` classes (aliases for `Schematic` and `DSchematic`)
+have been removed. They were deprecated in kfactory 2.0.
+
+```python
+# Before (2.x)
+import kfactory as kf
+schematic = kf.Schema(kcl=kcl)
+dschematic = kf.DSchema(kcl=kcl)
+
+# After (3.0)
+import kfactory as kf
+schematic = kf.Schematic(kcl=kcl)
+dschematic = kf.DSchematic(kcl=kcl)
+```
+
+#### Loading `pic.yml` Files — `from_pic_yml`
+
+`Schematic.model_validate()` no longer translates `pic.yml`-specific keys
+(e.g. `connections`, `port`-based placements with `xmin`/`xmax`/`ymin`/`ymax`,
+string-form port and pin references). Use the new `from_pic_yml()` static method
+instead — it sanitizes the dictionary through `sanitize_pic_yml()` before validation.
+
+`model_validate()` still works for dictionaries that already use the internal schema
+(e.g. round-tripping via `model_dump()`).
+
+```python
+from ruamel.yaml import YAML
+
+yaml = YAML(typ="safe")
+
+# Before (2.x) — model_validate handled pic.yml keys automatically
+with open("pic.yml") as f:
+    schematic = kf.Schematic.model_validate(yaml.load(f))
+
+# After (3.0) — use from_pic_yml for pic.yml dictionaries
+with open("pic.yml") as f:
+    schematic = kf.Schematic.from_pic_yml(yaml.load(f))
+
+# Or use the convenience helper (unchanged)
+schematic = kf.read_schematic(Path("pic.yml"), unit="dbu")
+```
+
+The standalone `sanitize_pic_yml()` function is also available for custom pipelines:
+
+```python
+from kfactory.schematic import sanitize_pic_yml
+
+raw = yaml.load(open("pic.yml"))
+sanitized = sanitize_pic_yml(raw)
+schematic = kf.Schematic.model_validate(sanitized)
 ```
 
 #### Routing Interface for Schematics
