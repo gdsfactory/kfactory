@@ -51,7 +51,7 @@ optional-dependencies.dev = [
   "kfactory[ci]",
   "pre-commit>=4.6,<4.7",
   "python-lsp-server[all]>=1.14,<1.15",
-  "ruff>=0.15.21,<0.16",
+  "ruff>=0.15.21,<0.17",
   "rust-just~=1.57.0",
   "scipy-stubs>=1.18,<1.19",
   "tbump>=6.11,<6.12",
@@ -72,7 +72,7 @@ optional-dependencies.docs = [
   "mkdocs-video>=1.5,<1.6",
   "mkdocstrings[python]>=1.0.6,<1.1",
   "pymdown-extensions>=11.0.1,<11.1",
-  "ruff>=0.15.21,<0.16",
+  "ruff>=0.15.21,<0.17",
   "zensical>=0.0.50,<0.1",
 ]
 optional-dependencies.ipy = [
