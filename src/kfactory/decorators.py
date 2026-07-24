@@ -350,7 +350,8 @@ def _overwrite_existing(
 ) -> None:
     for c in list(kcl.cells(name or cell.name)):
         if c is not cell.kdb_cell:
-            kcl[c.cell_index()].delete()
+            c_ = kcl[c.cell_index()]
+            c_.delete(delete_parents=True)
 
 
 def _check_cell(cell: AnyKCell, kcl: KCLayout) -> None:
@@ -513,8 +514,8 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                     kcl._future_cell_name = name
                     if layout_cache:
                         if overwrite_existing:
-                            for c in list(kcl.cells(kcl._future_cell_name)):
-                                kcl[c.cell_index()].delete()
+                            for c in list(kcl.cells(name)):
+                                _overwrite_existing(name, kcl[c.cell_index()], kcl)
                         else:
                             layout_cell = kcl.layout_cell(kcl._future_cell_name)
                             if layout_cell is not None:

@@ -123,10 +123,13 @@ def export_svg(
     per-layer fill from LAYER_FILL. Flip y to match SVG's y-down axis."""
     _, _, _, vb_h = viewbox
     layers = LogoLayers()
-    parts = [
+    first_part = (
         f'<svg xmlns="http://www.w3.org/2000/svg" '
         f'viewBox="{viewbox[0]} {viewbox[1]} {viewbox[2]} {viewbox[3]}" '
-        f'role="img" aria-label="kfactory">',
+        'role="img" aria-label="kfactory">'
+    )
+    parts = [
+        first_part,
         "  <title>kfactory</title>",
     ]
     for layer_name, fill in LAYER_FILL.items():
