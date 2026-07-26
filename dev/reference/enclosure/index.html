@@ -7698,9 +7698,7 @@ minkowski sum with a square.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_custom</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Edge</span> <span class="o">|</span> <span class="n">Polygon</span> <span class="o">|</span> <span class="n">Box</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_custom</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Edge</span> <span class="o">|</span> <span class="n">Polygon</span> <span class="o">|</span> <span class="n">Box</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7863,9 +7861,7 @@ the size of the section in dbu.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_enc</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span> <span class="n">Direction</span> <span class="o">=</span> <span class="n">Direction</span><span class="o">.</span><span class="n">BOTH</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_enc</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span> <span class="n">Direction</span> <span class="o">=</span> <span class="n">Direction</span><span class="o">.</span><span class="n">BOTH</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -8016,13 +8012,7 @@ Uses a box if both directions are selected.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_tiled</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">tile_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">n_pts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
-    <span class="n">n_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">carve_out_ports</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_tiled</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">tile_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">n_pts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="n">n_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">carve_out_ports</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -8660,13 +8650,7 @@ waveguides or similar that are straight.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">minkowski_region</span><span class="p">(</span>
-    <span class="n">r</span><span class="p">:</span> <span class="n">Region</span><span class="p">,</span>
-    <span class="n">d</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">shape</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
-        <span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="n">Box</span> <span class="o">|</span> <span class="n">Edge</span> <span class="o">|</span> <span class="n">Polygon</span>
-    <span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">minkowski_region</span><span class="p">(</span><span class="n">r</span><span class="p">:</span> <span class="n">Region</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="n">Box</span> <span class="o">|</span> <span class="n">Edge</span> <span class="o">|</span> <span class="n">Polygon</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -9030,9 +9014,7 @@ the minkowski and take the inverse again.</p>
   </span>
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">enclosures_must_have_main_layer</span><span class="p">(</span>
-    <span class="n">v</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">LayerEnclosure</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">LayerEnclosure</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">enclosures_must_have_main_layer</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">LayerEnclosure</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">LayerEnclosure</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -10480,20 +10462,7 @@ to a named enclosure.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__init__</span><span class="p">(</span>
-    <span class="n">sections</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span>
-        <span class="nb">tuple</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">main_layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">dsections</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span>
-        <span class="nb">tuple</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
-        <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
-    <span class="p">]</span>
-    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">bbox_sections</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
-    <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__init__</span><span class="p">(</span><span class="n">sections</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">main_layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dsections</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bbox_sections</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -10796,9 +10765,7 @@ if available. Use a hash of the sections and main_layer if the name is <code>Non
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_bbox</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_bbox</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -10948,12 +10915,7 @@ else throw an error.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_custom</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">shape</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
-        <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span> <span class="n">Edge</span> <span class="o">|</span> <span class="n">Polygon</span> <span class="o">|</span> <span class="n">Box</span> <span class="o">|</span> <span class="n">Region</span>
-    <span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_custom</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span> <span class="n">Edge</span> <span class="o">|</span> <span class="n">Polygon</span> <span class="o">|</span> <span class="n">Box</span> <span class="o">|</span> <span class="n">Region</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -11060,11 +11022,7 @@ full enclosure.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_custom</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">shape</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Edge</span> <span class="o">|</span> <span class="n">Polygon</span> <span class="o">|</span> <span class="n">Box</span><span class="p">],</span>
-    <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_custom</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Edge</span> <span class="o">|</span> <span class="n">Polygon</span> <span class="o">|</span> <span class="n">Box</span><span class="p">],</span> <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -11229,11 +11187,7 @@ the size of the section in dbu.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_enc</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">direction</span><span class="p">:</span> <span class="n">Direction</span> <span class="o">=</span> <span class="n">Direction</span><span class="o">.</span><span class="n">BOTH</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_enc</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span> <span class="n">Direction</span> <span class="o">=</span> <span class="n">Direction</span><span class="o">.</span><span class="n">BOTH</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -11404,14 +11358,7 @@ Uses a box if both directions are selected.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_tiled</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">tile_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">n_pts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
-    <span class="n">n_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">carve_out_ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Port</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_tiled</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tile_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">n_pts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="n">n_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">carve_out_ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Port</span><span class="p">]</span> <span class="o">=</span> <span class="p">[])</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -11867,9 +11814,7 @@ threads as are set to the process (usually all cores of the machine).</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_x</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_x</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -11967,9 +11912,7 @@ waveguides or similar that are straight.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_y</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">apply_minkowski_y</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="n">Region</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -12067,14 +12010,7 @@ waveguides or similar that are straight.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
-    <span class="n">main_layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">main_layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -12288,12 +12224,7 @@ piece is stopping 2nd-last -&gt; last in E-&gt;W.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path_dynamic</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
-    <span class="n">main_layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">widths</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path_dynamic</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">main_layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">widths</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -12452,13 +12383,7 @@ widths of the same lengths as the points.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">minkowski_region</span><span class="p">(</span>
-    <span class="n">r</span><span class="p">:</span> <span class="n">Region</span><span class="p">,</span>
-    <span class="n">d</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">shape</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
-        <span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="n">Box</span> <span class="o">|</span> <span class="n">Edge</span> <span class="o">|</span> <span class="n">Polygon</span>
-    <span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">minkowski_region</span><span class="p">(</span><span class="n">r</span><span class="p">:</span> <span class="n">Region</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="n">Box</span> <span class="o">|</span> <span class="n">Edge</span> <span class="o">|</span> <span class="n">Polygon</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -13745,14 +13670,7 @@ touching or overlapping sections.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">put</span><span class="p">(</span>
-    <span class="n">ix</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">iy</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">tile</span><span class="p">:</span> <span class="n">Box</span><span class="p">,</span>
-    <span class="n">region</span><span class="p">:</span> <span class="n">Region</span><span class="p">,</span>
-    <span class="n">dbu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">clip</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">put</span><span class="p">(</span><span class="n">ix</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">iy</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">tile</span><span class="p">:</span> <span class="n">Box</span><span class="p">,</span> <span class="n">region</span><span class="p">:</span> <span class="n">Region</span><span class="p">,</span> <span class="n">dbu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">clip</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -14245,9 +14163,7 @@ inserting.</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">insert</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">insert</span><span class="p">(</span><span class="n">port_hole_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="n">Region</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>          </div>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">insert</span><span class="p">(</span>
-    <span class="n">port_hole_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="n">Region</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">insert</span><span class="p">(</span><span class="n">port_hole_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="n">Region</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -14372,14 +14288,7 @@ inserting.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">put</span><span class="p">(</span>
-    <span class="n">ix</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">iy</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">tile</span><span class="p">:</span> <span class="n">Box</span><span class="p">,</span>
-    <span class="n">region</span><span class="p">:</span> <span class="n">Region</span><span class="p">,</span>
-    <span class="n">dbu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">clip</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">put</span><span class="p">(</span><span class="n">ix</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">iy</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">tile</span><span class="p">:</span> <span class="n">Box</span><span class="p">,</span> <span class="n">region</span><span class="p">:</span> <span class="n">Region</span><span class="p">,</span> <span class="n">dbu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">clip</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -14793,15 +14702,7 @@ the section will span all the way between the maxes.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path</span><span class="p">(</span>
-    <span class="n">target</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
-    <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
-    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -15079,13 +14980,7 @@ autocalculated from the last two elements</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path_cross_section</span><span class="p">(</span>
-    <span class="n">target</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="n">AnyCrossSection</span><span class="p">,</span>
-    <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path_cross_section</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">cross_section</span><span class="p">:</span> <span class="n">AnyCrossSection</span><span class="p">,</span> <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -15325,15 +15220,7 @@ autocalculated from the last two elements</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path_dynamic</span><span class="p">(</span>
-    <span class="n">target</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
-    <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
-    <span class="n">widths</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path_dynamic</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">widths</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -15722,12 +15609,7 @@ autocalculated from the last two elements</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path_dynamic_points</span><span class="p">(</span>
-    <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
-    <span class="n">widths</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
-    <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path_dynamic_points</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">widths</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -15976,12 +15858,7 @@ autocalculated from the last two elements</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path_points</span><span class="p">(</span>
-    <span class="n">path</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
-    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_path_points</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -16123,9 +16000,7 @@ will be autocalculated from the last two elements</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">is_callable_widths</span><span class="p">(</span>
-    <span class="n">widths</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">is_callable_widths</span><span class="p">(</span><span class="n">widths</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -16158,9 +16033,7 @@ will be autocalculated from the last two elements</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">path_pts_to_polygon</span><span class="p">(</span>
-    <span class="n">pts_top</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">pts_bot</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">path_pts_to_polygon</span><span class="p">(</span><span class="n">pts_top</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">pts_bot</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

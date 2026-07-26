@@ -5808,8 +5808,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/decorators.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1102</span>
-<span class="normal">1103</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1103</span>
 <span class="normal">1104</span>
 <span class="normal">1105</span>
 <span class="normal">1106</span>
@@ -5843,7 +5842,8 @@
 <span class="normal">1134</span>
 <span class="normal">1135</span>
 <span class="normal">1136</span>
-<span class="normal">1137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Decorators</span><span class="p">:</span>
+<span class="normal">1137</span>
+<span class="normal">1138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Decorators</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Various decorators intended to be attached to a KCLayout.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -5913,9 +5913,9 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/decorators.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1105</span>
-<span class="normal">1106</span>
-<span class="normal">1107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1106</span>
+<span class="normal">1107</span>
+<span class="normal">1108</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Just set the standard `@cell` decorator.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span>
 </code></pre></div></td></tr></table></div>
@@ -5933,26 +5933,10 @@
 
 </h4>
           <div class="doc-overloads">
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">module_cell</span><span class="p">(</span>
-    <span class="n">_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]</span>
-</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">module_cell</span><span class="p">(</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">ModuleCellKWargs</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span>
-    <span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]],</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]</span>
-<span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">module_cell</span><span class="p">(</span><span class="n">_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]</span>
+</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">module_cell</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">ModuleCellKWargs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]],</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]]</span>
 </code></pre></div>          </div>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">module_cell</span><span class="p">(</span>
-    <span class="n">_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">/</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">ModuleCellKWargs</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span>
-    <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]</span>
-    <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span>
-        <span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]],</span>
-        <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">],</span>
-    <span class="p">]</span>
-<span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">module_cell</span><span class="p">(</span><span class="n">_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">ModuleCellKWargs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]],</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5962,8 +5946,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/decorators.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1121</span>
-<span class="normal">1122</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1122</span>
 <span class="normal">1123</span>
 <span class="normal">1124</span>
 <span class="normal">1125</span>
@@ -5978,7 +5961,8 @@
 <span class="normal">1134</span>
 <span class="normal">1135</span>
 <span class="normal">1136</span>
-<span class="normal">1137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">module_cell</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1137</span>
+<span class="normal">1138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">module_cell</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">/</span><span class="p">,</span>
@@ -6037,14 +6021,14 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/decorators.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1058</span>
-<span class="normal">1059</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1059</span>
 <span class="normal">1060</span>
 <span class="normal">1061</span>
 <span class="normal">1062</span>
 <span class="normal">1063</span>
 <span class="normal">1064</span>
-<span class="normal">1065</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCellDecorator</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">:</span> <span class="n">ProtoKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]](</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCellDecorator</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">:</span> <span class="n">ProtoKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]](</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Signature of the `@cell` decorator.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
@@ -6076,11 +6060,7 @@
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">KCellDecoratorKWargs</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span>
-    <span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]],</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]</span>
-<span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">KCellDecoratorKWargs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]],</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6090,11 +6070,11 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/decorators.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1061</span>
-<span class="normal">1062</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1062</span>
 <span class="normal">1063</span>
 <span class="normal">1064</span>
-<span class="normal">1065</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">KCellDecoratorKWargs</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]],</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;__call__ implementation.&quot;&quot;&quot;</span>
@@ -6141,8 +6121,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/decorators.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1037</span>
-<span class="normal">1038</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1038</span>
 <span class="normal">1039</span>
 <span class="normal">1040</span>
 <span class="normal">1041</span>
@@ -6159,7 +6138,8 @@
 <span class="normal">1052</span>
 <span class="normal">1053</span>
 <span class="normal">1054</span>
-<span class="normal">1055</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCellDecoratorKWargs</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="normal">1055</span>
+<span class="normal">1056</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCellDecoratorKWargs</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;KWargs for `@cell`.&quot;&quot;&quot;</span>
 
     <span class="n">set_settings</span><span class="p">:</span> <span class="nb">bool</span>
@@ -6230,8 +6210,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/decorators.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1017</span>
-<span class="normal">1018</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1018</span>
 <span class="normal">1019</span>
 <span class="normal">1020</span>
 <span class="normal">1021</span>
@@ -6247,7 +6226,8 @@
 <span class="normal">1031</span>
 <span class="normal">1032</span>
 <span class="normal">1033</span>
-<span class="normal">1034</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ModuleCellKWargs</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="normal">1034</span>
+<span class="normal">1035</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ModuleCellKWargs</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;KWargs for `@module_cell`.&quot;&quot;&quot;</span>
 
     <span class="n">set_settings</span><span class="p">:</span> <span class="nb">bool</span>
@@ -6317,14 +6297,14 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/decorators.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1068</span>
-<span class="normal">1069</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1069</span>
 <span class="normal">1070</span>
 <span class="normal">1071</span>
 <span class="normal">1072</span>
 <span class="normal">1073</span>
 <span class="normal">1074</span>
-<span class="normal">1075</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ModuleDecorator</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="normal">1075</span>
+<span class="normal">1076</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ModuleDecorator</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Signature of the `@module_cell` decorator.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">:</span> <span class="n">ProtoKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]](</span>
@@ -6356,11 +6336,7 @@
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">ModuleCellKWargs</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span>
-    <span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]],</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]</span>
-<span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">ModuleCellKWargs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]],</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6370,11 +6346,11 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/decorators.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1071</span>
-<span class="normal">1072</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1072</span>
 <span class="normal">1073</span>
 <span class="normal">1074</span>
-<span class="normal">1075</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">:</span> <span class="n">ProtoKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1075</span>
+<span class="normal">1076</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">:</span> <span class="n">ProtoKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]](</span>
     <span class="bp">self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">ModuleCellKWargs</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]],</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">K</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;__call__ implementation.&quot;&quot;&quot;</span>
@@ -6417,8 +6393,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/decorators.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">377</span>
-<span class="normal">378</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">378</span>
 <span class="normal">379</span>
 <span class="normal">380</span>
 <span class="normal">381</span>
@@ -6783,7 +6758,8 @@
 <span class="normal">740</span>
 <span class="normal">741</span>
 <span class="normal">742</span>
-<span class="normal">743</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@final</span>
+<span class="normal">743</span>
+<span class="normal">744</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">WrappedKCellFunc</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
     <span class="n">_f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">]</span>
     <span class="n">_f_orig</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
@@ -6922,8 +6898,8 @@
                     <span class="n">kcl</span><span class="o">.</span><span class="n">_future_cell_name</span> <span class="o">=</span> <span class="n">name</span>
                     <span class="k">if</span> <span class="n">layout_cache</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">overwrite_existing</span><span class="p">:</span>
-                            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kcl</span><span class="o">.</span><span class="n">cells</span><span class="p">(</span><span class="n">kcl</span><span class="o">.</span><span class="n">_future_cell_name</span><span class="p">)):</span>
-                                <span class="n">kcl</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()]</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+                            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kcl</span><span class="o">.</span><span class="n">cells</span><span class="p">(</span><span class="n">name</span><span class="p">)):</span>
+                                <span class="n">_overwrite_existing</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">kcl</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()],</span> <span class="n">kcl</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">layout_cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">layout_cell</span><span class="p">(</span><span class="n">kcl</span><span class="o">.</span><span class="n">_future_cell_name</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">layout_cell</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -7174,9 +7150,7 @@
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_metadata</span><span class="p">(</span>
-    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">KCellParams</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">KCellParams</span><span class="o">.</span><span class="n">kwargs</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FactoryMetadata</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_metadata</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">KCellParams</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">KCellParams</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FactoryMetadata</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7187,8 +7161,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/decorators.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">729</span>
-<span class="normal">730</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">730</span>
 <span class="normal">731</span>
 <span class="normal">732</span>
 <span class="normal">733</span>
@@ -7201,7 +7174,8 @@
 <span class="normal">740</span>
 <span class="normal">741</span>
 <span class="normal">742</span>
-<span class="normal">743</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_metadata</span><span class="p">(</span>
+<span class="normal">743</span>
+<span class="normal">744</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_metadata</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">KCellParams</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">KCellParams</span><span class="o">.</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FactoryMetadata</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve all metadata providers into a single ``FactoryMetadata``.</span>
@@ -7240,9 +7214,9 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/decorators.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">725</span>
-<span class="normal">726</span>
-<span class="normal">727</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">has_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">has_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether any metadata providers are registered for this factory.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_providers</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
@@ -7259,9 +7233,7 @@
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">metadata_providers</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
-    <span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span>
-<span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">metadata_providers</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7271,9 +7243,9 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/decorators.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">721</span>
-<span class="normal">722</span>
-<span class="normal">723</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">metadata_providers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">metadata_providers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return all metadata provider records registered for this factory.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">metadata_providers_for</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -7314,8 +7286,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/decorators.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 746</span>
-<span class="normal"> 747</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 747</span>
 <span class="normal"> 748</span>
 <span class="normal"> 749</span>
 <span class="normal"> 750</span>
@@ -7571,7 +7542,8 @@
 <span class="normal">1000</span>
 <span class="normal">1001</span>
 <span class="normal">1002</span>
-<span class="normal">1003</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@final</span>
+<span class="normal">1003</span>
+<span class="normal">1004</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">WrappedVKCellFunc</span><span class="p">[</span><span class="o">**</span><span class="n">VKCellParams</span><span class="p">,</span> <span class="n">VK</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">]:</span>
     <span class="n">_f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">VKCellParams</span><span class="p">,</span> <span class="n">VK</span><span class="p">]</span>
     <span class="n">_f_orig</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">VKCellParams</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]</span>
@@ -7853,9 +7825,7 @@
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_metadata</span><span class="p">(</span>
-    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">VKCellParams</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">VKCellParams</span><span class="o">.</span><span class="n">kwargs</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FactoryMetadata</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_metadata</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">VKCellParams</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">VKCellParams</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FactoryMetadata</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7866,8 +7836,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/decorators.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 989</span>
-<span class="normal"> 990</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 990</span>
 <span class="normal"> 991</span>
 <span class="normal"> 992</span>
 <span class="normal"> 993</span>
@@ -7880,7 +7849,8 @@
 <span class="normal">1000</span>
 <span class="normal">1001</span>
 <span class="normal">1002</span>
-<span class="normal">1003</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_metadata</span><span class="p">(</span>
+<span class="normal">1003</span>
+<span class="normal">1004</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_metadata</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">VKCellParams</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">VKCellParams</span><span class="o">.</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FactoryMetadata</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve all metadata providers into a single ``FactoryMetadata``.</span>
@@ -7919,9 +7889,9 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/decorators.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">985</span>
-<span class="normal">986</span>
-<span class="normal">987</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">has_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">986</span>
+<span class="normal">987</span>
+<span class="normal">988</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">has_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether any metadata providers are registered for this factory.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_providers</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
@@ -7938,9 +7908,7 @@
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">metadata_providers</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
-    <span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span>
-<span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">metadata_providers</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7950,9 +7918,9 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/decorators.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">981</span>
-<span class="normal">982</span>
-<span class="normal">983</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">metadata_providers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">982</span>
+<span class="normal">983</span>
+<span class="normal">984</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">metadata_providers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return all metadata provider records registered for this factory.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">metadata_providers_for</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>

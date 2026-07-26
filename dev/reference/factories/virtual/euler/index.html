@@ -5549,20 +5549,7 @@
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span>
-    <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
-    <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
-    <span class="o">|</span> <span class="n">CrossSectionSpecDict</span>
-    <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span>
-    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VKCell</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="n">um</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">deg</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span> <span class="o">|</span> <span class="n">CrossSectionSpecDict</span> <span class="o">|</span> <span class="n">DCrossSectionSpecDict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">um</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VKCell</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5800,14 +5787,7 @@
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">virtual_bend_euler_factory</span><span class="p">(</span>
-    <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
-    <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]]</span>
-    <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span>
-    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">basename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BendEulerVKCell</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">virtual_bend_euler_factory</span><span class="p">(</span><span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">basename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BendEulerVKCell</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

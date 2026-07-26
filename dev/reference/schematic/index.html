@@ -7029,9 +7029,7 @@ Two <code>Port</code> objects (cell ports) cannot be connected directly.</p>
   </span>
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">from_list</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">from_list</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7410,12 +7408,7 @@ with an lyrdb marker database. <code>None</code> silently ignores failures.</p>
   </span>
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">check</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">schematic</span><span class="p">:</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">instances</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span><span class="p">],</span>
-    <span class="n">routes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">ManhattanRoute</span><span class="p">]],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">check</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">schematic</span><span class="p">:</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">instances</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span><span class="p">],</span> <span class="n">routes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">ManhattanRoute</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7462,11 +7455,7 @@ with an lyrdb marker database. <code>None</code> silently ignores failures.</p>
   </span>
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">enforce</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span>
-    <span class="n">route_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">enforce</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span> <span class="n">route_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7517,12 +7506,7 @@ such as <code>separation</code> and <code>bend90_radius</code>.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">lyrdb_markers</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">schematic</span><span class="p">:</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">instances</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span><span class="p">],</span>
-    <span class="n">routes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">ManhattanRoute</span><span class="p">]],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">rdb</span><span class="o">.</span><span class="n">ReportDatabase</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">lyrdb_markers</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">schematic</span><span class="p">:</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">instances</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span><span class="p">],</span> <span class="n">routes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">ManhattanRoute</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">rdb</span><span class="o">.</span><span class="n">ReportDatabase</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7805,9 +7789,7 @@ constraint-specific visualisation.</p>
   </span>
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">from_pic_yml</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DSchematic</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">from_pic_yml</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DSchematic</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -8469,12 +8451,7 @@ are within <code>tolerance</code> of each other.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">check</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">schematic</span><span class="p">:</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">instances</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span><span class="p">],</span>
-    <span class="n">routes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">ManhattanRoute</span><span class="p">]],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">check</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">schematic</span><span class="p">:</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">instances</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span><span class="p">],</span> <span class="n">routes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">ManhattanRoute</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -8521,11 +8498,7 @@ are within <code>tolerance</code> of each other.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">enforce</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span>
-    <span class="n">route_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">enforce</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span> <span class="n">route_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -8588,12 +8561,7 @@ such as <code>separation</code> and <code>bend90_radius</code>.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">lyrdb_markers</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">schematic</span><span class="p">:</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">instances</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span><span class="p">],</span>
-    <span class="n">routes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">ManhattanRoute</span><span class="p">]],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">rdb</span><span class="o">.</span><span class="n">ReportDatabase</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">lyrdb_markers</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">schematic</span><span class="p">:</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">instances</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span><span class="p">],</span> <span class="n">routes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">ManhattanRoute</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">rdb</span><span class="o">.</span><span class="n">ReportDatabase</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -9395,9 +9363,7 @@ to its bounding box or one of its ports.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">is_placeable</span><span class="p">(</span>
-    <span class="n">placed_instances</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">placed_ports</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">is_placeable</span><span class="p">(</span><span class="n">placed_instances</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">placed_ports</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -10084,9 +10050,7 @@ instance ports via <code>PortRef</code>/<code>PortArrayRef</code>.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__getitem__</span><span class="p">(</span>
-    <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">PortArrayRef</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">PortArrayRef</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -10735,9 +10699,7 @@ instance ports via <code>PortRef</code>/<code>PortArrayRef</code>.</p>
   </span>
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">from_pic_yml</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schematic</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">from_pic_yml</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schematic</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -11407,10 +11369,7 @@ ports: Accessing <code>PortRef</code>/<code>PortArrayRef</code> resulting from t
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">connect</span><span class="p">(</span>
-    <span class="n">port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
-    <span class="n">other</span><span class="p">:</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="n">PortRef</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">connect</span><span class="p">(</span><span class="n">port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">other</span><span class="p">:</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="n">PortRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -11463,15 +11422,7 @@ ports: Accessing <code>PortRef</code>/<code>PortArrayRef</code> resulting from t
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">place</span><span class="p">(</span>
-    <span class="n">x</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">AnchorRefX</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">y</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">AnchorRefY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">dx</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">dy</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">orientation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">PortRef</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">mirror</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">anchor</span><span class="p">:</span> <span class="n">FixedAnchorDict</span> <span class="o">|</span> <span class="n">PortAnchorDict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Placement</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">place</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">AnchorRefX</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">AnchorRefY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dy</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">PortRef</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mirror</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">anchor</span><span class="p">:</span> <span class="n">FixedAnchorDict</span> <span class="o">|</span> <span class="n">PortAnchorDict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Placement</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -15019,9 +14970,7 @@ the constraint already exist in the schematic.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add_port</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">PortArrayRef</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add_port</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">PortArrayRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -15148,12 +15097,7 @@ the constraint already exist in the schematic.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add_route</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">nets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">PortRef</span><span class="p">]],</span>
-    <span class="n">routing_strategy</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Route</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add_route</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">PortRef</span><span class="p">]],</span> <span class="n">routing_strategy</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Route</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -15385,11 +15329,7 @@ that belong to the same net.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">code_str</span><span class="p">(</span>
-    <span class="n">imports</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">_schematic_default_imports</span><span class="p">,</span>
-    <span class="n">kfactory_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">ruff_format</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">code_str</span><span class="p">(</span><span class="n">imports</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">_schematic_default_imports</span><span class="p">,</span> <span class="n">kfactory_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ruff_format</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -16078,38 +16018,7 @@ that belong to the same net.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_cell</span><span class="p">(</span>
-    <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">],</span>
-    <span class="n">factories</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span>
-        <span class="nb">str</span><span class="p">,</span>
-        <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">KCell</span><span class="p">]</span>
-        <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">DKCell</span><span class="p">]</span>
-        <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">],</span>
-    <span class="p">]</span>
-    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">cross_sections</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span>
-        <span class="nb">str</span><span class="p">,</span>
-        <span class="n">CrossSection</span>
-        <span class="o">|</span> <span class="n">DCrossSection</span>
-        <span class="o">|</span> <span class="n">AsymmetricCrossSection</span>
-        <span class="o">|</span> <span class="n">DAsymmetricCrossSection</span><span class="p">,</span>
-    <span class="p">]</span>
-    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">routing_strategies</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
-        <span class="nb">str</span><span class="p">,</span>
-        <span class="n">Callable</span><span class="p">[</span>
-            <span class="n">Concatenate</span><span class="p">[</span>
-                <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
-                <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]]],</span>
-                <span class="o">...</span><span class="p">,</span>
-            <span class="p">],</span>
-            <span class="n">Any</span><span class="p">,</span>
-        <span class="p">],</span>
-    <span class="p">]</span>
-    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">place_unknown</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">ignore_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_cell</span><span class="p">(</span><span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">],</span> <span class="n">factories</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">KCell</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">DKCell</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cross_sections</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CrossSection</span> <span class="o">|</span> <span class="n">DCrossSection</span> <span class="o">|</span> <span class="n">AsymmetricCrossSection</span> <span class="o">|</span> <span class="n">DAsymmetricCrossSection</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">routing_strategies</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="n">Concatenate</span><span class="p">[</span><span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]]],</span> <span class="o">...</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">place_unknown</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -16871,9 +16780,7 @@ not fully deterministic, therefore this is disabled by default.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_connection</span><span class="p">(</span>
-    <span class="n">port1</span><span class="p">:</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">port2</span><span class="p">:</span> <span class="n">PortRef</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_connection</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">port2</span><span class="p">:</span> <span class="n">PortRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -17059,15 +16966,7 @@ not fully deterministic, therefore this is disabled by default.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_inst</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">component</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">array</span><span class="p">:</span> <span class="n">RegularArray</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="n">Array</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">placement</span><span class="p">:</span> <span class="n">Placement</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">virtual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SchematicInstance</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_inst</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">component</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">RegularArray</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="n">Array</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">placement</span><span class="p">:</span> <span class="n">Placement</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">virtual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SchematicInstance</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -17355,12 +17254,7 @@ with <code>inst.place(...)</code> afterwards.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_pin</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="n">pin_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;DC&quot;</span><span class="p">,</span>
-    <span class="n">info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pin</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_pin</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">pin_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;DC&#39;</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pin</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -17594,15 +17488,7 @@ empty, or any port name is not present in <code>self.ports</code>.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_port</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">x</span><span class="p">:</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">PortArrayRef</span> <span class="o">|</span> <span class="n">T</span><span class="p">,</span>
-    <span class="n">y</span><span class="p">:</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">PortArrayRef</span> <span class="o">|</span> <span class="n">T</span><span class="p">,</span>
-    <span class="n">dx</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">dy</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">270</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">create_port</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">PortArrayRef</span> <span class="o">|</span> <span class="n">T</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">PortArrayRef</span> <span class="o">|</span> <span class="n">T</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dy</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">270</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -17709,9 +17595,7 @@ empty, or any port name is not present in <code>self.ports</code>.</p>
   </span>
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">from_pic_yml</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">from_pic_yml</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -17814,24 +17698,7 @@ placements, etc.) are translated to the current schema.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">netlist</span><span class="p">(</span>
-    <span class="n">add_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">factories</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
-        <span class="nb">str</span><span class="p">,</span>
-        <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
-        <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">],</span>
-    <span class="p">]</span>
-    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">external_factories</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
-        <span class="nb">str</span><span class="p">,</span>
-        <span class="nb">dict</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span>
-            <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
-            <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">],</span>
-        <span class="p">],</span>
-    <span class="p">]</span>
-    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Netlist</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">netlist</span><span class="p">(</span><span class="n">add_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">factories</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">external_factories</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Netlist</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -18043,19 +17910,7 @@ netlist is sorted for stable output.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">place_port</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">cell</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
-    <span class="n">cross_sections</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span>
-        <span class="nb">str</span><span class="p">,</span>
-        <span class="n">CrossSection</span>
-        <span class="o">|</span> <span class="n">DCrossSection</span>
-        <span class="o">|</span> <span class="n">AsymmetricCrossSection</span>
-        <span class="o">|</span> <span class="n">DAsymmetricCrossSection</span><span class="p">,</span>
-    <span class="p">],</span>
-    <span class="n">instances</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span> <span class="o">|</span> <span class="n">VInstance</span><span class="p">]</span>
-    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BasePort</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">place_port</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cell</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span> <span class="n">cross_sections</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CrossSection</span> <span class="o">|</span> <span class="n">DCrossSection</span> <span class="o">|</span> <span class="n">AsymmetricCrossSection</span> <span class="o">|</span> <span class="n">DAsymmetricCrossSection</span><span class="p">],</span> <span class="n">instances</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instance</span> <span class="o">|</span> <span class="n">VInstance</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BasePort</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -18313,16 +18168,10 @@ netlist is sorted for stable output.</p>
 
 </h3>
           <div class="doc-overloads">
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_schematic</span><span class="p">(</span>
-    <span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;dbu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;dbu&quot;</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schematic</span>
-</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_schematic</span><span class="p">(</span>
-    <span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;um&quot;</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DSchematic</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_schematic</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;dbu&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;dbu&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schematic</span>
+</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_schematic</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;um&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DSchematic</span>
 </code></pre></div>          </div>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_schematic</span><span class="p">(</span>
-    <span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span> <span class="s2">&quot;um&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;dbu&quot;</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schematic</span> <span class="o">|</span> <span class="n">DSchematic</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_schematic</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;dbu&#39;</span><span class="p">,</span> <span class="s1">&#39;um&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;dbu&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schematic</span> <span class="o">|</span> <span class="n">DSchematic</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

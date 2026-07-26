@@ -5545,12 +5545,7 @@
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">cross_section_from_width</span><span class="p">(</span>
-    <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
-    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrossSection</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">cross_section_from_width</span><span class="p">(</span><span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrossSection</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5605,16 +5600,7 @@
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_backbone</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span>
-    <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
-    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
-    <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">dbu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_backbone</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span> <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span> <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dbu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5901,13 +5887,7 @@
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_backbone_cross_section</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span>
-    <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="n">AnyCrossSection</span><span class="p">,</span>
-    <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_backbone_cross_section</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span> <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">cross_section</span><span class="p">:</span> <span class="n">AnyCrossSection</span><span class="p">,</span> <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6149,17 +6129,7 @@ with strips sharing a layer merged.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_backbone_dynamic</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span>
-    <span class="n">backbone</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
-    <span class="n">width1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">width2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span>
-    <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">dbu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">extrude_backbone_dynamic</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span> <span class="n">backbone</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">width1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">width2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="n">LayerInfo</span><span class="p">,</span> <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dbu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6480,12 +6450,7 @@ with strips sharing a layer merged.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">layer_enclosure_to_sections</span><span class="p">(</span>
-    <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span>
-    <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
-    <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
-<span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">layer_enclosure_to_sections</span><span class="p">(</span><span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

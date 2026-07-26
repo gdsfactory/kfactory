@@ -5788,7 +5788,8 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">52</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">51</span>
+<span class="normal">52</span>
 <span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
@@ -5799,8 +5800,7 @@
 <span class="normal">60</span>
 <span class="normal">61</span>
 <span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ManhattanRoutePathFunction</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ManhattanRoutePathFunction</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Minimal signature of a manhattan function.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
@@ -5837,13 +5837,7 @@
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span>
-    <span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span>
-    <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span>
-    <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">start_steps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_steps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span> <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span> <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_steps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end_steps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5853,7 +5847,8 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">55</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">54</span>
+<span class="normal">55</span>
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
@@ -5861,8 +5856,7 @@
 <span class="normal">60</span>
 <span class="normal">61</span>
 <span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
     <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
@@ -5914,7 +5908,8 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">67</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">66</span>
+<span class="normal">67</span>
 <span class="normal">68</span>
 <span class="normal">69</span>
 <span class="normal">70</span>
@@ -5926,8 +5921,7 @@
 <span class="normal">76</span>
 <span class="normal">77</span>
 <span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ManhattanRoutePathFunction180</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ManhattanRoutePathFunction180</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Minimal signature of a manhattan function with 180° bend routing.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
@@ -5965,14 +5959,7 @@
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span>
-    <span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span>
-    <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span>
-    <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">bend180_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">start_steps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_steps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">__call__</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span> <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span> <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bend180_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_steps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end_steps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5982,7 +5969,8 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">70</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">69</span>
+<span class="normal">70</span>
 <span class="normal">71</span>
 <span class="normal">72</span>
 <span class="normal">73</span>
@@ -5991,8 +5979,7 @@
 <span class="normal">76</span>
 <span class="normal">77</span>
 <span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
     <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
@@ -6047,7 +6034,8 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">337</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">336</span>
+<span class="normal">337</span>
 <span class="normal">338</span>
 <span class="normal">339</span>
 <span class="normal">340</span>
@@ -6298,8 +6286,7 @@
 <span class="normal">585</span>
 <span class="normal">586</span>
 <span class="normal">587</span>
-<span class="normal">588</span>
-<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">588</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ManhattanRouter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to store state of a routing between two ports or transformations.&quot;&quot;&quot;</span>
 
@@ -6576,13 +6563,7 @@
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">auto_route</span><span class="p">(</span>
-    <span class="n">max_try</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
-    <span class="n">straight_s_bend_strategy</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span>
-        <span class="s2">&quot;short&quot;</span><span class="p">,</span> <span class="s2">&quot;long&quot;</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;short&quot;</span><span class="p">,</span>
-    <span class="n">bbox</span><span class="p">:</span> <span class="n">Box</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">auto_route</span><span class="p">(</span><span class="n">max_try</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="n">straight_s_bend_strategy</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;short&#39;</span><span class="p">,</span> <span class="s1">&#39;long&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;short&#39;</span><span class="p">,</span> <span class="n">bbox</span><span class="p">:</span> <span class="n">Box</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6641,7 +6622,8 @@ measure to stop infinite loops. This should never trigger an error.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">398</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">397</span>
+<span class="normal">398</span>
 <span class="normal">399</span>
 <span class="normal">400</span>
 <span class="normal">401</span>
@@ -6749,8 +6731,7 @@ measure to stop infinite loops. This should never trigger an error.</p>
 <span class="normal">503</span>
 <span class="normal">504</span>
 <span class="normal">505</span>
-<span class="normal">506</span>
-<span class="normal">507</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">auto_route</span><span class="p">(</span>
+<span class="normal">506</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">auto_route</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">max_try</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
     <span class="n">straight_s_bend_strategy</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;short&quot;</span><span class="p">,</span> <span class="s2">&quot;long&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;short&quot;</span><span class="p">,</span>
@@ -6874,9 +6855,7 @@ measure to stop infinite loops. This should never trigger an error.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">collisions</span><span class="p">(</span>
-    <span class="n">log_errors</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;warn&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Edges</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Edges</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">collisions</span><span class="p">(</span><span class="n">log_errors</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;warn&#39;</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s1">&#39;error&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Edges</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Edges</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6942,7 +6921,8 @@ measure to stop infinite loops. This should never trigger an error.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">509</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">508</span>
+<span class="normal">509</span>
 <span class="normal">510</span>
 <span class="normal">511</span>
 <span class="normal">512</span>
@@ -6989,8 +6969,7 @@ measure to stop infinite loops. This should never trigger an error.</p>
 <span class="normal">553</span>
 <span class="normal">554</span>
 <span class="normal">555</span>
-<span class="normal">556</span>
-<span class="normal">557</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">collisions</span><span class="p">(</span>
+<span class="normal">556</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">collisions</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">log_errors</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;warn&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Edges</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Edges</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds collisions.</span>
@@ -7066,7 +7045,8 @@ order.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">559</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">558</span>
+<span class="normal">559</span>
 <span class="normal">560</span>
 <span class="normal">561</span>
 <span class="normal">562</span>
@@ -7095,8 +7075,7 @@ order.</p>
 <span class="normal">585</span>
 <span class="normal">586</span>
 <span class="normal">587</span>
-<span class="normal">588</span>
-<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]:</span>
+<span class="normal">588</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determines whether the routing was successful.</span>
 
 <span class="sd">    If it was successful and the start and end are facing each other,</span>
@@ -7173,7 +7152,8 @@ routing.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">262</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">261</span>
+<span class="normal">262</span>
 <span class="normal">263</span>
 <span class="normal">264</span>
 <span class="normal">265</span>
@@ -7244,8 +7224,7 @@ routing.</p>
 <span class="normal">330</span>
 <span class="normal">331</span>
 <span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">333</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ManhattanRouterSide</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A simple manhattan point router.</span>
 
@@ -7355,9 +7334,7 @@ routing.</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">clean_points</span><span class="p">(</span><span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
 </code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">clean_points</span><span class="p">(</span><span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]</span>
 </code></pre></div>          </div>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">clean_points</span><span class="p">(</span>
-    <span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">clean_points</span><span class="p">(</span><span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">DPoint</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7368,7 +7345,8 @@ routing.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2785</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2784</span>
+<span class="normal">2785</span>
 <span class="normal">2786</span>
 <span class="normal">2787</span>
 <span class="normal">2788</span>
@@ -7397,8 +7375,7 @@ routing.</p>
 <span class="normal">2811</span>
 <span class="normal">2812</span>
 <span class="normal">2813</span>
-<span class="normal">2814</span>
-<span class="normal">2815</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clean_points</span><span class="p">(</span>
+<span class="normal">2814</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clean_points</span><span class="p">(</span>
     <span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove useless points from a manhattan type of list.</span>
@@ -7443,15 +7420,7 @@ routing.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">droute_manhattan</span><span class="p">(</span>
-    <span class="n">port1</span><span class="p">:</span> <span class="n">DTrans</span><span class="p">,</span>
-    <span class="n">port2</span><span class="p">:</span> <span class="n">DTrans</span><span class="p">,</span>
-    <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">start_straight</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">end_straight</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">layout</span><span class="p">:</span> <span class="n">KCLayout</span> <span class="o">|</span> <span class="n">Layout</span><span class="p">,</span>
-    <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">droute_manhattan</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">DTrans</span><span class="p">,</span> <span class="n">port2</span><span class="p">:</span> <span class="n">DTrans</span><span class="p">,</span> <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_straight</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">end_straight</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">layout</span><span class="p">:</span> <span class="n">KCLayout</span> <span class="o">|</span> <span class="n">Layout</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7619,7 +7588,8 @@ to route straight as long as possible</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">222</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">221</span>
+<span class="normal">222</span>
 <span class="normal">223</span>
 <span class="normal">224</span>
 <span class="normal">225</span>
@@ -7652,8 +7622,7 @@ to route straight as long as possible</p>
 <span class="normal">252</span>
 <span class="normal">253</span>
 <span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">droute_manhattan</span><span class="p">(</span>
+<span class="normal">255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">droute_manhattan</span><span class="p">(</span>
     <span class="n">port1</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">,</span>
     <span class="n">port2</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">,</span>
     <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -7702,15 +7671,7 @@ to route straight as long as possible</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">droute_manhattan_180</span><span class="p">(</span>
-    <span class="n">port1</span><span class="p">:</span> <span class="n">DTrans</span><span class="p">,</span>
-    <span class="n">port2</span><span class="p">:</span> <span class="n">DTrans</span><span class="p">,</span>
-    <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">bend180_radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">start_straight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">end_straight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">layout</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">droute_manhattan_180</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">DTrans</span><span class="p">,</span> <span class="n">port2</span><span class="p">:</span> <span class="n">DTrans</span><span class="p">,</span> <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">bend180_radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">start_straight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end_straight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">layout</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7875,7 +7836,8 @@ to route straight as long as possible</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 97</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 96</span>
+<span class="normal"> 97</span>
 <span class="normal"> 98</span>
 <span class="normal"> 99</span>
 <span class="normal">100</span>
@@ -7904,8 +7866,7 @@ to route straight as long as possible</p>
 <span class="normal">123</span>
 <span class="normal">124</span>
 <span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">droute_manhattan_180</span><span class="p">(</span>
+<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">droute_manhattan_180</span><span class="p">(</span>
     <span class="n">port1</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">,</span>
     <span class="n">port2</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">,</span>
     <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -7950,13 +7911,7 @@ to route straight as long as possible</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">path_length_match_manhattan_route</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span>
-    <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">separation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">path_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">path_length_match_manhattan_route</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span> <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">separation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">path_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -8051,7 +8006,8 @@ of all routers.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">654</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">653</span>
+<span class="normal">654</span>
 <span class="normal">655</span>
 <span class="normal">656</span>
 <span class="normal">657</span>
@@ -8166,8 +8122,7 @@ of all routers.</p>
 <span class="normal">766</span>
 <span class="normal">767</span>
 <span class="normal">768</span>
-<span class="normal">769</span>
-<span class="normal">770</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">path_length_match_manhattan_route</span><span class="p">(</span>
+<span class="normal">769</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">path_length_match_manhattan_route</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span>
     <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -8298,14 +8253,7 @@ of all routers.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route_loosely</span><span class="p">(</span>
-    <span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span>
-    <span class="n">separation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">bbox_routing</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;minimal&quot;</span><span class="p">,</span> <span class="s2">&quot;full&quot;</span><span class="p">],</span>
-    <span class="n">start_bbox</span><span class="p">:</span> <span class="n">Box</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_bbox</span><span class="p">:</span> <span class="n">Box</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">allow_sbend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route_loosely</span><span class="p">(</span><span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span> <span class="n">separation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bbox_routing</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="s1">&#39;full&#39;</span><span class="p">],</span> <span class="n">start_bbox</span><span class="p">:</span> <span class="n">Box</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end_bbox</span><span class="p">:</span> <span class="n">Box</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">allow_sbend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -8317,7 +8265,8 @@ choose the shortest path.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1931</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1930</span>
+<span class="normal">1931</span>
 <span class="normal">1932</span>
 <span class="normal">1933</span>
 <span class="normal">1934</span>
@@ -8479,8 +8428,7 @@ choose the shortest path.</p>
 <span class="normal">2090</span>
 <span class="normal">2091</span>
 <span class="normal">2092</span>
-<span class="normal">2093</span>
-<span class="normal">2094</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_loosely</span><span class="p">(</span>
+<span class="normal">2093</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_loosely</span><span class="p">(</span>
     <span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span>
     <span class="n">separation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">bbox_routing</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;minimal&quot;</span><span class="p">,</span> <span class="s2">&quot;full&quot;</span><span class="p">],</span>
@@ -8658,14 +8606,7 @@ choose the shortest path.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route_manhattan</span><span class="p">(</span>
-    <span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span>
-    <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span>
-    <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">start_steps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_steps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route_manhattan</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span> <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span> <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_steps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end_steps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -8822,7 +8763,8 @@ to route straight as long as possible</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">592</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">591</span>
+<span class="normal">592</span>
 <span class="normal">593</span>
 <span class="normal">594</span>
 <span class="normal">595</span>
@@ -8874,8 +8816,7 @@ to route straight as long as possible</p>
 <span class="normal">641</span>
 <span class="normal">642</span>
 <span class="normal">643</span>
-<span class="normal">644</span>
-<span class="normal">645</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_manhattan</span><span class="p">(</span>
+<span class="normal">644</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_manhattan</span><span class="p">(</span>
     <span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
     <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
     <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -8943,14 +8884,7 @@ to route straight as long as possible</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route_manhattan_180</span><span class="p">(</span>
-    <span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span>
-    <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span>
-    <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">bend180_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">start_straight</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">end_straight</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route_manhattan_180</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span> <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">,</span> <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bend180_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_straight</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">end_straight</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -9094,7 +9028,8 @@ to route straight as long as possible</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">130</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">129</span>
+<span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span>
@@ -9182,8 +9117,7 @@ to route straight as long as possible</p>
 <span class="normal">215</span>
 <span class="normal">216</span>
 <span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_manhattan_180</span><span class="p">(</span>
+<span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_manhattan_180</span><span class="p">(</span>
     <span class="n">port1</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
     <span class="n">port2</span><span class="p">:</span> <span class="n">Port</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">,</span>
     <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -9287,23 +9221,7 @@ to route straight as long as possible</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route_smart</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">start_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">BasePort</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">],</span>
-    <span class="n">end_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">BasePort</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">],</span>
-    <span class="n">widths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">separation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">starts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
-    <span class="n">ends</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
-    <span class="n">bboxes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Box</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort_ports</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">waypoints</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="n">Trans</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">bbox_routing</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;minimal&quot;</span><span class="p">,</span> <span class="s2">&quot;full&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;minimal&quot;</span><span class="p">,</span>
-    <span class="n">allow_sbend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">route_debug</span><span class="p">:</span> <span class="n">RouteDebug</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route_smart</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">start_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">BasePort</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">],</span> <span class="n">end_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">BasePort</span> <span class="o">|</span> <span class="n">Trans</span><span class="p">],</span> <span class="n">widths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bend90_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">separation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">starts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">ends</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Step</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">bboxes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Box</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sort_ports</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">waypoints</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">|</span> <span class="n">Trans</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bbox_routing</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="s1">&#39;full&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">allow_sbend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">route_debug</span><span class="p">:</span> <span class="n">RouteDebug</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -9570,7 +9488,8 @@ Returns:
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 835</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 834</span>
+<span class="normal"> 835</span>
 <span class="normal"> 836</span>
 <span class="normal"> 837</span>
 <span class="normal"> 838</span>
@@ -10481,8 +10400,7 @@ Returns:
 <span class="normal">1743</span>
 <span class="normal">1744</span>
 <span class="normal">1745</span>
-<span class="normal">1746</span>
-<span class="normal">1747</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_smart</span><span class="p">(</span>
+<span class="normal">1746</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">route_smart</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">start_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">BasePort</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">],</span>
     <span class="n">end_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">BasePort</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">],</span>

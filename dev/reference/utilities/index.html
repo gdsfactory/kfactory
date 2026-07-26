@@ -5663,14 +5663,7 @@
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">as_png_data</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">layer_properties</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">resolution</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">),</span>
-    <span class="n">synchronous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">markers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">DShapeLike</span><span class="p">,</span> <span class="n">MarkerConfig</span><span class="p">]]</span>
-    <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">as_png_data</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">layer_properties</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">),</span> <span class="n">synchronous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">DShapeLike</span><span class="p">,</span> <span class="n">MarkerConfig</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5972,9 +5965,7 @@ instead of fitting the full cell.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">check_cell_ports</span><span class="p">(</span>
-    <span class="n">p1</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">check_cell_ports</span><span class="p">(</span><span class="n">p1</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6130,9 +6121,7 @@ instead of fitting the full cell.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">dpolygon_from_array</span><span class="p">(</span>
-    <span class="n">array</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">dpolygon_from_array</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6168,10 +6157,7 @@ instead of fitting the full cell.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">ensure_build_directory</span><span class="p">(</span>
-    <span class="n">subdirectory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mask&quot;</span><span class="p">,</span>
-    <span class="n">create_gitignore</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">ensure_build_directory</span><span class="p">(</span><span class="n">subdirectory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;mask&#39;</span><span class="p">,</span> <span class="n">create_gitignore</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6324,11 +6310,7 @@ git repository detection and .gitignore creation.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_build_path</span><span class="p">(</span>
-    <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">subdirectory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mask&quot;</span><span class="p">,</span>
-    <span class="n">file_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gds&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_build_path</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subdirectory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;mask&#39;</span><span class="p">,</span> <span class="n">file_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;gds&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6521,9 +6503,7 @@ and creates necessary directories.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_session_directory</span><span class="p">(</span>
-    <span class="n">custom_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">get_session_directory</span><span class="p">(</span><span class="n">custom_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6634,9 +6614,7 @@ and creates necessary directories.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">instance_port_name</span><span class="p">(</span>
-    <span class="n">inst</span><span class="p">:</span> <span class="n">Instance</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">instance_port_name</span><span class="p">(</span><span class="n">inst</span><span class="p">:</span> <span class="n">Instance</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6722,9 +6700,7 @@ and creates necessary directories.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">load_layout_options</span><span class="p">(</span>
-    <span class="o">**</span><span class="n">attributes</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LoadLayoutOptions</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">load_layout_options</span><span class="p">(</span><span class="o">**</span><span class="n">attributes</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LoadLayoutOptions</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6814,9 +6790,7 @@ handling of cell name conflicts pass
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">polygon_from_array</span><span class="p">(</span>
-    <span class="n">array</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Polygon</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">polygon_from_array</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Polygon</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6852,10 +6826,7 @@ handling of cell name conflicts pass
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">pprint_pins</span><span class="p">(</span>
-    <span class="n">pins</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Pin</span><span class="p">]</span> <span class="o">|</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">DPin</span><span class="p">],</span>
-    <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span> <span class="s2">&quot;um&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Table</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">pprint_pins</span><span class="p">(</span><span class="n">pins</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Pin</span><span class="p">]</span> <span class="o">|</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">DPin</span><span class="p">],</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;dbu&#39;</span><span class="p">,</span> <span class="s1">&#39;um&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Table</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6988,10 +6959,7 @@ the printing to enforce one or the other representation</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">pprint_ports</span><span class="p">(</span>
-    <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
-    <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span> <span class="s2">&quot;um&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Table</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">pprint_ports</span><span class="p">(</span><span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;dbu&#39;</span><span class="p">,</span> <span class="s1">&#39;um&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Table</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7250,9 +7218,7 @@ the printing to enforce one or the other representation</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">save_layout_options</span><span class="p">(</span>
-    <span class="o">**</span><span class="n">attributes</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">SaveLayoutOptions</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">save_layout_options</span><span class="p">(</span><span class="o">**</span><span class="n">attributes</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">SaveLayoutOptions</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7345,12 +7311,7 @@ gds without metadata pass <code>write_context_info=False</code></p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">update_default_trans</span><span class="p">(</span>
-    <span class="n">new_trans</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
-        <span class="nb">str</span><span class="p">,</span>
-        <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">],</span>
-    <span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">update_default_trans</span><span class="p">(</span><span class="n">new_trans</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

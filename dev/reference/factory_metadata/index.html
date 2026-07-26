@@ -5799,15 +5799,7 @@ simulation packages) can define their own schemas on top.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">target_kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fqn&quot;</span><span class="p">,</span> <span class="s2">&quot;object&quot;</span><span class="p">],</span>
-    <span class="n">target_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">kind</span><span class="p">:</span> <span class="n">FactoryMetadataProviderKind</span><span class="p">,</span>
-    <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-    <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">position</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;append&quot;</span><span class="p">,</span> <span class="s2">&quot;prepend&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;append&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">target_kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;fqn&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">],</span> <span class="n">target_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">FactoryMetadataProviderKind</span><span class="p">,</span> <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;append&#39;</span><span class="p">,</span> <span class="s1">&#39;prepend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;append&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5882,9 +5874,7 @@ simulation packages) can define their own schemas on top.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">providers_for</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qualified_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="nb">object</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">providers_for</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qualified_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6041,9 +6031,7 @@ interface without instantiating it.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">call_provider</span><span class="p">(</span>
-    <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">call_provider</span><span class="p">(</span><span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6124,9 +6112,7 @@ interface without instantiating it.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">provider_result_to_patch</span><span class="p">(</span>
-    <span class="n">record</span><span class="p">:</span> <span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_FactoryMetadataPatch</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">provider_result_to_patch</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_FactoryMetadataPatch</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6211,10 +6197,7 @@ interface without instantiating it.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">resolve_metadata</span><span class="p">(</span>
-    <span class="n">providers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">],</span>
-    <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FactoryMetadata</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">resolve_metadata</span><span class="p">(</span><span class="n">providers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">],</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">FactoryMetadata</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

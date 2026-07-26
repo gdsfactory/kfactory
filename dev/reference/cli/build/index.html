@@ -5404,75 +5404,7 @@
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">build</span><span class="p">(</span>
-    <span class="n">build_ref</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="nb">str</span><span class="p">,</span>
-        <span class="n">Argument</span><span class="p">(</span>
-            <span class="n">default</span><span class="o">=...</span><span class="p">,</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The file|module|function to execute:</span><span class="se">\n</span><span class="s2">Accepted Formats:</span><span class="se">\n</span><span class="s2">- /path/to/file.py::cell_function_name</span><span class="se">\n</span><span class="s2">- module.submodule::cell_function_name</span><span class="se">\n</span><span class="s2">- /path/to/file.py</span><span class="se">\n</span><span class="s2">- module.submodule&quot;</span><span class="p">,</span>
-        <span class="p">),</span>
-    <span class="p">],</span>
-    <span class="n">func_kwargs</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">Argument</span><span class="p">(</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Arguments used for --type function. Doesn&#39;t have any influence for other types&quot;</span>
-        <span class="p">),</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">show</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="nb">bool</span><span class="p">,</span>
-        <span class="n">Option</span><span class="p">(</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Show the file through klive in KLayout&quot;</span>
-        <span class="p">),</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">library</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">Option</span><span class="p">(</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Library(s) used by the main layout file. Only works for functions, not for &#39;__main__&#39; modules&quot;</span>
-        <span class="p">),</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">out_dir</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">Option</span><span class="p">(</span>
-            <span class="o">--</span><span class="n">out</span> <span class="o">-</span> <span class="nb">dir</span><span class="p">,</span>
-            <span class="o">-</span><span class="n">o</span><span class="p">,</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output directory for written layouts. Defaults to build/mask.&quot;</span><span class="p">,</span>
-        <span class="p">),</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">suffix</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="n">LayoutSuffix</span><span class="p">,</span>
-        <span class="n">Option</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Format of the layout files&quot;</span><span class="p">),</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="n">LayoutSuffix</span><span class="o">.</span><span class="n">oas</span><span class="p">,</span>
-    <span class="n">write_full</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="nb">bool</span><span class="p">,</span>
-        <span class="n">Option</span><span class="p">(</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Write the gds with full library support. Uses libraries passed with --library. Only works in function mode not on modules&quot;</span>
-        <span class="p">),</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">write_static</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="nb">bool</span><span class="p">,</span>
-        <span class="n">Option</span><span class="p">(</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Write a layout where all cells are converted to static (non-library) cells.&quot;</span>
-        <span class="p">),</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">write_nocontext</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="nb">bool</span><span class="p">,</span>
-        <span class="n">Option</span><span class="p">(</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Write the layout without any meta infos. This is useful for submitting the GDS to fabs.&quot;</span>
-        <span class="p">),</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">max_vertex_count</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="nb">int</span><span class="p">,</span>
-        <span class="n">Option</span><span class="p">(</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum number of vertices per polygon.&quot;</span>
-        <span class="p">),</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="mi">4000</span><span class="p">,</span>
-    <span class="n">max_cellname_length</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="nb">int</span><span class="p">,</span>
-        <span class="n">Option</span><span class="p">(</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum number of characters in a cell name.&quot;</span>
-        <span class="p">),</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="mi">99</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">build</span><span class="p">(</span><span class="n">build_ref</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Argument</span><span class="p">(</span><span class="n">default</span><span class="o">=...</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The file|module|function to execute:</span><span class="se">\n</span><span class="s1">Accepted Formats:</span><span class="se">\n</span><span class="s1">- /path/to/file.py::cell_function_name</span><span class="se">\n</span><span class="s1">- module.submodule::cell_function_name</span><span class="se">\n</span><span class="s1">- /path/to/file.py</span><span class="se">\n</span><span class="s1">- module.submodule&#39;</span><span class="p">)],</span> <span class="n">func_kwargs</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Argument</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Arguments used for --type function. Doesn&#39;t have any influence for other types&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Option</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s1">&#39;Show the file through klive in KLayout&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">library</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Option</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Library(s) used by the main layout file. Only works for functions, not for &#39;__main__&#39; modules&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Option</span><span class="p">(</span><span class="o">--</span><span class="n">out</span> <span class="o">-</span> <span class="nb">dir</span><span class="p">,</span> <span class="o">-</span><span class="n">o</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output directory for written layouts. Defaults to build/mask.&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">LayoutSuffix</span><span class="p">,</span> <span class="n">Option</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s1">&#39;Format of the layout files&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">LayoutSuffix</span><span class="o">.</span><span class="n">oas</span><span class="p">,</span> <span class="n">write_full</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Option</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write the gds with full library support. Uses libraries passed with --library. Only works in function mode not on modules&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">write_static</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Option</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write a layout where all cells are converted to static (non-library) cells.&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">write_nocontext</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Option</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write the layout without any meta infos. This is useful for submitting the GDS to fabs.&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">max_vertex_count</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Option</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s1">&#39;Maximum number of vertices per polygon.&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">4000</span><span class="p">,</span> <span class="n">max_cellname_length</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Option</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s1">&#39;Maximum number of characters in a cell name.&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">99</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
