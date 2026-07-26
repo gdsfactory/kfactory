@@ -2006,28 +2006,94 @@ class KCLayout(
                 " unique or pass `allow_duplicate` when creating the library"
             )
 
-    def delete_cell(self, cell: AnyTKCell | int) -> None:
-        """Delete a cell in the kcl object."""
-        with self.thread_lock:
-            if isinstance(cell, int):
-                self.layout.cell(cell).locked = False
-                self.layout.delete_cell(cell)
-                self.tkcells.pop(cell, None)
-            else:
-                ci = cell.cell_index()
-                self.layout.cell(ci).locked = False
-                self.layout.delete_cell(ci)
-                self.tkcells.pop(ci, None)
+    def delete_cell(
+        self, cell: AnyTKCell | int, *, delete_parents: bool = False
+    ) -> None:
+        """Delete a cell in the kcl object.
 
-    def delete_cell_rec(self, cell_index: int) -> None:
-        """Deletes a KCell plus all subcells."""
+
+        If `delete_parents` is false, the deletion might fail with a locked error from
+        KLayout. KLayout will refuse to delete a cell if any of its callers are locked
+        (i.e. parents or further ancestors).
+
+        Args:
+            cell: cell or its index to delete.
+            delete_parents: Also delete any parent (and its ancestor) cell.
+                This makes sense if we assume the parents and their parents are cached.
+        """
         with self.thread_lock:
+            ci = cell if isinstance(cell, int) else cell.cell_index()
+            kdbc = self[ci]._base.kdb_cell
+            kdbc.locked = False
+            if delete_parents:
+                parent_cis = kdbc.caller_cells()
+                parents = [self[ci] for ci in parent_cis]
+                for parent in parents:
+                    parent.locked = False
+                cis = [kdbc.cell_index(), *parent_cis]
+                self.layout.delete_cells(cis)
+                for ci in cis:
+                    self.tkcells.pop(ci, None)
+            else:
+                self.layout.delete_cell(kdbc)
+
+    def delete_cell_rec(self, cell_index: int, *, delete_parents: bool = False) -> None:
+        """Deletes a KCell plus all subcells.
+
+        If `delete_parents` is false, the deletion might fail with a locked error from
+        KLayout. KLayout will refuse to delete a cell if any of its callers are locked
+        (i.e. parents or further ancestors).
+
+        Args:
+            cell_index: Cell index to delete.
+            delete_parents: Also delete any parent (and its ancestor) cell.
+                This makes sense if we assume the parents and their parents are cached.
+        """
+
+        with self.thread_lock:
+            kdbc = self.layout.cell(cell_index)
+            kdbc.locked = False
+            if delete_parents:
+                parents = [self[ci] for ci in kdbc.caller_cells()]
+                for parent in parents:
+                    parent.locked = False
+                for parent in parents:
+                    self.tkcells.pop(parent.cell_index())
+                    parent._base.kdb_cell.delete()
+            for child in kdbc.called_cells():
+                self[child].locked = False
             self.layout.delete_cell_rec(cell_index)
             self.rebuild()
 
-    def delete_cells(self, cell_index_list: Sequence[int]) -> None:
-        """Delete a sequence of cell by indexes."""
+    def delete_cells(
+        self, cell_index_list: Sequence[int], *, delete_parents: bool = False
+    ) -> None:
+        """Delete a sequence of cell by indexes.
+
+
+        If `delete_parents` is false, the deletion might fail with a locked error from
+        KLayout. KLayout will refuse to delete a cell if any of its callers are locked
+        (i.e. parents or further ancestors).
+
+        Args:
+            cell_index_list: List of cell indexes to delete.
+            delete_parents: Also delete any parent (and its ancestor) cell.
+                This makes sense if we assume the parents and their parents are cached.
+        """
         with self.thread_lock:
+            if delete_parents:
+                parent_cis: set[int] = set().union(
+                    *[
+                        set(self.layout.cell(ci).caller_cells())
+                        for ci in cell_index_list
+                    ]
+                )
+                parents = [self.layout.cell(ci) for ci in parent_cis]
+                for parent in parents:
+                    parent.locked = False
+                for parent in parents:
+                    self.tkcells.pop(parent.cell_index(), None)
+                    parent.delete()
             for ci in cell_index_list:
                 self.layout.cell(ci).locked = False
                 self.tkcells.pop(ci, None)

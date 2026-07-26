@@ -1040,11 +1040,9 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         """
         self.plot()
 
-    def delete(self) -> None:
+    def delete(self, *, delete_parents: bool = False) -> None:
         """Delete the cell."""
-        ci = self.cell_index()
-        self._base.kdb_cell.locked = False
-        self.kcl.delete_cell(ci)
+        self.kcl.delete_cell(self, delete_parents=delete_parents)
 
     @abstractmethod
     def add_port(

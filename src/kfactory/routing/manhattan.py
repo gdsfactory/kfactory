@@ -40,7 +40,6 @@ __all__ = [
     "ManhattanRoutePathFunction",
     "ManhattanRoutePathFunction180",
     "clean_points",
-    "clean_points",
     "route_manhattan",
     "route_manhattan_180",
     "route_smart",

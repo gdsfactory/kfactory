@@ -152,7 +152,6 @@ __all__ = [
     "VInstanceGroup",
     "VInstancePorts",
     "VInstances",
-    "VInstances",
     "VKCell",
     "VShapes",
     "cell",

@@ -839,6 +839,88 @@ def test_return_wrong_type(
         return kcl.kcell()
 
     with pytest.raises(TypeError):
-        kcl.cell()(test_vk)()
+        kcl.cell()(test_vk)()  # ty:ignore[invalid-argument-type]
     with pytest.raises(TypeError):
-        kcl.vcell(test_kc)()
+        kcl.vcell(test_kc)()  # ty:ignore[invalid-argument-type]
+
+
+def _make_locked_hierarchy(
+    kcl: kf.KCLayout,
+    suffix: str,
+) -> tuple[kf.KCell, kf.KCell, kf.KCell]:
+    """Create grandparent -> parent -> child, all locked."""
+    child = kcl.kcell(f"child_{suffix}")
+    parent = kcl.kcell(f"parent_{suffix}")
+    grandparent = kcl.kcell(f"grandparent_{suffix}")
+    parent << child
+    grandparent << parent
+    child.locked = True
+    parent.locked = True
+    grandparent.locked = True
+    return child, parent, grandparent
+
+
+def test_delete_cell_locked_parents(kcl: kf.KCLayout) -> None:
+    """delete_cell without delete_parents fails when ancestors are locked."""
+    child, _parent, _grandparent = _make_locked_hierarchy(kcl, "delete_cell")
+
+    with pytest.raises(RuntimeError):
+        kcl.delete_cell(child.cell_index(), delete_parents=False)
+
+
+def test_delete_cell_with_delete_parents(kcl: kf.KCLayout) -> None:
+    """delete_cell with delete_parents=True removes ancestors and succeeds."""
+    child, parent, grandparent = _make_locked_hierarchy(kcl, "delete_cell_dp")
+    child_ci = child.cell_index()
+    parent_ci = parent.cell_index()
+    grandparent_ci = grandparent.cell_index()
+
+    kcl.delete_cell(child_ci, delete_parents=True)
+
+    assert not kcl.layout.is_valid_cell_index(parent_ci)
+    assert not kcl.layout.is_valid_cell_index(grandparent_ci)
+    assert not kcl.layout.is_valid_cell_index(child_ci)
+
+
+def test_delete_cell_rec_locked_parents(kcl: kf.KCLayout) -> None:
+    """delete_cell_rec without delete_parents fails when ancestors are locked."""
+    child, _parent, _grandparent = _make_locked_hierarchy(kcl, "delete_cell_rec")
+
+    with pytest.raises(RuntimeError):
+        kcl.delete_cell_rec(child.cell_index(), delete_parents=False)
+
+
+def test_delete_cell_rec_with_delete_parents(kcl: kf.KCLayout) -> None:
+    """delete_cell_rec with delete_parents=True removes ancestors and succeeds."""
+    child, parent, grandparent = _make_locked_hierarchy(kcl, "delete_cell_rec_dp")
+    child_ci = child.cell_index()
+    parent_ci = parent.cell_index()
+    grandparent_ci = grandparent.cell_index()
+
+    kcl.delete_cell_rec(child_ci, delete_parents=True)
+
+    assert not kcl.layout.is_valid_cell_index(parent_ci)
+    assert not kcl.layout.is_valid_cell_index(grandparent_ci)
+    assert not kcl.layout.is_valid_cell_index(child_ci)
+
+
+def test_delete_cells_locked_parents(kcl: kf.KCLayout) -> None:
+    """delete_cells without delete_parents fails when ancestors are locked."""
+    child, _parent, _grandparent = _make_locked_hierarchy(kcl, "delete_cells")
+
+    with pytest.raises(RuntimeError):
+        kcl.delete_cells([child.cell_index()], delete_parents=False)
+
+
+def test_delete_cells_with_delete_parents(kcl: kf.KCLayout) -> None:
+    """delete_cells with delete_parents=True removes ancestors and succeeds."""
+    child, parent, grandparent = _make_locked_hierarchy(kcl, "delete_cells_dp")
+    child_ci = child.cell_index()
+    parent_ci = parent.cell_index()
+    grandparent_ci = grandparent.cell_index()
+
+    kcl.delete_cells([child_ci], delete_parents=True)
+
+    assert not kcl.layout.is_valid_cell_index(parent_ci)
+    assert not kcl.layout.is_valid_cell_index(grandparent_ci)
+    assert not kcl.layout.is_valid_cell_index(child_ci)
