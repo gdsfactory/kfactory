@@ -5941,10 +5941,10 @@ and <code>__len__</code>.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
         <span class="n">obj</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># ty:ignore[unresolved-attribute]</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span>  <span class="c1"># ty:ignore[unresolved-attribute]</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">datatype</span> <span class="o">=</span> <span class="n">datatype</span>  <span class="c1"># ty:ignore[unresolved-attribute]</span>
-        <span class="k">return</span> <span class="n">obj</span>  <span class="c1"># ty:ignore[invalid-return-type]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">datatype</span> <span class="o">=</span> <span class="n">datatype</span>
+        <span class="k">return</span> <span class="n">obj</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve layer number[0] / datatype[1] of a layer.&quot;&quot;&quot;</span>
@@ -6216,10 +6216,10 @@ and <code>__len__</code>.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">value</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
     <span class="n">obj</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-    <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># ty:ignore[unresolved-attribute]</span>
-    <span class="n">obj</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span>  <span class="c1"># ty:ignore[unresolved-attribute]</span>
-    <span class="n">obj</span><span class="o">.</span><span class="n">datatype</span> <span class="o">=</span> <span class="n">datatype</span>  <span class="c1"># ty:ignore[unresolved-attribute]</span>
-    <span class="k">return</span> <span class="n">obj</span>  <span class="c1"># ty:ignore[invalid-return-type]</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">datatype</span> <span class="o">=</span> <span class="n">datatype</span>
+    <span class="k">return</span> <span class="n">obj</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
