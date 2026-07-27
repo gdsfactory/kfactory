@@ -2024,18 +2024,21 @@ class KCLayout(
         with self.thread_lock:
             ci = cell if isinstance(cell, int) else cell.cell_index()
             kdbc = self[ci]._base.kdb_cell
-            kdbc.locked = False
-            if delete_parents:
-                parent_cis = kdbc.caller_cells()
-                parents = [self[ci] for ci in parent_cis]
-                for parent in parents:
-                    parent.locked = False
-                cis = [kdbc.cell_index(), *parent_cis]
-                self.layout.delete_cells(cis)
-                for ci in cis:
+            if not kdbc._destroyed():
+                kdbc.locked = False
+                if delete_parents:
+                    parent_cis = kdbc.caller_cells()
+                    parents = [self[ci] for ci in parent_cis]
+                    for parent in parents:
+                        parent.locked = False
+                    cis = [kdbc.cell_index(), *parent_cis]
+                    self.layout.delete_cells(cis)
+                    for ci in cis:
+                        self.tkcells.pop(ci, None)
+                else:
+                    self.layout.delete_cell(kdbc)
                     self.tkcells.pop(ci, None)
-            else:
-                self.layout.delete_cell(kdbc)
+                self.rebuild()
 
     def delete_cell_rec(self, cell_index: int, *, delete_parents: bool = False) -> None:
         """Deletes a KCell plus all subcells.
@@ -2081,6 +2084,9 @@ class KCLayout(
                 This makes sense if we assume the parents and their parents are cached.
         """
         with self.thread_lock:
+            cell_index_list = [
+                ci for ci in cell_index_list if self.layout.cell(ci) is not None
+            ]
             if delete_parents:
                 parent_cis: set[int] = set().union(
                     *[
