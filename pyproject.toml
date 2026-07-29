@@ -45,7 +45,7 @@ optional-dependencies.ci = [
   "pytest-xdist>=3.8,<3.9",
   "types-cachetools>=7.0.0.20260713,<7.1",
   "types-requests>=2.33.0.20260712,<2.34",
-  "uv>=0.11.28,<0.12",
+  "uv>=0.11.28,<0.13",
 ]
 optional-dependencies.dev = [
   "kfactory[ci]",
