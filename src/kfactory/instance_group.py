@@ -30,7 +30,7 @@ __all__ = [
 ]
 
 
-class ProtoInstanceGroup[T: (int, float), TI: ProtoTInstance[Any] | VInstance[Any]](
+class ProtoInstanceGroup[T: (int, float), TI: ProtoTInstance[Any] | VInstance](
     GeometricObject[T], ABC
 ):
     insts: list[TI]
@@ -82,7 +82,7 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoTInstance[Any] | VInstance[An
     ) -> None:
         """Transform the instance group."""
         for inst in self.insts:
-            inst.transform(trans)
+            inst.transform(trans)  # ty: ignore[invalid-argument-type]
         if isinstance(trans, kdb.DTrans):
             trans = trans.to_itype(self.kcl.dbu)
         elif isinstance(trans, kdb.ICplxTrans):
@@ -93,14 +93,14 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoTInstance[Any] | VInstance[An
     def ibbox(self, layer: int | None = None) -> kdb.Box:
         """Get the total bounding box or the bounding box of a layer in dbu."""
         bb = kdb.Box()
-        for _bb in (inst.ibbox(layer) for inst in self.insts):
+        for _bb in (inst.ibbox(layer) for inst in self.insts):  # ty: ignore[invalid-argument-type]
             bb += _bb
         return bb
 
     def dbbox(self, layer: int | None = None) -> kdb.DBox:
         """Get the total bounding box or the bounding box of a layer in um."""
         bb = kdb.DBox()
-        for _bb in (inst.dbbox(layer) for inst in self.insts):
+        for _bb in (inst.dbbox(layer) for inst in self.insts):  # ty: ignore[invalid-argument-type]
             bb += _bb
         return bb
 
