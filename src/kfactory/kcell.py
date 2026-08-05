@@ -106,7 +106,6 @@ from .typings import (
     KC_co,
     MarkerConfig,
     MetaData,
-    TBaseCell_co,
 )
 from .utilities import (
     get_build_path,
@@ -320,7 +319,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     def name(self, value: str) -> None: ...
 
 
-class ProtoKCell[T: (int, float), TB: BaseKCell[Any]](GeometricObject[T], ABC):
+class ProtoKCell[T: (int, float), TB: BaseKCell](GeometricObject[T], ABC):
     _base: TB
 
     @property
@@ -406,7 +405,7 @@ class ProtoKCell[T: (int, float), TB: BaseKCell[Any]](GeometricObject[T], ABC):
         return self._base.vinsts
 
     @property
-    def base(self) -> TBaseCell_co:
+    def base(self) -> TB:
         return self._base
 
     @property
