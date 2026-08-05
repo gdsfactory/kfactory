@@ -94,7 +94,7 @@ def fix_spacing_tiled(
     """
     c = KCell(base=c.base)
     if tile_size is None:
-        tile_dim = min(25 * c.kcl.to_um(min_space), 250)
+        tile_dim = max(25 * c.kcl.to_um(min_space), 250)
         tile_size = (tile_dim, tile_dim)
     li = c.kcl.layer(layer)
     tp = kdb.TilingProcessor()
@@ -110,7 +110,7 @@ def fix_spacing_tiled(
 
     if smooth_factor != 0 or smooth_absolute:
         keep = "true" if smooth_keep_hv else "false"
-        smooth = smooth_absolute or min(int(smooth_factor * min_space), 1)
+        smooth = smooth_absolute or max(int(smooth_factor * min_space), 1)
         queue_str = (
             f"var sc = reg.space_check({min_space},"
             f" false, Metrics.{metrics.to_s()},"
@@ -171,7 +171,7 @@ def fix_spacing_sizing_tiled(
     c = KCell(base=c.base)
     tp = kdb.TilingProcessor()
     if tile_size is None:
-        tile_dim = min(25 * c.kcl.to_um(min_space), 250)
+        tile_dim = max(25 * c.kcl.to_um(min_space), 250)
         tile_size = (tile_dim, tile_dim)
     li = c.kcl.layer(layer)
     tp.frame = c.kcl.to_um(c.bbox(li))  # ty:ignore[invalid-assignment]
@@ -309,7 +309,7 @@ def fix_width_minkowski_tiled(
     tp.threads = n_threads or config.n_threads
 
     if tile_size is None:
-        tile_dim = min(25 * c.kcl.to_um(min_width), 250)
+        tile_dim = max(25 * c.kcl.to_um(min_width), 250)
         tile_size = (tile_dim, tile_dim)
 
     tp.tile_border(min_width * overlap * tp.dbu, min_width * overlap * tp.dbu)
@@ -389,7 +389,7 @@ def fix_width_and_spacing_minkowski_tiled(
     tp.threads = n_threads or config.n_threads
 
     if tile_size is None:
-        tile_dim = min(25 * c.kcl.to_um(min_space), 250)
+        tile_dim = max(25 * c.kcl.to_um(min_space), 250)
         tile_size = (tile_dim, tile_dim)
 
     border = min_space * tp.dbu * overlap
