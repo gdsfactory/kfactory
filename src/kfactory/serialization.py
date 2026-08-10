@@ -99,10 +99,10 @@ def clean_value(
     if isinstance(value, kdb.LayerInfo):
         return f"{value.name or str(value.layer) + '_' + str(value.datatype)}"
     if isinstance(value, list | tuple):
-        return "_".join(clean_value(v) for v in value)  # ty:ignore[invalid-argument-type]
+        return "_".join(clean_value(v) for v in value)
     if isinstance(value, dict):
         try:
-            return dict2name(**value)  # ty:ignore[invalid-argument-type]
+            return dict2name(**value)
         except TypeError as e:
             raise CellNameError(
                 "Dictionaries passed to functions as args/kwargs"
@@ -263,13 +263,12 @@ def serialize_setting(setting: MetaData) -> JSONSerializable:
         return None
     if isinstance(setting, dict):
         return {
-            str(name): serialize_setting(_setting)  # ty:ignore[invalid-argument-type]
-            for name, _setting in setting.items()
+            str(name): serialize_setting(_setting) for name, _setting in setting.items()
         }
     if isinstance(setting, list):
-        return [serialize_setting(s) for s in setting]  # ty:ignore[invalid-argument-type]
+        return [serialize_setting(s) for s in setting]
     if isinstance(setting, tuple):
-        return tuple(serialize_setting(s) for s in setting)  # ty:ignore[invalid-argument-type]
+        return tuple(serialize_setting(s) for s in setting)
     if serializible_shape_guard(setting):
         return f"!#{setting.__class__.__name__} {setting!s}"
     return setting  # ty:ignore[invalid-return-type]
@@ -279,9 +278,8 @@ def deserialize_setting(setting: JSONSerializable) -> MetaData:
     """Deserialize a setting."""
     if isinstance(setting, dict):
         return {
-            name: deserialize_setting(_setting)  # ty:ignore[invalid-argument-type]
-            for name, _setting in setting.items()
-        }  # ty:ignore[invalid-return-type]
+            name: deserialize_setting(_setting) for name, _setting in setting.items()
+        }
     if isinstance(setting, list):
         return [deserialize_setting(s) for s in setting]
     if isinstance(setting, tuple):
