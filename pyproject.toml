@@ -50,7 +50,7 @@ optional-dependencies.ci = [
 optional-dependencies.dev = [
   "kfactory[ci]",
   "pre-commit>=4.6,<4.7",
-  "python-lsp-server[all]>=1.14,<1.15",
+  "python-lsp-server[all]>=1.14,<1.16",
   "ruff~=0.16.0",
   "rust-just~=1.58.0",
   "scipy-stubs>=1.18,<1.19",
