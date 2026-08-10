@@ -12,8 +12,6 @@ from .settings import Info
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from .layout import KCLayout
-
 
 __all__ = [
     "LayerEnum",
@@ -82,7 +80,7 @@ class LayerEnum(int, Enum):  # ty:ignore[unsupported-base]
     layer: int
     datatype: int
     name: str
-    layout: constant[kdb.Layout]  # ty: ignore[not-subscriptable]
+    layout: kdb.Layout
 
     def __init__(self, layer: int, datatype: int) -> None:
         """Just here to make sure klayout knows the layer name."""
@@ -266,7 +264,7 @@ def layerenum_from_dict(
 ) -> type[LayerEnum]:
     from .layout import get_default_kcl
 
-    members: dict[str, constant[KCLayout] | tuple[int, int]] = {  # ty: ignore[not-subscriptable]
+    members: dict[str, constant | tuple[int, int]] = {
         "layout": constant(layout or get_default_kcl().layout)
     }
     for li in layers.model_dump().values():
