@@ -2816,8 +2816,11 @@ class KCLayout(
         return f"{self.__class__.__name__}({self.name}, n={len(self.kcells)})"
 
     def delete(self) -> None:
-        del kcls[self.name]
-        self.library.delete()
+        if kcls.get(self.name) is self:
+            del kcls[self.name]
+        if not self.library._destroyed():
+            self.library.delete()
+        self.tkcells = {}
 
     def routing_strategy(
         self,
