@@ -265,6 +265,7 @@ class Settings(BaseSettings):
     write_kfactory_settings: bool = True
     """Write kfactory version into the gds/oasis."""
     multi_xy_records: bool = False
+    max_vertex_count: int = 8000
 
     show_function: ShowFunction | None = None
 
