@@ -16,6 +16,7 @@ from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
+    Final,
     Protocol,
     TypeAliasType,
     TypedDict,
@@ -377,13 +378,13 @@ def _post_process[K: ProtoKCell[Any, Any]](
 
 @final
 class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
-    _f: Callable[KCellParams, KC]
+    _f: Final[Callable[KCellParams, KC]]
     _f_orig: Callable[KCellParams, ProtoTKCell[Any]]
     _f_schematic: Callable[KCellParams, TSchematic[Any]] | None = None
     cache: Cache[Hashable, Any] | dict[Hashable, Any]
     name: str
     kcl: KCLayout
-    output_type: type[KC]
+    output_type: Final[type[KC]]
     lvs_equivalent_ports: list[list[str]] | None = None
     ports_definition: PortsDefinition | None = None
     tags: set[str]
@@ -746,12 +747,12 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
 
 @final
 class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
-    _f: Callable[VKCellParams, VK]
+    _f: Final[Callable[VKCellParams, VK]]
     _f_orig: Callable[VKCellParams, VKCell]
     cache: Cache[Hashable, VK] | dict[Hashable, Any]
     name: str
     kcl: KCLayout
-    output_type: type[VK]
+    output_type: Final[type[VK]]
     lvs_equivalent_ports: list[list[str]] | None = None
     ports_definition: PortsDefinition | None = None
     tags: set[str]

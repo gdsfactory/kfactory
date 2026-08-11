@@ -198,7 +198,7 @@ class Factories[F: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]](
 
     def get_by_qualified_name(self, qualified_name: str) -> F | None:
         for factory in self._all:
-            if factory.qualified_name == qualified_name:
+            if factory.qualified_name == qualified_name:  # ty:ignore[invalid-attribute-access]
                 return factory
         return None
 
