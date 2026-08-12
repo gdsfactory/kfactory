@@ -7179,7 +7179,7 @@ specified in the constructor.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_by_qualified_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qualified_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">F</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">factory</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">factory</span><span class="o">.</span><span class="n">qualified_name</span> <span class="o">==</span> <span class="n">qualified_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">factory</span><span class="o">.</span><span class="n">qualified_name</span> <span class="o">==</span> <span class="n">qualified_name</span><span class="p">:</span>  <span class="c1"># ty:ignore[invalid-attribute-access]</span>
                 <span class="k">return</span> <span class="n">factory</span>
         <span class="k">return</span> <span class="kc">None</span>
 
@@ -10184,7 +10184,10 @@ them</p>
 <span class="normal">2893</span>
 <span class="normal">2894</span>
 <span class="normal">2895</span>
-<span class="normal">2896</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCLayout</span><span class="p">(</span>
+<span class="normal">2896</span>
+<span class="normal">2897</span>
+<span class="normal">2898</span>
+<span class="normal">2899</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCLayout</span><span class="p">(</span>
     <span class="n">BaseModel</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">&quot;allow&quot;</span><span class="p">,</span> <span class="n">validate_assignment</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Small extension to the klayout.db.Layout.</span>
@@ -12749,8 +12752,11 @@ them</p>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, n=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcells</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">del</span> <span class="n">kcls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">kcls</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">kcls</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">_destroyed</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tkcells</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">routing_strategy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -15515,10 +15521,7 @@ this layout.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2851</span>
-<span class="normal">2852</span>
-<span class="normal">2853</span>
-<span class="normal">2854</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2854</span>
 <span class="normal">2855</span>
 <span class="normal">2856</span>
 <span class="normal">2857</span>
@@ -15560,7 +15563,10 @@ this layout.</p>
 <span class="normal">2893</span>
 <span class="normal">2894</span>
 <span class="normal">2895</span>
-<span class="normal">2896</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generic_factory</span><span class="p">[</span><span class="n">F</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]](</span>
+<span class="normal">2896</span>
+<span class="normal">2897</span>
+<span class="normal">2898</span>
+<span class="normal">2899</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generic_factory</span><span class="p">[</span><span class="n">F</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]](</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">F</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
