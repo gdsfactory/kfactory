@@ -12,7 +12,7 @@ from .exceptions import (
     PortWidthMismatchError,
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
-from .instance import DInstance, Instance, ProtoTInstance, VInstance
+from .instance import DInstance, Instance, ProtoInstance, ProtoTInstance, VInstance
 from .port import BasePort, DPort, Port, ProtoPort
 from .ports import DCreatePort, DPorts, ICreatePort, Ports, ProtoPorts
 
@@ -30,7 +30,7 @@ __all__ = [
 ]
 
 
-class ProtoInstanceGroup[T: (int, float), TI: ProtoTInstance[Any] | VInstance](
+class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
     GeometricObject[T], ABC
 ):
     insts: list[TI]
@@ -82,7 +82,7 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoTInstance[Any] | VInstance](
     ) -> None:
         """Transform the instance group."""
         for inst in self.insts:
-            inst.transform(trans)  # ty: ignore[invalid-argument-type]
+            inst.transform(trans)
         if isinstance(trans, kdb.DTrans):
             trans = trans.to_itype(self.kcl.dbu)
         elif isinstance(trans, kdb.ICplxTrans):
@@ -93,14 +93,14 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoTInstance[Any] | VInstance](
     def ibbox(self, layer: int | None = None) -> kdb.Box:
         """Get the total bounding box or the bounding box of a layer in dbu."""
         bb = kdb.Box()
-        for _bb in (inst.ibbox(layer) for inst in self.insts):  # ty: ignore[invalid-argument-type]
+        for _bb in (inst.ibbox(layer) for inst in self.insts):
             bb += _bb
         return bb
 
     def dbbox(self, layer: int | None = None) -> kdb.DBox:
         """Get the total bounding box or the bounding box of a layer in um."""
         bb = kdb.DBox()
-        for _bb in (inst.dbbox(layer) for inst in self.insts):  # ty: ignore[invalid-argument-type]
+        for _bb in (inst.dbbox(layer) for inst in self.insts):
             bb += _bb
         return bb
 

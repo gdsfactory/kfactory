@@ -254,6 +254,24 @@ def test_kclayout_rebuild(kcl: kf.KCLayout, layers: Layers) -> None:
     assert len(list(kcl.layout.each_cell())) == 1
 
 
+def test_kclayout_delete_stale_destroyed_layout(kcl: kf.KCLayout) -> None:
+    kcl.kcell(name="cached_cell")
+    kcl.library.delete()
+    replacement = kf.KCLayout(name=kcl.name)
+
+    kcl.delete()
+
+    assert kf.kcls[kcl.name] is replacement
+    assert kcl.tkcells == {}
+
+    kcl.delete()
+    assert kf.kcls[kcl.name] is replacement
+
+    replacement.delete()
+    assert kcl.name not in kf.kcls
+    assert replacement.library._destroyed()
+
+
 def test_kclayout_assign(kcl: kf.KCLayout, layers: Layers) -> None:
     kcl2 = kf.KCLayout(name="kcl2")
     kcl2.infos = layers
