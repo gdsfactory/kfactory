@@ -60,7 +60,7 @@ optional-dependencies.dev = [
   "types-docutils>=0.22.3.20260712,<0.23",
   "types-pygments>=2.20.0.20260518,<2.21",
   "types-requests>=2.33.0.20260712,<2.34",
-  "types-setuptools>=83.0.0.20260706,<83.1",
+  "types-setuptools>=83.0.0.20260706,<84.1",
 ]
 optional-dependencies.docs = [
   "erdantic>=1.2.1,<1.3",
