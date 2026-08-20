@@ -330,13 +330,13 @@ def route_bundle(
     if isinstance(starts, int | float):
         starts = c.kcl.to_dbu(starts)
     elif isinstance(starts, list):
-        if isinstance(starts[0], int | float):
+        if starts and isinstance(starts[0], int | float):
             starts = [c.kcl.to_dbu(cast("int|float", start)) for start in starts]
         starts = cast("int | list[int] | list[Step] | list[list[Step]]", starts)
     if isinstance(ends, int | float):
         ends = c.kcl.to_dbu(ends)
     elif isinstance(ends, list):
-        if isinstance(ends[0], int | float):
+        if ends and isinstance(ends[0], int | float):
             ends = [c.kcl.to_dbu(cast("int|float", end)) for end in ends]
         ends = cast("int | list[int] | list[Step] | list[list[Step]]", ends)
     if waypoints is not None:
