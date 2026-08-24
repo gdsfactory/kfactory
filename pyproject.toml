@@ -57,7 +57,7 @@ optional-dependencies.dev = [
   "ty>=0.0.59,<0.1",
   "types-cachetools>=7.0.0.20260713,<7.1",
   "types-docutils>=0.22.3.20260712,<0.23",
-  "types-pygments>=2.20.0.20260518,<2.21",
+  "types-pygments>=2.20.0.20260518,<2.22",
   "types-requests>=2.33.0.20260712,<2.34",
   "types-setuptools>=83.0.0.20260706,<83.1",
 ]
