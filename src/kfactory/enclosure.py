@@ -590,6 +590,9 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
     Attributes:
         layer_sections: Mapping of layers to their layer sections.
         main_layer: Layer which to use unless specified otherwise.
+        bbox_sections: Mapping of layers to their bbox offset. Sorted by layer on
+            construction, so iteration order is deterministic (the enclosure is
+            frozen).
     """
 
     layer_sections: dict[kdb.LayerInfo, LayerSection]
@@ -672,7 +675,9 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             main_layer=main_layer,
             kcl=kcl,
             layer_sections=layer_sections,
-            bbox_sections={t[0]: t[1] for t in bbox_sections},
+            bbox_sections={
+                t[0]: t[1] for t in sorted(bbox_sections, key=lambda t: str(t[0]))
+            },
         )
         self._name = name
 
@@ -688,12 +693,8 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             "main_layer": self.main_layer,
         }
         if self.bbox_sections:
-            serialized["bbox_sections"] = self._sorted_bbox_sections()
+            serialized["bbox_sections"] = list(self.bbox_sections.items())
         return serialized
-
-    def _sorted_bbox_sections(self) -> list[tuple[kdb.LayerInfo, int]]:
-        """Bbox sections in a deterministic order."""
-        return sorted(self.bbox_sections.items(), key=lambda kv: str(kv[0]))
 
     def __hash__(self) -> int:  # make hashable BaseModel subclass
         """Calculate a unique hash of the enclosure."""
@@ -703,8 +704,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                 self.main_layer,
                 tuple(self.layer_sections.items()),
                 tuple(
-                    (str(layer), offset)
-                    for layer, offset in self._sorted_bbox_sections()
+                    (str(layer), offset) for layer, offset in self.bbox_sections.items()
                 ),
             )
         )
@@ -746,9 +746,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         list_to_hash: list[tuple[str, ...]] = [(str(self.main_layer),)]
         for layer, layer_section in self.layer_sections.items():
             list_to_hash.append((str(layer), str(layer_section.sections)))
-        for layer, offset in sorted(
-            self.bbox_sections.items(), key=lambda kv: str(kv[0])
-        ):
+        for layer, offset in self.bbox_sections.items():
             list_to_hash.append((str(layer), "bbox", str(offset)))
         return sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]  # noqa: S324
 
