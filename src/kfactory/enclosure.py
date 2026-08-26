@@ -678,7 +678,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
 
     @model_serializer
     def _serialize(self) -> dict[str, Any]:
-        return {
+        serialized: dict[str, Any] = {
             "name": self.name,
             "sections": [
                 (layer, s.d_max) if s.d_min is None else (layer, s.d_min, s.d_max)
@@ -687,10 +687,27 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             ],
             "main_layer": self.main_layer,
         }
+        if self.bbox_sections:
+            serialized["bbox_sections"] = self._sorted_bbox_sections()
+        return serialized
+
+    def _sorted_bbox_sections(self) -> list[tuple[kdb.LayerInfo, int]]:
+        """Bbox sections in a deterministic order."""
+        return sorted(self.bbox_sections.items(), key=lambda kv: str(kv[0]))
 
     def __hash__(self) -> int:  # make hashable BaseModel subclass
         """Calculate a unique hash of the enclosure."""
-        return hash((str(self), self.main_layer, tuple(self.layer_sections.items())))
+        return hash(
+            (
+                str(self),
+                self.main_layer,
+                tuple(self.layer_sections.items()),
+                tuple(
+                    (str(layer), offset)
+                    for layer, offset in self._sorted_bbox_sections()
+                ),
+            )
+        )
 
     def to_dtype(self, kcl: KCLayout) -> DLayerEnclosure:
         """Convert the enclosure to a um based enclosure."""

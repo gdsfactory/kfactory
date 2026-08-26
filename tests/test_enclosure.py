@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 import kfactory as kf
@@ -116,6 +118,58 @@ def test_um_enclosure_nodbu(layers: Layers) -> None:
                 (layers.WGCLAD, -2, 1),
             ]
         )
+
+
+def test_bbox_sections_gds_roundtrip(
+    kcl: kf.KCLayout, layers: Layers, tmp_path: Path
+) -> None:
+    """``bbox_sections`` survive a GDS metadata round-trip.
+
+    Regression: the enclosure serializer used to emit only
+    ``name``/``sections``/``main_layer``, so bbox sections never reached the file.
+    """
+    enc = kcl.get_enclosure(
+        kf.LayerEnclosure(
+            sections=[(layers.WGCLAD, 3000)],
+            main_layer=layers.WG,
+            bbox_sections=[(layers.FILL1, 2000)],
+            name="enc_bbox",
+        )
+    )
+    xs = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=500, enclosure=enc, name="xs_bbox")
+    )
+    c = kcl.kcell("bbox_sections_top")
+    c.shapes(kcl.find_layer(layers.WG)).insert(kf.kdb.Box(0, 0, 1000, 500))
+
+    path = tmp_path / "bbox_sections.gds"
+    kcl.write(path)
+    kcl_r = kf.KCLayout("BBOX_SECTIONS_R", infos=Layers)
+    kcl_r.read(path)
+
+    restored_enc = kcl_r.get_enclosure("enc_bbox")
+    assert restored_enc.bbox_sections == {layers.FILL1: 2000}
+    assert restored_enc == enc
+
+    restored_xs = kcl_r.get_symmetrical_cross_section("xs_bbox")
+    assert restored_xs.bbox_sections == {layers.FILL1: 2000}
+    assert restored_xs == xs
+
+
+def test_bbox_sections_eq_and_hash_agree(layers: Layers) -> None:
+    """Enclosures differing only in ``bbox_sections`` are unequal and hash apart."""
+    without_bbox = kf.LayerEnclosure(
+        sections=[(layers.WGCLAD, 3000)], main_layer=layers.WG, name="enc_hash"
+    )
+    with_bbox = kf.LayerEnclosure(
+        sections=[(layers.WGCLAD, 3000)],
+        main_layer=layers.WG,
+        bbox_sections=[(layers.FILL1, 2000)],
+        name="enc_hash",
+    )
+
+    assert without_bbox != with_bbox
+    assert hash(without_bbox) != hash(with_bbox)
 
 
 def test_pdkenclosure(layers: Layers, straight_blank: kf.KCell) -> None:
