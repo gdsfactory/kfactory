@@ -697,6 +697,8 @@ class KCLayout(
             tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]
         ]
         | None = None,
+        bbox_sections: Sequence[tuple[kdb.LayerInfo, int]] = [],
+        dbbox_sections: Sequence[tuple[kdb.LayerInfo, float]] | None = None,
     ) -> LayerEnclosure:
         """Create a new LayerEnclosure in the KCLayout."""
         if name is None and main_layer is not None and main_layer.name != "":
@@ -706,6 +708,8 @@ class KCLayout(
             dsections=dsections,
             name=name,
             main_layer=main_layer,
+            bbox_sections=bbox_sections,
+            dbbox_sections=dbbox_sections,
             kcl=self,
         )
 

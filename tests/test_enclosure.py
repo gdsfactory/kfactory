@@ -156,6 +156,124 @@ def test_bbox_sections_gds_roundtrip(
     assert restored_xs == xs
 
 
+def test_bbox_sections_dtype_roundtrip(kcl: kf.KCLayout, layers: Layers) -> None:
+    """``bbox_sections`` survive the dbu -> um -> dbu conversion.
+
+    Regression: `DLayerEnclosure` had no `bbox_sections` field, so `to_dtype`
+    silently dropped them.
+    """
+    enc = kf.LayerEnclosure(
+        sections=[(layers.WGCLAD, 3000)],
+        main_layer=layers.WG,
+        bbox_sections=[(layers.FILL1, 2000), (layers.FILL2, -500)],
+        name="enc_dtype_bbox",
+    )
+
+    denc = enc.to_dtype(kcl)
+    assert denc.bbox_sections == [(layers.FILL1, 2.0), (layers.FILL2, -0.5)]
+    assert denc.to_itype(kcl) == enc
+
+
+def test_bbox_sections_dbbox_sections_equivalent(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    """``dbbox_sections`` is the um based equivalent of ``bbox_sections``."""
+    enc = kf.LayerEnclosure(
+        sections=[(layers.WGCLAD, 3000)],
+        main_layer=layers.WG,
+        bbox_sections=[(layers.FILL1, 2000)],
+        kcl=kcl,
+    )
+    enc_um = kf.LayerEnclosure(
+        sections=[(layers.WGCLAD, 3000)],
+        main_layer=layers.WG,
+        dbbox_sections=[(layers.FILL1, 2.0)],
+        kcl=kcl,
+    )
+
+    assert enc == enc_um
+
+
+def test_dbbox_sections_nodbu(layers: Layers) -> None:
+    """When defining um bbox sections, kcl must be defined."""
+    with pytest.raises(AssertionError):
+        kf.LayerEnclosure(main_layer=layers.WG, dbbox_sections=[(layers.FILL1, 2.0)])
+
+
+def test_bbox_sections_spec_roundtrip(kcl: kf.KCLayout, layers: Layers) -> None:
+    """A dumped enclosure fed back through ``get_enclosure`` keeps its bbox sections.
+
+    Regression: `LayerEnclosureSpec` had no `bbox_sections` key and the dict
+    branches of `get_enclosure` dropped it.
+    """
+    enc = kf.LayerEnclosure(
+        sections=[(layers.WGCLAD, 3000)],
+        main_layer=layers.WG,
+        bbox_sections=[(layers.FILL1, 2000)],
+        name="enc_spec_bbox",
+    )
+
+    restored = kcl.get_enclosure(enc.model_dump())
+    assert restored.bbox_sections == {layers.FILL1: 2000}
+    assert restored == enc
+
+
+def test_bbox_sections_spec_um(kcl: kf.KCLayout, layers: Layers) -> None:
+    """A um based spec can define bbox sections via ``dbbox_sections``."""
+    spec: kf.enclosure.LayerEnclosureSpec = {
+        "main_layer": layers.WG,
+        "dsections": [(layers.WGCLAD, 3.0)],
+        "dbbox_sections": [(layers.FILL1, 2.0)],
+        "name": "enc_spec_um_bbox",
+    }
+
+    enc = kcl.get_enclosure(spec)
+    assert enc.bbox_sections == {layers.FILL1: 2000}
+
+
+def test_kcell_layer_enclosures_spec_bbox_sections(layers: Layers) -> None:
+    """``KCellLayerEnclosures`` specs keep bbox sections, and reject um specs."""
+    collection = kf.enclosure.KCellLayerEnclosures(enclosures=[])
+
+    enc = collection.get_enclosure(
+        {
+            "main_layer": layers.WG,
+            "sections": [(layers.WGCLAD, 3000)],
+            "bbox_sections": [(layers.FILL1, 2000)],
+        }
+    )
+    assert enc.bbox_sections == {layers.FILL1: 2000}
+    assert collection.enclosures == [enc]
+
+    with pytest.raises(ValueError, match="cannot be converted without"):
+        collection.get_enclosure(
+            {
+                "main_layer": layers.WG,
+                "dbbox_sections": [(layers.FILL1, 2.0)],
+            }
+        )
+
+
+def test_create_layer_enclosure_bbox_sections(kcl: kf.KCLayout, layers: Layers) -> None:
+    """``KCLayout.create_layer_enclosure`` can express bbox sections."""
+    enc = kcl.create_layer_enclosure(
+        sections=[(layers.WGCLAD, 3000)],
+        main_layer=layers.WG,
+        name="enc_created_bbox",
+        bbox_sections=[(layers.FILL1, 2000)],
+    )
+    assert enc.bbox_sections == {layers.FILL1: 2000}
+    assert kcl.layer_enclosures["enc_created_bbox"] is enc
+
+    enc_um = kcl.create_layer_enclosure(
+        dsections=[(layers.WGCLAD, 3.0)],
+        main_layer=layers.WG,
+        name="enc_created_bbox_um",
+        dbbox_sections=[(layers.FILL1, 2.0)],
+    )
+    assert enc_um.bbox_sections == {layers.FILL1: 2000}
+
+
 def test_bbox_sections_eq_and_hash_agree(layers: Layers) -> None:
     """Enclosures differing only in ``bbox_sections`` are unequal and hash apart."""
     without_bbox = kf.LayerEnclosure(

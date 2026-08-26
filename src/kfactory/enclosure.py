@@ -574,13 +574,20 @@ class LayerSection(BaseModel):
 
 
 class DLayerEnclosure(BaseModel, arbitrary_types_allowed=True):
+    """um based version of [LayerEnclosure][kfactory.enclosure.LayerEnclosure]."""
+
     sections: list[tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]]
     name: str | None = None
     main_layer: kdb.LayerInfo
+    bbox_sections: list[tuple[kdb.LayerInfo, float]] = Field(default_factory=list)
 
     def to_itype(self, kcl: KCLayout) -> LayerEnclosure:
         return LayerEnclosure(
-            dsections=self.sections, name=self.name, main_layer=self.main_layer, kcl=kcl
+            dsections=self.sections,
+            name=self.name,
+            main_layer=self.main_layer,
+            dbbox_sections=self.bbox_sections,
+            kcl=kcl,
         )
 
 
@@ -626,6 +633,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         ]
         | None = None,
         bbox_sections: Sequence[tuple[kdb.LayerInfo, int]] = [],
+        dbbox_sections: Sequence[tuple[kdb.LayerInfo, float]] | None = None,
         kcl: KCLayout | None = None,
     ) -> None:
         """Constructor of new enclosure.
@@ -637,9 +645,13 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                 cell name this name will be used for enclosure arguments.
             main_layer: Main layer used if the functions don't get an explicit layer.
             dsections: Same as sections but min/max defined in um
+            bbox_sections: tuples of (layer, offset) to grow the bounding box of the
+                reference by `offset` on `layer`.
+            dbbox_sections: Same as `bbox_sections` but the offset defined in um.
             kcl: `KCLayout` Used for conversion dbu -> um or when copying.
-                Must be specified if `desections` is not `None`. Also necessary
-                if copying to another layout and not all layers used are LayerInfos.
+                Must be specified if `dsections` or `dbbox_sections` is not `None`.
+                Also necessary if copying to another layout and not all layers used
+                are LayerInfos.
         """
         layer_sections: dict[kdb.LayerInfo, LayerSection] = {}
 
@@ -658,6 +670,15 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                             kcl.to_dbu(section[2]),
                         )
                     )
+
+        if dbbox_sections is not None:
+            assert kcl is not None, (
+                "If bbox sections in um are defined, kcl must be set"
+            )
+            bbox_sections = [
+                *bbox_sections,
+                *((layer, kcl.to_dbu(offset)) for layer, offset in dbbox_sections),
+            ]
 
         for sec in sorted(
             sections,
@@ -723,6 +744,10 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                 for section in layer_section.sections
             ],
             main_layer=self.main_layer,
+            bbox_sections=[
+                (layer, kcl.to_um(offset))
+                for layer, offset in self.bbox_sections.items()
+            ],
         )
 
     @property
@@ -1199,6 +1224,8 @@ class LayerEnclosureSpec(TypedDict):
     dsections: NotRequired[
         list[tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]]
     ]
+    bbox_sections: NotRequired[list[tuple[kdb.LayerInfo, int]]]
+    dbbox_sections: NotRequired[list[tuple[kdb.LayerInfo, float]]]
 
 
 class LayerEnclosureCollection(BaseModel):
@@ -1253,11 +1280,21 @@ class KCellLayerEnclosures(BaseModel):
     ) -> LayerEnclosure:
         if isinstance(enclosure, str):
             return self[enclosure]
-        if isinstance(enclosure, dict) and enclosure.get("dsections") is None:
+        if isinstance(enclosure, dict):
+            if (
+                enclosure.get("dsections") is not None
+                or enclosure.get("dbbox_sections") is not None
+            ):
+                raise ValueError(
+                    "um based enclosure specs (`dsections`/`dbbox_sections`) cannot be"
+                    " converted without a `KCLayout`. Use `KCLayout.get_enclosure` or"
+                    " pass a `LayerEnclosure` instead."
+                )
             enclosure = LayerEnclosure(
                 sections=enclosure.get("sections", []),
                 name=enclosure.get("name"),
                 main_layer=enclosure["main_layer"],
+                bbox_sections=enclosure.get("bbox_sections", []),
             )
 
         if enclosure not in self.enclosures:
@@ -1787,6 +1824,8 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
                     dsections=enclosure.get("dsections", []),
                     name=enclosure.get("name"),
                     main_layer=enclosure["main_layer"],
+                    bbox_sections=enclosure.get("bbox_sections", []),
+                    dbbox_sections=enclosure.get("dbbox_sections"),
                     kcl=kcl,
                 )
             else:
@@ -1794,6 +1833,8 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
                     sections=enclosure.get("sections", []),
                     name=enclosure.get("name"),
                     main_layer=enclosure["main_layer"],
+                    bbox_sections=enclosure.get("bbox_sections", []),
+                    dbbox_sections=enclosure.get("dbbox_sections"),
                     kcl=kcl,
                 )
         enclosure = cast("LayerEnclosure", enclosure)
