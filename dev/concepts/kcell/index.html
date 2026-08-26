@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5633,7 +5633,7 @@ geometry API. Coordinates can be expressed in <strong>database units (DBU)</stro
 </tbody>
 </table>
 <p>The default DBU for <code>kf.kcl</code> is <strong>1 nm</strong> (i.e. <code>dbu = 0.001</code>), so 1 µm = 1000 DBU.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_rect&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"my_rect"</span><span class="p">)</span>
 
 <span class="c1"># Add a 10 µm × 2 µm rectangle using µm coordinates (DBox)</span>
 <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -5646,7 +5646,7 @@ geometry API. Coordinates can be expressed in <strong>database units (DBU)</stro
 <img alt="png" src="../kcell/output_5_0.png" /></p>
 <h3 id="dbu-vs-m">DBU vs µm</h3>
 <p>The same shape expressed in DBU:</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_dbu</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_rect_dbu&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_dbu</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"my_rect_dbu"</span><span class="p">)</span>
 <span class="c1"># 10 µm = 10000 nm = 10000 DBU; 2 µm = 2000 DBU</span>
 <span class="n">c_dbu</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="o">-</span><span class="mi">5000</span><span class="p">,</span> <span class="o">-</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))</span>
 <span class="n">c_dbu</span>
@@ -5668,13 +5668,13 @@ DBU grid automatically.</p>
 </ul>
 <p>Ports can be added in µm (<code>add_port</code>) or DBU coordinates (<code>add_port</code> with <code>dbu=True</code>
 or by setting integer positions directly).</p>
-<div class="highlight"><pre><span></span><code><span class="n">wg</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;wg_with_ports&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">wg</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"wg_with_ports"</span><span class="p">)</span>
 <span class="n">wg</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
 
 <span class="c1"># Left port: facing west (180°), centre at (-5, 0), width 1 µm</span>
 <span class="n">wg</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
     <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span>
         <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">layer</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">),</span>
@@ -5684,7 +5684,7 @@ or by setting integer positions directly).</p>
 <span class="c1"># Right port: facing east (0°)</span>
 <span class="n">wg</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
     <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span>
         <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">layer</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">),</span>
@@ -5715,19 +5715,19 @@ or by setting integer positions directly).</p>
     <span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A simple straight waveguide.</span>
+<span class="w">    </span><span class="sd">"""A simple straight waveguide.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Length in µm.</span>
 <span class="sd">        width: Width in µm.</span>
 <span class="sd">        layer: Layer for the waveguide core.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">hw</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">hw</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">hw</span><span class="p">))</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
             <span class="n">width</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
             <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">),</span>
@@ -5736,7 +5736,7 @@ or by setting integer positions directly).</p>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
             <span class="n">width</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
             <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">),</span>
@@ -5759,11 +5759,11 @@ or by setting integer positions directly).</p>
 </code></pre></div>
 <h3 id="caching-same-arguments-same-object">Caching: same arguments → same object</h3>
 <div class="highlight"><pre><span></span><code><span class="n">s2</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Same object: </span><span class="si">{</span><span class="n">s</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="n">s2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Same object: </span><span class="si">{</span><span class="n">s</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="n">s2</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="n">s3</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Different length → different object: </span><span class="si">{</span><span class="n">s</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="n">s3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Different name: </span><span class="si">{</span><span class="n">s3</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Different length → different object: </span><span class="si">{</span><span class="n">s</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="n">s3</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Different name: </span><span class="si">{</span><span class="n">s3</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Same object: True
 Different length → different object: False
@@ -5780,7 +5780,7 @@ netlists or reproducing a layout from metadata alone.</p>
 <p>Use the <code>&lt;&lt;</code> operator (or <code>create_inst</code>) to place one cell inside another.
 An instance is a <em>pointer</em> — the underlying geometry is stored once; instances just
 carry position/rotation transforms.</p>
-<div class="highlight"><pre><span></span><code><span class="n">circuit</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;two_waveguides&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">circuit</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"two_waveguides"</span><span class="p">)</span>
 
 <span class="n">wg_a</span> <span class="o">=</span> <span class="n">circuit</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">wg_b</span> <span class="o">=</span> <span class="n">circuit</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -5788,8 +5788,8 @@ carry position/rotation transforms.</p>
 <span class="c1"># Place wg_b 5 µm above wg_a</span>
 <span class="n">wg_b</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 
-<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">wg_a</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;top_&quot;</span><span class="p">)</span>
-<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">wg_b</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;bot_&quot;</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">wg_a</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"top_"</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">wg_b</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"bot_"</span><span class="p">)</span>
 <span class="n">circuit</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
@@ -5798,13 +5798,13 @@ carry position/rotation transforms.</p>
 <h3 id="port-based-connection-with-connect">Port-based connection with <code>connect</code></h3>
 <p><code>instance.connect("port_name", other_instance, "other_port_name")</code> moves and rotates
 <code>instance</code> so that the named port aligns with the other port face-to-face.</p>
-<div class="highlight"><pre><span></span><code><span class="n">line</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;connected_waveguides&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">line</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"connected_waveguides"</span><span class="p">)</span>
 <span class="n">seg1</span> <span class="o">=</span> <span class="n">line</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">seg2</span> <span class="o">=</span> <span class="n">line</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="n">seg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+<span class="n">seg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
-<span class="n">line</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;seg1_&quot;</span><span class="p">)</span>
-<span class="n">line</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg2</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;seg2_&quot;</span><span class="p">)</span>
+<span class="n">line</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"seg1_"</span><span class="p">)</span>
+<span class="n">line</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg2</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"seg2_"</span><span class="p">)</span>
 <span class="n">line</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
@@ -5843,7 +5843,7 @@ should not pollute the global cell namespace, for example as a scratch pad durin
 routing or in tests.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">vcell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">virtual_scratch_pad</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">VKCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A virtual cell — not registered in the layout database.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A virtual cell — not registered in the layout database."""</span>
     <span class="n">vc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">VKCell</span><span class="p">()</span>
     <span class="n">vc</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">vc</span>
@@ -5854,7 +5854,7 @@ routing or in tests.</p>
 <span class="c1"># VKCells render the same way in notebooks</span>
 <span class="n">vpad</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>&lt;class &#39;kfactory.kcell.VKCell&#39;&gt;
+<div class="highlight"><pre><span></span><code>&lt;class 'kfactory.kcell.VKCell'&gt;
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
@@ -5945,7 +5945,7 @@ routing or in tests.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

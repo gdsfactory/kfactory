@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5324,14 +5324,14 @@ Arguments <code>width</code> and <code>radius</code> are in <strong>µm</strong>
     <span class="n">WG</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;FACTORIES_CIRCULAR_DEMO&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"FACTORIES_CIRCULAR_DEMO"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 <span class="n">L</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="n">bend_circ</span> <span class="o">=</span> <span class="n">bend_circular_factory</span><span class="p">(</span><span class="n">pdk</span><span class="p">)</span>
 
 <span class="n">bc90</span> <span class="o">=</span> <span class="n">bend_circ</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;circular bend:&quot;</span><span class="p">,</span> <span class="n">bc90</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;footprint radius:&quot;</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">get_radius</span><span class="p">(</span><span class="n">bc90</span><span class="p">),</span> <span class="s2">&quot;µm (== nominal)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"circular bend:"</span><span class="p">,</span> <span class="n">bc90</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"footprint radius:"</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">get_radius</span><span class="p">(</span><span class="n">bc90</span><span class="p">),</span> <span class="s2">"µm (== nominal)"</span><span class="p">)</span>
 <span class="n">bc90</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>circular bend: bend_circular_CS028523d7_500_R10_A90_AS1
@@ -5410,7 +5410,7 @@ footprint radius: 10000 µm (== nominal)
       <script id="__config" type="application/json">{"annotate":null,"base":"../../../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

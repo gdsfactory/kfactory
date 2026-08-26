@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5559,13 +5559,13 @@ and with what thickness. This information is used by simulation exporters
     <span class="n">layer</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
     <span class="n">zmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
     <span class="n">thickness</span><span class="o">=</span><span class="mf">0.22</span><span class="p">,</span>  <span class="c1"># µm</span>
-    <span class="n">material</span><span class="o">=</span><span class="s2">&quot;si&quot;</span><span class="p">,</span>
+    <span class="n">material</span><span class="o">=</span><span class="s2">"si"</span><span class="p">,</span>
     <span class="n">sidewall_angle</span><span class="o">=</span><span class="mf">80.0</span><span class="p">,</span>  <span class="c1"># near-vertical etch</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">wg_level</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>layer=(1, 0) thickness=0.22 thickness_tolerance=None zmin=0.0 material=&#39;si&#39; sidewall_angle=80.0 z_to_bias=None info=Info()
+<div class="highlight"><pre><span></span><code>layer=(1, 0) thickness=0.22 thickness_tolerance=None zmin=0.0 material='si' sidewall_angle=80.0 z_to_bias=None info=Info()
 </code></pre></div>
 <h3 id="info-simulation-metadata">Info — simulation metadata</h3>
 <p>Pass an <code>Info</code> object to attach extra metadata that simulators can consume.
@@ -5596,17 +5596,17 @@ Common fields:</p>
     <span class="n">layer</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
     <span class="n">zmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
     <span class="n">thickness</span><span class="o">=</span><span class="mf">0.22</span><span class="p">,</span>
-    <span class="n">material</span><span class="o">=</span><span class="s2">&quot;si&quot;</span><span class="p">,</span>
+    <span class="n">material</span><span class="o">=</span><span class="s2">"si"</span><span class="p">,</span>
     <span class="n">sidewall_angle</span><span class="o">=</span><span class="mf">80.0</span><span class="p">,</span>
     <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span>
         <span class="n">mesh_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">refractive_index</span><span class="o">=</span><span class="mf">3.47</span><span class="p">,</span>
-        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;grow&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s2">"grow"</span><span class="p">,</span>
     <span class="p">),</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">wg_level_with_info</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Info(mesh_order=1, refractive_index=3.47, type=&#39;grow&#39;)
+<div class="highlight"><pre><span></span><code>Info(mesh_order=1, refractive_index=3.47, type='grow')
 </code></pre></div>
 <h2 id="2-layerstack-the-full-process">2 · LayerStack — the full process</h2>
 <p><code>LayerStack</code> is a named collection of <code>LayerLevel</code>s. Pass levels as keyword arguments;
@@ -5617,57 +5617,57 @@ the keyword name becomes the layer's logical name in the stack.</p>
         <span class="n">layer</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">zmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">thickness</span><span class="o">=</span><span class="mf">0.22</span><span class="p">,</span>
-        <span class="n">material</span><span class="o">=</span><span class="s2">&quot;si&quot;</span><span class="p">,</span>
+        <span class="n">material</span><span class="o">=</span><span class="s2">"si"</span><span class="p">,</span>
         <span class="n">sidewall_angle</span><span class="o">=</span><span class="mf">80.0</span><span class="p">,</span>
-        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">3.47</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;grow&quot;</span><span class="p">),</span>
+        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">3.47</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"grow"</span><span class="p">),</span>
     <span class="p">),</span>
     <span class="n">slab</span><span class="o">=</span><span class="n">LayerLevel</span><span class="p">(</span>
         <span class="n">layer</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">zmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">thickness</span><span class="o">=</span><span class="mf">0.09</span><span class="p">,</span>  <span class="c1"># partial etch leaves 90 nm slab</span>
-        <span class="n">material</span><span class="o">=</span><span class="s2">&quot;si&quot;</span><span class="p">,</span>
+        <span class="n">material</span><span class="o">=</span><span class="s2">"si"</span><span class="p">,</span>
         <span class="n">sidewall_angle</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span>
-        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">3.47</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;grow&quot;</span><span class="p">),</span>
+        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">3.47</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"grow"</span><span class="p">),</span>
     <span class="p">),</span>
     <span class="c1"># --- oxide cladding ---</span>
     <span class="n">clad</span><span class="o">=</span><span class="n">LayerLevel</span><span class="p">(</span>
         <span class="n">layer</span><span class="o">=</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">zmin</span><span class="o">=-</span><span class="mf">3.0</span><span class="p">,</span>
         <span class="n">thickness</span><span class="o">=</span><span class="mf">3.22</span><span class="p">,</span>  <span class="c1"># 3 µm below + 0.22 µm above wg top</span>
-        <span class="n">material</span><span class="o">=</span><span class="s2">&quot;sio2&quot;</span><span class="p">,</span>
-        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">1.44</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;background&quot;</span><span class="p">),</span>
+        <span class="n">material</span><span class="o">=</span><span class="s2">"sio2"</span><span class="p">,</span>
+        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">1.44</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"background"</span><span class="p">),</span>
     <span class="p">),</span>
     <span class="c1"># --- metal ---</span>
     <span class="n">metal</span><span class="o">=</span><span class="n">LayerLevel</span><span class="p">(</span>
         <span class="n">layer</span><span class="o">=</span><span class="p">(</span><span class="mi">41</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">zmin</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
         <span class="n">thickness</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">material</span><span class="o">=</span><span class="s2">&quot;al&quot;</span><span class="p">,</span>
-        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;grow&quot;</span><span class="p">),</span>
+        <span class="n">material</span><span class="o">=</span><span class="s2">"al"</span><span class="p">,</span>
+        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"grow"</span><span class="p">),</span>
     <span class="p">),</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>layers={&#39;wg&#39;: LayerLevel(layer=(1, 0), thickness=0.22, thickness_tolerance=None, zmin=0.0, material=&#39;si&#39;, sidewall_angle=80.0, z_to_bias=None, info=Info(mesh_order=1, refractive_index=3.47, type=&#39;grow&#39;)), &#39;slab&#39;: LayerLevel(layer=(3, 0), thickness=0.09, thickness_tolerance=None, zmin=0.0, material=&#39;si&#39;, sidewall_angle=70.0, z_to_bias=None, info=Info(mesh_order=2, refractive_index=3.47, type=&#39;grow&#39;)), &#39;clad&#39;: LayerLevel(layer=(111, 0), thickness=3.22, thickness_tolerance=None, zmin=-3.0, material=&#39;sio2&#39;, sidewall_angle=0.0, z_to_bias=None, info=Info(mesh_order=3, refractive_index=1.44, type=&#39;background&#39;)), &#39;metal&#39;: LayerLevel(layer=(41, 0), thickness=1.0, thickness_tolerance=None, zmin=0.5, material=&#39;al&#39;, sidewall_angle=0.0, z_to_bias=None, info=Info(mesh_order=1, type=&#39;grow&#39;))}
+<div class="highlight"><pre><span></span><code>layers={'wg': LayerLevel(layer=(1, 0), thickness=0.22, thickness_tolerance=None, zmin=0.0, material='si', sidewall_angle=80.0, z_to_bias=None, info=Info(mesh_order=1, refractive_index=3.47, type='grow')), 'slab': LayerLevel(layer=(3, 0), thickness=0.09, thickness_tolerance=None, zmin=0.0, material='si', sidewall_angle=70.0, z_to_bias=None, info=Info(mesh_order=2, refractive_index=3.47, type='grow')), 'clad': LayerLevel(layer=(111, 0), thickness=3.22, thickness_tolerance=None, zmin=-3.0, material='sio2', sidewall_angle=0.0, z_to_bias=None, info=Info(mesh_order=3, refractive_index=1.44, type='background')), 'metal': LayerLevel(layer=(41, 0), thickness=1.0, thickness_tolerance=None, zmin=0.5, material='al', sidewall_angle=0.0, z_to_bias=None, info=Info(mesh_order=1, type='grow'))}
 </code></pre></div>
 <h2 id="3-querying-the-stack">3 · Querying the stack</h2>
 <p><code>LayerStack</code> exposes several lookup helpers. Keys are <code>(layer, datatype)</code> tuples.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Thicknesses:&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">"Thicknesses:"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">layer_tuple</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">stack</span><span class="o">.</span><span class="n">get_layer_to_thickness</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">layer_tuple</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">layer_tuple</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Materials:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Materials:"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">layer_tuple</span><span class="p">,</span> <span class="n">mat</span> <span class="ow">in</span> <span class="n">stack</span><span class="o">.</span><span class="n">get_layer_to_material</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">layer_tuple</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">mat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">layer_tuple</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">mat</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Z-min positions:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Z-min positions:"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">layer_tuple</span><span class="p">,</span> <span class="n">zmin</span> <span class="ow">in</span> <span class="n">stack</span><span class="o">.</span><span class="n">get_layer_to_zmin</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">layer_tuple</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">zmin</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">layer_tuple</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">zmin</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Sidewall angles:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Sidewall angles:"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">layer_tuple</span><span class="p">,</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">stack</span><span class="o">.</span><span class="n">get_layer_to_sidewall_angle</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">layer_tuple</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">angle</span><span class="si">}</span><span class="s2">°&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">layer_tuple</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">angle</span><span class="si">}</span><span class="s2">°"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Thicknesses:
   (1, 0): 0.22 µm
@@ -5694,9 +5694,9 @@ Sidewall angles:
   (41, 0): 0.0°
 </code></pre></div>
 <p>Access individual levels by name or by index:</p>
-<div class="highlight"><pre><span></span><code><span class="n">wg</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="s2">&quot;wg&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><span class="n">wg</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="s2">"wg"</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;wg zmin=</span><span class="si">{</span><span class="n">wg</span><span class="o">.</span><span class="n">zmin</span><span class="si">}</span><span class="s2"> µm, thickness=</span><span class="si">{</span><span class="n">wg</span><span class="o">.</span><span class="n">thickness</span><span class="si">}</span><span class="s2"> µm, top=</span><span class="si">{</span><span class="n">wg</span><span class="o">.</span><span class="n">zmin</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">wg</span><span class="o">.</span><span class="n">thickness</span><span class="si">}</span><span class="s2"> µm&quot;</span>
+    <span class="sa">f</span><span class="s2">"wg zmin=</span><span class="si">{</span><span class="n">wg</span><span class="o">.</span><span class="n">zmin</span><span class="si">}</span><span class="s2"> µm, thickness=</span><span class="si">{</span><span class="n">wg</span><span class="o">.</span><span class="n">thickness</span><span class="si">}</span><span class="s2"> µm, top=</span><span class="si">{</span><span class="n">wg</span><span class="o">.</span><span class="n">zmin</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">wg</span><span class="o">.</span><span class="n">thickness</span><span class="si">}</span><span class="s2"> µm"</span>
 <span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>wg zmin=0.0 µm, thickness=0.22 µm, top=0.22 µm
@@ -5717,7 +5717,7 @@ from it.</p>
     <span class="n">FLOORPLAN</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">99</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;DEMO_TECH_PDK&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"DEMO_TECH_PDK"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 <span class="n">L</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">infos</span>  <span class="c1"># LayerInfos instance; use for layer objects</span>
 
 <span class="n">STACK</span> <span class="o">=</span> <span class="n">LayerStack</span><span class="p">(</span>
@@ -5725,24 +5725,24 @@ from it.</p>
         <span class="n">layer</span><span class="o">=</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="o">.</span><span class="n">datatype</span><span class="p">),</span>
         <span class="n">zmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">thickness</span><span class="o">=</span><span class="mf">0.22</span><span class="p">,</span>
-        <span class="n">material</span><span class="o">=</span><span class="s2">&quot;si&quot;</span><span class="p">,</span>
+        <span class="n">material</span><span class="o">=</span><span class="s2">"si"</span><span class="p">,</span>
         <span class="n">sidewall_angle</span><span class="o">=</span><span class="mf">80.0</span><span class="p">,</span>
-        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">3.47</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;grow&quot;</span><span class="p">),</span>
+        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">3.47</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"grow"</span><span class="p">),</span>
     <span class="p">),</span>
     <span class="n">clad</span><span class="o">=</span><span class="n">LayerLevel</span><span class="p">(</span>
         <span class="n">layer</span><span class="o">=</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="o">.</span><span class="n">datatype</span><span class="p">),</span>
         <span class="n">zmin</span><span class="o">=-</span><span class="mf">3.0</span><span class="p">,</span>
         <span class="n">thickness</span><span class="o">=</span><span class="mf">3.22</span><span class="p">,</span>
-        <span class="n">material</span><span class="o">=</span><span class="s2">&quot;sio2&quot;</span><span class="p">,</span>
-        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">1.44</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;background&quot;</span><span class="p">),</span>
+        <span class="n">material</span><span class="o">=</span><span class="s2">"sio2"</span><span class="p">,</span>
+        <span class="n">info</span><span class="o">=</span><span class="n">Info</span><span class="p">(</span><span class="n">mesh_order</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">refractive_index</span><span class="o">=</span><span class="mf">1.44</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"background"</span><span class="p">),</span>
     <span class="p">),</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PDK:   </span><span class="si">{</span><span class="n">pdk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stack: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">STACK</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2"> layers defined&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"PDK:   </span><span class="si">{</span><span class="n">pdk</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Stack: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">STACK</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2"> layers defined"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>PDK:   name=&#39;DEMO_TECH_PDK&#39; layout=&lt;klayout.dbcore.Layout object at 0x7fe7f4ce7ec0&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7fe7f4b805f0&gt; factories=&lt;kfactory.layout.Factories object at 0x7fe7f4b12d50&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7fe7f4c936f0&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7fe81c1c64b0&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7fe7f4b8b8e0&gt; info=Info() settings=KCellSettings(version=&#39;3.0.4&#39;, klayout_version=&#39;0.30.10&#39;, meta_format=&#39;v3&#39;) decorators=&lt;kfactory.decorators.Decorators object at 0x7fe7f4b12fd0&gt; default_cell_output_type=&lt;class &#39;kfactory.kcell.KCell&#39;&gt; default_vcell_output_type=&lt;class &#39;kfactory.kcell.VKCell&#39;&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum &#39;LAYER&#39;&gt;
-Stack: [&#39;wg&#39;, &#39;clad&#39;] layers defined
+<div class="highlight"><pre><span></span><code>PDK:   name='DEMO_TECH_PDK' layout=&lt;klayout.dbcore.Layout object at 0x7f0f7aaac290&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7f0f7aba1a90&gt; factories=&lt;kfactory.layout.Factories object at 0x7f0f7aa02ad0&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7f0f7ab47bb0&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7f0f9e3b8a90&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7f0f7aa896d0&gt; info=Info() settings=KCellSettings(version='3.0.4', klayout_version='0.30.11', meta_format='v3') decorators=&lt;kfactory.decorators.Decorators object at 0x7f0f7aa02d50&gt; default_cell_output_type=&lt;class 'kfactory.kcell.KCell'&gt; default_vcell_output_type=&lt;class 'kfactory.kcell.VKCell'&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum 'LAYER'&gt;
+Stack: ['wg', 'clad'] layers defined
 </code></pre></div>
 <h2 id="5-serialising-the-stack">5 · Serialising the stack</h2>
 <p><code>to_dict()</code> returns a plain Python dict — useful for saving to YAML or JSON, or
@@ -5753,71 +5753,71 @@ for passing to simulators that don't import kfactory directly.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">))</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>{
-  &quot;wg&quot;: {
-    &quot;layer&quot;: [
+  "wg": {
+    "layer": [
       1,
       0
     ],
-    &quot;thickness&quot;: 0.22,
-    &quot;thickness_tolerance&quot;: null,
-    &quot;zmin&quot;: 0.0,
-    &quot;material&quot;: &quot;si&quot;,
-    &quot;sidewall_angle&quot;: 80.0,
-    &quot;z_to_bias&quot;: null,
-    &quot;info&quot;: {
-      &quot;mesh_order&quot;: 1,
-      &quot;refractive_index&quot;: 3.47,
-      &quot;type&quot;: &quot;grow&quot;
+    "thickness": 0.22,
+    "thickness_tolerance": null,
+    "zmin": 0.0,
+    "material": "si",
+    "sidewall_angle": 80.0,
+    "z_to_bias": null,
+    "info": {
+      "mesh_order": 1,
+      "refractive_index": 3.47,
+      "type": "grow"
     }
   },
-  &quot;slab&quot;: {
-    &quot;layer&quot;: [
+  "slab": {
+    "layer": [
       3,
       0
     ],
-    &quot;thickness&quot;: 0.09,
-    &quot;thickness_tolerance&quot;: null,
-    &quot;zmin&quot;: 0.0,
-    &quot;material&quot;: &quot;si&quot;,
-    &quot;sidewall_angle&quot;: 70.0,
-    &quot;z_to_bias&quot;: null,
-    &quot;info&quot;: {
-      &quot;mesh_order&quot;: 2,
-      &quot;refractive_index&quot;: 3.47,
-      &quot;type&quot;: &quot;grow&quot;
+    "thickness": 0.09,
+    "thickness_tolerance": null,
+    "zmin": 0.0,
+    "material": "si",
+    "sidewall_angle": 70.0,
+    "z_to_bias": null,
+    "info": {
+      "mesh_order": 2,
+      "refractive_index": 3.47,
+      "type": "grow"
     }
   },
-  &quot;clad&quot;: {
-    &quot;layer&quot;: [
+  "clad": {
+    "layer": [
       111,
       0
     ],
-    &quot;thickness&quot;: 3.22,
-    &quot;thickness_tolerance&quot;: null,
-    &quot;zmin&quot;: -3.0,
-    &quot;material&quot;: &quot;sio2&quot;,
-    &quot;sidewall_angle&quot;: 0.0,
-    &quot;z_to_bias&quot;: null,
-    &quot;info&quot;: {
-      &quot;mesh_order&quot;: 3,
-      &quot;refractive_index&quot;: 1.44,
-      &quot;type&quot;: &quot;background&quot;
+    "thickness": 3.22,
+    "thickness_tolerance": null,
+    "zmin": -3.0,
+    "material": "sio2",
+    "sidewall_angle": 0.0,
+    "z_to_bias": null,
+    "info": {
+      "mesh_order": 3,
+      "refractive_index": 1.44,
+      "type": "background"
     }
   },
-  &quot;metal&quot;: {
-    &quot;layer&quot;: [
+  "metal": {
+    "layer": [
       41,
       0
     ],
-    &quot;thickness&quot;: 1.0,
-    &quot;thickness_tolerance&quot;: null,
-    &quot;zmin&quot;: 0.5,
-    &quot;material&quot;: &quot;al&quot;,
-    &quot;sidewall_angle&quot;: 0.0,
-    &quot;z_to_bias&quot;: null,
-    &quot;info&quot;: {
-      &quot;mesh_order&quot;: 1,
-      &quot;type&quot;: &quot;grow&quot;
+    "thickness": 1.0,
+    "thickness_tolerance": null,
+    "zmin": 0.5,
+    "material": "al",
+    "sidewall_angle": 0.0,
+    "z_to_bias": null,
+    "info": {
+      "mesh_order": 1,
+      "type": "grow"
     }
   }
 }
@@ -5930,7 +5930,7 @@ from a single import.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

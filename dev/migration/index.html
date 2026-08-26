@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5994,7 +5994,7 @@ instances differently.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 
 <span class="c1"># Per connection</span>
-<span class="n">inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">other_inst</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">use_mirror</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">other_inst</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">,</span> <span class="n">use_mirror</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Globally (matches 2.x default)</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">connect_use_mirror</span> <span class="o">=</span> <span class="kc">True</span>
@@ -6045,23 +6045,23 @@ instead — it sanitizes the dictionary through <code>sanitize_pic_yml()</code> 
 (e.g. round-tripping via <code>model_dump()</code>).</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">ruamel.yaml</span><span class="w"> </span><span class="kn">import</span> <span class="n">YAML</span>
 
-<span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">(</span><span class="n">typ</span><span class="o">=</span><span class="s2">&quot;safe&quot;</span><span class="p">)</span>
+<span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">(</span><span class="n">typ</span><span class="o">=</span><span class="s2">"safe"</span><span class="p">)</span>
 
 <span class="c1"># Before (2.x) — model_validate handled pic.yml keys automatically</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;pic.yml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"pic.yml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
 
 <span class="c1"># After (3.0) — use from_pic_yml for pic.yml dictionaries</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;pic.yml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"pic.yml"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="o">.</span><span class="n">from_pic_yml</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
 
 <span class="c1"># Or use the convenience helper (unchanged)</span>
-<span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">read_schematic</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;pic.yml&quot;</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">)</span>
+<span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">read_schematic</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">"pic.yml"</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"dbu"</span><span class="p">)</span>
 </code></pre></div>
 <p>The standalone <code>sanitize_pic_yml()</code> function is also available for custom pipelines:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.schematic</span><span class="w"> </span><span class="kn">import</span> <span class="n">sanitize_pic_yml</span>
 
-<span class="n">raw</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;pic.yml&quot;</span><span class="p">))</span>
+<span class="n">raw</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">"pic.yml"</span><span class="p">))</span>
 <span class="n">sanitized</span> <span class="o">=</span> <span class="n">sanitize_pic_yml</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
 <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">sanitized</span><span class="p">)</span>
 </code></pre></div>
@@ -6073,14 +6073,14 @@ on the <code>KCLayout</code> instance. Registered strategies can then be referen
 <p>Use the <code>@kcl.routing_strategy</code> decorator or assign directly to <code>kcl.routing_strategies</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 
-<span class="n">kcl</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;MY_PDK&quot;</span><span class="p">)</span>
+<span class="n">kcl</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"MY_PDK"</span><span class="p">)</span>
 
 <span class="nd">@kcl</span><span class="o">.</span><span class="n">routing_strategy</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">route_bundle</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">start_ports</span><span class="p">,</span> <span class="n">end_ports</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="o">...</span>
 
 <span class="c1"># Or register directly:</span>
-<span class="n">kcl</span><span class="o">.</span><span class="n">routing_strategies</span><span class="p">[</span><span class="s2">&quot;my_custom_route&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">my_routing_function</span>
+<span class="n">kcl</span><span class="o">.</span><span class="n">routing_strategies</span><span class="p">[</span><span class="s2">"my_custom_route"</span><span class="p">]</span> <span class="o">=</span> <span class="n">my_routing_function</span>
 </code></pre></div>
 <h5 id="using-routes-in-a-schematic">Using Routes in a Schematic</h5>
 <p>The <code>Schematic.add_route</code> method creates a route bundle connecting start and end ports
@@ -6088,8 +6088,8 @@ using a named routing strategy:</p>
 <div class="highlight"><pre><span></span><code><span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
 
 <span class="c1"># Add instances</span>
-<span class="n">mmi1</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">add_instance</span><span class="p">(</span><span class="s2">&quot;mmi1&quot;</span><span class="p">,</span> <span class="n">mmi_factory</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
-<span class="n">mmi2</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">add_instance</span><span class="p">(</span><span class="s2">&quot;mmi2&quot;</span><span class="p">,</span> <span class="n">mmi_factory</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
+<span class="n">mmi1</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">add_instance</span><span class="p">(</span><span class="s2">"mmi1"</span><span class="p">,</span> <span class="n">mmi_factory</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
+<span class="n">mmi2</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">add_instance</span><span class="p">(</span><span class="s2">"mmi2"</span><span class="p">,</span> <span class="n">mmi_factory</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
 
 <span class="c1"># Place instances</span>
 <span class="n">mmi1</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
@@ -6097,10 +6097,10 @@ using a named routing strategy:</p>
 
 <span class="c1"># Route between instances</span>
 <span class="n">schematic</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;optical_route&quot;</span><span class="p">,</span>
-    <span class="n">start_ports</span><span class="o">=</span><span class="p">[</span><span class="n">mmi1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">]],</span>
-    <span class="n">end_ports</span><span class="o">=</span><span class="p">[</span><span class="n">mmi2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">]],</span>
-    <span class="n">routing_strategy</span><span class="o">=</span><span class="s2">&quot;route_bundle&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"optical_route"</span><span class="p">,</span>
+    <span class="n">start_ports</span><span class="o">=</span><span class="p">[</span><span class="n">mmi1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">]],</span>
+    <span class="n">end_ports</span><span class="o">=</span><span class="p">[</span><span class="n">mmi2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">]],</span>
+    <span class="n">routing_strategy</span><span class="o">=</span><span class="s2">"route_bundle"</span><span class="p">,</span>
     <span class="n">separation</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
     <span class="c1"># additional **settings are forwarded to the routing strategy function</span>
 <span class="p">)</span>
@@ -6169,7 +6169,7 @@ and calls it with the resolved ports and settings.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

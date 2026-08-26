@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5814,21 +5814,21 @@
 <span class="normal">165</span>
 <span class="normal">166</span>
 <span class="normal">167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LogFilter</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter certain messages by log level or regex.</span>
+<span class="w">    </span><span class="sd">"""Filter certain messages by log level or regex.</span>
 
 <span class="sd">    Filtered messages are not evaluated and discarded.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">level</span><span class="p">:</span> <span class="n">LogLevel</span> <span class="o">=</span> <span class="n">LogLevel</span><span class="o">.</span><span class="n">INFO</span>
     <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">loguru</span><span class="o">.</span><span class="n">Record</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loguru needs the filter to be callable.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Loguru needs the filter to be callable."""</span>
         <span class="n">levelno</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">level</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">)</span><span class="o">.</span><span class="n">no</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">regex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;level&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">no</span> <span class="o">&gt;=</span> <span class="n">levelno</span>
-        <span class="k">return</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;level&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">no</span> <span class="o">&gt;=</span> <span class="n">levelno</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span>
-            <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regex</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;message&quot;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">record</span><span class="p">[</span><span class="s2">"level"</span><span class="p">]</span><span class="o">.</span><span class="n">no</span> <span class="o">&gt;=</span> <span class="n">levelno</span>
+        <span class="k">return</span> <span class="n">record</span><span class="p">[</span><span class="s2">"level"</span><span class="p">]</span><span class="o">.</span><span class="n">no</span> <span class="o">&gt;=</span> <span class="n">levelno</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span>
+            <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regex</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="s2">"message"</span><span class="p">])</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -5871,12 +5871,12 @@
 <span class="normal">165</span>
 <span class="normal">166</span>
 <span class="normal">167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">loguru</span><span class="o">.</span><span class="n">Record</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Loguru needs the filter to be callable.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Loguru needs the filter to be callable."""</span>
     <span class="n">levelno</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">level</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">)</span><span class="o">.</span><span class="n">no</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">regex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;level&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">no</span> <span class="o">&gt;=</span> <span class="n">levelno</span>
-    <span class="k">return</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;level&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">no</span> <span class="o">&gt;=</span> <span class="n">levelno</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span>
-        <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regex</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;message&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">record</span><span class="p">[</span><span class="s2">"level"</span><span class="p">]</span><span class="o">.</span><span class="n">no</span> <span class="o">&gt;=</span> <span class="n">levelno</span>
+    <span class="k">return</span> <span class="n">record</span><span class="p">[</span><span class="s2">"level"</span><span class="p">]</span><span class="o">.</span><span class="n">no</span> <span class="o">&gt;=</span> <span class="n">levelno</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regex</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="s2">"message"</span><span class="p">])</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -5930,15 +5930,15 @@
 <span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LogLevel</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;KFactory logger levels.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""KFactory logger levels."""</span>
 
-    <span class="n">TRACE</span> <span class="o">=</span> <span class="s2">&quot;TRACE&quot;</span>
-    <span class="n">DEBUG</span> <span class="o">=</span> <span class="s2">&quot;DEBUG&quot;</span>
-    <span class="n">INFO</span> <span class="o">=</span> <span class="s2">&quot;INFO&quot;</span>
-    <span class="n">SUCCESS</span> <span class="o">=</span> <span class="s2">&quot;SUCCESS&quot;</span>
-    <span class="n">WARNING</span> <span class="o">=</span> <span class="s2">&quot;WARNING&quot;</span>
-    <span class="n">ERROR</span> <span class="o">=</span> <span class="s2">&quot;ERROR&quot;</span>
-    <span class="n">CRITICAL</span> <span class="o">=</span> <span class="s2">&quot;CRITICAL&quot;</span>
+    <span class="n">TRACE</span> <span class="o">=</span> <span class="s2">"TRACE"</span>
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="s2">"DEBUG"</span>
+    <span class="n">INFO</span> <span class="o">=</span> <span class="s2">"INFO"</span>
+    <span class="n">SUCCESS</span> <span class="o">=</span> <span class="s2">"SUCCESS"</span>
+    <span class="n">WARNING</span> <span class="o">=</span> <span class="s2">"WARNING"</span>
+    <span class="n">ERROR</span> <span class="o">=</span> <span class="s2">"ERROR"</span>
+    <span class="n">CRITICAL</span> <span class="o">=</span> <span class="s2">"CRITICAL"</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -5998,12 +5998,12 @@
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PROPID</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mapping for GDS properties.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Mapping for GDS properties."""</span>
 
     <span class="n">NAME</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Instance name.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Instance name."""</span>
     <span class="n">PURPOSE</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Instance purpose (e.g. &#39;routing&#39;).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Instance purpose (e.g. 'routing')."""</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -6274,48 +6274,48 @@ max_cellname_length: The maximum length of a cell name.</p>
 <span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Settings</span><span class="p">(</span><span class="n">BaseSettings</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;KFactory settings object.</span>
+<span class="w">    </span><span class="sd">"""KFactory settings object.</span>
 
 <span class="sd">    Attrs:</span>
 <span class="sd">        n_threads: Number of threads to use for tiling processor, defaults</span>
 <span class="sd">            to all available cores.</span>
-<span class="sd">        logger: The loguru class to use for logging. Shouldn&#39;t be necessary</span>
+<span class="sd">        logger: The loguru class to use for logging. Shouldn't be necessary</span>
 <span class="sd">            to configure by hand.</span>
 <span class="sd">        logfilter: The filter to use. Can be configured to set log level and filter</span>
 <span class="sd">            messages by regex.</span>
 <span class="sd">        display_type: The type of image to show when calling the jupyter display</span>
 <span class="sd">            function.</span>
 <span class="sd">        meta_format: Metadata format to use for reading KLayout metadata.</span>
-<span class="sd">            If set to &#39;default&#39;, metadata will be read as instances such as</span>
+<span class="sd">            If set to 'default', metadata will be read as instances such as</span>
 <span class="sd">            Trans/DCplxTrans. If the metadata is in the old string format</span>
 <span class="sd">            (there was a bug in how to read metadata in some versions), use</span>
-<span class="sd">            &#39;string&#39;.</span>
+<span class="sd">            'string'.</span>
 <span class="sd">        console: The rich console to use for displaying rich content.</span>
 <span class="sd">        max_cellname_length: The maximum length of a cell name.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">SettingsConfigDict</span><span class="p">(</span>
         <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">env_prefix</span><span class="o">=</span><span class="s2">&quot;kfactory_&quot;</span><span class="p">,</span>
-        <span class="n">env_nested_delimiter</span><span class="o">=</span><span class="s2">&quot;_&quot;</span><span class="p">,</span>
-        <span class="n">extra</span><span class="o">=</span><span class="s2">&quot;allow&quot;</span><span class="p">,</span>
+        <span class="n">env_prefix</span><span class="o">=</span><span class="s2">"kfactory_"</span><span class="p">,</span>
+        <span class="n">env_nested_delimiter</span><span class="o">=</span><span class="s2">"_"</span><span class="p">,</span>
+        <span class="n">extra</span><span class="o">=</span><span class="s2">"allow"</span><span class="p">,</span>
         <span class="n">validate_assignment</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">env_file</span><span class="o">=</span><span class="n">dotenv_path</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">n_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">get_affinity</span><span class="p">()</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of threads to use for multithreaded operations.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Number of threads to use for multithreaded operations."""</span>
     <span class="n">logfilter</span><span class="p">:</span> <span class="n">LogFilter</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">LogFilter</span><span class="p">)</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Can configure the logger to ignore certain levels or by regex.&quot;&quot;&quot;</span>
-    <span class="n">display_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;widget&quot;</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;image&quot;</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The default behavior for displaying cells in jupyter.&quot;&quot;&quot;</span>
-    <span class="n">meta_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;v3&quot;</span><span class="p">,</span> <span class="s2">&quot;v2&quot;</span><span class="p">,</span> <span class="s2">&quot;v1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;v3&quot;</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The format of the saving of metadata.</span>
+<span class="w">    </span><span class="sd">"""Can configure the logger to ignore certain levels or by regex."""</span>
+    <span class="n">display_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"widget"</span><span class="p">,</span> <span class="s2">"image"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"image"</span>
+<span class="w">    </span><span class="sd">"""The default behavior for displaying cells in jupyter."""</span>
+    <span class="n">meta_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"v3"</span><span class="p">,</span> <span class="s2">"v2"</span><span class="p">,</span> <span class="s2">"v1"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"v3"</span>
+<span class="w">    </span><span class="sd">"""The format of the saving of metadata.</span>
 
 <span class="sd">    v1: Transformations and other KLayout objects are stored as a string. In</span>
 <span class="sd">        case of ports they are converted back to KLayout objects on read.</span>
 <span class="sd">    v2: All objects can be stored in the nativ KLayout format (klayout&gt;=0.28.13)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># console for printing</span>
     <span class="n">console</span><span class="p">:</span> <span class="n">rich</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">Console</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">rich</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">Console</span><span class="p">)</span>
 
@@ -6339,27 +6339,27 @@ max_cellname_length: The maximum length of a cell name.</p>
     <span class="n">write_file_properties</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">write_timestamps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">write_kfactory_settings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write kfactory version into the gds/oasis.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Write kfactory version into the gds/oasis."""</span>
     <span class="n">multi_xy_records</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">max_vertex_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8000</span>
 
     <span class="n">show_function</span><span class="p">:</span> <span class="n">ShowFunction</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;show_function&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;before&quot;</span><span class="p">)</span>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"show_function"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"before"</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_show_function</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="n">ShowFunction</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ShowFunction</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">show</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">mod</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">show</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">mod</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">show</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">loaded_mod</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
             <span class="n">show_</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">loaded_mod</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">show_</span><span class="p">,</span> <span class="n">ShowFunction</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">show</span><span class="si">=}</span><span class="s2"> is not a ShowFunction.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">show</span><span class="si">=}</span><span class="s2"> is not a ShowFunction."</span><span class="p">)</span>
             <span class="n">show</span> <span class="o">=</span> <span class="n">show_</span>
         <span class="k">return</span> <span class="n">show</span>
 
-    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;logfilter&quot;</span><span class="p">)</span>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"logfilter"</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_logfilter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">logfilter</span><span class="p">:</span> <span class="n">LogFilter</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LogFilter</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
@@ -6370,49 +6370,49 @@ max_cellname_length: The maximum length of a cell name.</p>
             <span class="n">enqueue</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">backtrace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;LogLevel: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">logfilter</span><span class="o">.</span><span class="n">level</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"LogLevel: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span> <span class="n">logfilter</span><span class="o">.</span><span class="n">level</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">add_traceback</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">logfilter</span>
 
-    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;cell_overwrite_existing&quot;</span><span class="p">)</span>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"cell_overwrite_existing"</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_overwrite_and_cache</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;&#39;overwrite_existing&#39; has been set to True. This might cause &quot;</span>
-                <span class="s2">&quot;unintended behavior when overwriting existing cells and delete any &quot;</span>
-                <span class="s2">&quot;existing instances of them.&quot;</span>
+                <span class="s2">"'overwrite_existing' has been set to True. This might cause "</span>
+                <span class="s2">"unintended behavior when overwriting existing cells and delete any "</span>
+                <span class="s2">"existing instances of them."</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
-    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;cell_layout_cache&quot;</span><span class="p">)</span>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"cell_layout_cache"</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_layout_cache</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                <span class="s2">&quot;&#39;cell_layout_cache&#39; has been set to True. This might cause when &quot;</span>
-                <span class="s2">&quot;as any cell names generated automatically are loaded from the layout&quot;</span>
-                <span class="s2">&quot; instead of created. This could happen e.g. after reading a gds file&quot;</span>
-                <span class="s2">&quot; into the layout.&quot;</span>
+                <span class="s2">"'cell_layout_cache' has been set to True. This might cause when "</span>
+                <span class="s2">"as any cell names generated automatically are loaded from the layout"</span>
+                <span class="s2">" instead of created. This could happen e.g. after reading a gds file"</span>
+                <span class="s2">" into the layout."</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="nd">@field_validator</span><span class="p">(</span>
-        <span class="s2">&quot;allow_width_mismatch&quot;</span><span class="p">,</span> <span class="s2">&quot;allow_layer_mismatch&quot;</span><span class="p">,</span> <span class="s2">&quot;allow_type_mismatch&quot;</span>
+        <span class="s2">"allow_width_mismatch"</span><span class="p">,</span> <span class="s2">"allow_layer_mismatch"</span><span class="p">,</span> <span class="s2">"allow_type_mismatch"</span>
     <span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_debug_info_on_global_setting</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="n">ValidationInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_traceback</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; set globally to &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">field_name</span><span class="p">,</span> <span class="n">v</span>
+            <span class="s2">"'</span><span class="si">{}</span><span class="s2">' set globally to '</span><span class="si">{}</span><span class="s2">'"</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">field_name</span><span class="p">,</span> <span class="n">v</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">project_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find the current working directory&#39;s project dir.</span>
+<span class="w">        </span><span class="sd">"""Find the current working directory's project dir.</span>
 
-<span class="sd">        This is the git repo if it exists, cwd otherwise.&quot;&quot;&quot;</span>
+<span class="sd">        This is the git repo if it exists, cwd otherwise."""</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">repo</span> <span class="o">=</span> <span class="n">pygit2</span><span class="o">.</span><span class="n">Repository</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
             <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">repo</span><span class="o">.</span><span class="n">workdir</span> <span class="ow">or</span> <span class="n">repo</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
@@ -6420,7 +6420,7 @@ max_cellname_length: The maximum length of a cell name.</p>
             <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set log filter and run pydantic.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Set log filter and run pydantic."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -6449,7 +6449,7 @@ max_cellname_length: The maximum length of a cell name.</p>
   </span>
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="n">display_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;widget&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;image&#39;</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">display_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'widget'</span><span class="p">,</span> <span class="s1">'image'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'image'</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6499,7 +6499,7 @@ max_cellname_length: The maximum length of a cell name.</p>
   </span>
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="n">meta_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;v3&#39;</span><span class="p">,</span> <span class="s1">&#39;v2&#39;</span><span class="p">,</span> <span class="s1">&#39;v1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;v3&#39;</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">meta_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'v3'</span><span class="p">,</span> <span class="s1">'v2'</span><span class="p">,</span> <span class="s1">'v1'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'v3'</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6616,7 +6616,7 @@ max_cellname_length: The maximum length of a cell name.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set log filter and run pydantic.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Set log filter and run pydantic."""</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6658,12 +6658,12 @@ max_cellname_length: The maximum length of a cell name.</p>
 <span class="normal">97</span>
 <span class="normal">98</span>
 <span class="normal">99</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_traceback</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">loguru</span><span class="o">.</span><span class="n">Record</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a traceback to the logger.&quot;&quot;&quot;</span>
-    <span class="n">extra</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;extra&quot;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">extra</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;with_traceback&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="n">extra</span><span class="p">[</span><span class="s2">&quot;traceback&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_stack</span><span class="p">())</span>
+<span class="w">    </span><span class="sd">"""Add a traceback to the logger."""</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">"extra"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">extra</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"with_traceback"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">extra</span><span class="p">[</span><span class="s2">"traceback"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_stack</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">extra</span><span class="p">[</span><span class="s2">&quot;traceback&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">extra</span><span class="p">[</span><span class="s2">"traceback"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">""</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -6707,11 +6707,11 @@ fall back to the multiprocessing cpu count.</p>
 <span class="normal">192</span>
 <span class="normal">193</span>
 <span class="normal">194</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_affinity</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get number of cores/threads available.</span>
+<span class="w">    </span><span class="sd">"""Get number of cores/threads available.</span>
 
 <span class="sd">    On (most) linux we can get it through the scheduling affinity. Otherwise,</span>
 <span class="sd">    fall back to the multiprocessing cpu count.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span>
             <span class="n">os</span><span class="o">.</span><span class="n">sched_getaffinity</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># ty:ignore[unresolved-attribute, unused-ignore-comment]</span>
@@ -6770,26 +6770,26 @@ fall back to the multiprocessing cpu count.</p>
 <span class="normal">121</span>
 <span class="normal">122</span>
 <span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">tracing_formatter</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">loguru</span><span class="o">.</span><span class="n">Record</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Traceback filtering.</span>
+<span class="w">    </span><span class="sd">"""Traceback filtering.</span>
 
 <span class="sd">    Filter out frames coming from Loguru internals.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">frames</span> <span class="o">=</span> <span class="n">takewhile</span><span class="p">(</span>
-        <span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="s2">&quot;/loguru/&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">extract_stack</span><span class="p">()</span>
+        <span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="s2">"/loguru/"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">extract_stack</span><span class="p">()</span>
     <span class="p">)</span>
-    <span class="n">stack</span> <span class="o">=</span> <span class="s2">&quot; &gt; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">filename</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">lineno</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">)</span>
-    <span class="n">record</span><span class="p">[</span><span class="s2">&quot;extra&quot;</span><span class="p">][</span><span class="s2">&quot;stack&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stack</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="s2">" &gt; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">filename</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">lineno</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">)</span>
+    <span class="n">record</span><span class="p">[</span><span class="s2">"extra"</span><span class="p">][</span><span class="s2">"stack"</span><span class="p">]</span> <span class="o">=</span> <span class="n">stack</span>
 
-    <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;extra&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;with_backtrace&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">"extra"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"with_backtrace"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="s2">&quot;&lt;green&gt;{time:YYYY-MM-DD HH:mm:ss.SSS}&lt;/green&gt; | &lt;level&gt;</span><span class="si">{level: &lt;8}</span><span class="s2">&lt;/level&gt;&quot;</span>
-            <span class="s2">&quot; | &lt;cyan&gt;</span><span class="si">{extra[stack]}</span><span class="s2">&lt;/cyan&gt; - &lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;</span><span class="se">\n</span><span class="si">{exception}</span><span class="s2">&quot;</span>
+            <span class="s2">"&lt;green&gt;{time:YYYY-MM-DD HH:mm:ss.SSS}&lt;/green&gt; | &lt;level&gt;</span><span class="si">{level: &lt;8}</span><span class="s2">&lt;/level&gt;"</span>
+            <span class="s2">" | &lt;cyan&gt;</span><span class="si">{extra[stack]}</span><span class="s2">&lt;/cyan&gt; - &lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;</span><span class="se">\n</span><span class="si">{exception}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span>
-        <span class="s2">&quot;&lt;green&gt;{time:YYYY-MM-DD HH:mm:ss.SSS}&lt;/green&gt; | &lt;level&gt;</span><span class="si">{level: &lt;8}</span><span class="s2">&quot;</span>
-        <span class="s2">&quot;&lt;/level&gt; | &lt;cyan&gt;</span><span class="si">{name}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{function}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{line}</span><span class="s2">&lt;/cyan&gt;&quot;</span>
-        <span class="s2">&quot; - &lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;</span><span class="se">\n</span><span class="si">{exception}</span><span class="s2">&quot;</span>
+        <span class="s2">"&lt;green&gt;{time:YYYY-MM-DD HH:mm:ss.SSS}&lt;/green&gt; | &lt;level&gt;</span><span class="si">{level: &lt;8}</span><span class="s2">"</span>
+        <span class="s2">"&lt;/level&gt; | &lt;cyan&gt;</span><span class="si">{name}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{function}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{line}</span><span class="s2">&lt;/cyan&gt;"</span>
+        <span class="s2">" - &lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;</span><span class="se">\n</span><span class="si">{exception}</span><span class="s2">"</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6859,7 +6859,7 @@ fall back to the multiprocessing cpu count.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

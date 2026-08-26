@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5543,7 +5543,7 @@ and <em>where</em> (position, rotation, mirror).</p>
 parent.  Both forms return an <code>Instance</code> object that you can move, rotate, or mirror
 after creation.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Build a simple polygon cell to reuse</span>
-<span class="n">poly</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;polygon_source&quot;</span><span class="p">)</span>
+<span class="n">poly</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"polygon_source"</span><span class="p">)</span>
 <span class="n">xpts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span>
 <span class="n">ypts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 <span class="n">poly</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WGEX</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
@@ -5555,7 +5555,7 @@ after creation.</p>
 </code></pre></div>
 <img alt="png" src="../instances/output_4_0.png" /></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Long form: create_inst</span>
-<span class="n">parent</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;three_instances&quot;</span><span class="p">)</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"three_instances"</span><span class="p">)</span>
 <span class="n">inst1</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
 
 <span class="c1"># Short form: &lt;&lt; operator (exactly equivalent)</span>
@@ -5621,7 +5621,7 @@ transformation to reposition it:</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight"><pre><span></span><code><span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;transform_demo&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"transform_demo"</span><span class="p">)</span>
 <span class="n">s</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 
 <span class="n">inst_a</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">s</span>
@@ -5640,17 +5640,17 @@ transformation to reposition it:</p>
 <p><code>instance.connect("port_name", target_port)</code> moves and rotates the instance so that
 the named port aligns face-to-face with <code>target_port</code>.  This is the standard way to
 assemble photonic circuits.</p>
-<div class="highlight"><pre><span></span><code><span class="n">circuit</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;chained_straights&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">circuit</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"chained_straights"</span><span class="p">)</span>
 
 <span class="n">seg1</span> <span class="o">=</span> <span class="n">circuit</span> <span class="o">&lt;&lt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 <span class="n">seg2</span> <span class="o">=</span> <span class="n">circuit</span> <span class="o">&lt;&lt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 <span class="n">seg3</span> <span class="o">=</span> <span class="n">circuit</span> <span class="o">&lt;&lt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 
-<span class="n">seg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
-<span class="n">seg3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">seg2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+<span class="n">seg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
+<span class="n">seg3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">seg2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
-<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;in_&quot;</span><span class="p">)</span>
-<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg3</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;out_&quot;</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"in_"</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg3</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"out_"</span><span class="p">)</span>
 <span class="n">circuit</span><span class="o">.</span><span class="n">draw_ports</span><span class="p">()</span>
 <span class="n">circuit</span>
 </code></pre></div>
@@ -5662,13 +5662,13 @@ assemble photonic circuits.</p>
 two ports face the same direction (e.g. building a U-bend from two 90° bends).</p>
 <div class="highlight"><pre><span></span><code><span class="n">bend</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_euler</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
 
-<span class="n">u_bend</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;u_bend&quot;</span><span class="p">)</span>
+<span class="n">u_bend</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"u_bend"</span><span class="p">)</span>
 <span class="n">b1</span> <span class="o">=</span> <span class="n">u_bend</span> <span class="o">&lt;&lt;</span> <span class="n">bend</span>
 <span class="n">b2</span> <span class="o">=</span> <span class="n">u_bend</span> <span class="o">&lt;&lt;</span> <span class="n">bend</span>
-<span class="n">b2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">],</span> <span class="n">mirror</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">b2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">],</span> <span class="n">mirror</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">u_bend</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;left_&quot;</span><span class="p">)</span>
-<span class="n">u_bend</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b2</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;right_&quot;</span><span class="p">)</span>
+<span class="n">u_bend</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"left_"</span><span class="p">)</span>
+<span class="n">u_bend</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b2</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"right_"</span><span class="p">)</span>
 <span class="n">u_bend</span><span class="o">.</span><span class="n">draw_ports</span><span class="p">()</span>
 <span class="n">u_bend</span>
 </code></pre></div>
@@ -5684,7 +5684,7 @@ when you need per-element port access.</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="n">tile</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 
-<span class="n">grid</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;instance_array&quot;</span><span class="p">)</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"instance_array"</span><span class="p">)</span>
 <span class="n">arr</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
     <span class="n">tile</span><span class="p">,</span>
     <span class="n">na</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
@@ -5699,16 +5699,16 @@ when you need per-element port access.</p>
 </code></pre></div>
 <img alt="png" src="../instances/output_17_0.png" /></p>
 <p>Ports of array elements are accessed via <code>inst[port_name, col, row]</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Port at column 0, row 1:&quot;</span><span class="p">,</span> <span class="n">arr</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Port at column 2, row 0:&quot;</span><span class="p">,</span> <span class="n">arr</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">"Port at column 0, row 1:"</span><span class="p">,</span> <span class="n">arr</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Port at column 2, row 0:"</span><span class="p">,</span> <span class="n">arr</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Port at column 0, row 1: Port(self.name=&#39;o1&#39;, self.width=500, trans=r180 *1 0,10, layer=WG (1/0), port_type=optical)
-Port at column 2, row 0: Port(self.name=&#39;o2&#39;, self.width=500, trans=r0 *1 50,0, layer=WG (1/0), port_type=optical)
+<div class="highlight"><pre><span></span><code>Port at column 0, row 1: Port(self.name='o1', self.width=500, trans=r180 *1 0,10, layer=WG (1/0), port_type=optical)
+Port at column 2, row 0: Port(self.name='o2', self.width=500, trans=r0 *1 50,0, layer=WG (1/0), port_type=optical)
 </code></pre></div>
 <h2 id="hierarchical-nesting">Hierarchical nesting</h2>
 <p>Instances can point to cells that themselves contain instances.  There is no practical
 depth limit — kfactory and KLayout handle deep hierarchy natively.</p>
-<div class="highlight"><pre><span></span><code><span class="n">top</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;top_level&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">top</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"top_level"</span><span class="p">)</span>
 <span class="n">r1</span> <span class="o">=</span> <span class="n">top</span> <span class="o">&lt;&lt;</span> <span class="n">u_bend</span>
 <span class="n">r2</span> <span class="o">=</span> <span class="n">top</span> <span class="o">&lt;&lt;</span> <span class="n">u_bend</span>
 <span class="n">r3</span> <span class="o">=</span> <span class="n">top</span> <span class="o">&lt;&lt;</span> <span class="n">u_bend</span>
@@ -5726,10 +5726,10 @@ depth limit — kfactory and KLayout handle deep hierarchy natively.</p>
 <p>When you <code>connect</code> at a non-90° angle the sub-cell boundary and the parent boundary
 can produce sub-nanometre gaps at the interface.  Calling <code>instance.flatten()</code> merges
 the instance geometry into the parent, eliminating those gaps.</p>
-<div class="highlight"><pre><span></span><code><span class="n">angled</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;angled_connect&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">angled</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"angled_connect"</span><span class="p">)</span>
 <span class="n">b30a</span> <span class="o">=</span> <span class="n">angled</span> <span class="o">&lt;&lt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_euler</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 <span class="n">b30b</span> <span class="o">=</span> <span class="n">angled</span> <span class="o">&lt;&lt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_euler</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-<span class="n">b30b</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">b30a</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+<span class="n">b30b</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">b30a</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 <span class="n">b30b</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>  <span class="c1"># merges geometry into parent to close sub-nm gaps</span>
 <span class="n">angled</span>
 </code></pre></div>
@@ -5861,7 +5861,7 @@ the instance geometry into the parent, eliminating those gaps.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

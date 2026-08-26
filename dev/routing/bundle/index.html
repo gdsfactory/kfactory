@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5518,7 +5518,7 @@ avoiding obstacles.  This page covers parameters that are not shown in the
 <span class="n">SEP</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>  <span class="c1"># 2 µm centre-to-centre extra separation</span>
 
 <span class="n">wg_enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span>
-    <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;WGSTD_BND&quot;</span><span class="p">,</span> <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">)])</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"WGSTD_BND"</span><span class="p">,</span> <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">)])</span>
 <span class="p">)</span>
 
 <span class="n">bend90</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">factories</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_euler_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">)(</span>
@@ -5550,21 +5550,21 @@ end side — eliminating crossings.</p>
 
     <span class="n">start_ports</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">60_000</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10_000</span><span class="p">),</span>  <span class="c1"># reversed Y</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="p">]</span>
     <span class="n">end_ports</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">10_000</span><span class="p">),</span>  <span class="c1"># normal Y</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="p">]</span>
@@ -5602,24 +5602,24 @@ near dense arrays where cladding layers would otherwise overlap.</p>
     <span class="n">N</span> <span class="o">=</span> <span class="mi">4</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">4_000</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">4_000</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_bundle</span><span class="p">(</span>
         <span class="n">c</span><span class="p">,</span>
-        <span class="n">start_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^in&quot;</span><span class="p">)),</span>
-        <span class="n">end_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^out&quot;</span><span class="p">)),</span>
+        <span class="n">start_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">"^in"</span><span class="p">)),</span>
+        <span class="n">end_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">"^out"</span><span class="p">)),</span>
         <span class="n">separation</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">5.0</span><span class="p">),</span>  <span class="c1"># 5 µm — wider than the default 2 µm</span>
         <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
         <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
@@ -5652,7 +5652,7 @@ S-bend's own footprint.</p>
     <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">InstanceGroup</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;SBendFactoryDBU wrapper around `bend_s_euler` + an optional straight.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""SBendFactoryDBU wrapper around `bend_s_euler` + an optional straight."""</span>
     <span class="n">ig</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">InstanceGroup</span><span class="p">()</span>
 
     <span class="n">sbend</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_s_euler</span><span class="p">(</span>
@@ -5663,29 +5663,29 @@ S-bend's own footprint.</p>
         <span class="n">enclosure</span><span class="o">=</span><span class="n">wg_enc</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">ig</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sbend</span><span class="p">)</span>
-    <span class="n">ig</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">sbend</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+    <span class="n">ig</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">sbend</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
 
     <span class="n">pad</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="n">sbend</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">pad</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;sbend_factory: requested length=</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2"> dbu is shorter than&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot; the S-bend footprint (</span><span class="si">{</span><span class="n">sbend</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2"> dbu) for&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot; offset=</span><span class="si">{</span><span class="n">offset</span><span class="si">}</span><span class="s2"> dbu — no room for the S-bend.&quot;</span>
+            <span class="sa">f</span><span class="s2">"sbend_factory: requested length=</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2"> dbu is shorter than"</span>
+            <span class="sa">f</span><span class="s2">" the S-bend footprint (</span><span class="si">{</span><span class="n">sbend</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2"> dbu) for"</span>
+            <span class="sa">f</span><span class="s2">" offset=</span><span class="si">{</span><span class="n">offset</span><span class="si">}</span><span class="s2"> dbu — no room for the S-bend."</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="n">pad</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">wg</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">straight_factory</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pad</span><span class="p">)</span>
         <span class="n">ig</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">wg</span><span class="p">)</span>
-        <span class="n">wg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">sbend</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
-        <span class="n">ig</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">wg</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+        <span class="n">wg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">sbend</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
+        <span class="n">ig</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">wg</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">ig</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">sbend</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+        <span class="n">ig</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">sbend</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">ig</span>
 
 
 <span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bundle_sbend</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Three routes with mismatched y on each side — forces S-bends.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Three routes with mismatched y on each side — forces S-bends."""</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="c1"># Start ports face East (angle=0) at x=0.</span>
     <span class="c1"># End ports face West (angle=2) at x=200 µm.</span>
@@ -5696,21 +5696,21 @@ S-bend's own footprint.</p>
 
     <span class="n">start_ports</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">start_y_um</span><span class="p">)</span>
     <span class="p">]</span>
     <span class="n">end_ports</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">200</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">end_y_um</span><span class="p">)</span>
     <span class="p">]</span>
@@ -5764,7 +5764,7 @@ around obstacles independently.</p>
 <span class="c1"># `xmin &lt; ports.xmin - bend_radius` and `xmax &gt; ports.xmax + bend_radius`.</span>
 <span class="c1">#</span>
 <span class="c1"># The y range of each bbox is kept narrower than the port pitch so each</span>
-<span class="c1"># bbox only contains its own start and end port — adjacent routes&#39; ports</span>
+<span class="c1"># bbox only contains its own start and end port — adjacent routes' ports</span>
 <span class="c1"># are excluded, demonstrating that `route_smart` can handle per-route</span>
 <span class="c1"># obstacles independently.</span>
 <span class="n">N_BBOX</span> <span class="o">=</span> <span class="mi">4</span>
@@ -5786,18 +5786,18 @@ around obstacles independently.</p>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_BBOX</span><span class="p">):</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">PITCH_BBOX</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">PITCH_BBOX</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1"># Draw each obstacle on the floorplan layer so they are visible alongside</span>
@@ -5807,13 +5807,13 @@ around obstacles independently.</p>
 
     <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_bundle</span><span class="p">(</span>
         <span class="n">c</span><span class="p">,</span>
-        <span class="n">start_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^in&quot;</span><span class="p">)),</span>
-        <span class="n">end_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^out&quot;</span><span class="p">)),</span>
+        <span class="n">start_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">"^in"</span><span class="p">)),</span>
+        <span class="n">end_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">"^out"</span><span class="p">)),</span>
         <span class="n">separation</span><span class="o">=</span><span class="n">SEP</span><span class="p">,</span>
         <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
         <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
         <span class="n">bboxes</span><span class="o">=</span><span class="n">blockers</span><span class="p">,</span>
-        <span class="n">bbox_routing</span><span class="o">=</span><span class="s2">&quot;minimal&quot;</span><span class="p">,</span>
+        <span class="n">bbox_routing</span><span class="o">=</span><span class="s2">"minimal"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
@@ -5823,18 +5823,18 @@ around obstacles independently.</p>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_BBOX</span><span class="p">):</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">PITCH_BBOX</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">60_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">PITCH_BBOX</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">blocker</span> <span class="ow">in</span> <span class="n">blockers</span><span class="p">:</span>
@@ -5842,13 +5842,13 @@ around obstacles independently.</p>
 
     <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_bundle</span><span class="p">(</span>
         <span class="n">c</span><span class="p">,</span>
-        <span class="n">start_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^in&quot;</span><span class="p">)),</span>
-        <span class="n">end_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^out&quot;</span><span class="p">)),</span>
+        <span class="n">start_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">"^in"</span><span class="p">)),</span>
+        <span class="n">end_ports</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">"^out"</span><span class="p">)),</span>
         <span class="n">separation</span><span class="o">=</span><span class="n">SEP</span><span class="p">,</span>
         <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
         <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
         <span class="n">bboxes</span><span class="o">=</span><span class="n">blockers</span><span class="p">,</span>
-        <span class="n">bbox_routing</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">,</span>
+        <span class="n">bbox_routing</span><span class="o">=</span><span class="s2">"full"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
@@ -5892,18 +5892,18 @@ Relax individual checks when connecting different structures:</p>
 first (start) port.  Insert explicit <code>taper_cell</code> for mode-converting transitions.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bundle_type_mismatch</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Connect &#39;optical&#39; start ports to &#39;pin&#39; end ports.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Connect 'optical' start ports to 'pin' end ports."""</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">N</span> <span class="o">=</span> <span class="mi">2</span>
 
     <span class="n">start_ports</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;wg</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"wg</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="c1"># East-facing start ports — routes will head east toward the end ports</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">50_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">10_000</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
     <span class="p">]</span>
@@ -5911,11 +5911,11 @@ first (start) port.  Insert explicit <code>taper_cell</code> for mode-converting
     <span class="c1"># a different `port_type` to exercise `allow_type_mismatch=True`.</span>
     <span class="n">end_ports</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;pin</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"pin</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">50_000</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">10_000</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;pin&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"pin"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
     <span class="p">]</span>
@@ -6124,7 +6124,7 @@ first (start) port.  Insert explicit <code>taper_cell</code> for mode-converting
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

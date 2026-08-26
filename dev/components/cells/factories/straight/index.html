@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5369,7 +5369,7 @@ is a <strong>cross section</strong> (by name, instance, or spec dict); the <code
     <span class="n">WGCLAD</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;FACTORIES_STRAIGHT_DEMO&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"FACTORIES_STRAIGHT_DEMO"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 <span class="n">L</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="build-a-few-waveguides">Build a few waveguides</h2>
@@ -5382,18 +5382,18 @@ is a <strong>cross section</strong> (by name, instance, or spec dict); the <code
     <span class="n">kf</span><span class="o">.</span><span class="n">CrossSectionSpecDict</span><span class="p">(</span>
         <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span>  <span class="c1"># 500 DBU = 0.5 µm</span>
-        <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="s2">"dbu"</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"WG"</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="p">)</span>
 
-<span class="n">wg_short</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">10.0</span><span class="p">))</span>  <span class="c1"># 10 µm</span>
-<span class="n">wg_long</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">20.0</span><span class="p">))</span>
+<span class="n">wg_short</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="s2">"WG"</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">10.0</span><span class="p">))</span>  <span class="c1"># 10 µm</span>
+<span class="n">wg_long</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="s2">"WG"</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">20.0</span><span class="p">))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;short name:&quot;</span><span class="p">,</span> <span class="n">wg_short</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;long  name:&quot;</span><span class="p">,</span> <span class="n">wg_long</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"short name:"</span><span class="p">,</span> <span class="n">wg_short</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"long  name:"</span><span class="p">,</span> <span class="n">wg_long</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span>
-    <span class="s2">&quot;same object (same args)?&quot;</span><span class="p">,</span>
+    <span class="s2">"same object (same args)?"</span><span class="p">,</span>
     <span class="n">wg_short</span> <span class="ow">is</span> <span class="n">straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="n">wg</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)),</span>
 <span class="p">)</span>
 <span class="n">wg_short</span>
@@ -5413,12 +5413,12 @@ same object (same args)? True
         <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span>
         <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))],</span>
-        <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_CLAD&quot;</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="s2">"dbu"</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"WG_CLAD"</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="p">)</span>
 
-<span class="n">wg_clad</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG_CLAD&quot;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">15.0</span><span class="p">))</span>
+<span class="n">wg_clad</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="s2">"WG_CLAD"</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">15.0</span><span class="p">))</span>
 <span class="n">wg_clad</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
@@ -5494,7 +5494,7 @@ same object (same args)? True
       <script id="__config" type="application/json">{"annotate":null,"base":"../../../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

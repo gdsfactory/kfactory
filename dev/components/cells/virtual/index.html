@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5670,24 +5670,24 @@ database, no DBU conversion, until you explicitly materialise it.</p>
 
 <span class="n">L</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>
 
-<span class="c1"># Use a dedicated KCLayout so the virtual factories&#39; layer indices are consistent</span>
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;virtual_demo&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="c1"># Use a dedicated KCLayout so the virtual factories' layer indices are consistent</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"virtual_demo"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="creating-a-vkcell-directly">Creating a VKCell directly</h2>
 <p><code>kcl.vkcell(name=...)</code> returns an empty VKCell attached to the given layout.
 Shapes are added via <code>vkcell.shapes(layer_index).insert(...)</code> using µm-based
 <code>DPolygon</code> / <code>DBox</code> objects.</p>
-<div class="highlight"><pre><span></span><code><span class="n">vc_box</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;simple_box&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">vc_box</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"simple_box"</span><span class="p">)</span>
 
 <span class="n">layer_idx</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 
 <span class="c1"># Insert a rectangle in µm</span>
 <span class="n">vc_box</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;VKCell name  : </span><span class="si">{</span><span class="n">vc_box</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bbox (µm)    : </span><span class="si">{</span><span class="n">vc_box</span><span class="o">.</span><span class="n">dbbox</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bbox (DBU)   : </span><span class="si">{</span><span class="n">vc_box</span><span class="o">.</span><span class="n">ibbox</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;shapes count : </span><span class="si">{</span><span class="n">vc_box</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"VKCell name  : </span><span class="si">{</span><span class="n">vc_box</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"bbox (µm)    : </span><span class="si">{</span><span class="n">vc_box</span><span class="o">.</span><span class="n">dbbox</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"bbox (DBU)   : </span><span class="si">{</span><span class="n">vc_box</span><span class="o">.</span><span class="n">ibbox</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"shapes count : </span><span class="si">{</span><span class="n">vc_box</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>VKCell name  : simple_box
 bbox (µm)    : (0,-0.25;10,0.25)
@@ -5699,28 +5699,28 @@ shapes count : 1
 <h2 id="ports-on-a-vkcell">Ports on a VKCell</h2>
 <p>Ports are created with <code>create_port</code> using a <code>DCplxTrans</code> (µm-based complex
 transform) to specify position and orientation.</p>
-<div class="highlight"><pre><span></span><code><span class="n">vc_wg</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;virtual_wg&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">vc_wg</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"virtual_wg"</span><span class="p">)</span>
 <span class="n">wg_layer</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 
 <span class="n">vc_wg</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">wg_layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">))</span>
 
 <span class="c1"># o1 faces west (angle=180°)</span>
 <span class="n">vc_wg</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
     <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
     <span class="n">layer</span><span class="o">=</span><span class="n">wg_layer</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="c1"># o2 faces east (angle=0°)</span>
 <span class="n">vc_wg</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
     <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
     <span class="n">layer</span><span class="o">=</span><span class="n">wg_layer</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">vc_wg</span><span class="o">.</span><span class="n">ports</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: trans=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="si">}</span><span class="s2">  width=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">dwidth</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: trans=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="si">}</span><span class="s2">  width=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">dwidth</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>  o1: trans=r180 *1 0,0  width=0.500 µm
   o2: trans=r0 *1 20,0  width=0.500 µm
@@ -5729,12 +5729,12 @@ transform) to specify position and orientation.</p>
 <p>Call <code>VInstance(vc).insert_into(target)</code> to convert the virtual geometry to a
 real <code>KCell</code> instance inside <code>target</code>.  This is a one-shot operation — you can
 call it multiple times to place the virtual cell at different locations.</p>
-<div class="highlight"><pre><span></span><code><span class="n">target</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;wg_from_virtual&quot;</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">target</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"wg_from_virtual"</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 <span class="n">vi</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">VInstance</span><span class="p">(</span><span class="n">vc_wg</span><span class="p">)</span>
 <span class="n">vi</span><span class="o">.</span><span class="n">insert_into</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Real cell name  : </span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Real cell bbox  : </span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Real cell name  : </span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Real cell bbox  : </span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 <span class="n">target</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Real cell name  : wg_from_virtual
@@ -5747,24 +5747,24 @@ Real cell bbox  : (0,-0.25;20,0.25) µm
 <p>VKCells can contain instances of other VKCells.  The whole hierarchy is flattened
 into real KLayout cells when <code>insert_into</code> is called on the outermost level.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Build two virtual waveguide arms</span>
-<span class="n">arm_a</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;arm_a&quot;</span><span class="p">)</span>
+<span class="n">arm_a</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"arm_a"</span><span class="p">)</span>
 <span class="n">arm_a</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">wg_layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">30.0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">))</span>
 
-<span class="n">arm_b</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;arm_b&quot;</span><span class="p">)</span>
+<span class="n">arm_b</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"arm_b"</span><span class="p">)</span>
 <span class="n">arm_b</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">wg_layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">30.0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">))</span>
 
 <span class="c1"># Compose them inside a parent virtual cell</span>
-<span class="n">parent_vc</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;virtual_composed&quot;</span><span class="p">)</span>
+<span class="n">parent_vc</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"virtual_composed"</span><span class="p">)</span>
 <span class="n">inst_a</span> <span class="o">=</span> <span class="n">parent_vc</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="n">arm_a</span><span class="p">)</span>  <span class="c1"># at (0, 0)</span>
 <span class="n">inst_b</span> <span class="o">=</span> <span class="n">parent_vc</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
     <span class="n">cell</span><span class="o">=</span><span class="n">arm_b</span><span class="p">,</span>
     <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span>  <span class="c1"># shift 2 µm up</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;parent bbox (µm): </span><span class="si">{</span><span class="n">parent_vc</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"parent bbox (µm): </span><span class="si">{</span><span class="n">parent_vc</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="c1"># Materialise the whole hierarchy at once</span>
-<span class="n">c_composed</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;composed_from_virtual&quot;</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
+<span class="n">c_composed</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"composed_from_virtual"</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">VInstance</span><span class="p">(</span><span class="n">parent_vc</span><span class="p">)</span><span class="o">.</span><span class="n">insert_into</span><span class="p">(</span><span class="n">c_composed</span><span class="p">)</span>
 <span class="n">c_composed</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
@@ -5787,13 +5787,13 @@ works like <code>@pdk.cell</code> but returns a <code>VKCell</code> and caches b
     <span class="n">half_w</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">2</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">lyr</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">half_w</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">half_w</span><span class="p">))</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
         <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">layer</span><span class="o">=</span><span class="n">lyr</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
         <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">layer</span><span class="o">=</span><span class="n">lyr</span><span class="p">,</span>
@@ -5804,8 +5804,8 @@ works like <code>@pdk.cell</code> but returns a <code>VKCell</code> and caches b
 <span class="n">s1</span> <span class="o">=</span> <span class="n">virtual_straight</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 <span class="n">s2</span> <span class="o">=</span> <span class="n">virtual_straight</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>  <span class="c1"># cached</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;s1 is s2 (cached): </span><span class="si">{</span><span class="n">s1</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="n">s2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;s1 bbox : </span><span class="si">{</span><span class="n">s1</span><span class="o">.</span><span class="n">dbbox</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"s1 is s2 (cached): </span><span class="si">{</span><span class="n">s1</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="n">s2</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"s1 bbox : </span><span class="si">{</span><span class="n">s1</span><span class="o">.</span><span class="n">dbbox</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>s1 is s2 (cached): True
 s1 bbox : (0,-0.25;10,0.25) µm
@@ -5846,19 +5846,19 @@ These are the building blocks for all-angle routing (see
 <span class="n">vs</span> <span class="o">=</span> <span class="n">v_straight</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">15.0</span><span class="p">)</span>
 <span class="n">vb</span> <span class="o">=</span> <span class="n">v_bend</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;virtual straight bbox : </span><span class="si">{</span><span class="n">vs</span><span class="o">.</span><span class="n">dbbox</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;virtual bend    bbox  : </span><span class="si">{</span><span class="n">vb</span><span class="o">.</span><span class="n">dbbox</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;virtual bend    ports : </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">vb</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"virtual straight bbox : </span><span class="si">{</span><span class="n">vs</span><span class="o">.</span><span class="n">dbbox</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"virtual bend    bbox  : </span><span class="si">{</span><span class="n">vb</span><span class="o">.</span><span class="n">dbbox</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"virtual bend    ports : </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">vb</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>virtual straight bbox : (0,-0.25;15,0.25) µm
 virtual bend    bbox  : (0,-0.25;18.9509584665,18.7009584665) µm
-virtual bend    ports : [&#39;o1&#39;, &#39;o2&#39;]
+virtual bend    ports : ['o1', 'o2']
 </code></pre></div>
 <h2 id="all-angle-routing-into-a-vkcell">All-angle routing into a VKCell</h2>
 <p>The most common reason to work with VKCell directly is <strong>all-angle routing</strong> —
 computing the route in virtual space, inspecting it, then materialising once
 satisfied.</p>
-<div class="highlight"><pre><span></span><code><span class="n">vc_route</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;aa_preview&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">vc_route</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"aa_preview"</span><span class="p">)</span>
 
 <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">aa</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route</span><span class="p">(</span>
     <span class="n">vc_route</span><span class="p">,</span>
@@ -5873,11 +5873,11 @@ satisfied.</p>
     <span class="n">bend_factory</span><span class="o">=</span><span class="n">v_bend</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Virtual route bbox (µm): </span><span class="si">{</span><span class="n">vc_route</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ports: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">vc_route</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Virtual route bbox (µm): </span><span class="si">{</span><span class="n">vc_route</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Ports: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">vc_route</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="c1"># Materialise into a real cell</span>
-<span class="n">c_aa</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;aa_from_vkcell&quot;</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
+<span class="n">c_aa</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"aa_from_vkcell"</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">VInstance</span><span class="p">(</span><span class="n">vc_route</span><span class="p">)</span><span class="o">.</span><span class="n">insert_into</span><span class="p">(</span><span class="n">c_aa</span><span class="p">)</span>
 <span class="n">c_aa</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
@@ -5890,9 +5890,9 @@ Ports: []
 <h2 id="insert_into_flat"><code>insert_into_flat</code></h2>
 <p>Use <code>insert_into_flat</code> when you want the virtual geometry inlined directly into
 the target cell (no sub-cell hierarchy created).</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_flat</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;aa_flat&quot;</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_flat</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"aa_flat"</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 
-<span class="n">vc_flat</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;route_flat_src&quot;</span><span class="p">)</span>
+<span class="n">vc_flat</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"route_flat_src"</span><span class="p">)</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">aa</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route</span><span class="p">(</span>
     <span class="n">vc_flat</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
@@ -5908,8 +5908,8 @@ the target cell (no sub-cell hierarchy created).</p>
 
 <span class="n">kf</span><span class="o">.</span><span class="n">VInstance</span><span class="p">(</span><span class="n">vc_flat</span><span class="p">)</span><span class="o">.</span><span class="n">insert_into_flat</span><span class="p">(</span><span class="n">c_flat</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instances in c_flat : </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">c_flat</span><span class="o">.</span><span class="n">each_inst</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;c_flat bbox (µm)    : </span><span class="si">{</span><span class="n">c_flat</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Instances in c_flat : </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">c_flat</span><span class="o">.</span><span class="n">each_inst</span><span class="p">())</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"c_flat bbox (µm)    : </span><span class="si">{</span><span class="n">c_flat</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">c_flat</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Instances in c_flat : []
@@ -6049,7 +6049,7 @@ are created.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

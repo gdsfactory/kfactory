@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5827,14 +5827,14 @@ See <a href="../../enclosures/layer_enclosure/">Layer Enclosures</a> for the enc
     <span class="p">],</span>
     <span class="n">radius</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>  <span class="c1"># preferred bend radius hint</span>
     <span class="n">radius_min</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>  <span class="c1"># minimum bend radius hint (DRC)</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_500&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WG_500"</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;name:        </span><span class="si">{</span><span class="n">xs_wg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;width (µm):  </span><span class="si">{</span><span class="n">xs_wg</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;layer:       </span><span class="si">{</span><span class="n">xs_wg</span><span class="o">.</span><span class="n">layer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;radius (µm): </span><span class="si">{</span><span class="n">xs_wg</span><span class="o">.</span><span class="n">radius</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sections:    </span><span class="si">{</span><span class="n">xs_wg</span><span class="o">.</span><span class="n">sections</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"name:        </span><span class="si">{</span><span class="n">xs_wg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"width (µm):  </span><span class="si">{</span><span class="n">xs_wg</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"layer:       </span><span class="si">{</span><span class="n">xs_wg</span><span class="o">.</span><span class="n">layer</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"radius (µm): </span><span class="si">{</span><span class="n">xs_wg</span><span class="o">.</span><span class="n">radius</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"sections:    </span><span class="si">{</span><span class="n">xs_wg</span><span class="o">.</span><span class="n">sections</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>name:        WG_500
 width (µm):  0.5
@@ -5850,10 +5850,10 @@ calls with the same name return the cached version.</p>
 <span class="n">xs_dbu</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">CrossSection</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_wg</span><span class="p">)</span>
 
 <span class="c1"># Retrieve by name later — handy in factory functions that only know the name</span>
-<span class="n">xs_retrieved</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">CrossSection</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="s2">&quot;WG_500&quot;</span><span class="p">)</span>
+<span class="n">xs_retrieved</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">CrossSection</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="s2">"WG_500"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;same object? </span><span class="si">{</span><span class="n">xs_dbu</span><span class="o">.</span><span class="n">base</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">xs_retrieved</span><span class="o">.</span><span class="n">base</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;width (DBU): </span><span class="si">{</span><span class="n">xs_dbu</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># 500 DBU at 1 nm/DBU</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"same object? </span><span class="si">{</span><span class="n">xs_dbu</span><span class="o">.</span><span class="n">base</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">xs_retrieved</span><span class="o">.</span><span class="n">base</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"width (DBU): </span><span class="si">{</span><span class="n">xs_dbu</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># 500 DBU at 1 nm/DBU</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>same object? True
 width (DBU): 500
@@ -5870,11 +5870,11 @@ All dimensions are integers (database units).</p>
         <span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">),</span>  <span class="c1"># (layer, d_min, d_max) in DBU</span>
     <span class="p">],</span>
     <span class="n">radius</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>  <span class="c1"># 10 µm in DBU</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_500_dbu&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WG_500_dbu"</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;width (DBU): </span><span class="si">{</span><span class="n">xs_dbu_direct</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;width (µm):  </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs_dbu_direct</span><span class="o">.</span><span class="n">width</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"width (DBU): </span><span class="si">{</span><span class="n">xs_dbu_direct</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"width (µm):  </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs_dbu_direct</span><span class="o">.</span><span class="n">width</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>width (DBU): 500
 width (µm):  0.5
@@ -5885,7 +5885,7 @@ the immutable Pydantic model that gets stored in <code>KCLayout.cross_sections</
 You can build one directly using an existing <code>LayerEnclosure</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="n">enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_RIB&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"WG_RIB"</span><span class="p">,</span>
         <span class="n">main_layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
         <span class="n">sections</span><span class="o">=</span><span class="p">[</span>
             <span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">),</span>
@@ -5897,14 +5897,14 @@ You can build one directly using an existing <code>LayerEnclosure</code>:</p>
 <span class="n">xs_base</span> <span class="o">=</span> <span class="n">SymmetricalCrossSection</span><span class="p">(</span>
     <span class="n">width</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span>  <span class="c1"># 700 DBU = 0.7 µm</span>
     <span class="n">enclosure</span><span class="o">=</span><span class="n">enc</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_700_RIB&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WG_700_RIB"</span><span class="p">,</span>
     <span class="n">radius</span><span class="o">=</span><span class="mi">15_000</span><span class="p">,</span>
     <span class="n">radius_min</span><span class="o">=</span><span class="mi">8_000</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">xs_rib</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">CrossSection</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_base</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;layers:  </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">xs_rib</span><span class="o">.</span><span class="n">sections</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;radius:  </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs_rib</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"layers:  </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">xs_rib</span><span class="o">.</span><span class="n">sections</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"radius:  </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs_rib</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>layers:  [SLAB (3/0), WGCLAD (2/0)]
 radius:  15.0 µm
@@ -5921,12 +5921,12 @@ edge.</p>
         <span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span>  <span class="c1"># cladding: extends 0–2 µm from core</span>
         <span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">SLAB</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">),</span>  <span class="c1"># slab ring: starts 0.5 µm, ends 3 µm from core</span>
     <span class="p">],</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_IMPLANT&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WG_IMPLANT"</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="k">for</span> <span class="n">layer</span><span class="p">,</span> <span class="n">segs</span> <span class="ow">in</span> <span class="n">xs_implant</span><span class="o">.</span><span class="n">sections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="k">for</span> <span class="n">d_min</span><span class="p">,</span> <span class="n">d_max</span> <span class="ow">in</span> <span class="n">segs</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">d_min</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">d_max</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">d_min</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">d_max</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>  SLAB (3/0)  0.5 → 3.0 µm
   WGCLAD (2/0)  None → 2.0 µm
@@ -5944,11 +5944,11 @@ These do NOT use Minkowski operations; they simply offset the bounding box polyg
     <span class="p">],</span>
     <span class="n">bbox_layers</span><span class="o">=</span><span class="p">[</span><span class="n">L</span><span class="o">.</span><span class="n">FLOORPLAN</span><span class="p">],</span>
     <span class="n">bbox_offsets</span><span class="o">=</span><span class="p">[</span><span class="mf">5.0</span><span class="p">],</span>  <span class="c1"># floorplan 5 µm outside bounding box</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_FP&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WG_FP"</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">xs_fp_dbu</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_with_fp</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bbox_sections: </span><span class="si">{</span><span class="n">xs_fp_dbu</span><span class="o">.</span><span class="n">bbox_sections</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"bbox_sections: </span><span class="si">{</span><span class="n">xs_fp_dbu</span><span class="o">.</span><span class="n">bbox_sections</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>bbox_sections: {FLOORPLAN (10/0): 5000}
 </code></pre></div>
@@ -5959,12 +5959,12 @@ Because <code>@kf.cell</code> caches by parameters, factory functions should acc
 the cross-section <strong>name</strong> (a string) and look it up inside:</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mzi_arm</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">length_um</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A simple straight acting as an MZI arm.</span>
+<span class="w">    </span><span class="sd">"""A simple straight acting as an MZI arm.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        cross_section: Name of a registered cross-section.</span>
 <span class="sd">        length_um: Arm length in µm.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">length_um</span><span class="p">)</span>
@@ -5976,7 +5976,7 @@ the cross-section <strong>name</strong> (a string) and look it up inside:</p>
 
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># West-facing</span>
             <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="o">.</span><span class="n">base</span><span class="p">,</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
@@ -5984,7 +5984,7 @@ the cross-section <strong>name</strong> (a string) and look it up inside:</p>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># East-facing</span>
             <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="o">.</span><span class="n">base</span><span class="p">,</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
@@ -5993,9 +5993,9 @@ the cross-section <strong>name</strong> (a string) and look it up inside:</p>
     <span class="k">return</span> <span class="n">c</span>
 
 
-<span class="n">arm</span> <span class="o">=</span> <span class="n">mzi_arm</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG_500&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;port o1 width: </span><span class="si">{</span><span class="n">arm</span><span class="p">[</span><span class="s1">&#39;o1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2"> DBU = </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">arm</span><span class="p">[</span><span class="s1">&#39;o1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">width</span><span class="p">)</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;port o1 layer: </span><span class="si">{</span><span class="n">arm</span><span class="p">[</span><span class="s1">&#39;o1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">layer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">arm</span> <span class="o">=</span> <span class="n">mzi_arm</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="s2">"WG_500"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"port o1 width: </span><span class="si">{</span><span class="n">arm</span><span class="p">[</span><span class="s1">'o1'</span><span class="p">]</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2"> DBU = </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">arm</span><span class="p">[</span><span class="s1">'o1'</span><span class="p">]</span><span class="o">.</span><span class="n">width</span><span class="p">)</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"port o1 layer: </span><span class="si">{</span><span class="n">arm</span><span class="p">[</span><span class="s1">'o1'</span><span class="p">]</span><span class="o">.</span><span class="n">layer</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">arm</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>port o1 width: 500 DBU = 0.5 µm
@@ -6015,11 +6015,11 @@ the router reads <code>xs.radius</code> and <code>xs.radius_min</code> to choose
 </ol>
 <div class="highlight"><pre><span></span><code><span class="c1"># PDK setup (once)</span>
 <span class="n">xs_wg</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">DCrossSection</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
-                         <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)],</span> <span class="n">radius</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_500&quot;</span><span class="p">)</span>
+                         <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)],</span> <span class="n">radius</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"WG_500"</span><span class="p">)</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_wg</span><span class="p">)</span>   <span class="c1"># register</span>
 
 <span class="c1"># In a factory function — look up by name</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">my_bend</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WG_500&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">my_bend</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"WG_500"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
     <span class="o">...</span>
 </code></pre></div>
@@ -6048,13 +6048,13 @@ derived property <code>section_max - section_min</code>.</p>
         <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
         <span class="n">section_min</span><span class="o">=-</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">section_max</span><span class="o">=</span><span class="mi">201</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ASYM_301&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"ASYM_301"</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;width:       </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2"> DBU  (odd!)&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;main strip:  [</span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;xmin/xmax:   (</span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">get_xmin</span><span class="p">()</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">get_xmax</span><span class="p">()</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;is_symmetric: </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"width:       </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2"> DBU  (odd!)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"main strip:  [</span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">]"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"xmin/xmax:   (</span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">get_xmin</span><span class="p">()</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">get_xmax</span><span class="p">()</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"is_symmetric: </span><span class="si">{</span><span class="n">acs</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>width:       301 DBU  (odd!)
 main strip:  [-100, 201]
@@ -6072,30 +6072,30 @@ straight-like cell, the standard convention is:</p>
 <p>The mirror flag on <code>o2</code> flips the port-local frame so that "right side of
 profile" maps to the same world-y direction at both ports.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">asym_straight</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ASYM_301&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Asymmetric-cross-section straight.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">asym_straight</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"ASYM_301"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Asymmetric-cross-section straight.</span>
 
 <span class="sd">    Port convention:</span>
 <span class="sd">        o1 → R180 at left, faces -x.</span>
 <span class="sd">        o2 → M0   at right, faces +x with mirror (asymmetric requirement).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
     <span class="n">length</span> <span class="o">=</span> <span class="mi">5_000</span>  <span class="c1"># 5 µm</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">layer</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">section_min</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">section_max</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
 
 <span class="n">straight</span> <span class="o">=</span> <span class="n">asym_straight</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;o1 trans: </span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">&#39;o1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  mirror=</span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">&#39;o1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="sa">f</span><span class="s2">"o1 trans: </span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">'o1'</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  mirror=</span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">'o1'</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">"</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;o2 trans: </span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">&#39;o2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  mirror=</span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">&#39;o2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="sa">f</span><span class="s2">"o2 trans: </span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">'o2'</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  mirror=</span><span class="si">{</span><span class="n">straight</span><span class="p">[</span><span class="s1">'o2'</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">"</span>
 <span class="p">)</span>
 <span class="n">straight</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
@@ -6117,15 +6117,15 @@ up with a mirror flag.</p>
 have opposite mirror flags in world space. If they'd line up with the same
 orientation (an R180 join, which flips the profile), it raises
 <code>AsymmetricMirrorRequiredError</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="n">parent_chain</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;asym_chain_ok&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">parent_chain</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"asym_chain_ok"</span><span class="p">)</span>
 <span class="n">ia</span> <span class="o">=</span> <span class="n">parent_chain</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
 <span class="n">ib</span> <span class="o">=</span> <span class="n">parent_chain</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
 
 <span class="c1"># Default connect → succeeds, neither instance ends up with a mirror flag</span>
-<span class="n">ib</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">ia</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Default connect:&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ia.trans: </span><span class="si">{</span><span class="n">ia</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ia</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ib.trans: </span><span class="si">{</span><span class="n">ib</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ib</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">ib</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">ia</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Default connect:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  ia.trans: </span><span class="si">{</span><span class="n">ia</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ia</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  ib.trans: </span><span class="si">{</span><span class="n">ib</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ib</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 <span class="n">parent_chain</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Default connect:
@@ -6138,24 +6138,26 @@ orientation (an R180 join, which flips the profile), it raises
 <h3 id="o1-o1-still-possible-but-one-instance-ends-up-mirrored"><code>o1 ↔ o1</code>: still possible, but one instance ends up mirrored</h3>
 <p>Connecting two of the same kind of end (both <code>R180</code>) needs <code>mirror=True</code>
 too, but the result has one of the two instances flipped.</p>
-<div class="highlight"><pre><span></span><code><span class="n">parent_o1o1</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;asym_chain_o1o1&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">parent_o1o1</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"asym_chain_o1o1"</span><span class="p">)</span>
 <span class="n">ia2</span> <span class="o">=</span> <span class="n">parent_o1o1</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
 <span class="n">ib2</span> <span class="o">=</span> <span class="n">parent_o1o1</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">ib2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">ia2</span><span class="p">,</span> <span class="s2">&quot;o1&quot;</span><span class="p">)</span>
+    <span class="n">ib2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">ia2</span><span class="p">,</span> <span class="s2">"o1"</span><span class="p">)</span>
 <span class="k">except</span> <span class="n">AsymmetricMirrorRequiredError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WITHOUT mirror=True, o1↔o1 raises:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  AsymmetricMirrorRequiredError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"WITHOUT mirror=True, o1↔o1 raises:"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  AsymmetricMirrorRequiredError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="n">ib2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">ia2</span><span class="p">,</span> <span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">mirror</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WITH mirror=True (one instance mirrored):&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ia2.trans: </span><span class="si">{</span><span class="n">ia2</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ia2</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ib2.trans: </span><span class="si">{</span><span class="n">ib2</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ib2</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">ib2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">ia2</span><span class="p">,</span> <span class="s2">"o1"</span><span class="p">,</span> <span class="n">mirror</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"WITH mirror=True (one instance mirrored):"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  ia2.trans: </span><span class="si">{</span><span class="n">ia2</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ia2</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  ib2.trans: </span><span class="si">{</span><span class="n">ib2</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">  (mirror=</span><span class="si">{</span><span class="n">ib2</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 <span class="n">parent_o1o1</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>WITHOUT mirror=True, o1↔o1 raises:
-  AsymmetricMirrorRequiredError: Cannot connect ports &#39;o1&#39; and &#39;o1&#39; carrying the same asymmetric cross section without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
+
+
+  AsymmetricMirrorRequiredError: Cannot connect ports 'o1' and 'o1' carrying the same asymmetric cross section without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
 
 WITH mirror=True (one instance mirrored):
   ia2.trans: r0 0,0  (mirror=False)
@@ -6163,38 +6165,38 @@ WITH mirror=True (one instance mirrored):
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../cross_sections/output_26_1.png" /></p>
+<img alt="png" src="../cross_sections/output_26_2.png" /></p>
 <h3 id="connecting-symmetric-asymmetric-structural-mismatch">Connecting symmetric ↔ asymmetric: structural mismatch</h3>
 <p>A port carrying a <code>SymmetricalCrossSection</code> cannot connect to one carrying an
 <code>AsymmetricalCrossSection</code> — the two are structurally different objects.
 This raises <code>CrossSectionSymmetryMismatchError</code> <strong>before</strong> the width/layer
 checks, and it's not bypassable by <code>allow_width_mismatch=True</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">sym_straight</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WG_500&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plain symmetric straight for the mismatch demo.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sym_straight</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"WG_500"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Plain symmetric straight for the mismatch demo."""</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
     <span class="n">length</span> <span class="o">=</span> <span class="mi">5_000</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">layer</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">xs</span><span class="o">.</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
 
-<span class="n">parent_mix</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;asym_sym_mismatch&quot;</span><span class="p">)</span>
-<span class="n">sym_inst</span> <span class="o">=</span> <span class="n">parent_mix</span> <span class="o">&lt;&lt;</span> <span class="n">sym_straight</span><span class="p">(</span><span class="s2">&quot;WG_500&quot;</span><span class="p">)</span>
+<span class="n">parent_mix</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"asym_sym_mismatch"</span><span class="p">)</span>
+<span class="n">sym_inst</span> <span class="o">=</span> <span class="n">parent_mix</span> <span class="o">&lt;&lt;</span> <span class="n">sym_straight</span><span class="p">(</span><span class="s2">"WG_500"</span><span class="p">)</span>
 <span class="n">asym_inst</span> <span class="o">=</span> <span class="n">parent_mix</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">asym_inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">sym_inst</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">)</span>
+    <span class="n">asym_inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">sym_inst</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">)</span>
 <span class="k">except</span> <span class="n">CrossSectionSymmetryMismatchError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Symmetric ↔ asymmetric connect raises:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  CrossSectionSymmetryMismatchError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Symmetric ↔ asymmetric connect raises:"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  CrossSectionSymmetryMismatchError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Symmetric ↔ asymmetric connect raises:
-  CrossSectionSymmetryMismatchError: Cross section symmetry mismatch between ports &#39;o1&#39; (asymmetric) and &#39;o2&#39; (symmetric). Symmetric and asymmetric cross sections cannot be connected.
+  CrossSectionSymmetryMismatchError: Cross section symmetry mismatch between ports 'o1' (asymmetric) and 'o2' (symmetric). Symmetric and asymmetric cross sections cannot be connected.
 </code></pre></div>
 <h3 id="summary-of-asymmetric-port-behavior">Summary of asymmetric port behavior</h3>
 <table>
@@ -6349,7 +6351,7 @@ works by default and adding <code>mirror=True</code> would over-mirror it and ra
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5630,7 +5630,7 @@ waveguide core.</p>
 <p>A 2 µm WGCLAD around a WG core (1 nm/DBU → 2 µm = 2 000 DBU):</p>
 <div class="highlight"><pre><span></span><code><span class="n">clad_enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span>
     <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">)],</span>  <span class="c1"># 2 µm cladding in DBU</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WGSTD&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WGSTD"</span><span class="p">,</span>
     <span class="n">main_layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -5654,7 +5654,7 @@ automatically computed as the Minkowski expansion of the WG shape.</p>
 Use <code>dsections=</code> together with <code>kcl=</code> to specify distances in micrometres:</p>
 <div class="highlight"><pre><span></span><code><span class="n">clad_enc_um</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span>
     <span class="n">dsections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)],</span>  <span class="c1"># 2 µm — converted to DBU automatically</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WGSTD_UM&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WGSTD_UM"</span><span class="p">,</span>
     <span class="n">main_layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
     <span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
 <span class="p">)</span>
@@ -5668,7 +5668,7 @@ Use <code>dsections=</code> together with <code>kcl=</code> to specify distances
 <span class="p">)</span>
 <span class="n">bend_um</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-08-24 23:07:24.272[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m823[0m - [31m[1mName conflict in kfactory.kcell::name at line 823
+<div class="highlight"><pre><span></span><code>[32m2026-08-26 11:45:54.694[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m823[0m - [31m[1mName conflict in kfactory.kcell::name at line 823
 Renaming Unnamed_2 (cell_index=2) to bend_euler_CS67c2bf20_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CS67c2bf20_500_R10_A90_R150 (cell_index=0), function_name=_bend_euler, basename=bend_euler[0m
 </code></pre></div>
@@ -5693,7 +5693,7 @@ edge:</p>
         <span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">SLAB</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span>  <span class="c1"># 0 → 2 µm</span>
         <span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">NPP</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">),</span>  <span class="c1"># 1 → 3 µm  (annular ring)</span>
     <span class="p">],</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;SLAB_DOPED&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"SLAB_DOPED"</span><span class="p">,</span>
     <span class="n">main_layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
     <span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
 <span class="p">)</span>
@@ -5755,7 +5755,7 @@ enclosure.</p>
     <span class="n">layer</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCellEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Two euler bends joined at their West ports, with optional cell-level enclosure.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Two euler bends joined at their West ports, with optional cell-level enclosure."""</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">b1</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">factories</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_euler_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">)(</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span>
@@ -5780,7 +5780,7 @@ enclosure.</p>
 <span class="n">c_two</span> <span class="o">=</span> <span class="n">two_bends</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">enclosure</span><span class="o">=</span><span class="n">kcell_enc</span><span class="p">)</span>
 <span class="n">c_two</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-08-24 23:07:24.436[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m823[0m - [31m[1mName conflict in kfactory.kcell::name at line 823
+<div class="highlight"><pre><span></span><code>[32m2026-08-26 11:45:54.915[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m823[0m - [31m[1mName conflict in kfactory.kcell::name at line 823
 Renaming Unnamed_12 (cell_index=12) to bend_euler_CS028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=11), function_name=_bend_euler, basename=bend_euler[0m
 </code></pre></div>
@@ -5799,13 +5799,13 @@ bend radius as a named, reusable object.  <code>SymmetricalCrossSection</code> b
 <span class="n">wg_xs</span> <span class="o">=</span> <span class="n">SymmetricalCrossSection</span><span class="p">(</span>
     <span class="n">width</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span>  <span class="c1"># 500 nm core</span>
     <span class="n">enclosure</span><span class="o">=</span><span class="n">clad_enc</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_STD&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WG_STD"</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;name:          </span><span class="si">{</span><span class="n">wg_xs</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;width (DBU):   </span><span class="si">{</span><span class="n">wg_xs</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;width (µm):    </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">wg_xs</span><span class="o">.</span><span class="n">width</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;main_layer:    </span><span class="si">{</span><span class="n">wg_xs</span><span class="o">.</span><span class="n">main_layer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"name:          </span><span class="si">{</span><span class="n">wg_xs</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"width (DBU):   </span><span class="si">{</span><span class="n">wg_xs</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"width (µm):    </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">wg_xs</span><span class="o">.</span><span class="n">width</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"main_layer:    </span><span class="si">{</span><span class="n">wg_xs</span><span class="o">.</span><span class="n">main_layer</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>name:          WG_STD
 width (DBU):   500
@@ -5937,7 +5937,7 @@ factory width and bend radius.  See the <strong>Routing</strong> section for exa
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

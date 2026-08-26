@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5895,18 +5895,18 @@ placed at size's point.</p>
 <span class="normal">63</span>
 <span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Left</span><span class="p">(</span><span class="n">Step</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Let the router go left.</span>
+<span class="w">    </span><span class="sd">"""Let the router go left.</span>
 
 <span class="sd">    If a size is given, the router will continues that amount</span>
 <span class="sd">    (including the added bend).</span>
 <span class="sd">    If include_bend is true, the router will stop before the next bend needs to bed</span>
-<span class="sd">    placed at size&#39;s point.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    placed at size's point.</span>
+<span class="sd">    """</span>
 
     <span class="n">dist</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the router turn left and go straight if necessary.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Make the router turn left and go straight if necessary."""</span>
         <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
         <span class="n">router</span><span class="o">.</span><span class="n">left</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">:</span>
@@ -5917,14 +5917,14 @@ placed at size's point.</p>
                 <span class="p">):</span>
                     <span class="n">bend_radius</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;If the next bend should be avoided the step needs to be bigger&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot; than </span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">&quot;</span>
+                        <span class="s2">"If the next bend should be avoided the step needs to be bigger"</span>
+                        <span class="sa">f</span><span class="s2">" than </span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">"</span>
                     <span class="p">)</span>
                 <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
                     <span class="n">bend_radius</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The step needs to be bigger than </span><span class="si">{</span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The step needs to be bigger than </span><span class="si">{</span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="n">router</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -5981,7 +5981,7 @@ placed at size's point.</p>
 <span class="normal">62</span>
 <span class="normal">63</span>
 <span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make the router turn left and go straight if necessary.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Make the router turn left and go straight if necessary."""</span>
     <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
     <span class="n">router</span><span class="o">.</span><span class="n">left</span><span class="p">()</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">:</span>
@@ -5992,14 +5992,14 @@ placed at size's point.</p>
             <span class="p">):</span>
                 <span class="n">bend_radius</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;If the next bend should be avoided the step needs to be bigger&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; than </span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">&quot;</span>
+                    <span class="s2">"If the next bend should be avoided the step needs to be bigger"</span>
+                    <span class="sa">f</span><span class="s2">" than </span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">"</span>
                 <span class="p">)</span>
             <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
                 <span class="n">bend_radius</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The step needs to be bigger than </span><span class="si">{</span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The step needs to be bigger than </span><span class="si">{</span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">router</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6087,18 +6087,18 @@ placed at size's point.</p>
 <span class="normal">95</span>
 <span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Right</span><span class="p">(</span><span class="n">Step</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Let the router go right.</span>
+<span class="w">    </span><span class="sd">"""Let the router go right.</span>
 
 <span class="sd">    If a size is given, the router will continues that amount</span>
 <span class="sd">    (including the added bend).</span>
 <span class="sd">    If include_bend is true, the router will stop before the next bend needs to bed</span>
-<span class="sd">    placed at size&#39;s point.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    placed at size's point.</span>
+<span class="sd">    """</span>
 
     <span class="n">dist</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds the bend and potential straight after.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Adds the bend and potential straight after."""</span>
         <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
         <span class="n">router</span><span class="o">.</span><span class="n">right</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">:</span>
@@ -6106,14 +6106,14 @@ placed at size's point.</p>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
                     <span class="n">bend_radius</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;If the next bend should be avoided the step needs to be bigger&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot; than </span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">&quot;</span>
+                        <span class="s2">"If the next bend should be avoided the step needs to be bigger"</span>
+                        <span class="sa">f</span><span class="s2">" than </span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">"</span>
                     <span class="p">)</span>
                 <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
                     <span class="n">bend_radius</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The step needs to be bigger than </span><span class="si">{</span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The step needs to be bigger than </span><span class="si">{</span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="n">router</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -6167,7 +6167,7 @@ placed at size's point.</p>
 <span class="normal">94</span>
 <span class="normal">95</span>
 <span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds the bend and potential straight after.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Adds the bend and potential straight after."""</span>
     <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
     <span class="n">router</span><span class="o">.</span><span class="n">right</span><span class="p">()</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">:</span>
@@ -6175,14 +6175,14 @@ placed at size's point.</p>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
                 <span class="n">bend_radius</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;If the next bend should be avoided the step needs to be bigger&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; than </span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">&quot;</span>
+                    <span class="s2">"If the next bend should be avoided the step needs to be bigger"</span>
+                    <span class="sa">f</span><span class="s2">" than </span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">"</span>
                 <span class="p">)</span>
             <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
                 <span class="n">bend_radius</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The step needs to be bigger than </span><span class="si">{</span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The step needs to be bigger than </span><span class="si">{</span><span class="n">bend_radius</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">router</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6244,16 +6244,16 @@ placed at size's point.</p>
 <span class="normal">28</span>
 <span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Step</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base for a routing step.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Abstract base for a routing step."""</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes the step.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Executes the step."""</span>
         <span class="o">...</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">include_bend</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the execute should leave space at the end of the step for a bend.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Whether the execute should leave space at the end of the step for a bend."""</span>
         <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -6322,7 +6322,7 @@ placed at size's point.</p>
 <span class="normal">23</span>
 <span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Executes the step.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Executes the step."""</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6395,24 +6395,24 @@ placed at size's point.</p>
 <span class="normal">288</span>
 <span class="normal">289</span>
 <span class="normal">290</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Steps</span><span class="p">(</span><span class="n">RootModel</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Collection of steps. Runs the execution on them.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Collection of steps. Runs the execution on them."""</span>
 
     <span class="n">root</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">Step</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="s2">&quot;All Steps must implement an &quot;</span>
-                    <span class="s2">&quot;&#39;execute(self, router: ManhattanRouterSide, include_bend: bool)&quot;</span>
+                    <span class="s2">"All Steps must implement an "</span>
+                    <span class="s2">"'execute(self, router: ManhattanRouterSide, include_bend: bool)"</span>
                 <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run all the steps on the given router.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Run all the steps on the given router."""</span>
         <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
@@ -6422,7 +6422,7 @@ placed at size's point.</p>
                 <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">step</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">router</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in step </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">step</span><span class="si">=}</span><span class="s2">. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">!s}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error in step </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">step</span><span class="si">=}</span><span class="s2">. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">!s}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -6469,7 +6469,7 @@ placed at size's point.</p>
 <span class="normal">288</span>
 <span class="normal">289</span>
 <span class="normal">290</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run all the steps on the given router.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Run all the steps on the given router."""</span>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
@@ -6479,7 +6479,7 @@ placed at size's point.</p>
             <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">step</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">router</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in step </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">step</span><span class="si">=}</span><span class="s2">. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">!s}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error in step </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">step</span><span class="si">=}</span><span class="s2">. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">!s}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -6546,12 +6546,12 @@ placed at size's point.</p>
 <span class="normal">111</span>
 <span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Straight</span><span class="p">(</span><span class="n">Step</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds a straight section to the router.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Adds a straight section to the router."""</span>
 
     <span class="n">dist</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a straight section to the router.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Adds a straight section to the router."""</span>
         <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
@@ -6600,7 +6600,7 @@ placed at size's point.</p>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds a straight section to the router.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Adds a straight section to the router."""</span>
     <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
@@ -6679,18 +6679,18 @@ placed at size's point.</p>
 <span class="normal">133</span>
 <span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">X</span><span class="p">(</span><span class="n">Step</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Go to an absolute X coordinate.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Go to an absolute X coordinate."""</span>
 
     <span class="n">x</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a straight section to the router.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Adds a straight section to the router."""</span>
         <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
         <span class="k">if</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Cannot go to position {self.x=}, because the router is currently &quot;</span>
-                <span class="s2">&quot;going in the y direction with position &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">"Cannot go to position {self.x=}, because the router is currently "</span>
+                <span class="s2">"going in the y direction with position "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
@@ -6745,13 +6745,13 @@ placed at size's point.</p>
 <span class="normal">132</span>
 <span class="normal">133</span>
 <span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds a straight section to the router.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Adds a straight section to the router."""</span>
     <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
     <span class="k">if</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Cannot go to position {self.x=}, because the router is currently &quot;</span>
-            <span class="s2">&quot;going in the y direction with position &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="s2">"Cannot go to position {self.x=}, because the router is currently "</span>
+            <span class="s2">"going in the y direction with position "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
@@ -6911,13 +6911,13 @@ placed at size's point.</p>
 <span class="normal">258</span>
 <span class="normal">259</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">XY</span><span class="p">(</span><span class="n">Step</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Go to an absolute XY coordinate.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Go to an absolute XY coordinate."""</span>
 
     <span class="n">x</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">y</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes the step on a router.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Executes the step on a router."""</span>
         <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
         <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span>
         <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span>
@@ -6927,17 +6927,17 @@ placed at size's point.</p>
                 <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">ANGLE_180</span> <span class="k">else</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;XY step cannot go back. It is current pointing at 0&quot;</span>
-                        <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>
+                        <span class="s2">"XY step cannot go back. It is current pointing at 0"</span>
+                        <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)"</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
                         <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dx</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">router</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dx</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;XY step cannot go back&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"XY step cannot go back"</span><span class="p">)</span>
                 <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dx</span><span class="p">))</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -6948,23 +6948,23 @@ placed at size's point.</p>
                 <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="s2">&quot;XY&#39;s y-step is too small. It is current pointing&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot; at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">&quot;</span>
-                            <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>
+                            <span class="s2">"XY's y-step is too small. It is current pointing"</span>
+                            <span class="sa">f</span><span class="s2">" at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">"</span>
+                            <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                            <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                            <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)"</span>
                         <span class="p">)</span>
                     <span class="n">router</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="s2">&quot;XY&#39;s y-step is too small. It is current pointing&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot; at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">&quot;</span>
-                            <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
-                            <span class="s2">&quot;Too small distance to place bend of &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="si">}</span><span class="s2"> size&quot;</span>
+                            <span class="s2">"XY's y-step is too small. It is current pointing"</span>
+                            <span class="sa">f</span><span class="s2">" at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">"</span>
+                            <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                            <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                            <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">"</span>
+                            <span class="s2">"Too small distance to place bend of "</span>
+                            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="si">}</span><span class="s2"> size"</span>
                         <span class="p">)</span>
                     <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">))</span>
 
@@ -6972,13 +6972,13 @@ placed at size's point.</p>
                 <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">ANGLE_270</span> <span class="k">else</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;XY step cannot go back. It is current pointing at 0&quot;</span>
-                        <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>
+                        <span class="s2">"XY step cannot go back. It is current pointing at 0"</span>
+                        <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)"</span>
                     <span class="p">)</span>
                 <span class="k">if</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;XY step cannot go back&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"XY step cannot go back"</span><span class="p">)</span>
                 <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dx</span><span class="p">))</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">ANGLE_270</span><span class="p">:</span>
@@ -6989,23 +6989,23 @@ placed at size's point.</p>
                 <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="s2">&quot;XY&#39;s y-step is too small. It is current pointing&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot; at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">&quot;</span>
-                            <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>
+                            <span class="s2">"XY's y-step is too small. It is current pointing"</span>
+                            <span class="sa">f</span><span class="s2">" at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">"</span>
+                            <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                            <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                            <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)"</span>
                         <span class="p">)</span>
                     <span class="n">router</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="s2">&quot;XY&#39;s y-step is too small. It is current pointing&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot; at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">&quot;</span>
-                            <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
-                            <span class="s2">&quot;Too small distance to place bend of &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="si">}</span><span class="s2"> size&quot;</span>
+                            <span class="s2">"XY's y-step is too small. It is current pointing"</span>
+                            <span class="sa">f</span><span class="s2">" at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">"</span>
+                            <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                            <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                            <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">"</span>
+                            <span class="s2">"Too small distance to place bend of "</span>
+                            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="si">}</span><span class="s2"> size"</span>
                         <span class="p">)</span>
                     <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">))</span>
             <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
@@ -7138,7 +7138,7 @@ placed at size's point.</p>
 <span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Executes the step on a router.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Executes the step on a router."""</span>
     <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
     <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span>
     <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span>
@@ -7148,17 +7148,17 @@ placed at size's point.</p>
             <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">ANGLE_180</span> <span class="k">else</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;XY step cannot go back. It is current pointing at 0&quot;</span>
-                    <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>
+                    <span class="s2">"XY step cannot go back. It is current pointing at 0"</span>
+                    <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)"</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
                     <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dx</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">router</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dx</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;XY step cannot go back&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"XY step cannot go back"</span><span class="p">)</span>
             <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dx</span><span class="p">))</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -7169,23 +7169,23 @@ placed at size's point.</p>
             <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;XY&#39;s y-step is too small. It is current pointing&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot; at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>
+                        <span class="s2">"XY's y-step is too small. It is current pointing"</span>
+                        <span class="sa">f</span><span class="s2">" at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">"</span>
+                        <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)"</span>
                     <span class="p">)</span>
                 <span class="n">router</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;XY&#39;s y-step is too small. It is current pointing&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot; at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot;Too small distance to place bend of &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="si">}</span><span class="s2"> size&quot;</span>
+                        <span class="s2">"XY's y-step is too small. It is current pointing"</span>
+                        <span class="sa">f</span><span class="s2">" at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">"</span>
+                        <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="s2">"Too small distance to place bend of "</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="si">}</span><span class="s2"> size"</span>
                     <span class="p">)</span>
                 <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">))</span>
 
@@ -7193,13 +7193,13 @@ placed at size's point.</p>
             <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">ANGLE_270</span> <span class="k">else</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;XY step cannot go back. It is current pointing at 0&quot;</span>
-                    <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>
+                    <span class="s2">"XY step cannot go back. It is current pointing at 0"</span>
+                    <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)"</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;XY step cannot go back&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"XY step cannot go back"</span><span class="p">)</span>
             <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dx</span><span class="p">))</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">ANGLE_270</span><span class="p">:</span>
@@ -7210,23 +7210,23 @@ placed at size's point.</p>
             <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;XY&#39;s y-step is too small. It is current pointing&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot; at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>
+                        <span class="s2">"XY's y-step is too small. It is current pointing"</span>
+                        <span class="sa">f</span><span class="s2">" at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">"</span>
+                        <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)"</span>
                     <span class="p">)</span>
                 <span class="n">router</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;XY&#39;s y-step is too small. It is current pointing&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot; at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot; degrees.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
-                        <span class="s2">&quot;Too small distance to place bend of &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="si">}</span><span class="s2"> size&quot;</span>
+                        <span class="s2">"XY's y-step is too small. It is current pointing"</span>
+                        <span class="sa">f</span><span class="s2">" at </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">"</span>
+                        <span class="s2">" degrees.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Current position: </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="sa">f</span><span class="s2">"Target Position (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">"</span>
+                        <span class="s2">"Too small distance to place bend of "</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">bend90_radius</span><span class="si">}</span><span class="s2"> size"</span>
                     <span class="p">)</span>
                 <span class="n">router</span><span class="o">.</span><span class="n">straight_nobend</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">))</span>
         <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
@@ -7303,18 +7303,18 @@ placed at size's point.</p>
 <span class="normal">155</span>
 <span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Y</span><span class="p">(</span><span class="n">Step</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Go to an absolute X coordinate.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Go to an absolute X coordinate."""</span>
 
     <span class="n">y</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a straight section to the router.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Adds a straight section to the router."""</span>
         <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
         <span class="k">if</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Cannot go to position {self.x=}, because the router is currently &quot;</span>
-                <span class="s2">&quot;going in the y direction with position &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">"Cannot go to position {self.x=}, because the router is currently "</span>
+                <span class="s2">"going in the y direction with position "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
@@ -7369,13 +7369,13 @@ placed at size's point.</p>
 <span class="normal">154</span>
 <span class="normal">155</span>
 <span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router</span><span class="p">:</span> <span class="n">ManhattanRouterSide</span><span class="p">,</span> <span class="n">include_bend</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds a straight section to the router.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Adds a straight section to the router."""</span>
     <span class="n">ib</span> <span class="o">=</span> <span class="n">include_bend</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_bend</span>
     <span class="k">if</span> <span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">angle</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Cannot go to position {self.x=}, because the router is currently &quot;</span>
-            <span class="s2">&quot;going in the y direction with position &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="s2">"Cannot go to position {self.x=}, because the router is currently "</span>
+            <span class="s2">"going in the y direction with position "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">router</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ib</span><span class="p">:</span>
@@ -7459,7 +7459,7 @@ placed at size's point.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

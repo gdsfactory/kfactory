@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5503,7 +5503,7 @@
 <span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">OpticalAllAngleRoute</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optical route containing a connection between two ports.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Optical route containing a connection between two ports."""</span>
 
     <span class="n">backbone</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]</span>
     <span class="n">start_port</span><span class="p">:</span> <span class="n">Port</span>
@@ -5592,7 +5592,7 @@
     <span class="n">port_widths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
     <span class="n">spacings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Used to extract a bundle from a backbone.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Used to extract a bundle from a backbone."""</span>
     <span class="n">pts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">edges</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DEdge</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -5636,7 +5636,7 @@
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span> <span class="o">|</span> <span class="n">KCell</span> <span class="o">|</span> <span class="n">DKCell</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">straight_factory</span><span class="p">:</span> <span class="n">VirtualStraightFactory</span><span class="p">,</span> <span class="n">bend_factory</span><span class="p">:</span> <span class="n">VirtualBendFactory</span><span class="p">,</span> <span class="n">bend_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;o1&#39;</span><span class="p">,</span> <span class="s1">&#39;o2&#39;</span><span class="p">),</span> <span class="n">straight_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;o1&#39;</span><span class="p">,</span> <span class="s1">&#39;o2&#39;</span><span class="p">),</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">angle_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0001</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalAllAngleRoute</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span> <span class="o">|</span> <span class="n">KCell</span> <span class="o">|</span> <span class="n">DKCell</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">straight_factory</span><span class="p">:</span> <span class="n">VirtualStraightFactory</span><span class="p">,</span> <span class="n">bend_factory</span><span class="p">:</span> <span class="n">VirtualBendFactory</span><span class="p">,</span> <span class="n">bend_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'o1'</span><span class="p">,</span> <span class="s1">'o2'</span><span class="p">),</span> <span class="n">straight_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'o1'</span><span class="p">,</span> <span class="s1">'o2'</span><span class="p">),</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">angle_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0001</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalAllAngleRoute</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5969,12 +5969,12 @@ the point before and the following will be created.</p>
     <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span>
     <span class="n">straight_factory</span><span class="p">:</span> <span class="n">VirtualStraightFactory</span><span class="p">,</span>
     <span class="n">bend_factory</span><span class="p">:</span> <span class="n">VirtualBendFactory</span><span class="p">,</span>
-    <span class="n">bend_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">),</span>
-    <span class="n">straight_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">),</span>
+    <span class="n">bend_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">),</span>
+    <span class="n">straight_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">),</span>
     <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
     <span class="n">angle_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0001</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalAllAngleRoute</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Places an all-angle route.</span>
+<span class="w">    </span><span class="sd">"""Places an all-angle route.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        c: The virtual or real KCell to place the route in.</span>
@@ -5993,9 +5993,9 @@ the point before and the following will be created.</p>
 <span class="sd">        angle_tolerance: If a resulting bend from a point in the backbone would have an</span>
 <span class="sd">            angle below this tolerance, the point will be skipped and a straight between</span>
 <span class="sd">            the point before and the following will be created.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">backbone</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">MIN_ALL_ANGLE_ROUTES_POINTS</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All angle routes with less than 3 points are not supported.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"All angle routes with less than 3 points are not supported."</span><span class="p">)</span>
 
     <span class="n">bends</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">90</span><span class="p">:</span> <span class="n">bend_factory</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)}</span>
     <span class="n">layer</span> <span class="o">=</span> <span class="n">bends</span><span class="p">[</span><span class="mi">90</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">bend_ports</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">layer</span>
@@ -6009,14 +6009,14 @@ the point before and the following will be created.</p>
     <span class="n">end_angle</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">end_v</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">end_v</span><span class="o">.</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span> <span class="mi">180</span><span class="p">)</span> <span class="o">%</span> <span class="mi">360</span>
 
     <span class="n">start_port</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
         <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
         <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">start_angle</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">backbone</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_v</span><span class="p">()),</span>
         <span class="n">kcl</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">end_port</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
         <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
         <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">end_angle</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">backbone</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_v</span><span class="p">()),</span>
@@ -6061,9 +6061,9 @@ the point before and the following will be created.</p>
                 <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span> <span class="o">*</span> <span class="n">tolerance</span>
             <span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Not enough space to place bends at points </span><span class="si">{</span><span class="p">[</span><span class="n">old_pt</span><span class="p">,</span><span class="w"> </span><span class="n">pt</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Needed space=</span><span class="si">{</span><span class="n">start_offset</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">effective_radius</span><span class="si">}</span><span class="s2">, available &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;space=</span><span class="si">{</span><span class="p">(</span><span class="n">pt</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">old_pt</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Not enough space to place bends at points </span><span class="si">{</span><span class="p">[</span><span class="n">old_pt</span><span class="p">,</span><span class="w"> </span><span class="n">pt</span><span class="p">]</span><span class="si">}</span><span class="s2">."</span>
+                    <span class="sa">f</span><span class="s2">"Needed space=</span><span class="si">{</span><span class="n">start_offset</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">effective_radius</span><span class="si">}</span><span class="s2">, available "</span>
+                    <span class="sa">f</span><span class="s2">"space=</span><span class="si">{</span><span class="p">(</span><span class="n">pt</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">old_pt</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">effective_radius</span> <span class="o">=</span> <span class="mi">0</span>
@@ -6096,9 +6096,9 @@ the point before and the following will be created.</p>
     <span class="c1"># the route is invalid</span>
     <span class="k">if</span> <span class="n">_l</span> <span class="o">&lt;</span> <span class="o">-</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span> <span class="o">*</span> <span class="n">tolerance</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Not enough space to place bends at points </span><span class="si">{</span><span class="p">[</span><span class="n">old_pt</span><span class="p">,</span><span class="w"> </span><span class="n">pt</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Needed space=</span><span class="si">{</span><span class="n">effective_radius</span><span class="si">}</span><span class="s2">, available &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;space=</span><span class="si">{</span><span class="p">(</span><span class="n">pt</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">old_pt</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Not enough space to place bends at points </span><span class="si">{</span><span class="p">[</span><span class="n">old_pt</span><span class="p">,</span><span class="w"> </span><span class="n">pt</span><span class="p">]</span><span class="si">}</span><span class="s2">."</span>
+            <span class="sa">f</span><span class="s2">"Needed space=</span><span class="si">{</span><span class="n">effective_radius</span><span class="si">}</span><span class="s2">, available "</span>
+            <span class="sa">f</span><span class="s2">"space=</span><span class="si">{</span><span class="p">(</span><span class="n">pt</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">old_pt</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
     <span class="k">if</span> <span class="n">_l</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">create_vinst</span><span class="p">(</span><span class="n">straight_factory</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">_l</span><span class="p">))</span>
@@ -6129,7 +6129,7 @@ the point before and the following will be created.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route_bundle</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span> <span class="o">|</span> <span class="n">DKCell</span> <span class="o">|</span> <span class="n">VKCell</span><span class="p">,</span> <span class="n">start_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPort</span> <span class="o">|</span> <span class="n">Port</span><span class="p">],</span> <span class="n">end_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPort</span> <span class="o">|</span> <span class="n">Port</span><span class="p">],</span> <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">separation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">straight_factory</span><span class="p">:</span> <span class="n">VirtualStraightFactory</span><span class="p">,</span> <span class="n">bend_factory</span><span class="p">:</span> <span class="n">VirtualBendFactory</span><span class="p">,</span> <span class="n">bend_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;o1&#39;</span><span class="p">,</span> <span class="s1">&#39;o2&#39;</span><span class="p">),</span> <span class="n">straight_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;o1&#39;</span><span class="p">,</span> <span class="s1">&#39;o2&#39;</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">OpticalAllAngleRoute</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">route_bundle</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span> <span class="o">|</span> <span class="n">DKCell</span> <span class="o">|</span> <span class="n">VKCell</span><span class="p">,</span> <span class="n">start_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPort</span> <span class="o">|</span> <span class="n">Port</span><span class="p">],</span> <span class="n">end_ports</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPort</span> <span class="o">|</span> <span class="n">Port</span><span class="p">],</span> <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DPoint</span><span class="p">],</span> <span class="n">separation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">straight_factory</span><span class="p">:</span> <span class="n">VirtualStraightFactory</span><span class="p">,</span> <span class="n">bend_factory</span><span class="p">:</span> <span class="n">VirtualBendFactory</span><span class="p">,</span> <span class="n">bend_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'o1'</span><span class="p">,</span> <span class="s1">'o2'</span><span class="p">),</span> <span class="n">straight_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'o1'</span><span class="p">,</span> <span class="s1">'o2'</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">OpticalAllAngleRoute</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6443,10 +6443,10 @@ straights and bends.</p>
     <span class="n">separation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
     <span class="n">straight_factory</span><span class="p">:</span> <span class="n">VirtualStraightFactory</span><span class="p">,</span>
     <span class="n">bend_factory</span><span class="p">:</span> <span class="n">VirtualBendFactory</span><span class="p">,</span>
-    <span class="n">bend_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">),</span>
-    <span class="n">straight_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">),</span>
+    <span class="n">bend_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">),</span>
+    <span class="n">straight_ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">),</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">OpticalAllAngleRoute</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Places all-angle routes.</span>
+<span class="w">    </span><span class="sd">"""Places all-angle routes.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        c: The virtual or real KCell to place the route in.</span>
@@ -6469,14 +6469,14 @@ straights and bends.</p>
 <span class="sd">            straights and bends.</span>
 <span class="sd">        straight_ports: Names of the ports of the straight to use for connecting</span>
 <span class="sd">            straights and bends.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">routes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OpticalAllAngleRoute</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">if</span> <span class="n">backbone</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">backbone</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">MIN_WAYPOINTS_FOR_ROUTING</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;A bundle with less than two points has no orientation. &quot;</span>
-                <span class="s2">&quot;Cannot automatically determine orientation.&quot;</span>
+                <span class="s2">"A bundle with less than two points has no orientation. "</span>
+                <span class="s2">"Cannot automatically determine orientation."</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">separation</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">):</span>
@@ -6630,7 +6630,7 @@ straights and bends.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

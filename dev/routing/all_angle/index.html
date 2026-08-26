@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5512,7 +5512,7 @@ components live in memory only and are materialised into a real cell when
 <span class="n">L</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">infos</span> <span class="o">=</span> <span class="n">L</span>
 
-<span class="n">wg_enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;WGSTD_AA&quot;</span><span class="p">,</span> <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">)])</span>
+<span class="n">wg_enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"WGSTD_AA"</span><span class="p">,</span> <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">)])</span>
 
 <span class="c1"># Virtual straight: width and length in µm</span>
 <span class="n">straight_factory</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
@@ -5554,7 +5554,7 @@ backbone changes direction and fills the straight segments automatically.</p>
     <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">(</span><span class="mi">240</span><span class="p">,</span> <span class="mi">80</span><span class="p">),</span>  <span class="c1"># horizontal run to exit</span>
 <span class="p">]</span>
 
-<span class="n">c_single</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">(</span><span class="s2">&quot;aa_single_route&quot;</span><span class="p">)</span>
+<span class="n">c_single</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">(</span><span class="s2">"aa_single_route"</span><span class="p">)</span>
 <span class="n">route</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">aa</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route</span><span class="p">(</span>
     <span class="n">c_single</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
@@ -5563,9 +5563,9 @@ backbone changes direction and fills the straight segments automatically.</p>
     <span class="n">bend_factory</span><span class="o">=</span><span class="n">bend_factory</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total length : </span><span class="si">{</span><span class="n">route</span><span class="o">.</span><span class="n">length</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Straight length: </span><span class="si">{</span><span class="n">route</span><span class="o">.</span><span class="n">length_straights</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bend count     : </span><span class="si">{</span><span class="n">route</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">route</span><span class="o">.</span><span class="n">length_straights</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm in bends&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total length : </span><span class="si">{</span><span class="n">route</span><span class="o">.</span><span class="n">length</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Straight length: </span><span class="si">{</span><span class="n">route</span><span class="o">.</span><span class="n">length_straights</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Bend count     : </span><span class="si">{</span><span class="n">route</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">route</span><span class="o">.</span><span class="n">length_straights</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm in bends"</span><span class="p">)</span>
 
 <span class="n">c_single</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
@@ -5586,7 +5586,7 @@ through tight corridors where a manhattan route would require many detours.</p>
     <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">(</span><span class="mi">280</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># diagonal back down</span>
 <span class="p">]</span>
 
-<span class="n">c_diag</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">(</span><span class="s2">&quot;aa_diagonal_route&quot;</span><span class="p">)</span>
+<span class="n">c_diag</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">(</span><span class="s2">"aa_diagonal_route"</span><span class="p">)</span>
 <span class="n">route_diag</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">aa</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route</span><span class="p">(</span>
     <span class="n">c_diag</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
@@ -5595,7 +5595,7 @@ through tight corridors where a manhattan route would require many detours.</p>
     <span class="n">bend_factory</span><span class="o">=</span><span class="n">bend_factory</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total length: </span><span class="si">{</span><span class="n">route_diag</span><span class="o">.</span><span class="n">length</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total length: </span><span class="si">{</span><span class="n">route_diag</span><span class="o">.</span><span class="n">length</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 <span class="n">c_diag</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Total length: 320.00 µm
@@ -5621,7 +5621,7 @@ must be long enough to accommodate the widest route in the bundle plus its separ
 <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># angle step centre</span>
 <span class="n">_l</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># number of routes</span>
 
-<span class="n">c_bundle</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">(</span><span class="s2">&quot;aa_bundle_route&quot;</span><span class="p">)</span>
+<span class="n">c_bundle</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">(</span><span class="s2">"aa_bundle_route"</span><span class="p">)</span>
 
 <span class="n">start_ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">end_ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -5634,7 +5634,7 @@ must be long enough to accommodate the widest route in the bundle plus its separ
 
     <span class="n">start_ports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="n">c_bundle</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;s</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"s</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span>
                 <span class="mi">1</span><span class="p">,</span>
                 <span class="n">a_start</span><span class="p">,</span>
@@ -5648,7 +5648,7 @@ must be long enough to accommodate the widest route in the bundle plus its separ
     <span class="p">)</span>
     <span class="n">end_ports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="n">c_bundle</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;e</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"e</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span>
                 <span class="mi">1</span><span class="p">,</span>
                 <span class="n">a_end</span><span class="p">,</span>
@@ -5679,9 +5679,9 @@ must be long enough to accommodate the widest route in the bundle plus its separ
     <span class="n">bend_factory</span><span class="o">=</span><span class="n">bend_factory</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bundle contains </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">routes</span><span class="p">)</span><span class="si">}</span><span class="s2"> routes&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Bundle contains </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">routes</span><span class="p">)</span><span class="si">}</span><span class="s2"> routes"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">rt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">routes</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  route </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: length = </span><span class="si">{</span><span class="n">rt</span><span class="o">.</span><span class="n">length</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  route </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: length = </span><span class="si">{</span><span class="n">rt</span><span class="o">.</span><span class="n">length</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 
 <span class="n">c_bundle</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
@@ -5699,7 +5699,7 @@ must be long enough to accommodate the widest route in the bundle plus its separ
 <p>All-angle routing can also target a <code>VKCell</code> (virtual cell) so you can inspect or
 transform the result before materialising it into a real cell with
 <code>VInstance.insert_into</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="n">vc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;aa_virtual&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">vc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"aa_virtual"</span><span class="p">)</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">aa</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route</span><span class="p">(</span>
     <span class="n">vc</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
@@ -5714,7 +5714,7 @@ transform the result before materialising it into a real cell with
 <span class="p">)</span>
 
 <span class="c1"># Materialise: place the virtual route into a real KCell</span>
-<span class="n">c_real</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">(</span><span class="s2">&quot;aa_from_virtual&quot;</span><span class="p">)</span>
+<span class="n">c_real</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">(</span><span class="s2">"aa_from_virtual"</span><span class="p">)</span>
 <span class="n">vi</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">VInstance</span><span class="p">(</span><span class="n">vc</span><span class="p">)</span>
 <span class="n">vi</span><span class="o">.</span><span class="n">insert_into</span><span class="p">(</span><span class="n">c_real</span><span class="p">)</span>
 <span class="n">c_real</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
@@ -5859,7 +5859,7 @@ transform the result before materialising it into a real cell with
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

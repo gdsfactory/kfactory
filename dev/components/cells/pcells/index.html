@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5649,18 +5649,18 @@ be hashable (integers, floats, strings, <code>LayerInfo</code>) so the cache key
 computed.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">wg_straight</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Straight waveguide (DBU coordinates).</span>
+<span class="w">    </span><span class="sd">"""Straight waveguide (DBU coordinates).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        width: Waveguide core width in DBU.</span>
 <span class="sd">        length: Waveguide length in DBU.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">layer</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
             <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5668,7 +5668,7 @@ computed.</p>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
             <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5702,8 +5702,8 @@ object</em> — the body of the function is <strong>not</strong> executed a seco
 <div class="highlight"><pre><span></span><code><span class="n">s2</span> <span class="o">=</span> <span class="n">wg_straight</span><span class="p">(</span><span class="n">WG_WIDTH</span><span class="p">,</span> <span class="n">WG_LEN</span><span class="p">)</span>
 <span class="n">s3</span> <span class="o">=</span> <span class="n">wg_straight</span><span class="p">(</span><span class="n">WG_WIDTH</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">30.0</span><span class="p">))</span>  <span class="c1"># different length → new cell</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;same args → same object:&quot;</span><span class="p">,</span> <span class="n">s</span> <span class="ow">is</span> <span class="n">s2</span><span class="p">)</span>  <span class="c1"># True</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;diff args → new object: &quot;</span><span class="p">,</span> <span class="n">s</span> <span class="ow">is</span> <span class="n">s3</span><span class="p">)</span>  <span class="c1"># False</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"same args → same object:"</span><span class="p">,</span> <span class="n">s</span> <span class="ow">is</span> <span class="n">s2</span><span class="p">)</span>  <span class="c1"># True</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"diff args → new object: "</span><span class="p">,</span> <span class="n">s</span> <span class="ow">is</span> <span class="n">s3</span><span class="p">)</span>  <span class="c1"># False</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>same args → same object: True
 diff args → new object:  False
@@ -5714,12 +5714,12 @@ decorator wraps the returned <code>KCell</code> in a <code>DKCell</code> automat
 build geometry in DBU inside the function.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">DKCell</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">wg_straight_um</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Straight waveguide (µm API, DBU internals).</span>
+<span class="w">    </span><span class="sd">"""Straight waveguide (µm API, DBU internals).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        width: Waveguide core width in µm.</span>
 <span class="sd">        length: Waveguide length in µm.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">layer</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
@@ -5727,7 +5727,7 @@ build geometry in DBU inside the function.</p>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">w</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">l_</span><span class="p">,</span> <span class="n">w</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
             <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5735,7 +5735,7 @@ build geometry in DBU inside the function.</p>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">l_</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
             <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5745,9 +5745,9 @@ build geometry in DBU inside the function.</p>
 
 
 <span class="n">wg</span> <span class="o">=</span> <span class="n">wg_straight_um</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;type:&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">wg</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>  <span class="c1"># DKCell</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;name:&quot;</span><span class="p">,</span> <span class="n">wg</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># wg_straight_um_W0p5_L20</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;settings:&quot;</span><span class="p">,</span> <span class="n">wg</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"type:"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">wg</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>  <span class="c1"># DKCell</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"name:"</span><span class="p">,</span> <span class="n">wg</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># wg_straight_um_W0p5_L20</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"settings:"</span><span class="p">,</span> <span class="n">wg</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
 <span class="n">wg</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>type: DKCell
@@ -5762,13 +5762,13 @@ settings: KCellSettings(width=0.5, length=20)
 (slab) demonstrates layered geometry.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">wg_clad</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">clad_width</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Waveguide with slab cladding.</span>
+<span class="w">    </span><span class="sd">"""Waveguide with slab cladding.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        width: Core width in DBU.</span>
 <span class="sd">        length: Waveguide length in DBU.</span>
 <span class="sd">        clad_width: Extra cladding on each side in DBU.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">wg_layer</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
     <span class="n">clad_layer</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">)</span>
@@ -5781,7 +5781,7 @@ settings: KCellSettings(width=0.5, length=20)
 
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
             <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5789,7 +5789,7 @@ settings: KCellSettings(width=0.5, length=20)
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
             <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5814,13 +5814,13 @@ cell is fetched from the cache (or created once and cached), so there is no
 duplication even when many parent cells share the same child.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">y_branch</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">arm_sep</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simplified Y-branch: one input, two parallel outputs.</span>
+<span class="w">    </span><span class="sd">"""Simplified Y-branch: one input, two parallel outputs.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        width: Waveguide width in DBU.</span>
 <span class="sd">        length: Arm length in DBU.</span>
 <span class="sd">        arm_sep: Centre-to-centre separation of the two output arms in DBU.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">arm</span> <span class="o">=</span> <span class="n">wg_straight</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>  <span class="c1"># fetched from cache</span>
 
@@ -5830,8 +5830,8 @@ duplication even when many parent cells share the same child.</p>
     <span class="n">inst_top</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">arm_sep</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
     <span class="n">inst_bot</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">arm_sep</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)))</span>
 
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">inst_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o_top&quot;</span><span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">inst_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o_bot&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">inst_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"o_top"</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">inst_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"o_bot"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
 
@@ -5847,11 +5847,11 @@ KLayout cell database.  It is useful for intermediate helper geometry that never
 needs to appear as a standalone cell in the GDS.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">vcell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">marker_cross</span><span class="p">(</span><span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">VKCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alignment cross marker (virtual — not stored in the layout DB).</span>
+<span class="w">    </span><span class="sd">"""Alignment cross marker (virtual — not stored in the layout DB).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        size: Half-width of each arm in DBU.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">v</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">VKCell</span><span class="p">()</span>
     <span class="n">layer</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
     <span class="n">v</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="o">-</span><span class="n">size</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
@@ -5860,7 +5860,7 @@ needs to appear as a standalone cell in the GDS.</p>
 
 
 <span class="n">m</span> <span class="o">=</span> <span class="n">marker_cross</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">5.0</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;VKCell type:&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">m</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>  <span class="c1"># VKCell</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"VKCell type:"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">m</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>  <span class="c1"># VKCell</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>VKCell type: VKCell
 </code></pre></div>
@@ -5873,17 +5873,17 @@ of <code>@kf.cell</code> so that layer indices are looked up from the correct la
     <span class="n">SLAB</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;DEMO_PDK&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">PDK_LAYERS</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"DEMO_PDK"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">PDK_LAYERS</span><span class="p">)</span>
 
 
 <span class="nd">@pdk</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">pdk_straight</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Straight waveguide inside DEMO_PDK layout.</span>
+<span class="w">    </span><span class="sd">"""Straight waveguide inside DEMO_PDK layout.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        width: Core width in µm.</span>
 <span class="sd">        length: Waveguide length in µm.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
     <span class="n">layer</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">PDK_LAYERS</span><span class="p">()</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
@@ -5891,7 +5891,7 @@ of <code>@kf.cell</code> so that layer indices are looked up from the correct la
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">w</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">l_</span><span class="p">,</span> <span class="n">w</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
             <span class="n">layer_info</span><span class="o">=</span><span class="n">PDK_LAYERS</span><span class="p">()</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5900,7 +5900,7 @@ of <code>@kf.cell</code> so that layer indices are looked up from the correct la
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">l_</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
             <span class="n">layer_info</span><span class="o">=</span><span class="n">PDK_LAYERS</span><span class="p">()</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5911,8 +5911,8 @@ of <code>@kf.cell</code> so that layer indices are looked up from the correct la
 
 
 <span class="n">ps</span> <span class="o">=</span> <span class="n">pdk_straight</span><span class="p">(</span><span class="mf">0.45</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;name:&quot;</span><span class="p">,</span> <span class="n">ps</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># pdk_straight_W0p45_L15</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;kcl: &quot;</span><span class="p">,</span> <span class="n">ps</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># DEMO_PDK</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"name:"</span><span class="p">,</span> <span class="n">ps</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># pdk_straight_W0p45_L15</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"kcl: "</span><span class="p">,</span> <span class="n">ps</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># DEMO_PDK</span>
 <span class="n">ps</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>name: pdk_straight_W0p45_L15
@@ -5970,9 +5970,9 @@ caching, and validation.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">basename</span><span class="o">=</span><span class="s2">&quot;WG_STRIP&quot;</span><span class="p">,</span> <span class="n">set_settings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">basename</span><span class="o">=</span><span class="s2">"WG_STRIP"</span><span class="p">,</span> <span class="n">set_settings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">strip_waveguide</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Strip waveguide with custom basename.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Strip waveguide with custom basename."""</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">layer</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
@@ -5980,7 +5980,7 @@ caching, and validation.</p>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">w</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">l_</span><span class="p">,</span> <span class="n">w</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
             <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5988,7 +5988,7 @@ caching, and validation.</p>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">l_</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
             <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5998,18 +5998,16 @@ caching, and validation.</p>
 
 
 <span class="n">sw</span> <span class="o">=</span> <span class="n">strip_waveguide</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;name:    &quot;</span><span class="p">,</span> <span class="n">sw</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># WG_STRIP_W0p5_L10</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;settings:&quot;</span><span class="p">,</span> <span class="n">sw</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"name:    "</span><span class="p">,</span> <span class="n">sw</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># WG_STRIP_W0p5_L10</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"settings:"</span><span class="p">,</span> <span class="n">sw</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
 <span class="n">sw</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>name:    
-
- WG_STRIP_W0p5_L10
+<div class="highlight"><pre><span></span><code>name:     WG_STRIP_W0p5_L10
 settings: KCellSettings(width=0.5, length=10)
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<img alt="png" src="../pcells/output_20_2.png" /></p>
+<img alt="png" src="../pcells/output_20_1.png" /></p>
 <h2 id="summary">Summary</h2>
 <table>
 <thead>
@@ -6135,7 +6133,7 @@ to avoid hash errors.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5587,11 +5587,11 @@ and <code>flexgrid</code> visible.</p>
 
 <span class="n">components</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">kf</span><span class="o">.</span><span class="n">DKCell</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">sizes_um</span><span class="p">:</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">DKCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;box_</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">DKCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"box_</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
     <span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">)</span><span class="si">}</span><span class="s2"> components&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">)</span><span class="si">}</span><span class="s2"> components"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Created 6 components
 </code></pre></div>
@@ -5600,13 +5600,13 @@ and <code>flexgrid</code> visible.</p>
 All cells are arranged in a single row by default.</p>
 <p>Every slot is sized to fit the <strong>largest</strong> component's bounding box, so all
 cells are equally spaced even when they have different sizes.</p>
-<div class="highlight"><pre><span></span><code><span class="n">target_row</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;grid_row&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">target_row</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"grid_row"</span><span class="p">)</span>
 <span class="n">ig_row</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">target_row</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;Row bbox: </span><span class="si">{</span><span class="n">target_row</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm × </span><span class="si">{</span><span class="n">target_row</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm&quot;</span>
+    <span class="sa">f</span><span class="s2">"Row bbox: </span><span class="si">{</span><span class="n">target_row</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm × </span><span class="si">{</span><span class="n">target_row</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm"</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Placed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ig_row</span><span class="o">.</span><span class="n">insts</span><span class="p">)</span><span class="si">}</span><span class="s2"> instances&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Placed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ig_row</span><span class="o">.</span><span class="n">insts</span><span class="p">)</span><span class="si">}</span><span class="s2"> instances"</span><span class="p">)</span>
 <span class="n">target_row</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Row bbox: 78.5 µm × 10.0 µm
@@ -5618,11 +5618,11 @@ Placed 6 instances
 <h2 id="3-grid-2d-with-shape">3 · <code>grid</code> — 2D with <code>shape=</code></h2>
 <p>Pass <code>shape=(rows, cols)</code> to reflow a flat list into a 2-D grid.
 The slot size is still uniform (largest component sets the pitch in each axis).</p>
-<div class="highlight"><pre><span></span><code><span class="n">target_2d</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;grid_2d&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">target_2d</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"grid_2d"</span><span class="p">)</span>
 <span class="n">ig_2d</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">target_2d</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;2D bbox: </span><span class="si">{</span><span class="n">target_2d</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm × </span><span class="si">{</span><span class="n">target_2d</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm&quot;</span>
+    <span class="sa">f</span><span class="s2">"2D bbox: </span><span class="si">{</span><span class="n">target_2d</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm × </span><span class="si">{</span><span class="n">target_2d</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm"</span>
 <span class="p">)</span>
 <span class="n">target_2d</span>
 </code></pre></div>
@@ -5638,11 +5638,11 @@ a simple reflow.</p>
 <div class="highlight"><pre><span></span><code><span class="n">row0</span> <span class="o">=</span> <span class="p">[</span><span class="n">components</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">components</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">components</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
 <span class="n">row1</span> <span class="o">=</span> <span class="p">[</span><span class="n">components</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">components</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">components</span><span class="p">[</span><span class="mi">5</span><span class="p">]]</span>
 
-<span class="n">target_2d_explicit</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;grid_2d_explicit&quot;</span><span class="p">)</span>
+<span class="n">target_2d_explicit</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"grid_2d_explicit"</span><span class="p">)</span>
 <span class="n">ig_2d_explicit</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">target_2d_explicit</span><span class="p">,</span> <span class="p">[</span><span class="n">row0</span><span class="p">,</span> <span class="n">row1</span><span class="p">],</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;Explicit 2D bbox: </span><span class="si">{</span><span class="n">target_2d_explicit</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm × </span><span class="si">{</span><span class="n">target_2d_explicit</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm&quot;</span>
+    <span class="sa">f</span><span class="s2">"Explicit 2D bbox: </span><span class="si">{</span><span class="n">target_2d_explicit</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm × </span><span class="si">{</span><span class="n">target_2d_explicit</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm"</span>
 <span class="p">)</span>
 <span class="n">target_2d_explicit</span>
 </code></pre></div>
@@ -5657,19 +5657,19 @@ and each <strong>row</strong> its own height, so overall footprint is smaller wh
 components vary in size.</p>
 <p>Here the same six components are arranged with <code>shape=(2, 3)</code> using both
 functions so you can compare the bounding boxes.</p>
-<div class="highlight"><pre><span></span><code><span class="n">target_flex</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;flexgrid_2d&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">target_flex</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"flexgrid_2d"</span><span class="p">)</span>
 <span class="n">ig_flex</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">flexgrid</span><span class="p">(</span><span class="n">target_flex</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 
 <span class="n">grid_area</span> <span class="o">=</span> <span class="n">target_2d</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">*</span> <span class="n">target_2d</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
 <span class="n">flex_area</span> <span class="o">=</span> <span class="n">target_flex</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">*</span> <span class="n">target_flex</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
 
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;grid   bbox: </span><span class="si">{</span><span class="n">target_2d</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> × </span><span class="si">{</span><span class="n">target_2d</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm  (</span><span class="si">{</span><span class="n">grid_area</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> µm²)&quot;</span>
+    <span class="sa">f</span><span class="s2">"grid   bbox: </span><span class="si">{</span><span class="n">target_2d</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> × </span><span class="si">{</span><span class="n">target_2d</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm  (</span><span class="si">{</span><span class="n">grid_area</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> µm²)"</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;flexgrid bbox: </span><span class="si">{</span><span class="n">target_flex</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> × </span><span class="si">{</span><span class="n">target_flex</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm  (</span><span class="si">{</span><span class="n">flex_area</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> µm²)&quot;</span>
+    <span class="sa">f</span><span class="s2">"flexgrid bbox: </span><span class="si">{</span><span class="n">target_flex</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> × </span><span class="si">{</span><span class="n">target_flex</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm  (</span><span class="si">{</span><span class="n">flex_area</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> µm²)"</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Area saving: </span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">flex_area</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">grid_area</span><span class="p">)</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Area saving: </span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">flex_area</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">grid_area</span><span class="p">)</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
 <span class="n">target_flex</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>grid   bbox: 37.0 × 20.5 µm  (758 µm²)
@@ -5708,14 +5708,14 @@ components are positioned within their slot:</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight"><pre><span></span><code><span class="n">target_aligned</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;grid_aligned&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">target_aligned</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"grid_aligned"</span><span class="p">)</span>
 <span class="n">ig_aligned</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span>
     <span class="n">target_aligned</span><span class="p">,</span>
     <span class="n">components</span><span class="p">,</span>
     <span class="n">spacing</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
     <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-    <span class="n">align_x</span><span class="o">=</span><span class="s2">&quot;xmin&quot;</span><span class="p">,</span>
-    <span class="n">align_y</span><span class="o">=</span><span class="s2">&quot;ymin&quot;</span><span class="p">,</span>
+    <span class="n">align_x</span><span class="o">=</span><span class="s2">"xmin"</span><span class="p">,</span>
+    <span class="n">align_y</span><span class="o">=</span><span class="s2">"ymin"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">target_aligned</span>
 </code></pre></div>
@@ -5728,17 +5728,17 @@ use <code>grid_dbu</code> and pass the spacing in DBU.  The API is otherwise ide
 <div class="highlight"><pre><span></span><code><span class="c1"># Build KCell (DBU) components</span>
 <span class="n">comps_dbu</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">w_um</span><span class="p">,</span> <span class="n">h_um</span> <span class="ow">in</span> <span class="n">sizes_um</span><span class="p">:</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;kdbox_</span><span class="si">{</span><span class="n">w_um</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">h_um</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"kdbox_</span><span class="si">{</span><span class="n">w_um</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">h_um</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">w_um</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">h_um</span><span class="p">))</span>
     <span class="p">)</span>
     <span class="n">comps_dbu</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
-<span class="n">target_dbu</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;grid_dbu_example&quot;</span><span class="p">)</span>
+<span class="n">target_dbu</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"grid_dbu_example"</span><span class="p">)</span>
 <span class="n">ig_dbu</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">grid_dbu</span><span class="p">(</span><span class="n">target_dbu</span><span class="p">,</span> <span class="n">comps_dbu</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;grid_dbu bbox: </span><span class="si">{</span><span class="n">target_dbu</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm × </span><span class="si">{</span><span class="n">target_dbu</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm&quot;</span>
+    <span class="sa">f</span><span class="s2">"grid_dbu bbox: </span><span class="si">{</span><span class="n">target_dbu</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm × </span><span class="si">{</span><span class="n">target_dbu</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm"</span>
 <span class="p">)</span>
 <span class="n">target_dbu</span>
 </code></pre></div>
@@ -5750,21 +5750,21 @@ use <code>grid_dbu</code> and pass the spacing in DBU.  The API is otherwise ide
 <h2 id="8-placing-the-grid-in-a-larger-layout">8 · Placing the Grid in a Larger Layout</h2>
 <p>The returned <code>InstanceGroup</code> can be used to move the whole block at once.
 Here we pack two sub-grids and place them side-by-side in a top-level cell.</p>
-<div class="highlight"><pre><span></span><code><span class="n">top</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;top_assembly&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">top</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"top_assembly"</span><span class="p">)</span>
 
 <span class="c1"># First sub-grid: first 3 components</span>
-<span class="n">sub_a</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;sub_a&quot;</span><span class="p">)</span>
+<span class="n">sub_a</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"sub_a"</span><span class="p">)</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">sub_a</span><span class="p">,</span> <span class="n">components</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
 <span class="n">inst_a</span> <span class="o">=</span> <span class="n">top</span> <span class="o">&lt;&lt;</span> <span class="n">sub_a</span>
 
 <span class="c1"># Second sub-grid: last 3 components, placed to the right with a 10 µm gap</span>
-<span class="n">sub_b</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;sub_b&quot;</span><span class="p">)</span>
+<span class="n">sub_b</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"sub_b"</span><span class="p">)</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">sub_b</span><span class="p">,</span> <span class="n">components</span><span class="p">[</span><span class="mi">3</span><span class="p">:],</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
 <span class="n">inst_b</span> <span class="o">=</span> <span class="n">top</span> <span class="o">&lt;&lt;</span> <span class="n">sub_b</span>
 <span class="n">gap_dbu</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">inst_b</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">sub_a</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">+</span> <span class="n">gap_dbu</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Top bbox: </span><span class="si">{</span><span class="n">top</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm × </span><span class="si">{</span><span class="n">top</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Top bbox: </span><span class="si">{</span><span class="n">top</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm × </span><span class="si">{</span><span class="n">top</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 <span class="n">top</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Top bbox: 78.0 µm × 10.0 µm
@@ -5788,7 +5788,7 @@ Here we pack two sub-grids and place them side-by-side in a top-level cell.</p>
 <span class="n">ig</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">flexgrid_dbu</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 
 <span class="c1"># Alignment within each slot</span>
-<span class="n">ig</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">align_x</span><span class="o">=</span><span class="s2">&quot;xmin&quot;</span><span class="p">,</span> <span class="n">align_y</span><span class="o">=</span><span class="s2">&quot;ymin&quot;</span><span class="p">)</span>
+<span class="n">ig</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">align_x</span><span class="o">=</span><span class="s2">"xmin"</span><span class="p">,</span> <span class="n">align_y</span><span class="o">=</span><span class="s2">"ymin"</span><span class="p">)</span>
 
 <span class="c1"># Move the whole block after placement</span>
 <span class="n">inst</span> <span class="o">=</span> <span class="n">top</span> <span class="o">&lt;&lt;</span> <span class="n">target</span>
@@ -5876,7 +5876,7 @@ Here we pack two sub-grids and place them side-by-side in a top-level cell.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

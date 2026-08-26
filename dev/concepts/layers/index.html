@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5542,10 +5542,10 @@ automatically stored as the layer's <code>.name</code> attribute, which is usefu
 reports and technology files.</p>
 <p>Instantiating the class runs Pydantic validation — it checks that every field is a
 <code>kdb.LayerInfo</code> with valid <code>layer</code> and <code>datatype</code> numbers.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>  <span class="c1"># LayerInfo(1/0) — KLayout&#39;s string representation</span>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>  <span class="c1"># LayerInfo(1/0) — KLayout's string representation</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>  <span class="c1"># 1</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="o">.</span><span class="n">datatype</span><span class="p">)</span>  <span class="c1"># 0</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># &quot;WG&quot;  — auto-set from the field name</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># "WG"  — auto-set from the field name</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>WG (1/0)
 1
@@ -5562,12 +5562,12 @@ WG
 <p>KLayout stores shapes using an integer <em>layer index</em> (not the <code>(layer, datatype)</code> pair
 directly).  Use <code>kcl.find_layer</code> to convert a <code>LayerInfo</code> to this index:</p>
 <div class="highlight"><pre><span></span><code><span class="n">idx_wg</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WG layer index: </span><span class="si">{</span><span class="n">idx_wg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"WG layer index: </span><span class="si">{</span><span class="n">idx_wg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="c1"># You can also look up by number/datatype directly:</span>
 <span class="n">idx_wg2</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Same index via (layer, datatype): </span><span class="si">{</span><span class="n">idx_wg2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Indices match: </span><span class="si">{</span><span class="n">idx_wg</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">idx_wg2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Same index via (layer, datatype): </span><span class="si">{</span><span class="n">idx_wg2</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Indices match: </span><span class="si">{</span><span class="n">idx_wg</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">idx_wg2</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>WG layer index: WG
 Same index via (layer, datatype): WG
@@ -5575,7 +5575,7 @@ Indices match: True
 </code></pre></div>
 <h3 id="accessing-layers-by-name">Accessing layers by name</h3>
 <p><code>LayerInfos</code> supports dict-style access, which is useful in generic code:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="s2">&quot;CLAD&quot;</span><span class="p">])</span>  <span class="c1"># same as L.CLAD</span>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="s2">"CLAD"</span><span class="p">])</span>  <span class="c1"># same as L.CLAD</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>CLAD (4/0)
 </code></pre></div>
@@ -5584,7 +5584,7 @@ Indices match: True
 layers and <code>model_dump()</code> serialises them:</p>
 <div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">L</span><span class="o">.</span><span class="n">model_fields</span><span class="p">:</span>
     <span class="n">li</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2">  layer=</span><span class="si">{</span><span class="n">li</span><span class="o">.</span><span class="n">layer</span><span class="si">}</span><span class="s2">  datatype=</span><span class="si">{</span><span class="n">li</span><span class="o">.</span><span class="n">datatype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2">  layer=</span><span class="si">{</span><span class="n">li</span><span class="o">.</span><span class="n">layer</span><span class="si">}</span><span class="s2">  datatype=</span><span class="si">{</span><span class="n">li</span><span class="o">.</span><span class="n">datatype</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>  WG            layer=1  datatype=0
   WGEX          layer=2  datatype=0
@@ -5592,7 +5592,7 @@ layers and <code>model_dump()</code> serialises them:</p>
   FLOORPLAN     layer=10  datatype=0
 
 
-/tmp/ipykernel_3373/971822332.py:1: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_3453/971822332.py:1: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in L.model_fields:
 </code></pre></div>
 <h2 id="layerenum-integer-style-layer-access"><code>LayerEnum</code> — integer-style layer access</h2>
@@ -5602,13 +5602,13 @@ integer directly, or when you want to use a layer as a dict key with O(1) lookup
 <p>Use <code>layerenum_from_dict</code> to convert a <code>LayerInfos</code> into a <code>LayerEnum</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="n">LE</span> <span class="o">=</span> <span class="n">layerenum_from_dict</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">LE</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span>  <span class="c1"># &lt;enum &#39;LAYER&#39;&gt;</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">LE</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span>  <span class="c1"># &lt;enum 'LAYER'&gt;</span>
 <span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">LE</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span>  <span class="c1"># integer layer index in kf.kcl.layout</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">LE</span><span class="o">.</span><span class="n">WG</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>  <span class="c1"># 1  — original layer number</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">LE</span><span class="o">.</span><span class="n">WG</span><span class="o">.</span><span class="n">datatype</span><span class="p">)</span>  <span class="c1"># 0  — original datatype</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">LE</span><span class="o">.</span><span class="n">WG</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">LE</span><span class="o">.</span><span class="n">WG</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># tuple-style access: (layer, datatype)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>&lt;aenum &#39;LAYER&#39;&gt;
+<div class="highlight"><pre><span></span><code>&lt;aenum 'LAYER'&gt;
 0
 1
 0
@@ -5635,14 +5635,14 @@ section rendering, or fabrication export.  Each entry is a <code>LayerLevel</cod
         <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
         <span class="n">zmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">thickness</span><span class="o">=</span><span class="mf">0.22</span><span class="p">,</span>
-        <span class="n">material</span><span class="o">=</span><span class="s2">&quot;Si&quot;</span><span class="p">,</span>
+        <span class="n">material</span><span class="o">=</span><span class="s2">"Si"</span><span class="p">,</span>
         <span class="n">sidewall_angle</span><span class="o">=</span><span class="mf">85.0</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="n">cladding</span><span class="o">=</span><span class="n">LayerLevel</span><span class="p">(</span>
         <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">CLAD</span><span class="p">,</span>
         <span class="n">zmin</span><span class="o">=-</span><span class="mf">3.0</span><span class="p">,</span>
         <span class="n">thickness</span><span class="o">=</span><span class="mf">3.22</span><span class="p">,</span>
-        <span class="n">material</span><span class="o">=</span><span class="s2">&quot;SiO2&quot;</span><span class="p">,</span>
+        <span class="n">material</span><span class="o">=</span><span class="s2">"SiO2"</span><span class="p">,</span>
     <span class="p">),</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -5689,17 +5689,17 @@ section rendering, or fabrication export.  Each entry is a <code>LayerLevel</cod
 </tbody>
 </table>
 <div class="highlight"><pre><span></span><code><span class="c1"># Access individual levels by attribute or dict key</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">stack</span><span class="p">[</span><span class="s2">&quot;wg_core&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">thickness</span><span class="p">)</span>  <span class="c1"># 0.22</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stack</span><span class="p">[</span><span class="s2">"wg_core"</span><span class="p">]</span><span class="o">.</span><span class="n">thickness</span><span class="p">)</span>  <span class="c1"># 0.22</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">stack</span><span class="o">.</span><span class="n">cladding</span><span class="o">.</span><span class="n">material</span><span class="p">)</span>  <span class="c1"># SiO2</span>
 
 <span class="c1"># Convenience helpers for simulation</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">stack</span><span class="o">.</span><span class="n">get_layer_to_thickness</span><span class="p">())</span>  <span class="c1"># {(1,0): 0.22, (4,0): 3.22}</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">stack</span><span class="o">.</span><span class="n">get_layer_to_material</span><span class="p">())</span>  <span class="c1"># {(1,0): &#39;Si&#39;, (4,0): &#39;SiO2&#39;}</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stack</span><span class="o">.</span><span class="n">get_layer_to_material</span><span class="p">())</span>  <span class="c1"># {(1,0): 'Si', (4,0): 'SiO2'}</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>0.22
 SiO2
 {(1, 0): 0.22, (4, 0): 3.22}
-{(1, 0): &#39;Si&#39;, (4, 0): &#39;SiO2&#39;}
+{(1, 0): 'Si', (4, 0): 'SiO2'}
 </code></pre></div>
 <h2 id="putting-it-all-together-a-minimal-pdk-layer-set">Putting it all together: a minimal PDK layer set</h2>
 <p>A typical PDK definition combines <code>LayerInfos</code> and <code>LayerStack</code> in one module:</p>
@@ -5714,20 +5714,20 @@ SiO2
 <span class="n">pdk_layers</span> <span class="o">=</span> <span class="n">PDK_LAYER</span><span class="p">()</span>
 
 <span class="n">pdk_stack</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerStack</span><span class="p">(</span>
-    <span class="n">wg</span><span class="o">=</span><span class="n">LayerLevel</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">pdk_layers</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">zmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.22</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="s2">&quot;Si&quot;</span><span class="p">),</span>
-    <span class="n">m1</span><span class="o">=</span><span class="n">LayerLevel</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">pdk_layers</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span> <span class="n">zmin</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="s2">&quot;Al&quot;</span><span class="p">),</span>
-    <span class="n">m2</span><span class="o">=</span><span class="n">LayerLevel</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">pdk_layers</span><span class="o">.</span><span class="n">METAL2</span><span class="p">,</span> <span class="n">zmin</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="s2">&quot;Al&quot;</span><span class="p">),</span>
+    <span class="n">wg</span><span class="o">=</span><span class="n">LayerLevel</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">pdk_layers</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">zmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.22</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="s2">"Si"</span><span class="p">),</span>
+    <span class="n">m1</span><span class="o">=</span><span class="n">LayerLevel</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">pdk_layers</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span> <span class="n">zmin</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="s2">"Al"</span><span class="p">),</span>
+    <span class="n">m2</span><span class="o">=</span><span class="n">LayerLevel</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">pdk_layers</span><span class="o">.</span><span class="n">METAL2</span><span class="p">,</span> <span class="n">zmin</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="s2">"Al"</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Layer palette:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Layer palette:"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">pdk_layers</span><span class="o">.</span><span class="n">model_fields</span><span class="p">:</span>
     <span class="n">li</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">pdk_layers</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2">  (</span><span class="si">{</span><span class="n">li</span><span class="o">.</span><span class="n">layer</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">li</span><span class="o">.</span><span class="n">datatype</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2">  (</span><span class="si">{</span><span class="n">li</span><span class="o">.</span><span class="n">layer</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">li</span><span class="o">.</span><span class="n">datatype</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">3-D stack:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">3-D stack:"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">pdk_stack</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">6s</span><span class="si">}</span><span class="s2">  z=</span><span class="si">{</span><span class="n">level</span><span class="o">.</span><span class="n">zmin</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">…</span><span class="si">{</span><span class="n">level</span><span class="o">.</span><span class="n">zmin</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">level</span><span class="o">.</span><span class="n">thickness</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm  </span><span class="si">{</span><span class="n">level</span><span class="o">.</span><span class="n">material</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">6s</span><span class="si">}</span><span class="s2">  z=</span><span class="si">{</span><span class="n">level</span><span class="o">.</span><span class="n">zmin</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">…</span><span class="si">{</span><span class="n">level</span><span class="o">.</span><span class="n">zmin</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">level</span><span class="o">.</span><span class="n">thickness</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> µm  </span><span class="si">{</span><span class="n">level</span><span class="o">.</span><span class="n">material</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Layer palette:
@@ -5743,7 +5743,7 @@ SiO2
   m2      z=1.2…1.70 µm  Al
 
 
-/tmp/ipykernel_3373/3302201102.py:18: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_3453/3302201102.py:18: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in pdk_layers.model_fields:
 </code></pre></div>
 <h2 id="see-also">See Also</h2>
@@ -5828,7 +5828,7 @@ SiO2
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

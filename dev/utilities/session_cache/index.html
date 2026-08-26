@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5520,21 +5520,21 @@ Python package, so factory source files always exist on disk.</p>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 
-<span class="n">tmpdir</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;kf_session_demo_&quot;</span><span class="p">))</span>
+<span class="n">tmpdir</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">"kf_session_demo_"</span><span class="p">))</span>
 
-<span class="n">factory_src</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
+<span class="n">factory_src</span> <span class="o">=</span> <span class="s1">'''</span><span class="se">\</span>
 <span class="s1">import kfactory as kf</span>
 
 <span class="s1">class LAYER(kf.LayerInfos):</span>
 <span class="s1">    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)</span>
 
 <span class="s1">L = LAYER()</span>
-<span class="s1">pdk = kf.KCLayout(&quot;SESSION_DEMO&quot;, infos=LAYER)</span>
+<span class="s1">pdk = kf.KCLayout("SESSION_DEMO", infos=LAYER)</span>
 
 
 <span class="s1">@pdk.cell</span>
 <span class="s1">def wg_straight(width: float = 0.5, length: float = 10.0) -&gt; kf.KCell:</span>
-<span class="s1">    &quot;&quot;&quot;Straight waveguide.&quot;&quot;&quot;</span>
+<span class="s1">    """Straight waveguide."""</span>
 <span class="s1">    c = kf.KCell(kcl=pdk)</span>
 <span class="s1">    wg_layer = pdk.find_layer(L.WG)</span>
 <span class="s1">    w = pdk.to_dbu(width)</span>
@@ -5542,10 +5542,10 @@ Python package, so factory source files always exist on disk.</p>
 <span class="s1">    c.shapes(wg_layer).insert(</span>
 <span class="s1">        kf.kdb.Box(-length_dbu // 2, -w // 2, length_dbu // 2, w // 2)</span>
 <span class="s1">    )</span>
-<span class="s1">    c.add_port(port=kf.Port(name=&quot;o1&quot;,</span>
+<span class="s1">    c.add_port(port=kf.Port(name="o1",</span>
 <span class="s1">                             trans=kf.kdb.Trans(2, False, -length_dbu // 2, 0),</span>
 <span class="s1">                             width=w, layer=wg_layer, kcl=pdk))</span>
-<span class="s1">    c.add_port(port=kf.Port(name=&quot;o2&quot;,</span>
+<span class="s1">    c.add_port(port=kf.Port(name="o2",</span>
 <span class="s1">                             trans=kf.kdb.Trans(0, False, length_dbu // 2, 0),</span>
 <span class="s1">                             width=w, layer=wg_layer, kcl=pdk))</span>
 <span class="s1">    return c</span>
@@ -5553,7 +5553,7 @@ Python package, so factory source files always exist on disk.</p>
 
 <span class="s1">@pdk.cell</span>
 <span class="s1">def wg_taper(w1: float = 0.5, w2: float = 1.0, length: float = 20.0) -&gt; kf.KCell:</span>
-<span class="s1">    &quot;&quot;&quot;Linear taper.&quot;&quot;&quot;</span>
+<span class="s1">    """Linear taper."""</span>
 <span class="s1">    c = kf.KCell(kcl=pdk)</span>
 <span class="s1">    wg_layer = pdk.find_layer(L.WG)</span>
 <span class="s1">    w1_dbu = pdk.to_dbu(w1)</span>
@@ -5566,19 +5566,19 @@ Python package, so factory source files always exist on disk.</p>
 <span class="s1">        kf.kdb.Point(l_dbu // 2, -w2_dbu // 2),</span>
 <span class="s1">    ]</span>
 <span class="s1">    c.shapes(wg_layer).insert(kf.kdb.Polygon(pts))</span>
-<span class="s1">    c.add_port(port=kf.Port(name=&quot;o1&quot;,</span>
+<span class="s1">    c.add_port(port=kf.Port(name="o1",</span>
 <span class="s1">                             trans=kf.kdb.Trans(2, False, -l_dbu // 2, 0),</span>
 <span class="s1">                             width=w1_dbu, layer=wg_layer, kcl=pdk))</span>
-<span class="s1">    c.add_port(port=kf.Port(name=&quot;o2&quot;,</span>
+<span class="s1">    c.add_port(port=kf.Port(name="o2",</span>
 <span class="s1">                             trans=kf.kdb.Trans(0, False, l_dbu // 2, 0),</span>
 <span class="s1">                             width=w2_dbu, layer=wg_layer, kcl=pdk))</span>
 <span class="s1">    return c</span>
-<span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">'''</span>
 
-<span class="n">module_file</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s2">&quot;demo_factories.py&quot;</span>
+<span class="n">module_file</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s2">"demo_factories.py"</span>
 <span class="n">module_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">factory_src</span><span class="p">)</span>
 
-<span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">spec_from_file_location</span><span class="p">(</span><span class="s2">&quot;demo_factories&quot;</span><span class="p">,</span> <span class="n">module_file</span><span class="p">)</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">spec_from_file_location</span><span class="p">(</span><span class="s2">"demo_factories"</span><span class="p">,</span> <span class="n">module_file</span><span class="p">)</span>
 <span class="k">assert</span> <span class="n">spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">spec</span><span class="o">.</span><span class="n">loader</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 <span class="n">demo</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">module_from_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
 <span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">exec_module</span><span class="p">(</span><span class="n">demo</span><span class="p">)</span>  <span class="c1"># type: ignore[union-attr]</span>
@@ -5593,11 +5593,11 @@ module</strong>, before any factory functions are defined or called.  On the ver
 first run no session exists yet, so <code>load_session</code> logs a warning and
 returns immediately.  Pass <code>warn_missing_dir=False</code> to suppress that warning
 in production.</p>
-<div class="highlight"><pre><span></span><code><span class="n">session_dir</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s2">&quot;session&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">session_dir</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s2">"session"</span>
 
 <span class="c1"># First run: no session exists yet.  warn_missing_dir=False suppresses the log.</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">load_session</span><span class="p">(</span><span class="n">session_dir</span><span class="o">=</span><span class="n">session_dir</span><span class="p">,</span> <span class="n">warn_missing_dir</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;load_session on first run: no session yet, nothing loaded&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"load_session on first run: no session yet, nothing loaded"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>load_session on first run: no session yet, nothing loaded
 </code></pre></div>
@@ -5607,11 +5607,11 @@ in production.</p>
 <span class="n">taper_a</span> <span class="o">=</span> <span class="n">wg_taper</span><span class="p">(</span><span class="n">w1</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">w2</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">20.0</span><span class="p">)</span>
 <span class="n">taper_b</span> <span class="o">=</span> <span class="n">wg_taper</span><span class="p">(</span><span class="n">w1</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">w2</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">40.0</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cells in pdk:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">pdk</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">cells</span><span class="p">())])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;wg_straight cache size:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">factories</span><span class="p">[</span><span class="s2">&quot;wg_straight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">cache</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;wg_taper    cache size:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">factories</span><span class="p">[</span><span class="s2">&quot;wg_taper&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">cache</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Cells in pdk:"</span><span class="p">,</span> <span class="p">[</span><span class="n">pdk</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">cells</span><span class="p">())])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"wg_straight cache size:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">factories</span><span class="p">[</span><span class="s2">"wg_straight"</span><span class="p">]</span><span class="o">.</span><span class="n">cache</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"wg_taper    cache size:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">factories</span><span class="p">[</span><span class="s2">"wg_taper"</span><span class="p">]</span><span class="o">.</span><span class="n">cache</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Cells in pdk: [&#39;wg_straight_W0p5_L10&#39;, &#39;wg_straight_W0p8_L20&#39;, &#39;wg_taper_W0p5_W1_L20&#39;, &#39;wg_taper_W0p5_W2_L40&#39;]
+<div class="highlight"><pre><span></span><code>Cells in pdk: ['wg_straight_W0p5_L10', 'wg_straight_W0p8_L20', 'wg_taper_W0p5_W1_L20', 'wg_taper_W0p5_W2_L40']
 wg_straight cache size: 2
 wg_taper    cache size: 2
 </code></pre></div>
@@ -5621,9 +5621,9 @@ registered <code>KCLayout</code> instances.  Default location: <code>build/sessi
 (auto-created and auto-added to <code>.gitignore</code>).</p>
 <div class="highlight"><pre><span></span><code><span class="n">kf</span><span class="o">.</span><span class="n">save_session</span><span class="p">(</span><span class="n">session_dir</span><span class="o">=</span><span class="n">session_dir</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saved files:&quot;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">session_dir</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Saved files:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">session_dir</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">))</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Saved files:
   session/DEFAULT
@@ -5660,12 +5660,12 @@ Factory depends on changed →  also skipped (transitive invalidation)
 <p>Pass <code>c=&lt;cell&gt;</code> to restrict saving to only the <code>KCLayout</code> instances needed
 by that specific cell.  Useful in monorepo setups where multiple independent
 PDKs share one Python process.</p>
-<div class="highlight"><pre><span></span><code><span class="n">subset_dir</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s2">&quot;session_subset&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">subset_dir</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s2">"session_subset"</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">save_session</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="n">wg_500</span><span class="p">,</span> <span class="n">session_dir</span><span class="o">=</span><span class="n">subset_dir</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Subset save — files:&quot;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">subset_dir</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Subset save — files:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">subset_dir</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">))</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Subset save — files:
   session_subset/SESSION_DEMO
@@ -5678,7 +5678,7 @@ PDKs share one Python process.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># my_pdk/__init__.py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;my_pdk&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"my_pdk"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 
 <span class="c1"># Restore previously-computed cells before defining factories.</span>
 <span class="c1"># Silently skips on the very first run when no session exists yet.</span>
@@ -5697,7 +5697,7 @@ PDKs share one Python process.</p>
 <span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 
 <span class="n">chip</span> <span class="o">=</span> <span class="n">my_pdk</span><span class="o">.</span><span class="n">assemble_chip</span><span class="p">()</span>
-<span class="n">chip</span><span class="o">.</span><span class="n">write_gds</span><span class="p">(</span><span class="s2">&quot;output/chip.gds&quot;</span><span class="p">)</span>
+<span class="n">chip</span><span class="o">.</span><span class="n">write_gds</span><span class="p">(</span><span class="s2">"output/chip.gds"</span><span class="p">)</span>
 
 <span class="c1"># Persist the cache so the next run is faster.</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">save_session</span><span class="p">()</span>
@@ -5811,7 +5811,7 @@ machine-specific build artefacts.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

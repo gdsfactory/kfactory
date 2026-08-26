@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5429,7 +5429,7 @@ internally.</p>
     <span class="n">WG</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;FACTORIES_EULER_DEMO&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"FACTORIES_EULER_DEMO"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 <span class="n">L</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="bend_euler_factory-90-bends"><code>bend_euler_factory</code> — 90° bends</h2>
@@ -5437,7 +5437,7 @@ internally.</p>
 
 <span class="c1"># 90° bend, 0.5 µm wide, 10 µm radius</span>
 <span class="n">b90</span> <span class="o">=</span> <span class="n">bend_euler</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;90° euler bend:&quot;</span><span class="p">,</span> <span class="n">b90</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"90° euler bend:"</span><span class="p">,</span> <span class="n">b90</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 <span class="n">b90</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>90° euler bend: bend_euler_CS028523d7_500_R10_A90_R150
@@ -5449,8 +5449,8 @@ internally.</p>
 <p>The <code>angle</code> parameter (degrees, default 90) produces partial euler bends.</p>
 <div class="highlight"><pre><span></span><code><span class="n">b45</span> <span class="o">=</span> <span class="n">bend_euler</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mf">45.0</span><span class="p">)</span>
 <span class="n">b180</span> <span class="o">=</span> <span class="n">bend_euler</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mf">180.0</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;45°  bend:&quot;</span><span class="p">,</span> <span class="n">b45</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;180° bend:&quot;</span><span class="p">,</span> <span class="n">b180</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"45°  bend:"</span><span class="p">,</span> <span class="n">b45</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"180° bend:"</span><span class="p">,</span> <span class="n">b180</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 <span class="n">b180</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>45°  bend: bend_euler_CS028523d7_500_R10_A45_R150
@@ -5464,7 +5464,7 @@ internally.</p>
 nominal radius. Use <code>kf.routing.optical.get_radius(bend)</code> to get the footprint
 radius for routing spacing calculations.</p>
 <div class="highlight"><pre><span></span><code><span class="n">footprint_r</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">get_radius</span><span class="p">(</span><span class="n">b90</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nominal radius: 10.0 µm, footprint radius: </span><span class="si">{</span><span class="n">footprint_r</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"nominal radius: 10.0 µm, footprint radius: </span><span class="si">{</span><span class="n">footprint_r</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>nominal radius: 10.0 µm, footprint radius: 18701.000 µm
 </code></pre></div>
@@ -5475,7 +5475,7 @@ direction of the offset.</p>
 <div class="highlight"><pre><span></span><code><span class="n">sbend_euler</span> <span class="o">=</span> <span class="n">bend_s_euler_factory</span><span class="p">(</span><span class="n">pdk</span><span class="p">)</span>
 
 <span class="n">sbend</span> <span class="o">=</span> <span class="n">sbend_euler</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;S-bend:&quot;</span><span class="p">,</span> <span class="n">sbend</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"S-bend:"</span><span class="p">,</span> <span class="n">sbend</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 <span class="n">sbend</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>S-bend: bend_s_euler_CS028523d7_500_O5_R10_R150
@@ -5553,7 +5553,7 @@ direction of the offset.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

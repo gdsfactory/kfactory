@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5880,8 +5880,8 @@
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">=}</span><span class="s2"> is not a valid port name or index within the pin. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Available ports: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">=}</span><span class="s2"> is not a valid port name or index within the pin. "</span>
+                <span class="sa">f</span><span class="s2">"Available ports: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span>
@@ -5889,7 +5889,7 @@
         <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
         <span class="n">post_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DPin</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a copy of a pin.</span>
+<span class="w">        </span><span class="sd">"""Get a copy of a pin.</span>
 
 <span class="sd">        Transformation order which results in `copy.trans`:</span>
 <span class="sd">            - Trans: `trans * pin.trans * post_trans`</span>
@@ -5901,7 +5901,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            pin: a copy of the pin</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">DPin</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">trans</span><span class="o">=</span><span class="n">trans</span><span class="p">,</span> <span class="n">post_trans</span><span class="o">=</span><span class="n">post_trans</span><span class="p">))</span>
 
     <span class="nd">@property</span>
@@ -5969,8 +5969,8 @@
         <span class="p">)</span>
     <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">=}</span><span class="s2"> is not a valid port name or index within the pin. &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Available ports: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">=}</span><span class="s2"> is not a valid port name or index within the pin. "</span>
+            <span class="sa">f</span><span class="s2">"Available ports: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6092,7 +6092,7 @@
     <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
     <span class="n">post_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DPin</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a copy of a pin.</span>
+<span class="w">    </span><span class="sd">"""Get a copy of a pin.</span>
 
 <span class="sd">    Transformation order which results in `copy.trans`:</span>
 <span class="sd">        - Trans: `trans * pin.trans * post_trans`</span>
@@ -6104,7 +6104,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        pin: a copy of the pin</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">DPin</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">trans</span><span class="o">=</span><span class="n">trans</span><span class="p">,</span> <span class="n">post_trans</span><span class="o">=</span><span class="n">post_trans</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6200,8 +6200,8 @@
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">=}</span><span class="s2"> is not a valid port name or index within the pin. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Available ports: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">=}</span><span class="s2"> is not a valid port name or index within the pin. "</span>
+                <span class="sa">f</span><span class="s2">"Available ports: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
     <span class="nd">@property</span>
@@ -6217,7 +6217,7 @@
         <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
         <span class="n">post_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pin</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a copy of a pin.</span>
+<span class="w">        </span><span class="sd">"""Get a copy of a pin.</span>
 
 <span class="sd">        Transformation order which results in `copy.trans`:</span>
 <span class="sd">            - Trans: `trans * pin.trans * post_trans`</span>
@@ -6229,7 +6229,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            pin: a copy of the pin</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Pin</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">trans</span><span class="o">=</span><span class="n">trans</span><span class="p">,</span> <span class="n">post_trans</span><span class="o">=</span><span class="n">post_trans</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -6289,8 +6289,8 @@
         <span class="p">)</span>
     <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">=}</span><span class="s2"> is not a valid port name or index within the pin. &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Available ports: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">=}</span><span class="s2"> is not a valid port name or index within the pin. "</span>
+            <span class="sa">f</span><span class="s2">"Available ports: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6412,7 +6412,7 @@
     <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
     <span class="n">post_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pin</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a copy of a pin.</span>
+<span class="w">    </span><span class="sd">"""Get a copy of a pin.</span>
 
 <span class="sd">    Transformation order which results in `copy.trans`:</span>
 <span class="sd">        - Trans: `trans * pin.trans * post_trans`</span>
@@ -6424,7 +6424,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        pin: a copy of the pin</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Pin</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">trans</span><span class="o">=</span><span class="n">trans</span><span class="p">,</span> <span class="n">post_trans</span><span class="o">=</span><span class="n">post_trans</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6554,9 +6554,9 @@
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ProtoPin</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for kf.Pin, kf.DPin.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Base class for kf.Pin, kf.DPin."""</span>
 
-    <span class="n">yaml_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;!Pin&quot;</span>
+    <span class="n">yaml_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"!Pin"</span>
     <span class="n">_base</span><span class="p">:</span> <span class="n">BasePin</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">BasePin</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -6564,12 +6564,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">base</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BasePin</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the BasePin associated with this Pin.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Get the BasePin associated with this Pin."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of the pin.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Name of the pin."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">name</span>
 
     <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
@@ -6578,7 +6578,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">kcl</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCLayout</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;KCLayout associated to the pin.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""KCLayout associated to the pin."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">kcl</span>
 
     <span class="nd">@kcl</span><span class="o">.</span><span class="n">setter</span>
@@ -6587,7 +6587,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">pin_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Type of the pin.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Type of the pin."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">pin_type</span>
 
     <span class="nd">@pin_type</span><span class="o">.</span><span class="n">setter</span>
@@ -6596,7 +6596,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Info</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Additional info about the pin.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Additional info about the pin."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">info</span>
 
     <span class="nd">@info</span><span class="o">.</span><span class="n">setter</span>
@@ -6612,23 +6612,23 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">ports</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">T</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pin</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the pin to a dbu pin.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Convert the pin to a dbu pin."""</span>
         <span class="k">return</span> <span class="n">Pin</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DPin</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the pin to a um pin.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Convert the pin to a um pin."""</span>
         <span class="k">return</span> <span class="n">DPin</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;String representation of pin.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""String representation of pin."""</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">,&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;ports=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="si">}</span><span class="s2">, pin_type=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_type</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">,"</span>
+            <span class="sa">f</span><span class="s2">"ports=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="si">}</span><span class="s2">, pin_type=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_type</span><span class="si">}</span><span class="s2">)"</span>
         <span class="p">)</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a port in the pin by index or name.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Get a port in the pin by index or name."""</span>
         <span class="o">...</span>
 
     <span class="nd">@abstractmethod</span>
@@ -6637,7 +6637,7 @@
         <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
         <span class="n">post_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProtoPin</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Copy the port with a transformation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Copy the port with a transformation."""</span>
         <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -6806,7 +6806,7 @@
 <span class="normal">129</span>
 <span class="normal">130</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a port in the pin by index or name.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Get a port in the pin by index or name."""</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6838,10 +6838,10 @@
 <span class="normal">123</span>
 <span class="normal">124</span>
 <span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;String representation of pin.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""String representation of pin."""</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">,&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;ports=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="si">}</span><span class="s2">, pin_type=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_type</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">,"</span>
+        <span class="sa">f</span><span class="s2">"ports=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="si">}</span><span class="s2">, pin_type=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_type</span><span class="si">}</span><span class="s2">)"</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6884,7 +6884,7 @@
     <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
     <span class="n">post_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProtoPin</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Copy the port with a transformation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Copy the port with a transformation."""</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6913,7 +6913,7 @@
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DPin</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the pin to a um pin.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Convert the pin to a um pin."""</span>
     <span class="k">return</span> <span class="n">DPin</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6942,7 +6942,7 @@
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pin</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the pin to a dbu pin.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Convert the pin to a dbu pin."""</span>
     <span class="k">return</span> <span class="n">Pin</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6987,7 +6987,7 @@
 <span class="normal">252</span>
 <span class="normal">253</span>
 <span class="normal">254</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_regex</span><span class="p">(</span><span class="n">pins</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPin</span><span class="p">],</span> <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPin</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter iterable/sequence of pins by port name.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Filter iterable/sequence of pins by port name."""</span>
     <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">regex_filter</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">TPin</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -7027,7 +7027,7 @@
 <span class="normal">261</span>
 <span class="normal">262</span>
 <span class="normal">263</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_type</span><span class="p">(</span><span class="n">pins</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPin</span><span class="p">],</span> <span class="n">pin_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPin</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter iterable/sequence of pins by port_type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Filter iterable/sequence of pins by port_type."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">pt_filter</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">TPin</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">pin_type</span> <span class="o">==</span> <span class="n">pin_type</span>
@@ -7101,7 +7101,7 @@
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

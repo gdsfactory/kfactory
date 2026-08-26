@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5580,27 +5580,27 @@ euler bend, both registered on a dedicated <code>KCLayout</code>.</p>
 
 
 <span class="n">L</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;SCHEM_NETLIST&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"SCHEM_NETLIST"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 
 
 <span class="nd">@pdk</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">straight</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Straight waveguide segment.</span>
+<span class="w">    </span><span class="sd">"""Straight waveguide segment.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        width: Width in dbu.</span>
 <span class="sd">        length: Length in dbu.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mirrx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5610,12 +5610,12 @@ euler bend, both registered on a dedicated <code>KCLayout</code>.</p>
 
 <span class="nd">@pdk</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">bend90</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;90° Euler bend.</span>
+<span class="w">    </span><span class="sd">"""90° Euler bend.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        width: Width in dbu.</span>
 <span class="sd">        radius: Nominal bend radius in dbu.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">kf</span><span class="o">.</span><span class="n">factories</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_euler_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)(</span>
         <span class="n">width</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
         <span class="n">radius</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">radius</span><span class="p">),</span>
@@ -5628,13 +5628,13 @@ euler bend, both registered on a dedicated <code>KCLayout</code>.</p>
 <span class="k">def</span><span class="w"> </span><span class="nf">l_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">:</span>
     <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 
-    <span class="n">s1</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="s2">&quot;s1&quot;</span><span class="p">,</span> <span class="s2">&quot;straight&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">15_000</span><span class="p">})</span>
-    <span class="n">b1</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="s2">&quot;b1&quot;</span><span class="p">,</span> <span class="s2">&quot;bend90&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">})</span>
-    <span class="n">s2</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="s2">&quot;s2&quot;</span><span class="p">,</span> <span class="s2">&quot;straight&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">15_000</span><span class="p">})</span>
+    <span class="n">s1</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="s2">"s1"</span><span class="p">,</span> <span class="s2">"straight"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"width"</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="mi">15_000</span><span class="p">})</span>
+    <span class="n">b1</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="s2">"b1"</span><span class="p">,</span> <span class="s2">"bend90"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"width"</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">"radius"</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">})</span>
+    <span class="n">s2</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="s2">"s2"</span><span class="p">,</span> <span class="s2">"straight"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"width"</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="mi">15_000</span><span class="p">})</span>
 
     <span class="n">s1</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">b1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">s1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
-    <span class="n">s2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="n">b1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">s1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
+    <span class="n">s2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">schematic</span>
 
@@ -5679,26 +5679,26 @@ A <code>NetlistPort</code> identifies a cell-level port by name.</p>
 <div class="highlight"><pre><span></span><code><span class="n">netlists</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">netlist</span><span class="p">()</span>
 <span class="n">nl</span> <span class="o">=</span> <span class="n">netlists</span><span class="p">[</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instances (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nl</span><span class="o">.</span><span class="n">instances</span><span class="p">)</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Instances (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nl</span><span class="o">.</span><span class="n">instances</span><span class="p">)</span><span class="si">}</span><span class="s2">):"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">inst</span> <span class="ow">in</span> <span class="n">nl</span><span class="o">.</span><span class="n">instances</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: component=</span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">component</span><span class="si">!r}</span><span class="s2">  settings=</span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">settings</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: component=</span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">component</span><span class="si">!r}</span><span class="s2">  settings=</span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">settings</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Nets (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nl</span><span class="o">.</span><span class="n">nets</span><span class="p">)</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Nets (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nl</span><span class="o">.</span><span class="n">nets</span><span class="p">)</span><span class="si">}</span><span class="s2">):"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">net</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nl</span><span class="o">.</span><span class="n">nets</span><span class="p">):</span>
     <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">net</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">PortRef</span><span class="p">):</span>
-            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">instance</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">instance</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&lt;cell-port:</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&gt;&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  net[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="s1">&#39; — &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"&lt;cell-port:</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&gt;"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  net[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="s1">' — '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Top-level ports (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nl</span><span class="o">.</span><span class="n">ports</span><span class="p">)</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">nl</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Top-level ports (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nl</span><span class="o">.</span><span class="n">ports</span><span class="p">)</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">nl</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Instances (3):
-  b1: component=&#39;bend90&#39;  settings={&#39;radius&#39;: 10000, &#39;width&#39;: 500}
-  s1: component=&#39;straight&#39;  settings={&#39;length&#39;: 15000, &#39;width&#39;: 500}
-  s2: component=&#39;straight&#39;  settings={&#39;length&#39;: 15000, &#39;width&#39;: 500}
+  b1: component='bend90'  settings={'radius': 10000, 'width': 500}
+  s1: component='straight'  settings={'length': 15000, 'width': 500}
+  s2: component='straight'  settings={'length': 15000, 'width': 500}
 
 Nets (4):
   net[0]: b1.o1 — s1.o2
@@ -5719,7 +5719,7 @@ runs.  <code>Netlist.sort()</code> normalises both, making equality checks repro
 <span class="n">nl_b</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
 <span class="k">assert</span> <span class="n">nl_a</span> <span class="o">==</span> <span class="n">nl_b</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sorted netlists are equal ✓&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Sorted netlists are equal ✓"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Sorted netlists are equal ✓
 </code></pre></div>
@@ -5732,26 +5732,26 @@ directly.</p>
 <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">raw_json</span><span class="p">)</span>
 
 <span class="c1"># Show the top-level keys present in the serialized schematic</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Top-level keys:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Top-level keys:"</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
 <span class="c1"># Show the placements section</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Placements:&quot;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">placement</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;placements&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">placement</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Placements:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">placement</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"placements"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">placement</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Top-level keys: [&#39;name&#39;, &#39;instances&#39;, &#39;placements&#39;, &#39;nets&#39;, &#39;routes&#39;, &#39;ports&#39;, &#39;pins&#39;, &#39;constraints&#39;, &#39;unit&#39;, &#39;info&#39;]
+<div class="highlight"><pre><span></span><code>Top-level keys: ['name', 'instances', 'placements', 'nets', 'routes', 'ports', 'pins', 'constraints', 'unit', 'info']
 
 Placements:
-  s1: {&#39;mirror&#39;: False, &#39;x&#39;: 0, &#39;dx&#39;: 0, &#39;y&#39;: 0, &#39;dy&#39;: 0, &#39;orientation&#39;: 0.0, &#39;anchor&#39;: None}
+  s1: {'mirror': False, 'x': 0, 'dx': 0, 'y': 0, 'dy': 0, 'orientation': 0.0, 'anchor': None}
 
 
 /home/runner/work/kfactory/kfactory/.venv/lib/python3.14/site-packages/pydantic/main.py:542: UserWarning: Pydantic serializer warnings:
-  PydanticSerializationUnexpectedValue(Expected `RouteNet[Annotated[int, str]]` - serialized value may not be as expected [field_name=&#39;nets&#39;, input_value=Connection[TypeVar](net=(...tance=&#39;s1&#39;, port=&#39;o2&#39;))), input_type=Connection[TypeVar]])
-  PydanticSerializationUnexpectedValue(Expected `Connection[Annotated[int, str]]` - serialized value may not be as expected [field_name=&#39;nets&#39;, input_value=Connection[TypeVar](net=(...tance=&#39;s1&#39;, port=&#39;o2&#39;))), input_type=Connection[TypeVar]])
-  PydanticSerializationUnexpectedValue(Expected `VirtualConnection[Annotated[int, str]]` - serialized value may not be as expected [field_name=&#39;nets&#39;, input_value=Connection[TypeVar](net=(...tance=&#39;s1&#39;, port=&#39;o2&#39;))), input_type=Connection[TypeVar]])
-  PydanticSerializationUnexpectedValue(Expected `RouteNet[Annotated[int, str]]` - serialized value may not be as expected [field_name=&#39;nets&#39;, input_value=Connection[TypeVar](net=(...tance=&#39;s2&#39;, port=&#39;o1&#39;))), input_type=Connection[TypeVar]])
-  PydanticSerializationUnexpectedValue(Expected `Connection[Annotated[int, str]]` - serialized value may not be as expected [field_name=&#39;nets&#39;, input_value=Connection[TypeVar](net=(...tance=&#39;s2&#39;, port=&#39;o1&#39;))), input_type=Connection[TypeVar]])
-  PydanticSerializationUnexpectedValue(Expected `VirtualConnection[Annotated[int, str]]` - serialized value may not be as expected [field_name=&#39;nets&#39;, input_value=Connection[TypeVar](net=(...tance=&#39;s2&#39;, port=&#39;o1&#39;))), input_type=Connection[TypeVar]])
+  PydanticSerializationUnexpectedValue(Expected `RouteNet[Annotated[int, str]]` - serialized value may not be as expected [field_name='nets', input_value=Connection[TypeVar](net=(...tance='s1', port='o2'))), input_type=Connection[TypeVar]])
+  PydanticSerializationUnexpectedValue(Expected `Connection[Annotated[int, str]]` - serialized value may not be as expected [field_name='nets', input_value=Connection[TypeVar](net=(...tance='s1', port='o2'))), input_type=Connection[TypeVar]])
+  PydanticSerializationUnexpectedValue(Expected `VirtualConnection[Annotated[int, str]]` - serialized value may not be as expected [field_name='nets', input_value=Connection[TypeVar](net=(...tance='s1', port='o2'))), input_type=Connection[TypeVar]])
+  PydanticSerializationUnexpectedValue(Expected `RouteNet[Annotated[int, str]]` - serialized value may not be as expected [field_name='nets', input_value=Connection[TypeVar](net=(...tance='s2', port='o1'))), input_type=Connection[TypeVar]])
+  PydanticSerializationUnexpectedValue(Expected `Connection[Annotated[int, str]]` - serialized value may not be as expected [field_name='nets', input_value=Connection[TypeVar](net=(...tance='s2', port='o1'))), input_type=Connection[TypeVar]])
+  PydanticSerializationUnexpectedValue(Expected `VirtualConnection[Annotated[int, str]]` - serialized value may not be as expected [field_name='nets', input_value=Connection[TypeVar](net=(...tance='s2', port='o1'))), input_type=Connection[TypeVar]])
   return self.__pydantic_serializer__.to_json(
 </code></pre></div>
 <h3 id="yaml-round-trip-with-read_schematic">YAML round-trip with <code>read_schematic</code></h3>
@@ -5762,26 +5762,26 @@ legacy keys before validation), or use the convenience <code>read_schematic</cod
 Plain <code>model_validate</code> expects the internal schema and will not translate
 <code>pic.yml</code>-specific fields like <code>connections</code> or <code>port</code>-based placements.</p>
 <div class="highlight"><pre><span></span><code><span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
-    <span class="n">yaml_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;l_path.yaml&quot;</span>
+    <span class="n">yaml_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"l_path.yaml"</span>
 
-    <span class="c1"># Exclude the &#39;unit&#39; field — it is fixed by the Schematic subclass and must not</span>
+    <span class="c1"># Exclude the 'unit' field — it is fixed by the Schematic subclass and must not</span>
     <span class="c1"># be present in the serialized payload for read_schematic to accept it.</span>
-    <span class="n">yaml_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;unit&quot;</span><span class="p">}))</span>
+    <span class="n">yaml_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">{</span><span class="s2">"unit"</span><span class="p">}))</span>
 
     <span class="c1"># Read back. NOTE: a known upstream bug currently prevents the JSON</span>
     <span class="c1"># produced by `model_dump_json` from round-tripping through</span>
     <span class="c1"># `read_schematic` when nets are present (see kfactory issue tracker —</span>
-    <span class="c1"># the `nets` validator expects `{&quot;p1&quot;: ..., &quot;p2&quot;: ...}` keys but</span>
+    <span class="c1"># the `nets` validator expects `{"p1": ..., "p2": ...}` keys but</span>
     <span class="c1"># `model_dump_json` serialises them as nested arrays). The pattern is</span>
     <span class="c1"># shown for documentation; uncomment to test once the upstream fix lands.</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">reloaded</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">read_schematic</span><span class="p">(</span><span class="n">yaml_path</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reloaded schematic instances:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">reloaded</span><span class="o">.</span><span class="n">instances</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reloaded schematic placements:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">reloaded</span><span class="o">.</span><span class="n">placements</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="n">reloaded</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">read_schematic</span><span class="p">(</span><span class="n">yaml_path</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"dbu"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Reloaded schematic instances:"</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">reloaded</span><span class="o">.</span><span class="n">instances</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Reloaded schematic placements:"</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">reloaded</span><span class="o">.</span><span class="n">placements</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
     <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(known upstream round-trip bug — KeyError: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"(known upstream round-trip bug — KeyError: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>(known upstream round-trip bug — KeyError: &#39;p1&#39;)
+<div class="highlight"><pre><span></span><code>(known upstream round-trip bug — KeyError: 'p1')
 </code></pre></div>
 <p>The reloaded schematic carries the same instance definitions and placements.
 Calling <code>reloaded.create_cell(output_type=kf.KCell, factories={"straight": straight, "bend90": bend90})</code>
@@ -5796,7 +5796,7 @@ straight waveguide.  We annotate each instance with a text label so that the
 rendered layout matches the names that appear in the JSON output.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@pdk</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">cross</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Minimal 4-port waveguide crossing.</span>
+<span class="w">    </span><span class="sd">"""Minimal 4-port waveguide crossing.</span>
 
 <span class="sd">    Two perpendicular rectangles meeting at the origin.  Real PDK crossings</span>
 <span class="sd">    use tapered arms and an enclosure (see the `crossing45.py` tutorial) but</span>
@@ -5805,7 +5805,7 @@ rendered layout matches the names that appear in the JSON output.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        width: Waveguide width in dbu.</span>
 <span class="sd">        length: Arm length in dbu (also the cell footprint).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="o">-</span><span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
@@ -5814,25 +5814,25 @@ rendered layout matches the names that appear in the JSON output.</p>
         <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="o">-</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mirrx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mirrx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o3&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o3"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mirrx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">x</span><span class="o">=-</span><span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o4&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o4"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mirrx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=-</span><span class="n">length</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5842,19 +5842,19 @@ rendered layout matches the names that appear in the JSON output.</p>
 
 <span class="nd">@pdk</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">crossing_demo</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Two crossings connected by a straight, with instance-name labels.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Two crossings connected by a straight, with instance-name labels."""</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
 
     <span class="n">x1</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="n">cross</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">10_000</span><span class="p">))</span>
-    <span class="n">x1</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;x1&quot;</span>
+    <span class="n">x1</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"x1"</span>
 
     <span class="n">s_inst</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="n">straight</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">15_000</span><span class="p">))</span>
-    <span class="n">s_inst</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;s1&quot;</span>
-    <span class="n">s_inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">x1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+    <span class="n">s_inst</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"s1"</span>
+    <span class="n">s_inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">x1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
 
     <span class="n">x2_inst</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="n">cross</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">10_000</span><span class="p">))</span>
-    <span class="n">x2_inst</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;x2&quot;</span>
-    <span class="n">x2_inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o3&quot;</span><span class="p">,</span> <span class="n">s_inst</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="n">x2_inst</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"x2"</span>
+    <span class="n">x2_inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o3"</span><span class="p">,</span> <span class="n">s_inst</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
     <span class="c1"># Annotate each instance with its name so the rendered layout matches the</span>
     <span class="c1"># JSON output below.</span>
@@ -5880,7 +5880,7 @@ instance ordering stable so the JSON output is reproducible.</p>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">nl</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>{&quot;instances&quot;:{&quot;s1&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;straight&quot;,&quot;settings&quot;:{&quot;length&quot;:15000,&quot;width&quot;:500}},&quot;x1&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;cross&quot;,&quot;settings&quot;:{&quot;length&quot;:10000,&quot;width&quot;:500}},&quot;x2&quot;:{&quot;kcl&quot;:&quot;SCHEM_NETLIST&quot;,&quot;component&quot;:&quot;cross&quot;,&quot;settings&quot;:{&quot;length&quot;:10000,&quot;width&quot;:500}}},&quot;nets&quot;:[[{&quot;instance&quot;:&quot;s1&quot;,&quot;port&quot;:&quot;o1&quot;},{&quot;instance&quot;:&quot;x1&quot;,&quot;port&quot;:&quot;o1&quot;}],[{&quot;instance&quot;:&quot;s1&quot;,&quot;port&quot;:&quot;o2&quot;},{&quot;instance&quot;:&quot;x2&quot;,&quot;port&quot;:&quot;o3&quot;}],[{&quot;instance&quot;:&quot;x1&quot;,&quot;port&quot;:&quot;o2&quot;}],[{&quot;instance&quot;:&quot;x1&quot;,&quot;port&quot;:&quot;o3&quot;}],[{&quot;instance&quot;:&quot;x1&quot;,&quot;port&quot;:&quot;o4&quot;}],[{&quot;instance&quot;:&quot;x2&quot;,&quot;port&quot;:&quot;o1&quot;}],[{&quot;instance&quot;:&quot;x2&quot;,&quot;port&quot;:&quot;o2&quot;}],[{&quot;instance&quot;:&quot;x2&quot;,&quot;port&quot;:&quot;o4&quot;}]],&quot;ports&quot;:[]}
+<div class="highlight"><pre><span></span><code>{"instances":{"s1":{"kcl":"SCHEM_NETLIST","component":"straight","settings":{"length":15000,"width":500}},"x1":{"kcl":"SCHEM_NETLIST","component":"cross","settings":{"length":10000,"width":500}},"x2":{"kcl":"SCHEM_NETLIST","component":"cross","settings":{"length":10000,"width":500}}},"nets":[[{"instance":"s1","port":"o1"},{"instance":"x1","port":"o1"}],[{"instance":"s1","port":"o2"},{"instance":"x2","port":"o3"}],[{"instance":"x1","port":"o2"}],[{"instance":"x1","port":"o3"}],[{"instance":"x1","port":"o4"}],[{"instance":"x2","port":"o1"}],[{"instance":"x2","port":"o2"}],[{"instance":"x2","port":"o4"}]],"ports":[]}
 </code></pre></div>
 <p>The JSON contains three top-level keys:</p>
 <ul>
@@ -5900,41 +5900,41 @@ for testing or for importing connectivity from an external source.</p>
 
 <span class="c1"># Add instance definitions</span>
 <span class="n">manual_nl</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-    <span class="s2">&quot;wg1&quot;</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="s2">&quot;MY_PDK&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
+    <span class="s2">"wg1"</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="s2">"MY_PDK"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"width"</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
 <span class="p">)</span>
 <span class="n">manual_nl</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-    <span class="s2">&quot;wg2&quot;</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="s2">&quot;MY_PDK&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
+    <span class="s2">"wg2"</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="s2">"MY_PDK"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"width"</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
 <span class="p">)</span>
 
 <span class="c1"># Add a top-level port</span>
-<span class="n">p_in</span> <span class="o">=</span> <span class="n">manual_nl</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="s2">&quot;in&quot;</span><span class="p">)</span>
+<span class="n">p_in</span> <span class="o">=</span> <span class="n">manual_nl</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="s2">"in"</span><span class="p">)</span>
 
-<span class="c1"># Connect: cell-level &quot;in&quot; is tied to wg1.o1</span>
-<span class="n">manual_nl</span><span class="o">.</span><span class="n">create_net</span><span class="p">(</span><span class="n">p_in</span><span class="p">,</span> <span class="n">PortRef</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="s2">&quot;wg1&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">))</span>
+<span class="c1"># Connect: cell-level "in" is tied to wg1.o1</span>
+<span class="n">manual_nl</span><span class="o">.</span><span class="n">create_net</span><span class="p">(</span><span class="n">p_in</span><span class="p">,</span> <span class="n">PortRef</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="s2">"wg1"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">))</span>
 
 <span class="c1"># Internal net: wg1.o2 connects to wg2.o1</span>
 <span class="n">manual_nl</span><span class="o">.</span><span class="n">create_net</span><span class="p">(</span>
-    <span class="n">PortRef</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="s2">&quot;wg1&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">),</span>
-    <span class="n">PortRef</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="s2">&quot;wg2&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">),</span>
+    <span class="n">PortRef</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="s2">"wg1"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">),</span>
+    <span class="n">PortRef</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="s2">"wg2"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">),</span>
 <span class="p">)</span>
 
 <span class="n">manual_nl</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Instances:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">manual_nl</span><span class="o">.</span><span class="n">instances</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Top-level ports:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">manual_nl</span><span class="o">.</span><span class="n">ports</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nets:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Instances:"</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">manual_nl</span><span class="o">.</span><span class="n">instances</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Top-level ports:"</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">manual_nl</span><span class="o">.</span><span class="n">ports</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Nets:"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">net</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">manual_nl</span><span class="o">.</span><span class="n">nets</span><span class="p">):</span>
     <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">instance</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">PortRef</span><span class="p">)</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">instance</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">PortRef</span><span class="p">)</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"&lt;</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&gt;"</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">net</span>
     <span class="p">]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  net[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="n">parts</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  net[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="n">parts</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Instances: [&#39;wg1&#39;, &#39;wg2&#39;]
-Top-level ports: [&#39;in&#39;]
+<div class="highlight"><pre><span></span><code>Instances: ['wg1', 'wg2']
+Top-level ports: ['in']
 Nets:
-  net[0]: [&#39;&lt;in&gt;&#39;, &#39;wg1.o1&#39;]
-  net[1]: [&#39;wg1.o2&#39;, &#39;wg2.o1&#39;]
+  net[0]: ['&lt;in&gt;', 'wg1.o1']
+  net[1]: ['wg1.o2', 'wg2.o1']
 </code></pre></div>
 <h2 id="summary">Summary</h2>
 <table>
@@ -6053,7 +6053,7 @@ Nets:
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

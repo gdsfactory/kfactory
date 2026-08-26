@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5600,16 +5600,16 @@ everywhere in your PDK. Never recreate it — each <code>KCLayout</code> call re
 entry in <code>kf.kcls</code>.</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="c1"># Create the PDK layout with layers registered.</span>
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;MY_PDK&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"MY_PDK"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 
 <span class="c1"># pdk.infos is the LayerInfos instance; use it for layer objects everywhere.</span>
 <span class="n">L</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">infos</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PDK:  </span><span class="si">{</span><span class="n">pdk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dbu:  </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">dbu</span><span class="si">}</span><span class="s2"> µm/DBU  (1 nm grid)&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WG layer index: </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"PDK:  </span><span class="si">{</span><span class="n">pdk</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dbu:  </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">dbu</span><span class="si">}</span><span class="s2"> µm/DBU  (1 nm grid)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"WG layer index: </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>PDK:  name=&#39;MY_PDK&#39; layout=&lt;klayout.dbcore.Layout object at 0x7f2748da7da0&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7f2748c405f0&gt; factories=&lt;kfactory.layout.Factories object at 0x7f2748bd3110&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7f2748d535c0&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7f276cdd24b0&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7f2748c3e670&gt; info=Info() settings=KCellSettings(version=&#39;3.0.4&#39;, klayout_version=&#39;0.30.10&#39;, meta_format=&#39;v3&#39;) decorators=&lt;kfactory.decorators.Decorators object at 0x7f2748bd3390&gt; default_cell_output_type=&lt;class &#39;kfactory.kcell.KCell&#39;&gt; default_vcell_output_type=&lt;class &#39;kfactory.kcell.VKCell&#39;&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum &#39;LAYER&#39;&gt;
+<div class="highlight"><pre><span></span><code>PDK:  name='MY_PDK' layout=&lt;klayout.dbcore.Layout object at 0x7f78f4c8c170&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7f78f4d999a0&gt; factories=&lt;kfactory.layout.Factories object at 0x7f78f4bfae90&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7f78f4d4be10&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7f79149a0a90&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7f78f4c88550&gt; info=Info() settings=KCellSettings(version='3.0.4', klayout_version='0.30.11', meta_format='v3') decorators=&lt;kfactory.decorators.Decorators object at 0x7f78f4bfb110&gt; default_cell_output_type=&lt;class 'kfactory.kcell.KCell'&gt; default_vcell_output_type=&lt;class 'kfactory.kcell.VKCell'&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum 'LAYER'&gt;
 dbu:  0.001 µm/DBU  (1 nm grid)
 WG layer index: WG
 </code></pre></div>
@@ -5621,7 +5621,7 @@ Register it with the layout so routers and cross-sections can look it up by name
 <div class="highlight"><pre><span></span><code><span class="c1"># Standard strip waveguide enclosure: 2 µm oxide cladding.</span>
 <span class="n">enc_strip</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;STRIP&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"STRIP"</span><span class="p">,</span>
         <span class="n">main_layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
         <span class="n">sections</span><span class="o">=</span><span class="p">[</span>
             <span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">),</span>  <span class="c1"># 0–2 µm cladding</span>
@@ -5632,7 +5632,7 @@ Register it with the layout so routers and cross-sections can look it up by name
 <span class="c1"># Rib waveguide: cladding + partial slab.</span>
 <span class="n">enc_rib</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RIB&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"RIB"</span><span class="p">,</span>
         <span class="n">main_layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
         <span class="n">sections</span><span class="o">=</span><span class="p">[</span>
             <span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">),</span>  <span class="c1"># 0–2 µm cladding</span>
@@ -5641,8 +5641,8 @@ Register it with the layout so routers and cross-sections can look it up by name
     <span class="p">)</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;strip enclosure: </span><span class="si">{</span><span class="n">enc_strip</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;rib   enclosure: </span><span class="si">{</span><span class="n">enc_rib</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"strip enclosure: </span><span class="si">{</span><span class="n">enc_strip</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"rib   enclosure: </span><span class="si">{</span><span class="n">enc_rib</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>strip enclosure: STRIP
 rib   enclosure: RIB
@@ -5663,14 +5663,14 @@ them later with <code>pdk.get_icross_section("WG_500")</code> (DBU view) or
     <span class="p">],</span>
     <span class="n">radius</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>  <span class="c1"># preferred bend radius (µm) — routing hint</span>
     <span class="n">radius_min</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>  <span class="c1"># minimum bend radius (µm) — DRC hint</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_500&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WG_500"</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Register and obtain the DBU-unit view.</span>
 <span class="n">xs_strip_dbu</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_strip</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cross-section:  </span><span class="si">{</span><span class="n">xs_strip_dbu</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;core width DBU: </span><span class="si">{</span><span class="n">xs_strip_dbu</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">  (</span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs_strip_dbu</span><span class="o">.</span><span class="n">width</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm)&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;radius (µm):    </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs_strip_dbu</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cross-section:  </span><span class="si">{</span><span class="n">xs_strip_dbu</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"core width DBU: </span><span class="si">{</span><span class="n">xs_strip_dbu</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">  (</span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs_strip_dbu</span><span class="o">.</span><span class="n">width</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"radius (µm):    </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs_strip_dbu</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>cross-section:  WG_500
 core width DBU: 500  (0.500 µm)
@@ -5687,13 +5687,13 @@ radius (µm):    10.0
     <span class="p">],</span>
     <span class="n">radius</span><span class="o">=</span><span class="mf">15.0</span><span class="p">,</span>
     <span class="n">radius_min</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_700_RIB&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WG_700_RIB"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_rib</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;registered cross-sections: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">cross_sections</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"registered cross-sections: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">cross_sections</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>registered cross-sections: [&#39;67c2bf20_500&#39;, &#39;WG_500&#39;, &#39;592829b8_700&#39;, &#39;WG_700_RIB&#39;]
+<div class="highlight"><pre><span></span><code>registered cross-sections: ['67c2bf20_500', 'WG_500', '592829b8_700', 'WG_700_RIB']
 </code></pre></div>
 <h2 id="5-factories">5 · Factories</h2>
 <p>A <strong>factory</strong> is a function that creates cells bound to a specific <code>KCLayout</code>.
@@ -5772,13 +5772,13 @@ factory caches the result — calling with the same parameters returns the same 
     <span class="n">enclosure</span><span class="o">=</span><span class="n">enc_strip</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;straight:  </span><span class="si">{</span><span class="n">wg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bend90:    </span><span class="si">{</span><span class="n">bend</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;taper:     </span><span class="si">{</span><span class="n">tp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"straight:  </span><span class="si">{</span><span class="n">wg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"bend90:    </span><span class="si">{</span><span class="n">bend</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"taper:     </span><span class="si">{</span><span class="n">tp</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>straight:  KCell(name=straight_CSSTRIP_500_L20000, ports=[&#39;o1&#39;, &#39;o2&#39;], pins=[], instances=[], locked=True, kcl=MY_PDK)
-bend90:    KCell(name=bend_euler_CSSTRIP_500_R10_A90_R150, ports=[&#39;o1&#39;, &#39;o2&#39;], pins=[], instances=[], locked=True, kcl=MY_PDK)
-taper:     KCell(name=taper_CSSTRIP_500_CSSTRIP_1000_L10000, ports=[&#39;o1&#39;, &#39;o2&#39;], pins=[], instances=[], locked=True, kcl=MY_PDK)
+<div class="highlight"><pre><span></span><code>straight:  KCell(name=straight_CSSTRIP_500_L20000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
+bend90:    KCell(name=bend_euler_CSSTRIP_500_R10_A90_R150, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
+taper:     KCell(name=taper_CSSTRIP_500_CSSTRIP_1000_L10000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
 </code></pre></div>
 <h2 id="6-custom-cells-using-pdk-factories">6 · Custom cells using PDK factories</h2>
 <p>Build compound cells by combining the primitives.  The <code>@pdk.cell</code> decorator caches
@@ -5794,13 +5794,13 @@ makes layer indices inconsistent.</p>
     <span class="n">gap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>  <span class="c1"># µm — gap between output waveguides</span>
     <span class="n">length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>  <span class="c1"># µm — MMI body length</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;1×2 multimode-interference splitter.</span>
+<span class="w">    </span><span class="sd">"""1×2 multimode-interference splitter.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        width: Waveguide core width (µm).</span>
 <span class="sd">        gap: Gap between the two output waveguides (µm).</span>
 <span class="sd">        length: MMI body length (µm).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
 
     <span class="c1"># Convert µm to DBU for shape/port placement.</span>
@@ -5836,25 +5836,25 @@ makes layer indices inconsistent.</p>
     <span class="c1"># is resolved in the correct layout.</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="n">length_dbu</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">width_dbu</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wg_li</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>  <span class="c1"># required when using a custom KCLayout</span>
         <span class="p">)</span>
     <span class="p">)</span>
 
     <span class="c1"># Two output ports (East face), vertically offset by ±(width+gap)/2.</span>
     <span class="n">y_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">width_dbu</span> <span class="o">+</span> <span class="n">gap_dbu</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">y_out</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;o3&quot;</span><span class="p">,</span> <span class="o">-</span><span class="n">y_out</span><span class="p">)]:</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">y_out</span><span class="p">),</span> <span class="p">(</span><span class="s2">"o3"</span><span class="p">,</span> <span class="o">-</span><span class="n">y_out</span><span class="p">)]:</span>
         <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
             <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length_dbu</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span>
                 <span class="n">width</span><span class="o">=</span><span class="n">width_dbu</span><span class="p">,</span>
                 <span class="n">layer</span><span class="o">=</span><span class="n">wg_li</span><span class="p">,</span>
-                <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+                <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
                 <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -5863,10 +5863,10 @@ makes layer indices inconsistent.</p>
 
 
 <span class="n">splitter</span> <span class="o">=</span> <span class="n">mmi_1x2</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mmi_1x2 ports: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">splitter</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"mmi_1x2 ports: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">splitter</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">splitter</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>mmi_1x2 ports: [&#39;o1&#39;, &#39;o2&#39;, &#39;o3&#39;]
+<div class="highlight"><pre><span></span><code>mmi_1x2 ports: ['o1', 'o2', 'o3']
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
@@ -5876,11 +5876,11 @@ makes layer indices inconsistent.</p>
 The following builds a simple Y-splitter + arms circuit to show the assembly pattern.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@pdk</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">splitter_arms</span><span class="p">(</span><span class="n">arm_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Y-splitter followed by two straight waveguide arms.</span>
+<span class="w">    </span><span class="sd">"""Y-splitter followed by two straight waveguide arms.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        arm_length: Length of each output arm (µm).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
 
     <span class="c1"># Place splitter at the origin.</span>
@@ -5898,22 +5898,22 @@ The following builds a simple Y-splitter + arms circuit to show the assembly pat
     <span class="n">bot_arm</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">arm_wg</span>
 
     <span class="c1"># Snap arm inputs to the splitter outputs.</span>
-    <span class="n">top_arm</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">)</span>
-    <span class="n">bot_arm</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="s2">&quot;o3&quot;</span><span class="p">)</span>
+    <span class="n">top_arm</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">)</span>
+    <span class="n">bot_arm</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="s2">"o3"</span><span class="p">)</span>
 
     <span class="c1"># Expose the circuit ports (pass name= to rename on the parent).</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">sp</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">top_arm</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">bot_arm</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o3&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">sp</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">top_arm</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">bot_arm</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"o3"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">c</span>
 
 
 <span class="n">fork</span> <span class="o">=</span> <span class="n">splitter_arms</span><span class="p">(</span><span class="n">arm_length</span><span class="o">=</span><span class="mf">30.0</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;splitter_arms ports: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">fork</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"splitter_arms ports: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">fork</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">fork</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>splitter_arms ports: [&#39;o1&#39;, &#39;o2&#39;, &#39;o3&#39;]
+<div class="highlight"><pre><span></span><code>splitter_arms ports: ['o1', 'o2', 'o3']
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
@@ -5952,14 +5952,14 @@ All cells registered in <code>pdk</code> (including sub-cells) are written in on
 <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 
 <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
-    <span class="n">gds_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;my_pdk.gds&quot;</span>
+    <span class="n">gds_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"my_pdk.gds"</span>
     <span class="n">pdk</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">gds_path</span><span class="p">))</span>
     <span class="n">size</span> <span class="o">=</span> <span class="n">gds_path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Written: </span><span class="si">{</span><span class="n">gds_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">  (</span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2"> bytes)&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Top cells: </span><span class="si">{</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">pdk</span><span class="o">.</span><span class="n">top_kcells</span><span class="p">()]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Written: </span><span class="si">{</span><span class="n">gds_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">  (</span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2"> bytes)"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Top cells: </span><span class="si">{</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">pdk</span><span class="o">.</span><span class="n">top_kcells</span><span class="p">()]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Written: my_pdk.gds  (12422 bytes)
-Top cells: [&#39;straight_CSSTRIP_500_L20000&#39;, &#39;bend_euler_CSSTRIP_500_R10_A90_R150&#39;, &#39;taper_CSSTRIP_500_CSSTRIP_1000_L10000&#39;, &#39;splitter_arms_AL30&#39;]
+<div class="highlight"><pre><span></span><code>Written: my_pdk.gds  (12392 bytes)
+Top cells: ['straight_CSSTRIP_500_L20000', 'bend_euler_CSSTRIP_500_R10_A90_R150', 'taper_CSSTRIP_500_CSSTRIP_1000_L10000', 'splitter_arms_AL30']
 </code></pre></div>
 <h2 id="see-also">See Also</h2>
 <table>
@@ -6051,7 +6051,7 @@ Top cells: [&#39;straight_CSSTRIP_500_L20000&#39;, &#39;bend_euler_CSSTRIP_500_R
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -6172,14 +6172,14 @@ are silently rounded.  Design your grid in multiples of 2 DBU to avoid asymmetry
 <p><code>add_port</code> requires the <code>port=</code> keyword — passing a port positionally raises a
 <code>TypeError</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Wrong</span>
-<span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+<span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
 
 <span class="c1"># Correct</span>
-<span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+<span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
 </code></pre></div>
 <hr />
 <h3 id="how-do-i-rename-a-port-when-exposing-it-from-a-sub-cell">How do I rename a port when exposing it from a sub-cell?</h3>
-<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"in"</span><span class="p">)</span>
 </code></pre></div>
 <p>Do <strong>not</strong> use <code>port.copy("new_name")</code> — that creates a detached copy not linked
 to the instance.</p>
@@ -6194,7 +6194,7 @@ to the instance.</p>
 carries layer index 0 for <code>WG</code>; a different <code>KCLayout</code> may map <code>WG</code> to index 5.</p>
 <p><strong>Fix</strong>: always pass <code>kcl=pdk</code> when constructing <code>kf.Port</code> inside a PDK cell:</p>
 <div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
     <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
     <span class="n">layer</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">),</span>
@@ -6205,10 +6205,10 @@ carries layer index 0 for <code>WG</code>; a different <code>KCLayout</code> may
 <h3 id="kclayout-isnt-seeing-my-layers-even-though-i-set-kclinfos"><code>KCLayout</code> isn't seeing my layers even though I set <code>kcl.infos</code></h3>
 <p>Pass the <strong>class</strong> (not an instance) to <code>KCLayout.__init__</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Correct — pass the class</span>
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;my_pdk&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"my_pdk"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 
 <span class="c1"># Wrong — setting after construction does not fully propagate</span>
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;my_pdk&quot;</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"my_pdk"</span><span class="p">)</span>
 <span class="n">pdk</span><span class="o">.</span><span class="n">infos</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>   <span class="c1"># ← incomplete</span>
 </code></pre></div>
 <p>After construction <code>pdk.infos</code> holds the instance; the <code>infos=</code> constructor
@@ -6348,10 +6348,10 @@ or a 2-element sequence, not a <code>kdb.DVector</code>:</p>
 <p>Settings passed to <code>create_inst</code> must be JSON-serialisable.  Do <strong>not</strong> pass
 <code>LayerInfo</code> objects — use <code>int</code>, <code>float</code>, or <code>str</code> instead:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Wrong</span>
-<span class="n">sch</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="s2">&quot;wg&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;layer&quot;</span><span class="p">:</span> <span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">})</span>
+<span class="n">sch</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="s2">"wg"</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"layer"</span><span class="p">:</span> <span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">})</span>
 
 <span class="c1"># Correct</span>
-<span class="n">sch</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="s2">&quot;wg&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;layer&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)})</span>
+<span class="n">sch</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="s2">"wg"</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"layer"</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)})</span>
 </code></pre></div>
 <hr />
 <h2 id="difftest-regression-testing">Difftest / regression testing</h2>
@@ -6443,7 +6443,7 @@ in a clean CI environment.  Show it as a code comment instead.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

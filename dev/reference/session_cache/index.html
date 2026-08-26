@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5438,20 +5438,20 @@
 <span class="normal">66</span>
 <span class="normal">67</span>
 <span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FunctionPickler</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">Pickler</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom pickler that can serialize non-lambda functions by reference.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Custom pickler that can serialize non-lambda functions by reference."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">reducer_override</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="n">_reconstruct_function</span> <span class="ow">or</span> <span class="n">obj</span> <span class="ow">is</span> <span class="n">_reconstruct_partial</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">NotImplemented</span>
-            <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;&lt;lambda&gt;&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"&lt;lambda&gt;"</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">pickle</span><span class="o">.</span><span class="n">PicklingError</span><span class="p">(</span>
-                    <span class="s2">&quot;Cannot pickle lambda functions. Use a named function instead.&quot;</span>
+                    <span class="s2">"Cannot pickle lambda functions. Use a named function instead."</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="s2">&quot;&lt;locals&gt;&quot;</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__qualname__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">"&lt;locals&gt;"</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__qualname__</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">pickle</span><span class="o">.</span><span class="n">PicklingError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Cannot pickle nested function </span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="vm">__qualname__</span><span class="si">!r}</span><span class="s2">. &quot;</span>
-                    <span class="s2">&quot;Use a module-level function instead.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Cannot pickle nested function </span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="vm">__qualname__</span><span class="si">!r}</span><span class="s2">. "</span>
+                    <span class="s2">"Use a module-level function instead."</span>
                 <span class="p">)</span>
             <span class="k">return</span> <span class="n">_reconstruct_function</span><span class="p">,</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__qualname__</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">):</span>
@@ -5511,7 +5511,7 @@
                 <summary>Source code in <code>kfactory/session_cache.py</code></summary>
                 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">71</span>
 <span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FunctionUnpickler</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">Unpickler</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom unpickler paired with FunctionPickler.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Custom unpickler paired with FunctionPickler."""</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -5582,7 +5582,7 @@
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5554,27 +5554,27 @@ data, and how the YAML round-trip works.</p>
 
 
 <span class="n">L</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;SCHEM_PORTS_PINS&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"SCHEM_PORTS_PINS"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 
 
 <span class="nd">@pdk</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">straight</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10_000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Straight waveguide. Both optical ports are also grouped under a `&quot;dc&quot;` pin.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Straight waveguide. Both optical ports are also grouped under a `"dc"` pin."""</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
     <span class="n">p1</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">p2</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">create_pin</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;dc&quot;</span><span class="p">,</span> <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">pin_type</span><span class="o">=</span><span class="s2">&quot;DC&quot;</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;bus&quot;</span><span class="p">})</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_pin</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"dc"</span><span class="p">,</span> <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">pin_type</span><span class="o">=</span><span class="s2">"DC"</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"bus"</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">c</span>
 </code></pre></div>
 <h2 id="part-1-ports-on-a-schematic">Part 1 — Ports on a schematic</h2>
@@ -5613,31 +5613,31 @@ when <code>create_cell</code> runs.</p>
     <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 
     <span class="n">s</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"s"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"width"</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
     <span class="p">)</span>
     <span class="n">s</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># forward each instance port up to the top level. the schematic-port key name</span>
     <span class="c1"># becomes the cell-port name on the resulting KCell — it does not have to match</span>
-    <span class="c1"># the instance&#39;s port name.</span>
-    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
-    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="c1"># the instance's port name.</span>
+    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
+    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"right"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">schematic</span>
 
 
 <span class="n">cell</span> <span class="o">=</span> <span class="n">forwarded_ports</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cell ports:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">ports</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"cell ports:"</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">ports</span><span class="p">])</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>cell ports: [&#39;left&#39;, &#39;right&#39;]
+<div class="highlight"><pre><span></span><code>cell ports: ['right', 'left']
 </code></pre></div>
 <p>Inside the schematic, the entries are <code>PortRef</code> objects pointing at the underlying
 instance:</p>
 <div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">: </span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">: </span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>  &#39;left&#39;: s[&#39;o1&#39;]
-  &#39;right&#39;: s[&#39;o2&#39;]
+<div class="highlight"><pre><span></span><code>  'left': s['o1']
+  'right': s['o2']
 </code></pre></div>
 <h3 id="create_port-placeable-top-level-port"><code>create_port</code> — placeable top-level port</h3>
 <p>Use <code>create_port</code> when the top-level port is <em>not</em> a copy of an instance port —
@@ -5650,21 +5650,21 @@ is a function of an instance's geometry but not directly any port.</p>
     <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 
     <span class="n">s</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"s"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"width"</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
     <span class="p">)</span>
     <span class="n">s</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="c1"># an extra &quot;monitor&quot; port placed 5 µm above the centre of the straight, facing up</span>
+    <span class="c1"># an extra "monitor" port placed 5 µm above the centre of the straight, facing up</span>
     <span class="n">schematic</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;monitor&quot;</span><span class="p">,</span>
-        <span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG_500&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"monitor"</span><span class="p">,</span>
+        <span class="n">cross_section</span><span class="o">=</span><span class="s2">"WG_500"</span><span class="p">,</span>
         <span class="n">x</span><span class="o">=</span><span class="mi">5_000</span><span class="p">,</span>
         <span class="n">y</span><span class="o">=</span><span class="mi">5_000</span><span class="p">,</span>
         <span class="n">orientation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
-    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
+    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"right"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">schematic</span>
 </code></pre></div>
 <div class="admonition note">
@@ -5710,15 +5710,15 @@ with any single instance pin. The constituent port names must already exist in
     <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 
     <span class="n">s</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"s"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"width"</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
     <span class="p">)</span>
     <span class="n">s</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
-    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
+    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"right"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
     <span class="n">schematic</span><span class="o">.</span><span class="n">create_pin</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;bus&quot;</span><span class="p">,</span> <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">],</span> <span class="n">pin_type</span><span class="o">=</span><span class="s2">&quot;RF&quot;</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"bus"</span><span class="p">,</span> <span class="n">ports</span><span class="o">=</span><span class="p">[</span><span class="s2">"left"</span><span class="p">,</span> <span class="s2">"right"</span><span class="p">],</span> <span class="n">pin_type</span><span class="o">=</span><span class="s2">"RF"</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{</span><span class="s2">"freq"</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">schematic</span>
@@ -5727,13 +5727,13 @@ with any single instance pin. The constituent port names must already exist in
 <span class="n">cell</span> <span class="o">=</span> <span class="n">explicit_pin</span><span class="p">()</span>
 <span class="k">for</span> <span class="n">pin</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">pins</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;pin </span><span class="si">{</span><span class="n">pin</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">:&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot; ports=</span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">pin</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot; type=</span><span class="si">{</span><span class="n">pin</span><span class="o">.</span><span class="n">pin_type</span><span class="si">!r}</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot; info=</span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="n">pin</span><span class="o">.</span><span class="n">info</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"pin </span><span class="si">{</span><span class="n">pin</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">:"</span>
+        <span class="sa">f</span><span class="s2">" ports=</span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">pin</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">" type=</span><span class="si">{</span><span class="n">pin</span><span class="o">.</span><span class="n">pin_type</span><span class="si">!r}</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">" info=</span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="n">pin</span><span class="o">.</span><span class="n">info</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>pin &#39;bus&#39;: ports=[&#39;left&#39;, &#39;right&#39;] type=&#39;RF&#39; info={&#39;freq&#39;: 5}
+<div class="highlight"><pre><span></span><code>pin 'bus': ports=['left', 'right'] type='RF' info={'freq': 5}
 </code></pre></div>
 <h3 id="add_pin-forward-an-instance-pin"><code>add_pin</code> — forward an instance pin</h3>
 <p>Use <code>add_pin</code> when an instance already exposes a pin you want at the top level.
@@ -5747,24 +5747,24 @@ clear error.</p>
     <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 
     <span class="n">s</span> <span class="o">=</span> <span class="n">schematic</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"s"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"width"</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="mi">10_000</span><span class="p">}</span>
     <span class="p">)</span>
     <span class="n">s</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="c1"># both underlying ports of the instance&#39;s &quot;dc&quot; pin are needed at the top level</span>
-    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
-    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="c1"># both underlying ports of the instance's "dc" pin are needed at the top level</span>
+    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
+    <span class="n">schematic</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"right"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
     <span class="c1"># forward the pin — pin_type and info are inherited from the instance pin</span>
-    <span class="n">schematic</span><span class="o">.</span><span class="n">add_pin</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;dc&quot;</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">pins</span><span class="p">[</span><span class="s2">&quot;dc&quot;</span><span class="p">])</span>
+    <span class="n">schematic</span><span class="o">.</span><span class="n">add_pin</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"dc"</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">pins</span><span class="p">[</span><span class="s2">"dc"</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">schematic</span>
 
 
 <span class="n">cell</span> <span class="o">=</span> <span class="n">forwarded_pin</span><span class="p">()</span>
 <span class="k">for</span> <span class="n">pin</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">pins</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pin </span><span class="si">{</span><span class="n">pin</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">: type=</span><span class="si">{</span><span class="n">pin</span><span class="o">.</span><span class="n">pin_type</span><span class="si">!r}</span><span class="s2"> info=</span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="n">pin</span><span class="o">.</span><span class="n">info</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"pin </span><span class="si">{</span><span class="n">pin</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">: type=</span><span class="si">{</span><span class="n">pin</span><span class="o">.</span><span class="n">pin_type</span><span class="si">!r}</span><span class="s2"> info=</span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="n">pin</span><span class="o">.</span><span class="n">info</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>pin &#39;dc&#39;: type=&#39;DC&#39; info={&#39;role&#39;: &#39;bus&#39;}
+<div class="highlight"><pre><span></span><code>pin 'dc': type='DC' info={'role': 'bus'}
 </code></pre></div>
 <h2 id="part-3-yaml-round-trip">Part 3 — YAML round-trip</h2>
 <p>Schematic ports and pins serialize alongside instances and placements. The format
@@ -5773,7 +5773,7 @@ accepts two shorthands:</p>
 <li>Ports: <code>"&lt;inst&gt;,&lt;port&gt;"</code> (forwarded) or a <code>{x, y, ...}</code> dict (placeable)</li>
 <li>Pins: <code>"&lt;inst&gt;,&lt;pin&gt;"</code> (forwarded) or a <code>{ports: [...], pin_type, info}</code> block</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="n">yaml_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">yaml_str</span> <span class="o">=</span> <span class="s2">"""</span>
 <span class="s2">instances:</span>
 <span class="s2">  s:</span>
 <span class="s2">    component: straight</span>
@@ -5791,22 +5791,22 @@ accepts two shorthands:</p>
 <span class="s2">    ports: [left, right]</span>
 <span class="s2">    pin_type: RF</span>
 <span class="s2">  fwd: s,dc</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ruamel.yaml</span><span class="w"> </span><span class="kn">import</span> <span class="n">YAML</span>
 
-<span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">(</span><span class="n">typ</span><span class="o">=</span><span class="s2">&quot;safe&quot;</span><span class="p">)</span>
+<span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">(</span><span class="n">typ</span><span class="o">=</span><span class="s2">"safe"</span><span class="p">)</span>
 <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="o">.</span><span class="n">from_pic_yml</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">yaml_str</span><span class="p">))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ports:&quot;</span><span class="p">,</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">schematic</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pins:&quot;</span><span class="p">,</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">schematic</span><span class="o">.</span><span class="n">pins</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;bus.ports:&quot;</span><span class="p">,</span> <span class="n">schematic</span><span class="o">.</span><span class="n">pins</span><span class="p">[</span><span class="s2">&quot;bus&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;fwd:&quot;</span><span class="p">,</span> <span class="n">schematic</span><span class="o">.</span><span class="n">pins</span><span class="p">[</span><span class="s2">&quot;fwd&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"ports:"</span><span class="p">,</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">schematic</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"pins:"</span><span class="p">,</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">schematic</span><span class="o">.</span><span class="n">pins</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"bus.ports:"</span><span class="p">,</span> <span class="n">schematic</span><span class="o">.</span><span class="n">pins</span><span class="p">[</span><span class="s2">"bus"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"fwd:"</span><span class="p">,</span> <span class="n">schematic</span><span class="o">.</span><span class="n">pins</span><span class="p">[</span><span class="s2">"fwd"</span><span class="p">])</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>ports: {&#39;left&#39;: &#39;PortRef&#39;, &#39;right&#39;: &#39;PortRef&#39;}
-pins: {&#39;bus&#39;: &#39;Pin&#39;, &#39;fwd&#39;: &#39;PinRef&#39;}
-bus.ports: [&#39;left&#39;, &#39;right&#39;]
-fwd: instance=&#39;s&#39; pin=&#39;dc&#39;
+<div class="highlight"><pre><span></span><code>ports: {'left': 'PortRef', 'right': 'PortRef'}
+pins: {'bus': 'Pin', 'fwd': 'PinRef'}
+bus.ports: ['left', 'right']
+fwd: instance='s' pin='dc'
 </code></pre></div>
 <h2 id="pitfalls">Pitfalls</h2>
 <ul>
@@ -5923,7 +5923,7 @@ fwd: instance=&#39;s&#39; pin=&#39;dc&#39;
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

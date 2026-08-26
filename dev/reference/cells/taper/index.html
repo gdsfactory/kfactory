@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5700,7 +5700,7 @@ legacy <code>width1</code>/<code>width2</code>/<code>layer</code>/<code>enclosur
     <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Linear Taper [um].</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Linear Taper [um].</span>
 
 <span class="sd">    Visualization::</span>
 
@@ -5728,7 +5728,7 @@ legacy <code>width1</code>/<code>width2</code>/<code>layer</code>/<code>enclosur
 <span class="sd">        width2: Width of the core on the right side. [um] (legacy; requires ``layer``)</span>
 <span class="sd">        layer: Main layer of the taper. (legacy)</span>
 <span class="sd">        enclosure: Definition of the slab/exclude. (legacy)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">cross_section1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">cross_section2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">taper_dbu</span><span class="p">(</span>
             <span class="n">cross_section1</span><span class="o">=</span><span class="n">cross_section1</span><span class="p">,</span>
@@ -5737,8 +5737,8 @@ legacy <code>width1</code>/<code>width2</code>/<code>layer</code>/<code>enclosur
         <span class="p">)</span>
     <span class="k">if</span> <span class="n">width1</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">width2</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Provide cross_section1 and cross_section2, or width1, width2 and layer&quot;</span>
-            <span class="s2">&quot; (legacy call).&quot;</span>
+            <span class="s2">"Provide cross_section1 and cross_section2, or width1, width2 and layer"</span>
+            <span class="s2">" (legacy call)."</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">taper_dbu</span><span class="p">(</span>
         <span class="n">width1</span><span class="o">=</span><span class="n">demo</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width1</span><span class="p">),</span>
@@ -5815,7 +5815,7 @@ legacy <code>width1</code>/<code>width2</code>/<code>layer</code>/<code>enclosur
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

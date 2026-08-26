@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -6701,7 +6701,7 @@
 <span class="normal">689</span>
 <span class="normal">690</span>
 <span class="normal">691</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DInstance</span><span class="p">(</span><span class="n">ProtoTInstance</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">UMGeometricObject</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;An Instance of a KCell.</span>
+<span class="w">    </span><span class="sd">"""An Instance of a KCell.</span>
 
 <span class="sd">    An Instance is a reference to a KCell with a transformation.</span>
 
@@ -6710,32 +6710,32 @@
 <span class="sd">        ports: Transformed ports of the KCell</span>
 <span class="sd">        kcl: Pointer to the layout object holding the instance</span>
 <span class="sd">        d: Helper that allows retrieval of instance information in um</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">yaml_tag</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;!Instance&quot;</span>
+    <span class="n">yaml_tag</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"!Instance"</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Instance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an instance from a KLayout Instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Create an instance from a KLayout Instance."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="n">kcl</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="n">instance</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ports</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DInstancePorts</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the transformed ports of the KCell.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Gets the transformed ports of the KCell."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.instance_ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">DInstancePorts</span>
 
         <span class="k">return</span> <span class="n">DInstancePorts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">pins</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DInstancePins</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the transformed ports of the KCell.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Gets the transformed ports of the KCell."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.instance_pins</span><span class="w"> </span><span class="kn">import</span> <span class="n">DInstancePins</span>
 
         <span class="k">return</span> <span class="n">DInstancePins</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DKCell</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parent KCell  of the Instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Parent KCell  of the Instance."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dkcells</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_index</span><span class="p">]</span>
 
     <span class="nd">@cell</span><span class="o">.</span><span class="n">setter</span>
@@ -6744,7 +6744,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">parent_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DKCell</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the cell this instance is contained in.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Gets the cell this instance is contained in."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dkcells</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">parent_cell</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()]</span>
 
     <span class="nd">@parent_cell</span><span class="o">.</span><span class="n">setter</span>
@@ -6763,7 +6763,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DPort</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns port from instance.</span>
+<span class="w">        </span><span class="sd">"""Returns port from instance.</span>
 
 <span class="sd">        The key can either be an integer, in which case the nth port is</span>
 <span class="sd">        returned, or a string in which case the first port with a matching</span>
@@ -6773,10 +6773,10 @@
 <span class="sd">        form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in</span>
 <span class="sd">        the `instance.a` direction and `i_b` the `instance.b` direction.</span>
 
-<span class="sd">        E.g. `c.ports[&quot;a&quot;, 3, 5]`, accesses the ports of the instance which is</span>
+<span class="sd">        E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is</span>
 <span class="sd">        3 times in `a` direction (4th index in the array), and 5 times in `b` direction</span>
 <span class="sd">        (5th index in the array).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -6965,7 +6965,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="normal">691</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DPort</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns port from instance.</span>
+<span class="w">    </span><span class="sd">"""Returns port from instance.</span>
 
 <span class="sd">    The key can either be an integer, in which case the nth port is</span>
 <span class="sd">    returned, or a string in which case the first port with a matching</span>
@@ -6975,10 +6975,10 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="sd">    form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in</span>
 <span class="sd">    the `instance.a` direction and `i_b` the `instance.b` direction.</span>
 
-<span class="sd">    E.g. `c.ports[&quot;a&quot;, 3, 5]`, accesses the ports of the instance which is</span>
+<span class="sd">    E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is</span>
 <span class="sd">    3 times in `a` direction (4th index in the array), and 5 times in `b` direction</span>
 <span class="sd">    (5th index in the array).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7008,7 +7008,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="normal">629</span>
 <span class="normal">630</span>
 <span class="normal">631</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Instance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create an instance from a KLayout Instance.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Create an instance from a KLayout Instance."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="n">kcl</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="n">instance</span>
 </code></pre></div></td></tr></table></div>
@@ -7203,7 +7203,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="normal">609</span>
 <span class="normal">610</span>
 <span class="normal">611</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Instance</span><span class="p">(</span><span class="n">ProtoTInstance</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">DBUGeometricObject</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;An Instance of a KCell.</span>
+<span class="w">    </span><span class="sd">"""An Instance of a KCell.</span>
 
 <span class="sd">    An Instance is a reference to a KCell with a transformation.</span>
 
@@ -7212,25 +7212,25 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="sd">        ports: Transformed ports of the KCell</span>
 <span class="sd">        kcl: Pointer to the layout object holding the instance</span>
 <span class="sd">        d: Helper that allows retrieval of instance information in um</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">yaml_tag</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;!Instance&quot;</span>
+    <span class="n">yaml_tag</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"!Instance"</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Instance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an instance from a KLayout Instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Create an instance from a KLayout Instance."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="n">kcl</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="n">instance</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ports</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InstancePorts</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the transformed ports of the KCell.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Gets the transformed ports of the KCell."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.instance_ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">InstancePorts</span>
 
         <span class="k">return</span> <span class="n">InstancePorts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">pins</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InstancePins</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the transformed pins of the KCell.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Gets the transformed pins of the KCell."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.instance_pins</span><span class="w"> </span><span class="kn">import</span> <span class="n">InstancePins</span>
 
         <span class="k">return</span> <span class="n">InstancePins</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -7238,7 +7238,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Port</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns port from instance.</span>
+<span class="w">        </span><span class="sd">"""Returns port from instance.</span>
 
 <span class="sd">        The key can either be an integer, in which case the nth port is</span>
 <span class="sd">        returned, or a string in which case the first port with a matching</span>
@@ -7248,15 +7248,15 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="sd">        form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in</span>
 <span class="sd">        the `instance.a` direction and `i_b` the `instance.b` direction.</span>
 
-<span class="sd">        E.g. `c.ports[&quot;a&quot;, 3, 5]`, accesses the ports of the instance which is</span>
+<span class="sd">        E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is</span>
 <span class="sd">        3 times in `a` direction (4th index in the array), and 5 times in `b` direction</span>
 <span class="sd">        (5th index in the array).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">parent_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the cell this instance is contained in.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Gets the cell this instance is contained in."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">parent_cell</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()]</span>
 
     <span class="nd">@parent_cell</span><span class="o">.</span><span class="n">setter</span>
@@ -7269,7 +7269,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parent KCell of the Instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Parent KCell of the Instance."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">kcells</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_index</span><span class="p">]</span>
 
     <span class="nd">@cell</span><span class="o">.</span><span class="n">setter</span>
@@ -7278,11 +7278,11 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_yaml</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">representer</span><span class="p">:</span> <span class="n">BaseRepresenter</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MappingNode</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the instance to a yaml representation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Convert the instance to a yaml representation."""</span>
         <span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;cellname&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="s2">&quot;trans&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">trans</span><span class="p">,</span>
-            <span class="s2">&quot;dcplx_trans&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="p">,</span>
+            <span class="s2">"cellname"</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">"trans"</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">trans</span><span class="p">,</span>
+            <span class="s2">"dcplx_trans"</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">representer</span><span class="o">.</span><span class="n">represent_mapping</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">yaml_tag</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -7472,7 +7472,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="normal">579</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Port</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns port from instance.</span>
+<span class="w">    </span><span class="sd">"""Returns port from instance.</span>
 
 <span class="sd">    The key can either be an integer, in which case the nth port is</span>
 <span class="sd">    returned, or a string in which case the first port with a matching</span>
@@ -7482,10 +7482,10 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="sd">    form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in</span>
 <span class="sd">    the `instance.a` direction and `i_b` the `instance.b` direction.</span>
 
-<span class="sd">    E.g. `c.ports[&quot;a&quot;, 3, 5]`, accesses the ports of the instance which is</span>
+<span class="sd">    E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is</span>
 <span class="sd">    3 times in `a` direction (4th index in the array), and 5 times in `b` direction</span>
 <span class="sd">    (5th index in the array).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7515,7 +7515,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="normal">544</span>
 <span class="normal">545</span>
 <span class="normal">546</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Instance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create an instance from a KLayout Instance.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Create an instance from a KLayout Instance."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="n">kcl</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="n">instance</span>
 </code></pre></div></td></tr></table></div>
@@ -7556,11 +7556,11 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="normal">610</span>
 <span class="normal">611</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">to_yaml</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">representer</span><span class="p">:</span> <span class="n">BaseRepresenter</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MappingNode</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the instance to a yaml representation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Convert the instance to a yaml representation."""</span>
     <span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;cellname&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-        <span class="s2">&quot;trans&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">trans</span><span class="p">,</span>
-        <span class="s2">&quot;dcplx_trans&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="p">,</span>
+        <span class="s2">"cellname"</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">"trans"</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">trans</span><span class="p">,</span>
+        <span class="s2">"dcplx_trans"</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="n">representer</span><span class="o">.</span><span class="n">represent_mapping</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">yaml_tag</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -7644,7 +7644,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="normal">86</span>
 <span class="normal">87</span>
 <span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ProtoInstance</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">GeometricObject</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for instances.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Base class for instances."""</span>
 
     <span class="n">_kcl</span><span class="p">:</span> <span class="n">KCLayout</span>
     <span class="n">na</span><span class="p">:</span> <span class="nb">int</span>
@@ -7654,7 +7654,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">kcl</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCLayout</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;KCLayout object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""KCLayout object."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kcl</span>
 
     <span class="nd">@kcl</span><span class="o">.</span><span class="n">setter</span>
@@ -7664,7 +7664,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of the instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Name of the instance."""</span>
 
     <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
     <span class="nd">@abstractmethod</span>
@@ -7673,7 +7673,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cell_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of the cell the instance refers to.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Name of the cell the instance refers to."""</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span>
@@ -8271,7 +8271,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
         <span class="k">return</span> <span class="n">DInstance</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;If we don&#39;t have an attribute, get it from the instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""If we don't have an attribute, get it from the instance."""</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># ty:ignore[unresolved-attribute]</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -8282,18 +8282,18 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of instance in GDS.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Name of instance in GDS."""</span>
         <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="n">PROPID</span><span class="o">.</span><span class="n">NAME</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cplx_trans</span><span class="o">.</span><span class="n">angle</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cplx_trans</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
-                <span class="n">name</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;_A</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cplx_trans</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">name</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"_A</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cplx_trans</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">name</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;_A</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cplx_trans</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;p&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">name</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"_A</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cplx_trans</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'.'</span><span class="p">,</span><span class="w"> </span><span class="s1">'p'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cplx_trans</span><span class="o">.</span><span class="n">is_mirror</span><span class="p">():</span>
-            <span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot;_M&quot;</span>
+            <span class="n">name</span> <span class="o">+=</span> <span class="s2">"_M"</span>
         <span class="k">return</span> <span class="n">name</span>
 
     <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
@@ -8306,7 +8306,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">purpose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Purpose value of instance in GDS.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Purpose value of instance in GDS."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="n">PROPID</span><span class="o">.</span><span class="n">PURPOSE</span><span class="p">)</span>
 
     <span class="nd">@purpose</span><span class="o">.</span><span class="n">setter</span>
@@ -8315,7 +8315,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cell_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the index of the cell this instance refers to.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Get the index of the cell this instance refers to."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">cell_index</span>
 
     <span class="nd">@cell_index</span><span class="o">.</span><span class="n">setter</span>
@@ -8325,7 +8325,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parent KCell  of the Instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Parent KCell  of the Instance."""</span>
         <span class="o">...</span>
 
     <span class="nd">@cell</span><span class="o">.</span><span class="n">setter</span>
@@ -8335,18 +8335,18 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ports</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProtoTInstancePorts</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ports of the instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Ports of the instance."""</span>
         <span class="o">...</span>
 
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">pins</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProtoTInstancePins</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ports of the instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Ports of the instance."""</span>
         <span class="o">...</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Vector</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the displacement vector for the &#39;a&#39; axis.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the displacement vector for the 'a' axis."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">a</span>
 
     <span class="nd">@a</span><span class="o">.</span><span class="n">setter</span>
@@ -8355,7 +8355,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Vector</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the displacement vector for the &#39;b&#39; axis.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the displacement vector for the 'b' axis."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">b</span>
 
     <span class="nd">@b</span><span class="o">.</span><span class="n">setter</span>
@@ -8364,7 +8364,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cell_inst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">CellInstArray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the basic CellInstArray object associated with this instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Gets the basic CellInstArray object associated with this instance."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">cell_inst</span>
 
     <span class="nd">@cell_inst</span><span class="o">.</span><span class="n">setter</span>
@@ -8373,10 +8373,10 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cplx_trans</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">ICplxTrans</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the complex transformation of the instance.</span>
+<span class="w">        </span><span class="sd">"""Gets the complex transformation of the instance.</span>
 
 <span class="sd">        Or the first instance in the array.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">cplx_trans</span>
 
     <span class="nd">@cplx_trans</span><span class="o">.</span><span class="n">setter</span>
@@ -8385,10 +8385,10 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dcplx_trans</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the complex transformation of the instance.</span>
+<span class="w">        </span><span class="sd">"""Gets the complex transformation of the instance.</span>
 
 <span class="sd">        Or the first instance in the array.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">dcplx_trans</span>
 
     <span class="nd">@dcplx_trans</span><span class="o">.</span><span class="n">setter</span>
@@ -8397,10 +8397,10 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dtrans</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the complex transformation of the instance.</span>
+<span class="w">        </span><span class="sd">"""Gets the complex transformation of the instance.</span>
 
 <span class="sd">        Or the first instance in the array.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">dtrans</span>
 
     <span class="nd">@dtrans</span><span class="o">.</span><span class="n">setter</span>
@@ -8409,10 +8409,10 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">trans</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the complex transformation of the instance.</span>
+<span class="w">        </span><span class="sd">"""Gets the complex transformation of the instance.</span>
 
 <span class="sd">        Or the first instance in the array.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">trans</span>
 
     <span class="nd">@trans</span><span class="o">.</span><span class="n">setter</span>
@@ -8421,7 +8421,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">na</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the displacement vector for the &#39;a&#39; axis.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the displacement vector for the 'a' axis."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">na</span>
 
     <span class="nd">@na</span><span class="o">.</span><span class="n">setter</span>
@@ -8430,7 +8430,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">nb</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the number of instances in the &#39;b&#39; axis.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the number of instances in the 'b' axis."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">nb</span>
 
     <span class="nd">@nb</span><span class="o">.</span><span class="n">setter</span>
@@ -8439,7 +8439,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">prop_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the properties ID associated with the instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Gets the properties ID associated with the instance."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">prop_id</span>
 
     <span class="nd">@prop_id</span><span class="o">.</span><span class="n">setter</span>
@@ -8448,13 +8448,13 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hash the instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Hash the instance."""</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">sha3_512</span><span class="p">()</span>
         <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">hash</span><span class="p">())</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complex</span><span class="p">():</span>
-            <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">hash</span><span class="p">()</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;big&quot;</span><span class="p">))</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">hash</span><span class="p">()</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s2">"big"</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">hash</span><span class="p">()</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;big&quot;</span><span class="p">))</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">hash</span><span class="p">()</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s2">"big"</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
 
     <span class="nd">@overload</span>
@@ -8514,7 +8514,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
         <span class="n">use_mirror</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_angle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Align port with name `portname` to a port.</span>
+<span class="w">        </span><span class="sd">"""Align port with name `portname` to a port.</span>
 
 <span class="sd">        Function to allow to transform this instance so that a port of this instance is</span>
 <span class="sd">        connected (same center with 180° turn) to another instance.</span>
@@ -8522,7 +8522,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="sd">        Args:</span>
 <span class="sd">            port: The name of the port of this instance to be connected, or directly an</span>
 <span class="sd">                instance port. Can be `None` because port names can be `None`.</span>
-<span class="sd">            other: The other instance or a port. Skip `other_port_name` if it&#39;s a port.</span>
+<span class="sd">            other: The other instance or a port. Skip `other_port_name` if it's a port.</span>
 <span class="sd">            other_port_name: The name of the other port. Ignored if</span>
 <span class="sd">                `other` is a port.</span>
 <span class="sd">            mirror: Instead of applying klayout.db.Trans.R180 as a connection</span>
@@ -8533,7 +8533,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="sd">            allow_type_mismatch: Skip port_type check between the ports if set.</span>
 <span class="sd">            use_mirror: If False mirror flag does not get applied from the connection.</span>
 <span class="sd">            use_angle: If False the angle does not get applied from the connection.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">allow_width_mismatch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">allow_width_mismatch</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">allow_width_mismatch</span>
         <span class="k">if</span> <span class="n">allow_layer_mismatch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -8550,9 +8550,9 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">other_port_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;portname cannot be None if an Instance Object is given. For&quot;</span>
-                    <span class="s2">&quot;complex connections (non-90 degree and floating point ports) use&quot;</span>
-                    <span class="s2">&quot;route_cplx instead&quot;</span>
+                    <span class="s2">"portname cannot be None if an Instance Object is given. For"</span>
+                    <span class="s2">"complex connections (non-90 degree and floating point ports) use"</span>
+                    <span class="s2">"route_cplx instead"</span>
                 <span class="p">)</span>
             <span class="n">op</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">other_port_name</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">ProtoPort</span><span class="p">):</span>
@@ -8573,7 +8573,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
             <span class="k">raise</span> <span class="n">PortTypeMismatchError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span>
         <span class="c1"># For two ports carrying the same asymmetric cross section, the</span>
         <span class="c1"># profile asymmetry must align in world coordinates after the</span>
-        <span class="c1"># connection — i.e. both ports&#39; world &quot;right&quot; direction must match.</span>
+        <span class="c1"># connection — i.e. both ports' world "right" direction must match.</span>
         <span class="c1"># This depends on the actual resulting inst.trans (not just the</span>
         <span class="c1"># `mirror` flag), so compute the would-be world trans of p and verify.</span>
         <span class="n">same_asym</span> <span class="o">=</span> <span class="p">(</span>
@@ -8607,15 +8607,15 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
                         <span class="n">op</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span>
                     <span class="p">)</span>
                 <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This shouldn&#39;t happen&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"This shouldn't happen"</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">dcplx_trans</span>
             <span class="k">if</span> <span class="n">same_asym</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">p_</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Couldn&#39;t find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry&quot;</span>
-                        <span class="s2">&quot; compatibility check.&quot;</span>
+                        <span class="sa">f</span><span class="s2">"Couldn't find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry"</span>
+                        <span class="s2">" compatibility check."</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">p_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">!=</span> <span class="n">op</span><span class="o">.</span><span class="n">mirror</span><span class="p">:</span>
@@ -8637,7 +8637,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
                 <span class="k">case</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span>
                     <span class="n">trans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">disp</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">disp</span><span class="p">)</span>
                 <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This shouldn&#39;t happen&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"This shouldn't happen"</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">trans</span>
             <span class="k">if</span> <span class="n">same_asym</span><span class="p">:</span>
@@ -8645,8 +8645,8 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
                     <span class="n">p_</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Couldn&#39;t find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry&quot;</span>
-                        <span class="s2">&quot; compatibility check.&quot;</span>
+                        <span class="sa">f</span><span class="s2">"Couldn't find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry"</span>
+                        <span class="s2">" compatibility check."</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">p_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">!=</span> <span class="n">op</span><span class="o">.</span><span class="n">mirror</span><span class="p">:</span>
@@ -8655,10 +8655,10 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Return a string representation of the instance."""</span>
         <span class="n">port_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: ports </span><span class="si">{</span><span class="n">port_names</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_index</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: ports </span><span class="si">{</span><span class="n">port_names</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_index</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span>
@@ -8669,12 +8669,12 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
         <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">trans</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flatten all or just certain instances.</span>
+<span class="w">        </span><span class="sd">"""Flatten all or just certain instances.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            levels: If level &lt; #hierarchy-levels -&gt; pull the sub instances to self,</span>
 <span class="sd">                else pull the polygons. None will always flatten all levels.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">levels</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -9172,7 +9172,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="normal">121</span>
 <span class="normal">122</span>
 <span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;If we don&#39;t have an attribute, get it from the instance.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""If we don't have an attribute, get it from the instance."""</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># ty:ignore[unresolved-attribute]</span>
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -9207,10 +9207,10 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="normal">505</span>
 <span class="normal">506</span>
 <span class="normal">507</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the instance.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return a string representation of the instance."""</span>
     <span class="n">port_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: ports </span><span class="si">{</span><span class="n">port_names</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_index</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: ports </span><span class="si">{</span><span class="n">port_names</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_index</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -9570,7 +9570,7 @@ instance will be mirrored and connected.</p>
     <span class="n">use_mirror</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_angle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Align port with name `portname` to a port.</span>
+<span class="w">    </span><span class="sd">"""Align port with name `portname` to a port.</span>
 
 <span class="sd">    Function to allow to transform this instance so that a port of this instance is</span>
 <span class="sd">    connected (same center with 180° turn) to another instance.</span>
@@ -9578,7 +9578,7 @@ instance will be mirrored and connected.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        port: The name of the port of this instance to be connected, or directly an</span>
 <span class="sd">            instance port. Can be `None` because port names can be `None`.</span>
-<span class="sd">        other: The other instance or a port. Skip `other_port_name` if it&#39;s a port.</span>
+<span class="sd">        other: The other instance or a port. Skip `other_port_name` if it's a port.</span>
 <span class="sd">        other_port_name: The name of the other port. Ignored if</span>
 <span class="sd">            `other` is a port.</span>
 <span class="sd">        mirror: Instead of applying klayout.db.Trans.R180 as a connection</span>
@@ -9589,7 +9589,7 @@ instance will be mirrored and connected.</p>
 <span class="sd">        allow_type_mismatch: Skip port_type check between the ports if set.</span>
 <span class="sd">        use_mirror: If False mirror flag does not get applied from the connection.</span>
 <span class="sd">        use_angle: If False the angle does not get applied from the connection.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">allow_width_mismatch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">allow_width_mismatch</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">allow_width_mismatch</span>
     <span class="k">if</span> <span class="n">allow_layer_mismatch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -9606,9 +9606,9 @@ instance will be mirrored and connected.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">other_port_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;portname cannot be None if an Instance Object is given. For&quot;</span>
-                <span class="s2">&quot;complex connections (non-90 degree and floating point ports) use&quot;</span>
-                <span class="s2">&quot;route_cplx instead&quot;</span>
+                <span class="s2">"portname cannot be None if an Instance Object is given. For"</span>
+                <span class="s2">"complex connections (non-90 degree and floating point ports) use"</span>
+                <span class="s2">"route_cplx instead"</span>
             <span class="p">)</span>
         <span class="n">op</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">other_port_name</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">ProtoPort</span><span class="p">):</span>
@@ -9629,7 +9629,7 @@ instance will be mirrored and connected.</p>
         <span class="k">raise</span> <span class="n">PortTypeMismatchError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span>
     <span class="c1"># For two ports carrying the same asymmetric cross section, the</span>
     <span class="c1"># profile asymmetry must align in world coordinates after the</span>
-    <span class="c1"># connection — i.e. both ports&#39; world &quot;right&quot; direction must match.</span>
+    <span class="c1"># connection — i.e. both ports' world "right" direction must match.</span>
     <span class="c1"># This depends on the actual resulting inst.trans (not just the</span>
     <span class="c1"># `mirror` flag), so compute the would-be world trans of p and verify.</span>
     <span class="n">same_asym</span> <span class="o">=</span> <span class="p">(</span>
@@ -9663,15 +9663,15 @@ instance will be mirrored and connected.</p>
                     <span class="n">op</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span>
                 <span class="p">)</span>
             <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This shouldn&#39;t happen&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"This shouldn't happen"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">dcplx_trans</span>
         <span class="k">if</span> <span class="n">same_asym</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">p_</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Couldn&#39;t find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry&quot;</span>
-                    <span class="s2">&quot; compatibility check.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Couldn't find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry"</span>
+                    <span class="s2">" compatibility check."</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">p_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">!=</span> <span class="n">op</span><span class="o">.</span><span class="n">mirror</span><span class="p">:</span>
@@ -9693,7 +9693,7 @@ instance will be mirrored and connected.</p>
             <span class="k">case</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="n">trans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">disp</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">disp</span><span class="p">)</span>
             <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This shouldn&#39;t happen&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"This shouldn't happen"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">trans</span>
         <span class="k">if</span> <span class="n">same_asym</span><span class="p">:</span>
@@ -9701,8 +9701,8 @@ instance will be mirrored and connected.</p>
                 <span class="n">p_</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Couldn&#39;t find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry&quot;</span>
-                    <span class="s2">&quot; compatibility check.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Couldn't find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry"</span>
+                    <span class="s2">" compatibility check."</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">p_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">!=</span> <span class="n">op</span><span class="o">.</span><span class="n">mirror</span><span class="p">:</span>
@@ -9776,12 +9776,12 @@ else pull the polygons. None will always flatten all levels.</p>
 <span class="normal">524</span>
 <span class="normal">525</span>
 <span class="normal">526</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flatten all or just certain instances.</span>
+<span class="w">    </span><span class="sd">"""Flatten all or just certain instances.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        levels: If level &lt; #hierarchy-levels -&gt; pull the sub instances to self,</span>
 <span class="sd">            else pull the polygons. None will always flatten all levels.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">levels</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -10347,7 +10347,7 @@ else pull the polygons. None will always flatten all levels.</p>
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DPort</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns port from instance.</span>
+<span class="w">        </span><span class="sd">"""Returns port from instance.</span>
 
 <span class="sd">        The key can either be an integer, in which case the nth port is</span>
 <span class="sd">        returned, or a string in which case the first port with a matching</span>
@@ -10357,10 +10357,10 @@ else pull the polygons. None will always flatten all levels.</p>
 <span class="sd">        form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in</span>
 <span class="sd">        the `instance.a` direction and `i_b` the `instance.b` direction.</span>
 
-<span class="sd">        E.g. `c.ports[&quot;a&quot;, 3, 5]`, accesses the ports of the instance which is</span>
+<span class="sd">        E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is</span>
 <span class="sd">        3 times in `a` direction (4th index in the array), and 5 times in `b` direction</span>
 <span class="sd">        (5th index in the array).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
@@ -10376,9 +10376,9 @@ else pull the polygons. None will always flatten all levels.</p>
         <span class="k">return</span> <span class="n">VInstancePins</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the instance.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Return a string representation of the instance."""</span>
         <span class="n">port_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: ports </span><span class="si">{</span><span class="n">port_names</span><span class="si">}</span><span class="s2">, transformation </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: ports </span><span class="si">{</span><span class="n">port_names</span><span class="si">}</span><span class="s2">, transformation </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">"</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">insert_into</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -10403,11 +10403,11 @@ else pull the polygons. None will always flatten all levels.</p>
             <span class="n">cell_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span>
             <span class="k">if</span> <span class="n">cell_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Cannot insert a non-flattened VInstance into a VKCell when the&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; name is &#39;None&#39;. VKCell at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="s2">"Cannot insert a non-flattened VInstance into a VKCell when the"</span>
+                    <span class="sa">f</span><span class="s2">" name is 'None'. VKCell at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="n">trans_</span> <span class="o">!=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">():</span>
-                <span class="n">cell_name</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">trans_</span><span class="o">.</span><span class="n">hash</span><span class="p">()</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">cell_name</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"_</span><span class="si">{</span><span class="n">trans_</span><span class="o">.</span><span class="n">hash</span><span class="p">()</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">"</span>
             <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layout_cell</span><span class="p">(</span><span class="n">cell_name</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">cell_</span> <span class="o">=</span> <span class="n">KCell</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">cell_name</span><span class="p">)</span>  <span class="c1"># self.cell.dup()</span>
                 <span class="k">for</span> <span class="n">layer</span><span class="p">,</span> <span class="n">shapes</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -10457,7 +10457,7 @@ else pull the polygons. None will always flatten all levels.</p>
         <span class="n">trans_</span> <span class="o">=</span> <span class="n">base_trans</span><span class="o">.</span><span class="n">inverted</span><span class="p">()</span> <span class="o">*</span> <span class="n">trans_</span>
         <span class="n">cell_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span>
         <span class="k">if</span> <span class="n">trans_</span> <span class="o">!=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">():</span>
-            <span class="n">cell_name</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">trans_</span><span class="o">.</span><span class="n">hash</span><span class="p">()</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">cell_name</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"_</span><span class="si">{</span><span class="n">trans_</span><span class="o">.</span><span class="n">hash</span><span class="p">()</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">inst_</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
                 <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">na</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nb</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span>
@@ -10548,12 +10548,12 @@ else pull the polygons. None will always flatten all levels.</p>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">levels</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;Levels are not supported if the inserted Instance is a KCell.&quot;</span>
+                    <span class="s2">"Levels are not supported if the inserted Instance is a KCell."</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">):</span>
                 <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">kcl</span> <span class="ow">is</span> <span class="n">cell</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="p">(</span>
-                    <span class="s2">&quot;Inserting a KCell into a KCell across different KCLayouts&quot;</span>
-                    <span class="s2">&quot; is currently not supported&quot;</span>
+                    <span class="s2">"Inserting a KCell into a KCell across different KCLayouts"</span>
+                    <span class="s2">" is currently not supported"</span>
                 <span class="p">)</span>
                 <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer_indexes</span><span class="p">():</span>
                     <span class="n">reg</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">kdb_cell</span><span class="o">.</span><span class="n">begin_shapes_rec</span><span class="p">(</span><span class="n">layer</span><span class="p">))</span>
@@ -10623,7 +10623,7 @@ else pull the polygons. None will always flatten all levels.</p>
         <span class="n">use_mirror</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_angle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Align port with name `portname` to a port.</span>
+<span class="w">        </span><span class="sd">"""Align port with name `portname` to a port.</span>
 
 <span class="sd">        Function to allow to transform this instance so that a port of this instance is</span>
 <span class="sd">        connected (same center with 180° turn) to another instance.</span>
@@ -10631,7 +10631,7 @@ else pull the polygons. None will always flatten all levels.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            port: The name of the port of this instance to be connected, or directly an</span>
 <span class="sd">                instance port. Can be `None` because port names can be `None`.</span>
-<span class="sd">            other: The other instance or a port. Skip `other_port_name` if it&#39;s a port.</span>
+<span class="sd">            other: The other instance or a port. Skip `other_port_name` if it's a port.</span>
 <span class="sd">            other_port_name: The name of the other port. Ignored if</span>
 <span class="sd">                `other` is a port.</span>
 <span class="sd">            mirror: Instead of applying klayout.db.Trans.R180 as a connection</span>
@@ -10642,7 +10642,7 @@ else pull the polygons. None will always flatten all levels.</p>
 <span class="sd">            allow_type_mismatch: Skip port_type check between the ports if set.</span>
 <span class="sd">            use_mirror: If False mirror flag does not get applied from the connection.</span>
 <span class="sd">            use_angle: If False the angle does not get applied from the connection.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">allow_layer_mismatch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">allow_layer_mismatch</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">allow_layer_mismatch</span>
         <span class="k">if</span> <span class="n">allow_width_mismatch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -10656,9 +10656,9 @@ else pull the polygons. None will always flatten all levels.</p>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ProtoInstance</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">other_port_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;portname cannot be None if an Instance Object is given. For&quot;</span>
-                    <span class="s2">&quot;complex connections (non-90 degree and floating point ports) use&quot;</span>
-                    <span class="s2">&quot;route_cplx instead&quot;</span>
+                    <span class="s2">"portname cannot be None if an Instance Object is given. For"</span>
+                    <span class="s2">"complex connections (non-90 degree and floating point ports) use"</span>
+                    <span class="s2">"route_cplx instead"</span>
                 <span class="p">)</span>
             <span class="n">op</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">other_port_name</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -10701,7 +10701,7 @@ else pull the polygons. None will always flatten all levels.</p>
             <span class="k">case</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span><span class="p">)</span>
             <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This shouldn&#39;t happen&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"This shouldn't happen"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">dcplx_trans</span>
         <span class="k">if</span> <span class="n">same_asym</span><span class="p">:</span>
@@ -10709,8 +10709,8 @@ else pull the polygons. None will always flatten all levels.</p>
                 <span class="n">p_</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Couldn&#39;t find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry&quot;</span>
-                    <span class="s2">&quot; compatibility check.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Couldn't find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry"</span>
+                    <span class="s2">" compatibility check."</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">p_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">!=</span> <span class="n">op</span><span class="o">.</span><span class="n">mirror</span><span class="p">:</span>
@@ -10875,7 +10875,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="normal">773</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DPort</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns port from instance.</span>
+<span class="w">    </span><span class="sd">"""Returns port from instance.</span>
 
 <span class="sd">    The key can either be an integer, in which case the nth port is</span>
 <span class="sd">    returned, or a string in which case the first port with a matching</span>
@@ -10885,10 +10885,10 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="sd">    form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in</span>
 <span class="sd">    the `instance.a` direction and `i_b` the `instance.b` direction.</span>
 
-<span class="sd">    E.g. `c.ports[&quot;a&quot;, 3, 5]`, accesses the ports of the instance which is</span>
+<span class="sd">    E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is</span>
 <span class="sd">    3 times in `a` direction (4th index in the array), and 5 times in `b` direction</span>
 <span class="sd">    (5th index in the array).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -10918,9 +10918,9 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
 <span class="normal">788</span>
 <span class="normal">789</span>
 <span class="normal">790</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the instance.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return a string representation of the instance."""</span>
     <span class="n">port_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: ports </span><span class="si">{</span><span class="n">port_names</span><span class="si">}</span><span class="s2">, transformation </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: ports </span><span class="si">{</span><span class="n">port_names</span><span class="si">}</span><span class="s2">, transformation </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="si">}</span><span class="s2">"</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -11233,7 +11233,7 @@ instance will be mirrored and connected.</p>
     <span class="n">use_mirror</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_angle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Align port with name `portname` to a port.</span>
+<span class="w">    </span><span class="sd">"""Align port with name `portname` to a port.</span>
 
 <span class="sd">    Function to allow to transform this instance so that a port of this instance is</span>
 <span class="sd">    connected (same center with 180° turn) to another instance.</span>
@@ -11241,7 +11241,7 @@ instance will be mirrored and connected.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        port: The name of the port of this instance to be connected, or directly an</span>
 <span class="sd">            instance port. Can be `None` because port names can be `None`.</span>
-<span class="sd">        other: The other instance or a port. Skip `other_port_name` if it&#39;s a port.</span>
+<span class="sd">        other: The other instance or a port. Skip `other_port_name` if it's a port.</span>
 <span class="sd">        other_port_name: The name of the other port. Ignored if</span>
 <span class="sd">            `other` is a port.</span>
 <span class="sd">        mirror: Instead of applying klayout.db.Trans.R180 as a connection</span>
@@ -11252,7 +11252,7 @@ instance will be mirrored and connected.</p>
 <span class="sd">        allow_type_mismatch: Skip port_type check between the ports if set.</span>
 <span class="sd">        use_mirror: If False mirror flag does not get applied from the connection.</span>
 <span class="sd">        use_angle: If False the angle does not get applied from the connection.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">allow_layer_mismatch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">allow_layer_mismatch</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">allow_layer_mismatch</span>
     <span class="k">if</span> <span class="n">allow_width_mismatch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -11266,9 +11266,9 @@ instance will be mirrored and connected.</p>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ProtoInstance</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">other_port_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;portname cannot be None if an Instance Object is given. For&quot;</span>
-                <span class="s2">&quot;complex connections (non-90 degree and floating point ports) use&quot;</span>
-                <span class="s2">&quot;route_cplx instead&quot;</span>
+                <span class="s2">"portname cannot be None if an Instance Object is given. For"</span>
+                <span class="s2">"complex connections (non-90 degree and floating point ports) use"</span>
+                <span class="s2">"route_cplx instead"</span>
             <span class="p">)</span>
         <span class="n">op</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="n">other_port_name</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -11311,7 +11311,7 @@ instance will be mirrored and connected.</p>
         <span class="k">case</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span>
             <span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span><span class="p">)</span>
         <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This shouldn&#39;t happen&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"This shouldn't happen"</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">dcplx_trans</span>
     <span class="k">if</span> <span class="n">same_asym</span><span class="p">:</span>
@@ -11319,8 +11319,8 @@ instance will be mirrored and connected.</p>
             <span class="n">p_</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Couldn&#39;t find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry&quot;</span>
-                <span class="s2">&quot; compatibility check.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Couldn't find port </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in instance, skipping asymmetry"</span>
+                <span class="s2">" compatibility check."</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">p_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">!=</span> <span class="n">op</span><span class="o">.</span><span class="n">mirror</span><span class="p">:</span>
@@ -11403,7 +11403,7 @@ instance will be mirrored and connected.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

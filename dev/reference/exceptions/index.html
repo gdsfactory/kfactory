@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5798,12 +5798,12 @@ left/right halves of the profile. Pass <code>mirror=True</code> to <code>connect
 <span class="normal">175</span>
 <span class="normal">176</span>
 <span class="normal">177</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AsymmetricMirrorRequiredError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when connecting two asymmetric ports without `mirror=True`.</span>
+<span class="w">    </span><span class="sd">"""Raised when connecting two asymmetric ports without `mirror=True`.</span>
 
 <span class="sd">    Two ports carrying the same `AsymmetricalCrossSection` can only be</span>
 <span class="sd">    connected via an M90 (mirror) transformation, since R180 would flip the</span>
 <span class="sd">    left/right halves of the profile. Pass `mirror=True` to `connect`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -5812,10 +5812,10 @@ left/right halves of the profile. Pass <code>mirror=True</code> to <code>connect
         <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Cannot connect ports </span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> carrying the same&quot;</span>
-            <span class="s2">&quot; asymmetric cross section without `mirror=True`. Asymmetric profiles&quot;</span>
-            <span class="s2">&quot; require an M90 transformation (mirror) — R180 would flip the&quot;</span>
-            <span class="s2">&quot; left/right halves. Pass `mirror=True` to `connect`.&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"Cannot connect ports </span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> carrying the same"</span>
+            <span class="s2">" asymmetric cross section without `mirror=True`. Asymmetric profiles"</span>
+            <span class="s2">" require an M90 transformation (mirror) — R180 would flip the"</span>
+            <span class="s2">" left/right halves. Pass `mirror=True` to `connect`."</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -5872,7 +5872,7 @@ left/right halves of the profile. Pass <code>mirror=True</code> to <code>connect
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
                 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">203</span>
 <span class="normal">204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CellNameError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised if a KCell is created and the automatic assigned name is taken.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Raised if a KCell is created and the automatic assigned name is taken."""</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -5920,13 +5920,13 @@ signature (or to reuse a name for a different signature) raises this error.</p>
 <span class="normal">54</span>
 <span class="normal">55</span>
 <span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CrossSectionNamingConflictError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a second name is registered for an existing structural signature.</span>
+<span class="w">    </span><span class="sd">"""Raised when a second name is registered for an existing structural signature.</span>
 
 <span class="sd">    Cross sections and enclosures are canonicalized by their name-independent</span>
 <span class="sd">    structural signature. A given signature may have at most one *named* canonical</span>
 <span class="sd">    entry; attempting to register a second, differently-named entry for the same</span>
 <span class="sd">    signature (or to reuse a name for a different signature) raises this error.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -5985,11 +5985,11 @@ signature (or to reuse a name for a different signature) raises this error.</p>
 <span class="normal">198</span>
 <span class="normal">199</span>
 <span class="normal">200</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CrossSectionSymmetryMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when connecting ports whose cross sections differ in symmetry.</span>
+<span class="w">    </span><span class="sd">"""Raised when connecting ports whose cross sections differ in symmetry.</span>
 
 <span class="sd">    A symmetric and an asymmetric cross section cannot be connected even with</span>
 <span class="sd">    `allow_width_mismatch`, since they are structurally different objects.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -5997,12 +5997,12 @@ signature (or to reuse a name for a different signature) raises this error.</p>
         <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
         <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">kind1</span> <span class="o">=</span> <span class="s2">&quot;symmetric&quot;</span> <span class="k">if</span> <span class="n">p1</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;asymmetric&quot;</span>
-        <span class="n">kind2</span> <span class="o">=</span> <span class="s2">&quot;symmetric&quot;</span> <span class="k">if</span> <span class="n">p2</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;asymmetric&quot;</span>
+        <span class="n">kind1</span> <span class="o">=</span> <span class="s2">"symmetric"</span> <span class="k">if</span> <span class="n">p1</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"asymmetric"</span>
+        <span class="n">kind2</span> <span class="o">=</span> <span class="s2">"symmetric"</span> <span class="k">if</span> <span class="n">p2</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"asymmetric"</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Cross section symmetry mismatch between ports </span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> (</span><span class="si">{</span><span class="n">kind1</span><span class="si">}</span><span class="s2">)&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot; and </span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> (</span><span class="si">{</span><span class="n">kind2</span><span class="si">}</span><span class="s2">). Symmetric and asymmetric cross sections&quot;</span>
-            <span class="s2">&quot; cannot be connected.&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"Cross section symmetry mismatch between ports </span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> (</span><span class="si">{</span><span class="n">kind1</span><span class="si">}</span><span class="s2">)"</span>
+            <span class="sa">f</span><span class="s2">" and </span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> (</span><span class="si">{</span><span class="n">kind2</span><span class="si">}</span><span class="s2">). Symmetric and asymmetric cross sections"</span>
+            <span class="s2">" cannot be connected."</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6065,11 +6065,11 @@ about which names are duplicated and which cells are involved.</p>
 <span class="normal">210</span>
 <span class="normal">211</span>
 <span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DuplicateCellNameError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when writing a layout with multiple cells sharing the same name.</span>
+<span class="w">    </span><span class="sd">"""Raised when writing a layout with multiple cells sharing the same name.</span>
 
 <span class="sd">    GDS/OASIS formats require unique cell names. This error provides details</span>
 <span class="sd">    about which names are duplicated and which cells are involved.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -6107,7 +6107,7 @@ about which names are duplicated and which cells are involved.</p>
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
                 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
 <span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FactoriesLockedError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when trying to add a factory to a locked Factories collection.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Raised when trying to add a factory to a locked Factories collection."""</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -6145,7 +6145,7 @@ about which names are duplicated and which cells are involved.</p>
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
                 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">215</span>
 <span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InvalidLayerError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a layer is not valid.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Raised when a layer is not valid."""</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -6192,15 +6192,15 @@ about which names are duplicated and which cells are involved.</p>
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LockedError</span><span class="p">(</span><span class="ne">AttributeError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a locked cell is being modified.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Raised when a locked cell is being modified."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcell</span><span class="p">:</span> <span class="n">AnyKCell</span> <span class="o">|</span> <span class="n">BaseKCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Throw _locked error.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Throw _locked error."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">kcell</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is locked and likely stored in cache. Modifications are &quot;</span>
-            <span class="s2">&quot;disabled as its associated function is decorated with `cell`. To modify, &quot;</span>
-            <span class="s2">&quot;update the code in the function or create a copy of &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;the </span><span class="si">{</span><span class="n">kcell</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">kcell</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is locked and likely stored in cache. Modifications are "</span>
+            <span class="s2">"disabled as its associated function is decorated with `cell`. To modify, "</span>
+            <span class="s2">"update the code in the function or create a copy of "</span>
+            <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">kcell</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">."</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -6244,12 +6244,12 @@ about which names are duplicated and which cells are involved.</p>
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcell</span><span class="p">:</span> <span class="n">AnyKCell</span> <span class="o">|</span> <span class="n">BaseKCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Throw _locked error.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Throw _locked error."""</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">kcell</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is locked and likely stored in cache. Modifications are &quot;</span>
-        <span class="s2">&quot;disabled as its associated function is decorated with `cell`. To modify, &quot;</span>
-        <span class="s2">&quot;update the code in the function or create a copy of &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;the </span><span class="si">{</span><span class="n">kcell</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">kcell</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is locked and likely stored in cache. Modifications are "</span>
+        <span class="s2">"disabled as its associated function is decorated with `cell`. To modify, "</span>
+        <span class="s2">"update the code in the function or create a copy of "</span>
+        <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">kcell</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">."</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6295,7 +6295,7 @@ about which names are duplicated and which cells are involved.</p>
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
                 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
 <span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MergeError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised if two layout&#39;s have conflicting cell definitions.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Raised if two layout's have conflicting cell definitions."""</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -6369,7 +6369,7 @@ about which names are duplicated and which cells are involved.</p>
 <span class="normal">123</span>
 <span class="normal">124</span>
 <span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortLayerMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Error thrown when two ports don&#39;t have a matching `layer`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Error thrown when two ports don't have a matching `layer`."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -6380,30 +6380,30 @@ about which names are duplicated and which cells are involved.</p>
         <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
         <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Throw error for the two ports `p1`/`p1`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Throw error for the two ports `p1`/`p1`."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.instance</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoInstance</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.layer</span><span class="w"> </span><span class="kn">import</span> <span class="n">LayerEnum</span>
 
         <span class="n">l1</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="fm">__int__</span><span class="p">()</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="fm">__int__</span><span class="p">()</span><span class="si">}</span><span class="s2">)"</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">LayerEnum</span><span class="p">)</span>
             <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">kcl</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">get_info</span><span class="p">(</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="p">))</span>
         <span class="p">)</span>
         <span class="n">l2</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="fm">__int__</span><span class="p">()</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="fm">__int__</span><span class="p">()</span><span class="si">}</span><span class="s2">)"</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">LayerEnum</span><span class="p">)</span>
             <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">kcl</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">get_info</span><span class="p">(</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="p">))</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_inst</span><span class="p">,</span> <span class="n">ProtoInstance</span><span class="p">):</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Layer mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;] (&quot;</span><span class="si">{</span><span class="n">l1</span><span class="si">}</span><span class="s1">&quot;/&quot;</span><span class="si">{</span><span class="n">l2</span><span class="si">}</span><span class="s1">&quot;)&#39;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s1">'Layer mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+                <span class="sa">f</span><span class="s1">' and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"] ("</span><span class="si">{</span><span class="n">l1</span><span class="si">}</span><span class="s1">"/"</span><span class="si">{</span><span class="n">l2</span><span class="si">}</span><span class="s1">")'</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Layer mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39; and Port &quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; (&quot;</span><span class="si">{</span><span class="n">l1</span><span class="si">}</span><span class="s1">&quot;/&quot;</span><span class="si">{</span><span class="n">l2</span><span class="si">}</span><span class="s1">&quot;)&#39;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s1">'Layer mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+                <span class="sa">f</span><span class="s1">' and Port "</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">" ("</span><span class="si">{</span><span class="n">l1</span><span class="si">}</span><span class="s1">"/"</span><span class="si">{</span><span class="n">l2</span><span class="si">}</span><span class="s1">")'</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6483,30 +6483,30 @@ about which names are duplicated and which cells are involved.</p>
     <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Throw error for the two ports `p1`/`p1`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Throw error for the two ports `p1`/`p1`."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.instance</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoInstance</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.layer</span><span class="w"> </span><span class="kn">import</span> <span class="n">LayerEnum</span>
 
     <span class="n">l1</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="fm">__int__</span><span class="p">()</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="fm">__int__</span><span class="p">()</span><span class="si">}</span><span class="s2">)"</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">LayerEnum</span><span class="p">)</span>
         <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">kcl</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">get_info</span><span class="p">(</span><span class="n">p1</span><span class="o">.</span><span class="n">layer</span><span class="p">))</span>
     <span class="p">)</span>
     <span class="n">l2</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="fm">__int__</span><span class="p">()</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="fm">__int__</span><span class="p">()</span><span class="si">}</span><span class="s2">)"</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">LayerEnum</span><span class="p">)</span>
         <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">kcl</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">get_info</span><span class="p">(</span><span class="n">p2</span><span class="o">.</span><span class="n">layer</span><span class="p">))</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_inst</span><span class="p">,</span> <span class="n">ProtoInstance</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Layer mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;] (&quot;</span><span class="si">{</span><span class="n">l1</span><span class="si">}</span><span class="s1">&quot;/&quot;</span><span class="si">{</span><span class="n">l2</span><span class="si">}</span><span class="s1">&quot;)&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'Layer mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+            <span class="sa">f</span><span class="s1">' and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"] ("</span><span class="si">{</span><span class="n">l1</span><span class="si">}</span><span class="s1">"/"</span><span class="si">{</span><span class="n">l2</span><span class="si">}</span><span class="s1">")'</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Layer mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39; and Port &quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; (&quot;</span><span class="si">{</span><span class="n">l1</span><span class="si">}</span><span class="s1">&quot;/&quot;</span><span class="si">{</span><span class="n">l2</span><span class="si">}</span><span class="s1">&quot;)&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'Layer mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+            <span class="sa">f</span><span class="s1">' and Port "</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">" ("</span><span class="si">{</span><span class="n">l1</span><span class="si">}</span><span class="s1">"/"</span><span class="si">{</span><span class="n">l2</span><span class="si">}</span><span class="s1">")'</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6578,7 +6578,7 @@ about which names are duplicated and which cells are involved.</p>
 <span class="normal">152</span>
 <span class="normal">153</span>
 <span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortTypeMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Error thrown when two ports don&#39;t have a matching `port_type`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Error thrown when two ports don't have a matching `port_type`."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -6588,20 +6588,20 @@ about which names are duplicated and which cells are involved.</p>
         <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
         <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Throw error for the two ports `p1`/`p1`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Throw error for the two ports `p1`/`p1`."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.instance</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoInstance</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_inst</span><span class="p">,</span> <span class="n">ProtoInstance</span><span class="p">):</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Type mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-                <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s1">'Type mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+                <span class="sa">f</span><span class="s1">' and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+                <span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Type mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39; and Port &quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; (</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s1">'Type mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+                <span class="sa">f</span><span class="s1">' and Port "</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">" (</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s1">)'</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6669,20 +6669,20 @@ about which names are duplicated and which cells are involved.</p>
     <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Throw error for the two ports `p1`/`p1`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Throw error for the two ports `p1`/`p1`."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.instance</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoInstance</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_inst</span><span class="p">,</span> <span class="n">ProtoInstance</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Type mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-            <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'Type mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+            <span class="sa">f</span><span class="s1">' and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+            <span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Type mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39; and Port &quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; (</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'Type mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+            <span class="sa">f</span><span class="s1">' and Port "</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">" (</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s1">)'</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6754,7 +6754,7 @@ about which names are duplicated and which cells are involved.</p>
 <span class="normal">83</span>
 <span class="normal">84</span>
 <span class="normal">85</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortWidthMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Error thrown when two ports don&#39;t have a matching `width`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Error thrown when two ports don't have a matching `width`."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -6764,20 +6764,20 @@ about which names are duplicated and which cells are involved.</p>
         <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
         <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Throw error for the two ports `p1`/`p1`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Throw error for the two ports `p1`/`p1`."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.instance</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoInstance</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_inst</span><span class="p">,</span> <span class="n">ProtoInstance</span><span class="p">):</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Width mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;] &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;(&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">&quot;/&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">&quot;)&#39;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s1">'Width mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"] '</span>
+                <span class="sa">f</span><span class="s1">'and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+                <span class="sa">f</span><span class="s1">'("</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">"/"</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">")'</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Width mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;] &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;and Port &quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; (&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">&quot;/&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">&quot;)&#39;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s1">'Width mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"] '</span>
+                <span class="sa">f</span><span class="s1">'and Port "</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">" ("</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">"/"</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">")'</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6845,20 +6845,20 @@ about which names are duplicated and which cells are involved.</p>
     <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Throw error for the two ports `p1`/`p1`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Throw error for the two ports `p1`/`p1`."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.instance</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoInstance</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_inst</span><span class="p">,</span> <span class="n">ProtoInstance</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Width mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;] &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;(&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">&quot;/&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">&quot;)&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'Width mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"] '</span>
+            <span class="sa">f</span><span class="s1">'and </span><span class="si">{</span><span class="n">other_inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"]'</span>
+            <span class="sa">f</span><span class="s1">'("</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">"/"</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">")'</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Width mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">[&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;] &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;and Port &quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; (&quot;</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">&quot;/&quot;</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">&quot;)&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">'Width mismatch between the ports </span><span class="si">{</span><span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">["</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">"] '</span>
+            <span class="sa">f</span><span class="s1">'and Port "</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">" ("</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">"/"</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1">")'</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6938,7 +6938,7 @@ about which names are duplicated and which cells are involved.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

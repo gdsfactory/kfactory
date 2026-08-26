@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5504,14 +5504,14 @@ It demonstrates several advanced features working together:</p>
 <span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">scrollable_text</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;400px&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HTML</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render long text in a vertically scrollable, monospaced HTML block.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">scrollable_text</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"400px"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HTML</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Render long text in a vertically scrollable, monospaced HTML block."""</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">html</span>
 
     <span class="k">return</span> <span class="n">HTML</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s1">&#39;&lt;div style=&quot;max-height: </span><span class="si">{</span><span class="n">max_height</span><span class="si">}</span><span class="s1">; overflow-y: auto; &#39;</span>
-        <span class="sa">f</span><span class="s2">&quot;font-family: monospace; white-space: pre; padding: 0.5em; &quot;</span>
-        <span class="sa">f</span><span class="s1">&#39;border: 1px solid #ccc;&quot;&gt;</span><span class="si">{</span><span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/div&gt;&#39;</span>
+        <span class="sa">f</span><span class="s1">'&lt;div style="max-height: </span><span class="si">{</span><span class="n">max_height</span><span class="si">}</span><span class="s1">; overflow-y: auto; '</span>
+        <span class="sa">f</span><span class="s2">"font-family: monospace; white-space: pre; padding: 0.5em; "</span>
+        <span class="sa">f</span><span class="s1">'border: 1px solid #ccc;"&gt;</span><span class="si">{</span><span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/div&gt;'</span>
     <span class="p">)</span>
 </code></pre></div>
 <h2 id="pdk-setup">PDK setup</h2>
@@ -5524,15 +5524,15 @@ that the schematic can reference as a plain string.</p>
 
 
 <span class="n">LAYER</span> <span class="o">=</span> <span class="n">Layers</span><span class="p">()</span>
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;CROSSING_PDK&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">Layers</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"CROSSING_PDK"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">Layers</span><span class="p">)</span>
 
 <span class="n">xs_wg1</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">SymmetricalCrossSection</span><span class="p">(</span>
         <span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
         <span class="n">enclosure</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span>
-            <span class="p">[(</span><span class="n">LAYER</span><span class="o">.</span><span class="n">WGEX</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">,</span> <span class="n">main_layer</span><span class="o">=</span><span class="n">LAYER</span><span class="o">.</span><span class="n">WG</span>
+            <span class="p">[(</span><span class="n">LAYER</span><span class="o">.</span><span class="n">WGEX</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"WG"</span><span class="p">,</span> <span class="n">main_layer</span><span class="o">=</span><span class="n">LAYER</span><span class="o">.</span><span class="n">WG</span>
         <span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG1000&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"WG1000"</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="p">)</span>
 
@@ -5540,7 +5540,7 @@ that the schematic can reference as a plain string.</p>
 <span class="c1"># cross-section is available there as well.</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_wg1</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>&lt;kfactory.cross_section.CrossSection at 0x7fcda051b610&gt;
+<div class="highlight"><pre><span></span><code>&lt;kfactory.cross_section.CrossSection at 0x7efec293b390&gt;
 </code></pre></div>
 <h2 id="the-cross-cell">The <code>cross</code> cell</h2>
 <p>A single 45° crossing: four waveguide arms radiating from the center.</p>
@@ -5590,12 +5590,12 @@ that the schematic can reference as a plain string.</p>
     <span class="n">bb</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">bbox</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">main_layer</span><span class="p">))</span>
 
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">bb</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">bb</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span>
     <span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bb</span><span class="o">.</span><span class="n">top</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;o3&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">bb</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bb</span><span class="o">.</span><span class="n">top</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"o3"</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">bb</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o4&quot;</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bb</span><span class="o">.</span><span class="n">bottom</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o4"</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bb</span><span class="o">.</span><span class="n">bottom</span><span class="p">),</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span>
     <span class="p">)</span>
 
     <span class="n">xs</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">apply_minkowski_tiled</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">main_layer</span><span class="p">)</span>
@@ -5614,14 +5614,14 @@ repetitive routing primitives.</p>
     <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
     <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">VKCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Virtual euler bend.</span>
+<span class="w">    </span><span class="sd">"""Virtual euler bend.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        radius: Radius of the backbone. [um]</span>
 <span class="sd">        cross_section: Name of the CrossSection.</span>
 <span class="sd">        angle: Angle of the bend.</span>
 <span class="sd">        resolution: Angle resolution for the backbone.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">()</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_dcross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
     <span class="n">dbu</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span>
@@ -5642,12 +5642,12 @@ repetitive routing primitives.</p>
     <span class="p">)</span>
 
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
         <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
         <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">backbone</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_v</span><span class="p">()),</span>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
         <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
         <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">backbone</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_v</span><span class="p">()),</span>
     <span class="p">)</span>
@@ -5657,12 +5657,12 @@ repetitive routing primitives.</p>
 
 <span class="nd">@pdk</span><span class="o">.</span><span class="n">vcell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">straight</span><span class="p">(</span><span class="n">length</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">VKCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Virtual straight waveguide.</span>
+<span class="w">    </span><span class="sd">"""Virtual straight waveguide.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        length: Length in um.</span>
 <span class="sd">        cross_section: Name of the CrossSection.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">()</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_dcross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
 
@@ -5678,12 +5678,12 @@ repetitive routing primitives.</p>
     <span class="p">)</span>
 
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
         <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">mag</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">mirrx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
         <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">mag</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mirrx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
     <span class="p">)</span>
@@ -5708,30 +5708,30 @@ repetitive routing primitives.</p>
     <span class="n">cross_cell</span> <span class="o">=</span> <span class="n">cross</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="n">cross_section</span><span class="p">)</span>
 
     <span class="n">cross_port_delta</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">cross_cell</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span>
-        <span class="o">-</span> <span class="n">cross_cell</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span>
+        <span class="n">cross_cell</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">]</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span>
+        <span class="o">-</span> <span class="n">cross_cell</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">]</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">disp</span>
     <span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
     <span class="n">width</span> <span class="o">=</span> <span class="n">cross_cell</span><span class="o">.</span><span class="n">dbbox</span><span class="p">(</span><span class="n">cross_cell</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">main_layer</span><span class="p">))</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
 
     <span class="n">bend_cell</span> <span class="o">=</span> <span class="n">bend_euler</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="n">cross_section</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
 
-    <span class="n">dy</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">bend_cell</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">bend_cell</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">bend_cell</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">bend_cell</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
     <span class="n">dl</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">pitch</span> <span class="o">-</span> <span class="n">cross_port_delta</span> <span class="o">-</span> <span class="n">dy</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 
     <span class="n">d_w</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pitch</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">width</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">d_w</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Pitch must be bigger than the crossing&#39;s size: crossing_width=</span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">pitch</span><span class="si">=}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"Pitch must be bigger than the crossing's size: crossing_width=</span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">pitch</span><span class="si">=}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">):</span>
             <span class="n">crossing</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">component</span><span class="o">=</span><span class="s2">&quot;cross&quot;</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">component</span><span class="o">=</span><span class="s2">"cross"</span><span class="p">,</span>
                 <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
-                <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">name</span><span class="p">},</span>
+                <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">name</span><span class="p">},</span>
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">d_w</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -5740,205 +5740,205 @@ repetitive routing primitives.</p>
                         <span class="n">crossing</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
                     <span class="k">case</span> <span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span>
                         <span class="n">wg_ij</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-                            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;spacer_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">_1&quot;</span><span class="p">,</span>
-                            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-                            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">d_w</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+                            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"spacer_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">_1"</span><span class="p">,</span>
+                            <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+                            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">d_w</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
                             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
                             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="p">)</span>
                         <span class="n">wg_ij</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-                            <span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o4&quot;</span><span class="p">]</span>
+                            <span class="s2">"o1"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o4"</span><span class="p">]</span>
                         <span class="p">)</span>
-                        <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">wg_ij</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+                        <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">wg_ij</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
                     <span class="k">case</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">wg_ij</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-                            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;spacer_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">_2&quot;</span><span class="p">,</span>
-                            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-                            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">d_w</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+                            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"spacer_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">_2"</span><span class="p">,</span>
+                            <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+                            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">d_w</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
                             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
                             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="p">)</span>
                         <span class="n">wg_ij</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-                            <span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o3&quot;</span><span class="p">]</span>
+                            <span class="s2">"o1"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o3"</span><span class="p">]</span>
                         <span class="p">)</span>
-                        <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">wg_ij</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+                        <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">wg_ij</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
                     <span class="k">case</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span>
                         <span class="n">wg_ij1</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-                            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;spacer_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">_1&quot;</span><span class="p">,</span>
-                            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-                            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">d_w</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+                            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"spacer_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">_1"</span><span class="p">,</span>
+                            <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+                            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">d_w</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
                             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
                             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="p">)</span>
                         <span class="n">wg_ij1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-                            <span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o4&quot;</span><span class="p">]</span>
+                            <span class="s2">"o1"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o4"</span><span class="p">]</span>
                         <span class="p">)</span>
                         <span class="n">wg_ij2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-                            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;spacer_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">_2&quot;</span><span class="p">,</span>
-                            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-                            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">d_w</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+                            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"spacer_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">_2"</span><span class="p">,</span>
+                            <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+                            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">d_w</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
                             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
                             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="p">)</span>
                         <span class="n">wg_ij2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-                            <span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o3&quot;</span><span class="p">]</span>
+                            <span class="s2">"o1"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o3"</span><span class="p">]</span>
                         <span class="p">)</span>
-                        <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">wg_ij1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
-                        <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">wg_ij2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+                        <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">wg_ij1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
+                        <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">wg_ij2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">match</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span>
                     <span class="k">case</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">crossing</span><span class="o">.</span><span class="n">place</span><span class="p">()</span>
                     <span class="k">case</span> <span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span>
                         <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-                            <span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o4&quot;</span><span class="p">]</span>
+                            <span class="s2">"o2"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o4"</span><span class="p">]</span>
                         <span class="p">)</span>
                     <span class="k">case</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-                            <span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o3&quot;</span><span class="p">]</span>
+                            <span class="s2">"o1"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o3"</span><span class="p">]</span>
                         <span class="p">)</span>
                     <span class="k">case</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span>
                         <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-                            <span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o4&quot;</span><span class="p">]</span>
+                            <span class="s2">"o2"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o4"</span><span class="p">]</span>
                         <span class="p">)</span>
                         <span class="n">crossing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-                            <span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o3&quot;</span><span class="p">]</span>
+                            <span class="s2">"o1"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o3"</span><span class="p">]</span>
                         <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">):</span>
         <span class="n">spacer_start_top</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;io_spacer_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">dl</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"io_spacer_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">dl</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">bend_start_top</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;bend45_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;bend_euler&quot;</span><span class="p">,</span>
-            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;angle&quot;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">,</span> <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">},</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"bend45_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">component</span><span class="o">=</span><span class="s2">"bend_euler"</span><span class="p">,</span>
+            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"angle"</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">,</span> <span class="s2">"radius"</span><span class="p">:</span> <span class="mi">30</span><span class="p">},</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">bend_start_top</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">spacer_start_top</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
-        <span class="n">spacer_start_top</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">bend_start_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+        <span class="n">spacer_start_top</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_0"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
+        <span class="n">spacer_start_top</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">bend_start_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
         <span class="n">spacer_start_bot</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;io_spacer_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">dl</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"io_spacer_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">dl</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">bend_start_bot</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;bend45_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;bend_euler&quot;</span><span class="p">,</span>
-            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;angle&quot;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">,</span> <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">},</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"bend45_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">component</span><span class="o">=</span><span class="s2">"bend_euler"</span><span class="p">,</span>
+            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"angle"</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">,</span> <span class="s2">"radius"</span><span class="p">:</span> <span class="mi">30</span><span class="p">},</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">spacer_start_bot</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_0_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
-        <span class="n">spacer_start_bot</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">bend_start_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+        <span class="n">spacer_start_bot</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_0_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
+        <span class="n">spacer_start_bot</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">bend_start_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
         <span class="n">spacer_end_top</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;io_spacer_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">dl</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"io_spacer_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">dl</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">bend_end_top</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;bend45_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;bend_euler&quot;</span><span class="p">,</span>
-            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;angle&quot;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">,</span> <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">},</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"bend45_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">component</span><span class="o">=</span><span class="s2">"bend_euler"</span><span class="p">,</span>
+            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"angle"</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">,</span> <span class="s2">"radius"</span><span class="p">:</span> <span class="mi">30</span><span class="p">},</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">bend_end_top</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">spacer_end_top</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-            <span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o4&quot;</span><span class="p">]</span>
+            <span class="s2">"o1"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o4"</span><span class="p">]</span>
         <span class="p">)</span>
-        <span class="n">spacer_end_top</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">bend_end_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+        <span class="n">spacer_end_top</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">bend_end_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
         <span class="n">spacer_end_bot</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;io_spacer_</span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">dl</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"io_spacer_</span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">dl</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">bend_end_bot</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;bend45_</span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">component</span><span class="o">=</span><span class="s2">&quot;bend_euler&quot;</span><span class="p">,</span>
-            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;angle&quot;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">,</span> <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">},</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"bend45_</span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">component</span><span class="o">=</span><span class="s2">"bend_euler"</span><span class="p">,</span>
+            <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"angle"</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">,</span> <span class="s2">"radius"</span><span class="p">:</span> <span class="mi">30</span><span class="p">},</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
             <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">spacer_end_bot</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-            <span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;crossing_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o3&quot;</span><span class="p">]</span>
+            <span class="s2">"o1"</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="sa">f</span><span class="s2">"crossing_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o3"</span><span class="p">]</span>
         <span class="p">)</span>
-        <span class="n">spacer_end_bot</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">bend_end_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+        <span class="n">spacer_end_bot</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">bend_end_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
         <span class="n">io_l_start</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pitch</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span>
         <span class="n">io_l_end</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">pitch</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">io_l_start</span><span class="p">:</span>
             <span class="n">io_straight_start_top</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;io_straight_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-                <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">io_l_start</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"io_straight_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">io_l_start</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
                 <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
                 <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">io_straight_start_top</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">bend_start_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+            <span class="n">io_straight_start_top</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">bend_start_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
             <span class="n">io_straight_start_bot</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;io_straight_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-                <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">io_l_start</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"io_straight_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">io_l_start</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
                 <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
                 <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">io_straight_start_bot</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">bend_start_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+            <span class="n">io_straight_start_bot</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">bend_start_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
 
-            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">io_straight_start_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">io_straight_start_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
             <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">io_straight_start_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">]</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">io_straight_start_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">]</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">bend_start_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
-            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">bend_start_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">bend_start_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">bend_start_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">io_l_end</span><span class="p">:</span>
             <span class="n">io_straight_end_top</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;io_straight_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-                <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">io_l_end</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"io_straight_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">io_l_end</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
                 <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
                 <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">io_straight_end_top</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">bend_end_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+            <span class="n">io_straight_end_top</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">bend_end_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
             <span class="n">io_straight_end_bot</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;io_straight_</span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="n">component</span><span class="o">=</span><span class="s2">&quot;straight&quot;</span><span class="p">,</span>
-                <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">io_l_end</span><span class="p">,</span> <span class="s2">&quot;cross_section&quot;</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"io_straight_</span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">component</span><span class="o">=</span><span class="s2">"straight"</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">=</span><span class="p">{</span><span class="s2">"length"</span><span class="p">:</span> <span class="n">io_l_end</span><span class="p">,</span> <span class="s2">"cross_section"</span><span class="p">:</span> <span class="n">cross_section</span><span class="p">},</span>
                 <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
                 <span class="n">virtual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">io_straight_end_bot</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="n">bend_end_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
-            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">io_straight_end_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+            <span class="n">io_straight_end_bot</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="n">bend_end_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">io_straight_end_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
             <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">io_straight_end_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">]</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">io_straight_end_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">]</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">bend_end_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
-            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">bend_end_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">bend_end_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">n</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">bend_end_bot</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">s</span>
 
 
-<span class="n">c</span> <span class="o">=</span> <span class="n">crossing45</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG1000&quot;</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">crossing45</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="s2">"WG1000"</span><span class="p">)</span>
 <span class="n">c</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-08-24 23:07:05.729[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1028[0m - [1mStarting minkowski on Unnamed_0[0m
+<div class="highlight"><pre><span></span><code>[32m2026-08-26 11:45:34.733[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1028[0m - [1mStarting minkowski on Unnamed_0[0m
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
@@ -5948,7 +5948,7 @@ repetitive routing primitives.</p>
 serialisable Pydantic structure.</p>
 <div class="highlight"><pre><span></span><code><span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
     <span class="c1"># capture pydantic serialization warnings due to generic type mismatch</span>
-    <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;pydantic&quot;</span><span class="p">)</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"pydantic"</span><span class="p">)</span>
     <span class="n">scrollable_text</span><span class="p">(</span><span class="n">pformat</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">exclude_defaults</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
 </code></pre></div>
 <h2 id="lvs-schematic-vs-extracted-netlist">LVS: schematic vs extracted netlist</h2>
@@ -5957,8 +5957,8 @@ netlist (derived from physical geometry), we can verify they match.</p>
 <div class="highlight"><pre><span></span><code><span class="n">schematic_netlist</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">netlist</span><span class="p">()</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
 <span class="n">extracted_netlist</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">netlist</span><span class="p">()[</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
 
-<span class="k">assert</span> <span class="n">schematic_netlist</span> <span class="o">==</span> <span class="n">extracted_netlist</span><span class="p">,</span> <span class="s2">&quot;LVS failed!&quot;</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LVS passed: schematic and extracted netlists match.&quot;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">schematic_netlist</span> <span class="o">==</span> <span class="n">extracted_netlist</span><span class="p">,</span> <span class="s2">"LVS failed!"</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"LVS passed: schematic and extracted netlists match."</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>LVS passed: schematic and extracted netlists match.
 </code></pre></div>
@@ -5970,7 +5970,7 @@ with collaborators or archived for reproducibility.</p>
 
 <span class="n">Code</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">code_str</span><span class="p">())</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-08-24 23:07:06.316[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2136[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+<div class="highlight"><pre><span></span><code>[32m2026-08-26 11:45:35.090[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2136[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -5979,7 +5979,7 @@ with collaborators or archived for reproducibility.</p>
 import kfactory as kf
 
 
-kcl = kf.kcls[&quot;DEFAULT&quot;]
+kcl = kf.kcls["DEFAULT"]
 
 @kcl.schematic_cell(output_type=kf.DKCell)
 def crossing45_N8_P30_CSWG1000() -&gt; kf.DSchematic:
@@ -5987,610 +5987,610 @@ def crossing45_N8_P30_CSWG1000() -&gt; kf.DSchematic:
 
   # Create the schematic instances
   bend45_0 = schematic.create_inst(
-    name=&#39;bend45_0&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_0',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_1 = schematic.create_inst(
-    name=&#39;bend45_1&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_1',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_10 = schematic.create_inst(
-    name=&#39;bend45_10&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_10',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_11 = schematic.create_inst(
-    name=&#39;bend45_11&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_11',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_12 = schematic.create_inst(
-    name=&#39;bend45_12&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_12',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_13 = schematic.create_inst(
-    name=&#39;bend45_13&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_13',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_14 = schematic.create_inst(
-    name=&#39;bend45_14&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_14',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_15 = schematic.create_inst(
-    name=&#39;bend45_15&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_15',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_2 = schematic.create_inst(
-    name=&#39;bend45_2&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_2',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_3 = schematic.create_inst(
-    name=&#39;bend45_3&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_3',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_4 = schematic.create_inst(
-    name=&#39;bend45_4&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_4',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_5 = schematic.create_inst(
-    name=&#39;bend45_5&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_5',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_6 = schematic.create_inst(
-    name=&#39;bend45_6&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_6',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_7 = schematic.create_inst(
-    name=&#39;bend45_7&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_7',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_8 = schematic.create_inst(
-    name=&#39;bend45_8&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_8',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   bend45_9 = schematic.create_inst(
-    name=&#39;bend45_9&#39;,
-    component=&#39;bend_euler&#39;,
-    settings={&#39;angle&#39;: 45, &#39;cross_section&#39;: &#39;WG1000&#39;, &#39;radius&#39;: 30},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='bend45_9',
+    component='bend_euler',
+    settings={'angle': 45, 'cross_section': 'WG1000', 'radius': 30},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_0_0 = schematic.create_inst(
-    name=&#39;crossing_0_0&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_0_0',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_0_1 = schematic.create_inst(
-    name=&#39;crossing_0_1&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_0_1',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_0_2 = schematic.create_inst(
-    name=&#39;crossing_0_2&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_0_2',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_0_3 = schematic.create_inst(
-    name=&#39;crossing_0_3&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_0_3',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_1_0 = schematic.create_inst(
-    name=&#39;crossing_1_0&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_1_0',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_1_1 = schematic.create_inst(
-    name=&#39;crossing_1_1&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_1_1',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_1_2 = schematic.create_inst(
-    name=&#39;crossing_1_2&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_1_2',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_1_3 = schematic.create_inst(
-    name=&#39;crossing_1_3&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_1_3',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_2_0 = schematic.create_inst(
-    name=&#39;crossing_2_0&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_2_0',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_2_1 = schematic.create_inst(
-    name=&#39;crossing_2_1&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_2_1',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_2_2 = schematic.create_inst(
-    name=&#39;crossing_2_2&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_2_2',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_2_3 = schematic.create_inst(
-    name=&#39;crossing_2_3&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_2_3',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_3_0 = schematic.create_inst(
-    name=&#39;crossing_3_0&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_3_0',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_3_1 = schematic.create_inst(
-    name=&#39;crossing_3_1&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_3_1',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_3_2 = schematic.create_inst(
-    name=&#39;crossing_3_2&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_3_2',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   crossing_3_3 = schematic.create_inst(
-    name=&#39;crossing_3_3&#39;,
-    component=&#39;cross&#39;,
-    settings={&#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='crossing_3_3',
+    component='cross',
+    settings={'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_0 = schematic.create_inst(
-    name=&#39;io_spacer_0&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_0',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_1 = schematic.create_inst(
-    name=&#39;io_spacer_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_1',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_10 = schematic.create_inst(
-    name=&#39;io_spacer_10&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_10',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_11 = schematic.create_inst(
-    name=&#39;io_spacer_11&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_11',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_12 = schematic.create_inst(
-    name=&#39;io_spacer_12&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_12',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_13 = schematic.create_inst(
-    name=&#39;io_spacer_13&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_13',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_14 = schematic.create_inst(
-    name=&#39;io_spacer_14&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_14',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_15 = schematic.create_inst(
-    name=&#39;io_spacer_15&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_15',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_2 = schematic.create_inst(
-    name=&#39;io_spacer_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_2',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_3 = schematic.create_inst(
-    name=&#39;io_spacer_3&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_3',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_4 = schematic.create_inst(
-    name=&#39;io_spacer_4&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_4',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_5 = schematic.create_inst(
-    name=&#39;io_spacer_5&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_5',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_6 = schematic.create_inst(
-    name=&#39;io_spacer_6&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_6',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_7 = schematic.create_inst(
-    name=&#39;io_spacer_7&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_7',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_8 = schematic.create_inst(
-    name=&#39;io_spacer_8&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_8',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_spacer_9 = schematic.create_inst(
-    name=&#39;io_spacer_9&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: -11.83950689958798, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_spacer_9',
+    component='straight',
+    settings={'length': -11.83950689958798, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_1 = schematic.create_inst(
-    name=&#39;io_straight_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 30.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_1',
+    component='straight',
+    settings={'length': 30.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_10 = schematic.create_inst(
-    name=&#39;io_straight_10&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 30.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_10',
+    component='straight',
+    settings={'length': 30.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_13 = schematic.create_inst(
-    name=&#39;io_straight_13&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 30.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_13',
+    component='straight',
+    settings={'length': 30.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_14 = schematic.create_inst(
-    name=&#39;io_straight_14&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 60.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_14',
+    component='straight',
+    settings={'length': 60.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_15 = schematic.create_inst(
-    name=&#39;io_straight_15&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 90.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_15',
+    component='straight',
+    settings={'length': 90.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_2 = schematic.create_inst(
-    name=&#39;io_straight_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 60.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_2',
+    component='straight',
+    settings={'length': 60.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_3 = schematic.create_inst(
-    name=&#39;io_straight_3&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 90.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_3',
+    component='straight',
+    settings={'length': 90.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_4 = schematic.create_inst(
-    name=&#39;io_straight_4&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 90.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_4',
+    component='straight',
+    settings={'length': 90.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_5 = schematic.create_inst(
-    name=&#39;io_straight_5&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 60.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_5',
+    component='straight',
+    settings={'length': 60.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_6 = schematic.create_inst(
-    name=&#39;io_straight_6&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 30.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_6',
+    component='straight',
+    settings={'length': 30.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_8 = schematic.create_inst(
-    name=&#39;io_straight_8&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 90.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_8',
+    component='straight',
+    settings={'length': 90.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   io_straight_9 = schematic.create_inst(
-    name=&#39;io_straight_9&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 60.0, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='io_straight_9',
+    component='straight',
+    settings={'length': 60.0, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_0_1_1 = schematic.create_inst(
-    name=&#39;spacer_0_1_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_0_1_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_0_2_1 = schematic.create_inst(
-    name=&#39;spacer_0_2_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_0_2_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_0_3_1 = schematic.create_inst(
-    name=&#39;spacer_0_3_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_0_3_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_1_0_2 = schematic.create_inst(
-    name=&#39;spacer_1_0_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_1_0_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_1_1_1 = schematic.create_inst(
-    name=&#39;spacer_1_1_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_1_1_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_1_1_2 = schematic.create_inst(
-    name=&#39;spacer_1_1_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_1_1_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_1_2_1 = schematic.create_inst(
-    name=&#39;spacer_1_2_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_1_2_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_1_2_2 = schematic.create_inst(
-    name=&#39;spacer_1_2_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_1_2_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_1_3_1 = schematic.create_inst(
-    name=&#39;spacer_1_3_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_1_3_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_1_3_2 = schematic.create_inst(
-    name=&#39;spacer_1_3_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_1_3_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_2_0_2 = schematic.create_inst(
-    name=&#39;spacer_2_0_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_2_0_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_2_1_1 = schematic.create_inst(
-    name=&#39;spacer_2_1_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_2_1_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_2_1_2 = schematic.create_inst(
-    name=&#39;spacer_2_1_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_2_1_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_2_2_1 = schematic.create_inst(
-    name=&#39;spacer_2_2_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_2_2_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_2_2_2 = schematic.create_inst(
-    name=&#39;spacer_2_2_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_2_2_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_2_3_1 = schematic.create_inst(
-    name=&#39;spacer_2_3_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_2_3_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_2_3_2 = schematic.create_inst(
-    name=&#39;spacer_2_3_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_2_3_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_3_0_2 = schematic.create_inst(
-    name=&#39;spacer_3_0_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_3_0_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_3_1_1 = schematic.create_inst(
-    name=&#39;spacer_3_1_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_3_1_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_3_1_2 = schematic.create_inst(
-    name=&#39;spacer_3_1_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_3_1_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_3_2_1 = schematic.create_inst(
-    name=&#39;spacer_3_2_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_3_2_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_3_2_2 = schematic.create_inst(
-    name=&#39;spacer_3_2_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_3_2_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_3_3_1 = schematic.create_inst(
-    name=&#39;spacer_3_3_1&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_3_3_1',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   spacer_3_3_2 = schematic.create_inst(
-    name=&#39;spacer_3_3_2&#39;,
-    component=&#39;straight&#39;,
-    settings={&#39;length&#39;: 25.25040687119285, &#39;cross_section&#39;: &#39;WG1000&#39;},
-    kcl=kf.kcls[&quot;CROSSING_PDK&quot;],
+    name='spacer_3_3_2',
+    component='straight',
+    settings={'length': 25.25040687119285, 'cross_section': 'WG1000'},
+    kcl=kf.kcls["CROSSING_PDK"],
     virtual=True,
   )
   # Schematic ports
-  schematic.add_port(name=&#39;in_0&#39;,port=io_straight_4[&#39;o1&#39;])
-  schematic.add_port(name=&#39;in_1&#39;,port=io_straight_5[&#39;o1&#39;])
-  schematic.add_port(name=&#39;in_2&#39;,port=io_straight_6[&#39;o1&#39;])
-  schematic.add_port(name=&#39;in_3&#39;,port=bend45_7[&#39;o1&#39;])
-  schematic.add_port(name=&#39;in_4&#39;,port=bend45_0[&#39;o1&#39;])
-  schematic.add_port(name=&#39;in_5&#39;,port=io_straight_1[&#39;o1&#39;])
-  schematic.add_port(name=&#39;in_6&#39;,port=io_straight_2[&#39;o1&#39;])
-  schematic.add_port(name=&#39;in_7&#39;,port=io_straight_3[&#39;o1&#39;])
-  schematic.add_port(name=&#39;out_0&#39;,port=bend45_12[&#39;o1&#39;])
-  schematic.add_port(name=&#39;out_1&#39;,port=io_straight_13[&#39;o1&#39;])
-  schematic.add_port(name=&#39;out_2&#39;,port=io_straight_14[&#39;o1&#39;])
-  schematic.add_port(name=&#39;out_3&#39;,port=io_straight_15[&#39;o1&#39;])
-  schematic.add_port(name=&#39;out_4&#39;,port=io_straight_8[&#39;o1&#39;])
-  schematic.add_port(name=&#39;out_5&#39;,port=io_straight_9[&#39;o1&#39;])
-  schematic.add_port(name=&#39;out_6&#39;,port=io_straight_10[&#39;o1&#39;])
-  schematic.add_port(name=&#39;out_7&#39;,port=bend45_11[&#39;o1&#39;])
+  schematic.add_port(name='in_0',port=io_straight_4['o1'])
+  schematic.add_port(name='in_1',port=io_straight_5['o1'])
+  schematic.add_port(name='in_2',port=io_straight_6['o1'])
+  schematic.add_port(name='in_3',port=bend45_7['o1'])
+  schematic.add_port(name='in_4',port=bend45_0['o1'])
+  schematic.add_port(name='in_5',port=io_straight_1['o1'])
+  schematic.add_port(name='in_6',port=io_straight_2['o1'])
+  schematic.add_port(name='in_7',port=io_straight_3['o1'])
+  schematic.add_port(name='out_0',port=bend45_12['o1'])
+  schematic.add_port(name='out_1',port=io_straight_13['o1'])
+  schematic.add_port(name='out_2',port=io_straight_14['o1'])
+  schematic.add_port(name='out_3',port=io_straight_15['o1'])
+  schematic.add_port(name='out_4',port=io_straight_8['o1'])
+  schematic.add_port(name='out_5',port=io_straight_9['o1'])
+  schematic.add_port(name='out_6',port=io_straight_10['o1'])
+  schematic.add_port(name='out_7',port=bend45_11['o1'])
 
   # Schematic instance placements
   bend45_0.mirror = True
@@ -6607,372 +6607,372 @@ def crossing45_N8_P30_CSWG1000() -&gt; kf.DSchematic:
 
   # Schematic connections
   crossing_0_0.connect(
-    port=&#39;o4&#39;,
-    other=spacer_0_1_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_0_1_1['o1'],
   )
   crossing_0_1.connect(
-    port=&#39;o2&#39;,
-    other=spacer_0_1_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_0_1_1['o2'],
   )
   crossing_0_1.connect(
-    port=&#39;o4&#39;,
-    other=spacer_0_2_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_0_2_1['o1'],
   )
   crossing_0_2.connect(
-    port=&#39;o2&#39;,
-    other=spacer_0_2_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_0_2_1['o2'],
   )
   crossing_0_2.connect(
-    port=&#39;o4&#39;,
-    other=spacer_0_3_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_0_3_1['o1'],
   )
   crossing_0_3.connect(
-    port=&#39;o2&#39;,
-    other=spacer_0_3_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_0_3_1['o2'],
   )
   crossing_0_0.connect(
-    port=&#39;o3&#39;,
-    other=spacer_1_0_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_1_0_2['o1'],
   )
   crossing_1_0.connect(
-    port=&#39;o1&#39;,
-    other=spacer_1_0_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_1_0_2['o2'],
   )
   crossing_1_0.connect(
-    port=&#39;o4&#39;,
-    other=spacer_1_1_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_1_1_1['o1'],
   )
   crossing_0_1.connect(
-    port=&#39;o3&#39;,
-    other=spacer_1_1_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_1_1_2['o1'],
   )
   crossing_1_1.connect(
-    port=&#39;o2&#39;,
-    other=spacer_1_1_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_1_1_1['o2'],
   )
   crossing_1_1.connect(
-    port=&#39;o1&#39;,
-    other=spacer_1_1_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_1_1_2['o2'],
   )
   crossing_1_1.connect(
-    port=&#39;o4&#39;,
-    other=spacer_1_2_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_1_2_1['o1'],
   )
   crossing_0_2.connect(
-    port=&#39;o3&#39;,
-    other=spacer_1_2_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_1_2_2['o1'],
   )
   crossing_1_2.connect(
-    port=&#39;o2&#39;,
-    other=spacer_1_2_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_1_2_1['o2'],
   )
   crossing_1_2.connect(
-    port=&#39;o1&#39;,
-    other=spacer_1_2_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_1_2_2['o2'],
   )
   crossing_1_2.connect(
-    port=&#39;o4&#39;,
-    other=spacer_1_3_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_1_3_1['o1'],
   )
   crossing_0_3.connect(
-    port=&#39;o3&#39;,
-    other=spacer_1_3_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_1_3_2['o1'],
   )
   crossing_1_3.connect(
-    port=&#39;o2&#39;,
-    other=spacer_1_3_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_1_3_1['o2'],
   )
   crossing_1_3.connect(
-    port=&#39;o1&#39;,
-    other=spacer_1_3_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_1_3_2['o2'],
   )
   crossing_1_0.connect(
-    port=&#39;o3&#39;,
-    other=spacer_2_0_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_2_0_2['o1'],
   )
   crossing_2_0.connect(
-    port=&#39;o1&#39;,
-    other=spacer_2_0_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_2_0_2['o2'],
   )
   crossing_2_0.connect(
-    port=&#39;o4&#39;,
-    other=spacer_2_1_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_2_1_1['o1'],
   )
   crossing_1_1.connect(
-    port=&#39;o3&#39;,
-    other=spacer_2_1_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_2_1_2['o1'],
   )
   crossing_2_1.connect(
-    port=&#39;o2&#39;,
-    other=spacer_2_1_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_2_1_1['o2'],
   )
   crossing_2_1.connect(
-    port=&#39;o1&#39;,
-    other=spacer_2_1_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_2_1_2['o2'],
   )
   crossing_2_1.connect(
-    port=&#39;o4&#39;,
-    other=spacer_2_2_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_2_2_1['o1'],
   )
   crossing_1_2.connect(
-    port=&#39;o3&#39;,
-    other=spacer_2_2_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_2_2_2['o1'],
   )
   crossing_2_2.connect(
-    port=&#39;o2&#39;,
-    other=spacer_2_2_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_2_2_1['o2'],
   )
   crossing_2_2.connect(
-    port=&#39;o1&#39;,
-    other=spacer_2_2_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_2_2_2['o2'],
   )
   crossing_2_2.connect(
-    port=&#39;o4&#39;,
-    other=spacer_2_3_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_2_3_1['o1'],
   )
   crossing_1_3.connect(
-    port=&#39;o3&#39;,
-    other=spacer_2_3_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_2_3_2['o1'],
   )
   crossing_2_3.connect(
-    port=&#39;o2&#39;,
-    other=spacer_2_3_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_2_3_1['o2'],
   )
   crossing_2_3.connect(
-    port=&#39;o1&#39;,
-    other=spacer_2_3_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_2_3_2['o2'],
   )
   crossing_2_0.connect(
-    port=&#39;o3&#39;,
-    other=spacer_3_0_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_3_0_2['o1'],
   )
   crossing_3_0.connect(
-    port=&#39;o1&#39;,
-    other=spacer_3_0_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_3_0_2['o2'],
   )
   crossing_3_0.connect(
-    port=&#39;o4&#39;,
-    other=spacer_3_1_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_3_1_1['o1'],
   )
   crossing_2_1.connect(
-    port=&#39;o3&#39;,
-    other=spacer_3_1_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_3_1_2['o1'],
   )
   crossing_3_1.connect(
-    port=&#39;o2&#39;,
-    other=spacer_3_1_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_3_1_1['o2'],
   )
   crossing_3_1.connect(
-    port=&#39;o1&#39;,
-    other=spacer_3_1_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_3_1_2['o2'],
   )
   crossing_3_1.connect(
-    port=&#39;o4&#39;,
-    other=spacer_3_2_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_3_2_1['o1'],
   )
   crossing_2_2.connect(
-    port=&#39;o3&#39;,
-    other=spacer_3_2_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_3_2_2['o1'],
   )
   crossing_3_2.connect(
-    port=&#39;o2&#39;,
-    other=spacer_3_2_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_3_2_1['o2'],
   )
   crossing_3_2.connect(
-    port=&#39;o1&#39;,
-    other=spacer_3_2_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_3_2_2['o2'],
   )
   crossing_3_2.connect(
-    port=&#39;o4&#39;,
-    other=spacer_3_3_1[&#39;o1&#39;],
+    port='o4',
+    other=spacer_3_3_1['o1'],
   )
   crossing_2_3.connect(
-    port=&#39;o3&#39;,
-    other=spacer_3_3_2[&#39;o1&#39;],
+    port='o3',
+    other=spacer_3_3_2['o1'],
   )
   crossing_3_3.connect(
-    port=&#39;o2&#39;,
-    other=spacer_3_3_1[&#39;o2&#39;],
+    port='o2',
+    other=spacer_3_3_1['o2'],
   )
   crossing_3_3.connect(
-    port=&#39;o1&#39;,
-    other=spacer_3_3_2[&#39;o2&#39;],
+    port='o1',
+    other=spacer_3_3_2['o2'],
   )
   crossing_0_0.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_0[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_0['o2'],
   )
   bend45_0.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_0[&#39;o1&#39;],
+    port='o2',
+    other=io_spacer_0['o1'],
   )
   crossing_0_0.connect(
-    port=&#39;o1&#39;,
-    other=io_spacer_7[&#39;o2&#39;],
+    port='o1',
+    other=io_spacer_7['o2'],
   )
   bend45_7.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_7[&#39;o1&#39;],
+    port='o2',
+    other=io_spacer_7['o1'],
   )
   crossing_0_3.connect(
-    port=&#39;o4&#39;,
-    other=io_spacer_8[&#39;o1&#39;],
+    port='o4',
+    other=io_spacer_8['o1'],
   )
   bend45_8.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_8[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_8['o2'],
   )
   crossing_3_0.connect(
-    port=&#39;o3&#39;,
-    other=io_spacer_15[&#39;o1&#39;],
+    port='o3',
+    other=io_spacer_15['o1'],
   )
   bend45_15.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_15[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_15['o2'],
   )
   bend45_8.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_8[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_8['o2'],
   )
   bend45_15.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_15[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_15['o2'],
   )
   crossing_1_0.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_1[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_1['o2'],
   )
   bend45_1.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_1[&#39;o1&#39;],
+    port='o2',
+    other=io_spacer_1['o1'],
   )
   crossing_0_1.connect(
-    port=&#39;o1&#39;,
-    other=io_spacer_6[&#39;o2&#39;],
+    port='o1',
+    other=io_spacer_6['o2'],
   )
   bend45_6.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_6[&#39;o1&#39;],
+    port='o2',
+    other=io_spacer_6['o1'],
   )
   crossing_1_3.connect(
-    port=&#39;o4&#39;,
-    other=io_spacer_9[&#39;o1&#39;],
+    port='o4',
+    other=io_spacer_9['o1'],
   )
   bend45_9.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_9[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_9['o2'],
   )
   crossing_3_1.connect(
-    port=&#39;o3&#39;,
-    other=io_spacer_14[&#39;o1&#39;],
+    port='o3',
+    other=io_spacer_14['o1'],
   )
   bend45_14.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_14[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_14['o2'],
   )
   bend45_1.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_1[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_1['o2'],
   )
   bend45_6.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_6[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_6['o2'],
   )
   bend45_9.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_9[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_9['o2'],
   )
   bend45_14.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_14[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_14['o2'],
   )
   crossing_2_0.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_2[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_2['o2'],
   )
   bend45_2.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_2[&#39;o1&#39;],
+    port='o2',
+    other=io_spacer_2['o1'],
   )
   crossing_0_2.connect(
-    port=&#39;o1&#39;,
-    other=io_spacer_5[&#39;o2&#39;],
+    port='o1',
+    other=io_spacer_5['o2'],
   )
   bend45_5.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_5[&#39;o1&#39;],
+    port='o2',
+    other=io_spacer_5['o1'],
   )
   crossing_2_3.connect(
-    port=&#39;o4&#39;,
-    other=io_spacer_10[&#39;o1&#39;],
+    port='o4',
+    other=io_spacer_10['o1'],
   )
   bend45_10.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_10[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_10['o2'],
   )
   crossing_3_2.connect(
-    port=&#39;o3&#39;,
-    other=io_spacer_13[&#39;o1&#39;],
+    port='o3',
+    other=io_spacer_13['o1'],
   )
   bend45_13.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_13[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_13['o2'],
   )
   bend45_2.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_2[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_2['o2'],
   )
   bend45_5.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_5[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_5['o2'],
   )
   bend45_10.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_10[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_10['o2'],
   )
   bend45_13.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_13[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_13['o2'],
   )
   crossing_3_0.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_3[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_3['o2'],
   )
   bend45_3.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_3[&#39;o1&#39;],
+    port='o2',
+    other=io_spacer_3['o1'],
   )
   crossing_0_3.connect(
-    port=&#39;o1&#39;,
-    other=io_spacer_4[&#39;o2&#39;],
+    port='o1',
+    other=io_spacer_4['o2'],
   )
   bend45_4.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_4[&#39;o1&#39;],
+    port='o2',
+    other=io_spacer_4['o1'],
   )
   crossing_3_3.connect(
-    port=&#39;o4&#39;,
-    other=io_spacer_11[&#39;o1&#39;],
+    port='o4',
+    other=io_spacer_11['o1'],
   )
   bend45_11.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_11[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_11['o2'],
   )
   crossing_3_3.connect(
-    port=&#39;o3&#39;,
-    other=io_spacer_12[&#39;o1&#39;],
+    port='o3',
+    other=io_spacer_12['o1'],
   )
   bend45_12.connect(
-    port=&#39;o2&#39;,
-    other=io_spacer_12[&#39;o2&#39;],
+    port='o2',
+    other=io_spacer_12['o2'],
   )
   bend45_3.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_3[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_3['o2'],
   )
   bend45_4.connect(
-    port=&#39;o1&#39;,
-    other=io_straight_4[&#39;o2&#39;],
+    port='o1',
+    other=io_straight_4['o2'],
   )
   return schematic
 </code></pre></div>
@@ -7106,7 +7106,7 @@ def crossing45_N8_P30_CSWG1000() -&gt; kf.DSchematic:
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

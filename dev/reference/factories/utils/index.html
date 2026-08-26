@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5518,12 +5518,12 @@
 <span class="normal">45</span>
 <span class="normal">46</span>
 <span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">boundary_from_shapes</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a cell boundary from its drawn shapes.</span>
+<span class="w">    </span><span class="sd">"""Build a cell boundary from its drawn shapes.</span>
 
 <span class="sd">    Collects every shape on every layer, merges them, and returns the first polygon</span>
-<span class="sd">    (in um) of the merged region — i.e. the outline of the cell&#39;s footprint. Returns</span>
+<span class="sd">    (in um) of the merged region — i.e. the outline of the cell's footprint. Returns</span>
 <span class="sd">    `None` if the cell has no shapes.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">layer_index</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer_indexes</span><span class="p">():</span>
         <span class="n">region</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">layer_index</span><span class="p">))</span>
@@ -5571,17 +5571,17 @@
 <span class="normal">79</span>
 <span class="normal">80</span>
 <span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cross_section_from_width</span><span class="p">(</span>
-    <span class="n">kcl</span><span class="p">:</span> <span class="s2">&quot;KCLayout&quot;</span><span class="p">,</span>
+    <span class="n">kcl</span><span class="p">:</span> <span class="s2">"KCLayout"</span><span class="p">,</span>
     <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrossSection</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a (dbu) symmetric cross section from legacy width/layer/enclosure args.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Build a (dbu) symmetric cross section from legacy width/layer/enclosure args."""</span>
     <span class="k">return</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span>
         <span class="n">CrossSectionSpecDict</span><span class="p">(</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
             <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
-            <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="s2">"dbu"</span><span class="p">,</span>
             <span class="n">sections</span><span class="o">=</span><span class="n">layer_enclosure_to_sections</span><span class="p">(</span><span class="n">enclosure</span><span class="p">),</span>
         <span class="p">),</span>
         <span class="n">symmetrical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -5825,7 +5825,7 @@
     <span class="n">dbu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extrude a backbone into a virtual cell.</span>
+<span class="w">    </span><span class="sd">"""Extrude a backbone into a virtual cell.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        c: target cell</span>
@@ -5836,7 +5836,7 @@
 <span class="sd">        start_angle: force a certain start angle</span>
 <span class="sd">        end_angle: force a acertain end angle</span>
 <span class="sd">        dbu: database unit to use as a reference</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">center_path_l</span><span class="p">,</span> <span class="n">center_path_r</span> <span class="o">=</span> <span class="n">extrude_path_points</span><span class="p">(</span>
         <span class="n">backbone</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">start_angle</span><span class="o">=</span><span class="n">start_angle</span><span class="p">,</span> <span class="n">end_angle</span><span class="o">=</span><span class="n">end_angle</span>
     <span class="p">)</span>
@@ -6059,11 +6059,11 @@ with strips sharing a layer merged.</p>
 <span class="normal">202</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extrude_backbone_cross_section</span><span class="p">(</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">,</span>
     <span class="n">backbone</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">],</span>
-    <span class="n">cross_section</span><span class="p">:</span> <span class="s2">&quot;AnyCrossSection&quot;</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="s2">"AnyCrossSection"</span><span class="p">,</span>
     <span class="n">start_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">end_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extrude a (symmetric or asymmetric) cross section along a backbone (um).</span>
+<span class="w">    </span><span class="sd">"""Extrude a (symmetric or asymmetric) cross section along a backbone (um).</span>
 
 <span class="sd">    The virtual-cell counterpart of</span>
 <span class="sd">    [`extrude_path_cross_section`][kfactory.enclosure.extrude_path_cross_section]:</span>
@@ -6078,7 +6078,7 @@ with strips sharing a layer merged.</p>
 <span class="sd">        cross_section: the cross section to extrude</span>
 <span class="sd">        start_angle: force a certain start angle</span>
 <span class="sd">        end_angle: force a certain end angle</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">..cross_section</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsymmetricalCrossSection</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="n">AsymmetricalCrossSection</span><span class="p">):</span>
@@ -6380,7 +6380,7 @@ with strips sharing a layer merged.</p>
     <span class="n">dbu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extrude a backbone into a virtual cell.</span>
+<span class="w">    </span><span class="sd">"""Extrude a backbone into a virtual cell.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        c: target cell</span>
@@ -6392,7 +6392,7 @@ with strips sharing a layer merged.</p>
 <span class="sd">        start_angle: force a certain start angle</span>
 <span class="sd">        end_angle: force a acertain end angle</span>
 <span class="sd">        dbu: database unit to use as a reference</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">width_f</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">width1</span> <span class="o">-</span> <span class="n">width2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">width2</span> <span class="o">+</span> <span class="n">a</span>
@@ -6476,7 +6476,7 @@ with strips sharing a layer merged.</p>
 <span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">layer_enclosure_to_sections</span><span class="p">(</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flatten a `LayerEnclosure` into `CrossSectionSpec` ``sections`` (dbu).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Flatten a `LayerEnclosure` into `CrossSectionSpec` ``sections`` (dbu)."""</span>
     <span class="k">if</span> <span class="n">enclosure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
     <span class="n">sections</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -6555,7 +6555,7 @@ with strips sharing a layer merged.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

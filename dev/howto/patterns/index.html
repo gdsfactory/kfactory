@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5463,7 +5463,7 @@ building real PDKs.  Each pattern is a self-contained recipe you can adapt.</p>
     <span class="n">WGEX</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;patterns_pdk&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"patterns_pdk"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 <span class="n">L</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">infos</span>
 <span class="c1"># li_* = integer layer indices (for direct shape insertion / port construction)</span>
 <span class="n">li_wg</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
@@ -5471,7 +5471,7 @@ building real PDKs.  Each pattern is a self-contained recipe you can adapt.</p>
 
 <span class="n">enc</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_EX&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"WG_EX"</span><span class="p">,</span>
         <span class="n">main_layer</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">2000</span><span class="p">)],</span>
     <span class="p">)</span>
@@ -5497,7 +5497,7 @@ pattern.  Each primitive is created once (cached by <code>@kf.cell</code>) and r
     <span class="n">length2</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;L-shaped arm: straight → 90° euler bend → straight.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""L-shaped arm: straight → 90° euler bend → straight."""</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 
     <span class="n">w_dbu</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
@@ -5514,20 +5514,20 @@ pattern.  Each primitive is created once (cached by <code>@kf.cell</code>) and r
     <span class="n">i_b</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">b</span>
     <span class="n">i2</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">s2</span>
 
-    <span class="n">i_b</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">i1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
-    <span class="n">i2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">i_b</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="n">i_b</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">i1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
+    <span class="n">i2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">i_b</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
     <span class="c1"># Expose external ports</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
 
 <span class="n">arm</span> <span class="o">=</span> <span class="n">l_arm</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ports: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">arm</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ports: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">arm</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">arm</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>ports: [&#39;o1&#39;, &#39;o2&#39;]
+<div class="highlight"><pre><span></span><code>ports: ['o1', 'o2']
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
@@ -5537,10 +5537,10 @@ pattern.  Each primitive is created once (cached by <code>@kf.cell</code>) and r
 <p>When a cell wraps several children you need to surface the right ports to the
 caller.  Two sub-patterns cover most cases:</p>
 <p><strong>a) Direct exposure</strong> — forward the child port unchanged:</p>
-<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">inst</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">inst</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"in"</span><span class="p">)</span>
 </code></pre></div>
 <p><strong>b) Bulk exposure with auto-renaming</strong> — expose all ports with a prefix:</p>
-<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">inst</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;left_&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">inst</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"left_"</span><span class="p">)</span>
 </code></pre></div>
 <p>The example below builds a Mach-Zehnder skeleton and exposes four ports
 (<code>in</code>, <code>out</code>, <code>arm_top_in</code>, <code>arm_top_out</code>).</p>
@@ -5550,7 +5550,7 @@ caller.  Two sub-patterns cover most cases:</p>
     <span class="n">arm_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mach-Zehnder skeleton with exposed arm ports.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Mach-Zehnder skeleton with exposed arm ports."""</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 
     <span class="n">w_dbu</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
@@ -5562,29 +5562,29 @@ caller.  Two sub-patterns cover most cases:</p>
     <span class="c1"># Bottom arm</span>
     <span class="n">i_in</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">s_in</span>
     <span class="n">i_arm</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">s_arm</span>
-    <span class="n">i_arm</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">i_in</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="n">i_arm</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">i_in</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
     <span class="n">i_out</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">s_in</span>
-    <span class="n">i_out</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">i_arm</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="n">i_out</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">i_arm</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
     <span class="c1"># Top arm (offset upward by 2 × radius µm)</span>
     <span class="n">i_arm_top</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">s_arm</span>
     <span class="n">i_arm_top</span><span class="o">.</span><span class="n">dmove</span><span class="p">((</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># pure µm offset</span>
 
     <span class="c1"># a) Direct port exposure with rename</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_in</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_out</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;out&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_in</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"in"</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_out</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"out"</span><span class="p">)</span>
 
     <span class="c1"># b) Individual port exposure for arm access points</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_arm_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;arm_top_in&quot;</span><span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_arm_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;arm_top_out&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_arm_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"arm_top_in"</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_arm_top</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"arm_top_out"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">c</span>
 
 
 <span class="n">mz</span> <span class="o">=</span> <span class="n">mz_skeleton</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ports: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">mz</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ports: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">mz</span><span class="o">.</span><span class="n">ports</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>ports: [&#39;in&#39;, &#39;out&#39;, &#39;arm_top_in&#39;, &#39;arm_top_out&#39;]
+<div class="highlight"><pre><span></span><code>ports: ['in', 'out', 'arm_top_in', 'arm_top_out']
 </code></pre></div>
 <hr />
 <h2 id="3-factory-bundle-dataclass">3 · Factory bundle (dataclass)</h2>
@@ -5617,22 +5617,22 @@ module level instead.</p>
     <span class="n">w_dbu</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">factories</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">w_dbu</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">length</span><span class="p">),</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
     <span class="n">inst</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">s</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">inst</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">)</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">inst</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">inst</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">inst</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
 
 <span class="n">comp</span> <span class="o">=</span> <span class="n">my_component</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cell: </span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;factory bundle type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">factories</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cell: </span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"factory bundle type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">factories</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-08-24 23:07:09.977[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m823[0m - [31m[1mName conflict in kfactory.kcell::name at line 823
+<div class="highlight"><pre><span></span><code>[32m2026-08-26 11:45:39.674[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m823[0m - [31m[1mName conflict in kfactory.kcell::name at line 823
 Renaming Unnamed_8 (cell_index=8) to straight_CS028523d7_500_L10000 would cause it to be named the same as:
  - straight_CS028523d7_500_L10000 (cell_index=1), function_name=_straight, basename=straight[0m
 
 
 cell: my_component_W0p5_L10
-factory bundle type: &lt;class &#39;__main__.PDKFactories&#39;&gt;
+factory bundle type: &lt;class '__main__.PDKFactories'&gt;
 </code></pre></div>
 <hr />
 <h2 id="4-cross-section-lookup-in-cached-cells">4 · Cross-section lookup in cached cells</h2>
@@ -5649,52 +5649,52 @@ parameter.</p>
 <span class="n">xs_wg</span> <span class="o">=</span> <span class="n">SymmetricalCrossSection</span><span class="p">(</span>
     <span class="n">width</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span>
     <span class="n">enclosure</span><span class="o">=</span><span class="n">enc</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WG"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_wg</span><span class="p">)</span>  <span class="c1"># registers and returns it (idempotent)</span>
 
 <span class="n">xs_wide</span> <span class="o">=</span> <span class="n">SymmetricalCrossSection</span><span class="p">(</span>
     <span class="n">width</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span>
     <span class="n">enclosure</span><span class="o">=</span><span class="n">enc</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG_WIDE&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"WG_WIDE"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_wide</span><span class="p">)</span>
 
 
 <span class="nd">@pdk</span><span class="o">.</span><span class="n">cell</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">wg_with_xs</span><span class="p">(</span><span class="n">xs_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WG&quot;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Straight waveguide parameterised by cross-section name.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wg_with_xs</span><span class="p">(</span><span class="n">xs_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"WG"</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Straight waveguide parameterised by cross-section name."""</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_name</span><span class="p">)</span>  <span class="c1"># ← lookup inside the cell body</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
     <span class="n">l_dbu</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">li_wg</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">l_dbu</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">width</span><span class="p">))</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="n">l_dbu</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">xs</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">li_wg</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">l_dbu</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">width</span><span class="o">=</span><span class="n">xs</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">li_wg</span><span class="p">,</span>
-            <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+            <span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">,</span>
             <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span>
 
 
-<span class="n">wg_std</span> <span class="o">=</span> <span class="n">wg_with_xs</span><span class="p">(</span><span class="n">xs_name</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">)</span>
-<span class="n">wg_wide</span> <span class="o">=</span> <span class="n">wg_with_xs</span><span class="p">(</span><span class="n">xs_name</span><span class="o">=</span><span class="s2">&quot;WG_WIDE&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WG width (DBU):      </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="s1">&#39;WG&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WG_WIDE width (DBU): </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="s1">&#39;WG_WIDE&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">wg_std</span> <span class="o">=</span> <span class="n">wg_with_xs</span><span class="p">(</span><span class="n">xs_name</span><span class="o">=</span><span class="s2">"WG"</span><span class="p">)</span>
+<span class="n">wg_wide</span> <span class="o">=</span> <span class="n">wg_with_xs</span><span class="p">(</span><span class="n">xs_name</span><span class="o">=</span><span class="s2">"WG_WIDE"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"WG width (DBU):      </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="s1">'WG'</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"WG_WIDE width (DBU): </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="s1">'WG_WIDE'</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>WG width (DBU):      500
 WG_WIDE width (DBU): 1000
@@ -5728,20 +5728,20 @@ component galleries, and fill tiles.</p>
 </table>
 <p>The <code>shape=(rows, cols)</code> parameter sets the grid dimensions.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Build a small set of components to tile</span>
-<span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">wg_with_xs</span><span class="p">(</span><span class="n">xs_name</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+<span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">wg_with_xs</span><span class="p">(</span><span class="n">xs_name</span><span class="o">=</span><span class="s2">"WG"</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
 
 <span class="c1"># grid_dbu places cells into a target KCell and returns an InstanceGroup</span>
-<span class="n">target</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;wg_array&quot;</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"wg_array"</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">grid_dbu</span><span class="p">(</span>
     <span class="n">target</span><span class="p">,</span>
     <span class="n">kcells</span><span class="o">=</span><span class="n">components</span><span class="p">,</span>
     <span class="n">spacing</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">5.0</span><span class="p">),</span>
     <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-    <span class="n">align_x</span><span class="o">=</span><span class="s2">&quot;xmin&quot;</span><span class="p">,</span>
-    <span class="n">align_y</span><span class="o">=</span><span class="s2">&quot;ymin&quot;</span><span class="p">,</span>
+    <span class="n">align_x</span><span class="o">=</span><span class="s2">"xmin"</span><span class="p">,</span>
+    <span class="n">align_y</span><span class="o">=</span><span class="s2">"ymin"</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;grid cell name: </span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;grid bbox (µm): </span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"grid cell name: </span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"grid bbox (µm): </span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">target</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>grid cell name: wg_array
@@ -5775,8 +5775,8 @@ turn it into a permanent <code>KCell</code> is:</p>
 <span class="n">v_bend</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_v_bend_raw</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 
 <span class="c1"># Step 1 — route into a VKCell (virtual; geometry stays in-memory only)</span>
-<span class="c1"># Create the VKCell via the PDK&#39;s KCLayout so layer indices match</span>
-<span class="n">vc</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;aa_vkcell_demo&quot;</span><span class="p">)</span>
+<span class="c1"># Create the VKCell via the PDK's KCLayout so layer indices match</span>
+<span class="n">vc</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">vkcell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"aa_vkcell_demo"</span><span class="p">)</span>
 <span class="n">aa</span><span class="o">.</span><span class="n">route</span><span class="p">(</span>
     <span class="n">vc</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
@@ -5791,12 +5791,12 @@ turn it into a permanent <code>KCell</code> is:</p>
 <span class="p">)</span>
 
 <span class="c1"># Step 2 — materialise into a real KCell</span>
-<span class="n">c_routed</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;aa_vkcell_pattern&quot;</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
+<span class="n">c_routed</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"aa_vkcell_pattern"</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">)</span>
 <span class="n">vi</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">VInstance</span><span class="p">(</span><span class="n">vc</span><span class="p">)</span>
 <span class="n">vi</span><span class="o">.</span><span class="n">insert_into</span><span class="p">(</span><span class="n">c_routed</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cell: </span><span class="si">{</span><span class="n">c_routed</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bbox (µm): </span><span class="si">{</span><span class="n">c_routed</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cell: </span><span class="si">{</span><span class="n">c_routed</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"bbox (µm): </span><span class="si">{</span><span class="n">c_routed</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">c_routed</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>cell: aa_vkcell_pattern
@@ -5887,7 +5887,7 @@ bbox (µm): (0,-0.25;160,60.25)
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

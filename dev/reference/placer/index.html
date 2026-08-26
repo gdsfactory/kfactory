@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5621,7 +5621,7 @@ This is used for example to enable loading additional yaml files etc.</p>
     <span class="n">additional_classes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recreate cells from a yaml file.</span>
+<span class="w">    </span><span class="sd">"""Recreate cells from a yaml file.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        inp: Input file path.</span>
@@ -5629,7 +5629,7 @@ This is used for example to enable loading additional yaml files etc.</p>
 <span class="sd">        additional_classes: Additional yaml classes that should be registered.</span>
 <span class="sd">            This is used for example to enable loading additional yaml files etc.</span>
 <span class="sd">        verbose: Print more verbose errors etc.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">yaml</span> <span class="o">=</span> <span class="n">get_yaml_obj</span><span class="p">()</span>
     <span class="n">yaml</span><span class="o">.</span><span class="n">register_class</span><span class="p">(</span>
         <span class="n">include_from_loader</span><span class="p">(</span><span class="n">inp</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">kcl</span><span class="p">,</span> <span class="n">additional_classes</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
@@ -5773,7 +5773,7 @@ set to sys.stdout</p>
     <span class="n">output</span><span class="p">:</span> <span class="n">PathLike</span><span class="p">,</span>
     <span class="n">cells</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">TKCell</span><span class="p">]</span> <span class="o">|</span> <span class="n">TKCell</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert cell(s) to a yaml representations.</span>
+<span class="w">    </span><span class="sd">"""Convert cell(s) to a yaml representations.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        output: A stream or string of a path where to dump the yaml. Can also be</span>
@@ -5783,7 +5783,7 @@ set to sys.stdout</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        yaml dump</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">_cells</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">ProtoTKCell</span> <span class="o">|</span> <span class="n">TKCell</span><span class="p">)</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
     <span class="n">_cells</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">hierarchy_levels</span><span class="p">())</span>
     <span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">()</span>
@@ -5847,10 +5847,10 @@ set to sys.stdout</p>
     <span class="n">additional_classes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Expanded yaml.</span>
+<span class="w">    </span><span class="sd">"""Expanded yaml.</span>
 
 <span class="sd">    Expand cross-references. Same syntax as `cells_from_yaml`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">(</span><span class="n">pure</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">ModKCell</span><span class="p">(</span><span class="n">KCell</span><span class="p">):</span>
@@ -5893,7 +5893,7 @@ set to sys.stdout</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_yaml_obj</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">YAML</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;New global yaml object.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""New global yaml object."""</span>
     <span class="k">return</span> <span class="n">YAML</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -5950,18 +5950,18 @@ set to sys.stdout</p>
     <span class="n">additional_classes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Expand ruamel to support the `!include` keyword.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Expand ruamel to support the `!include` keyword."""</span>
 
     <span class="nd">@dataclass</span>
     <span class="k">class</span><span class="w"> </span><span class="nc">Include</span><span class="p">:</span>
         <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span>
-        <span class="n">yaml_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;!include&quot;</span>
+        <span class="n">yaml_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"!include"</span>
 
         <span class="nd">@classmethod</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">from_yaml</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">constructor</span><span class="p">:</span> <span class="n">SafeConstructor</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">d</span> <span class="o">=</span> <span class="n">SafeConstructor</span><span class="o">.</span><span class="n">construct_mapping</span><span class="p">(</span><span class="n">constructor</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
 
-            <span class="n">f</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">])</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"filename"</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
                 <span class="n">cells_from_yaml</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">library</span><span class="p">,</span> <span class="n">additional_classes</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -6028,7 +6028,7 @@ set to sys.stdout</p>
     <span class="n">additional_classes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a new KCell class compatible with ruamel yaml.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Register a new KCell class compatible with ruamel yaml."""</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">ModKCell</span><span class="p">(</span><span class="n">KCell</span><span class="p">):</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">library</span><span class="p">:</span> <span class="n">KCLayout</span> <span class="o">=</span> <span class="n">kcl</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -6119,7 +6119,7 @@ set to sys.stdout</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

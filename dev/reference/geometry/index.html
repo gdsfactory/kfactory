@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -7617,93 +7617,93 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the x-coordinate of the center of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the x-coordinate of the center of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span>
 
     <span class="nd">@x</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s center x-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's center x-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">x</span><span class="o">=</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the y-coordinate of the center of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the y-coordinate of the center of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">y</span>
 
     <span class="nd">@y</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s center y-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's center y-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">y</span><span class="o">=</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">xmin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the x-coordinate of the left edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the x-coordinate of the left edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">left</span>
 
     <span class="nd">@xmin</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">xmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s left edge x-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's left edge x-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">x</span><span class="o">=</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ymin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the y-coordinate of the bottom edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the y-coordinate of the bottom edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">bottom</span>
 
     <span class="nd">@ymin</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ymin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s bottom edge y-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's bottom edge y-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">y</span><span class="o">=</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">bottom</span><span class="p">))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">xmax</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the x-coordinate of the right edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the x-coordinate of the right edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">right</span>
 
     <span class="nd">@xmax</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">xmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s right edge x-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's right edge x-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">x</span><span class="o">=</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">right</span><span class="p">))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ymax</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the y-coordinate of the top edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the y-coordinate of the top edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">top</span>
 
     <span class="nd">@ymax</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ymax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s top edge y-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's top edge y-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">y</span><span class="o">=</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">top</span><span class="p">))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">xsize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the width of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the width of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
 
     <span class="nd">@xsize</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">xsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the width of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Sets the width of the bounding box."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">x</span><span class="o">=</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ysize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the height of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the height of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
 
     <span class="nd">@ysize</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ysize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the height of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Sets the height of the bounding box."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">y</span><span class="o">=</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the coordinate center of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the coordinate center of the bounding box."""</span>
         <span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">center</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">center</span><span class="o">.</span><span class="n">y</span>
 
     <span class="nd">@center</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s center coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's center coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span>
                 <span class="n">__val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">__val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">y</span>
@@ -7721,12 +7721,12 @@
         <span class="n">origin</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
         <span class="n">destination</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move self in dbu.</span>
+<span class="w">        </span><span class="sd">"""Move self in dbu.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            origin: reference point to move [dbu]</span>
 <span class="sd">            destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="o">*</span><span class="n">origin</span><span class="p">))</span>  <span class="c1"># ty:ignore[no-matching-overload]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -7744,12 +7744,12 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">movex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">movex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move self in x-direction in dbu.</span>
+<span class="w">        </span><span class="sd">"""Move self in x-direction in dbu.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            origin: reference point to move [dbu]</span>
 <span class="sd">            destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">x</span><span class="o">=</span><span class="n">origin</span><span class="p">))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -7763,12 +7763,12 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">movey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">movey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move self in y-direction in dbu.</span>
+<span class="w">        </span><span class="sd">"""Move self in y-direction in dbu.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            origin: reference point to move [dbu]</span>
 <span class="sd">            destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">y</span><span class="o">=</span><span class="n">origin</span><span class="p">))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -7777,113 +7777,113 @@
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Rotate self.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Rotate self."""</span>
         <span class="o">...</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">mirror</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mirror self at a line.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Mirror self at a line."""</span>
         <span class="o">...</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">mirror_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mirror self at an y-axis at position x.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Mirror self at an y-axis at position x."""</span>
         <span class="o">...</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">mirror_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mirror self at an x-axis at position y.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Mirror self at an x-axis at position y."""</span>
         <span class="o">...</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the x-coordinate of the center of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the x-coordinate of the center of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span>
 
     <span class="nd">@ix</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s center x-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's center x-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the y-coordinate of the center of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the y-coordinate of the center of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">y</span>
 
     <span class="nd">@iy</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s center y-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's center y-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ixmin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the x-coordinate of the left edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the x-coordinate of the left edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">left</span>
 
     <span class="nd">@ixmin</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ixmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s left x-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's left x-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iymin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the y-coordinate of the bottom edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the y-coordinate of the bottom edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">bottom</span>
 
     <span class="nd">@iymin</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iymin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s bottom y-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's bottom y-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">bottom</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ixmax</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the x-coordinate of the right edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the x-coordinate of the right edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">right</span>
 
     <span class="nd">@ixmax</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ixmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s right x-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's right x-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iymax</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the y-coordinate of the top edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the y-coordinate of the top edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">top</span>
 
     <span class="nd">@iymax</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iymax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s top y-coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's top y-coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">top</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ixsize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the width of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the width of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
 
     <span class="nd">@ixsize</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">ixsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the width of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Sets the width of the bounding box."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iysize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the height of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the height of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
 
     <span class="nd">@iysize</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iysize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the height of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Sets the height of the bounding box."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">icenter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the coordinate center of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the coordinate center of the bounding box."""</span>
         <span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">center</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">center</span><span class="o">.</span><span class="n">y</span>
 
     <span class="nd">@icenter</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">icenter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s center coordinate.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's center coordinate."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
             <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span>
                 <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">y</span>
@@ -7901,12 +7901,12 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">imove</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move self in dbu.</span>
+<span class="w">        </span><span class="sd">"""Move self in dbu.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            origin: reference point to move [dbu]</span>
 <span class="sd">            destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="o">*</span><span class="n">origin</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -7922,12 +7922,12 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">imovex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">imovex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move self in x-direction in dbu.</span>
+<span class="w">        </span><span class="sd">"""Move self in x-direction in dbu.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            origin: reference point to move [dbu]</span>
 <span class="sd">            destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -7941,12 +7941,12 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">imovey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">imovey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move self in y-direction in dbu.</span>
+<span class="w">        </span><span class="sd">"""Move self in y-direction in dbu.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            origin: reference point to move [dbu]</span>
 <span class="sd">            destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">origin</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -7954,7 +7954,7 @@
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">irotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Rotate self in increments of 90°.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Rotate self in increments of 90°."""</span>
         <span class="n">t</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">center</span><span class="p">:</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="o">*</span><span class="n">center</span><span class="p">)</span>
@@ -7967,7 +7967,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">imirror</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mirror self at a line.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Mirror self at a line."""</span>
         <span class="n">p1_</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span>
         <span class="n">p2_</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span>
         <span class="n">mirror_v</span> <span class="o">=</span> <span class="n">p2_</span> <span class="o">-</span> <span class="n">p1_</span>
@@ -7988,104 +7988,104 @@
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">imirror_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mirror self at an y-axis at position x.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Mirror self at an y-axis at position x."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">imirror_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mirror self at an x-axis at position y.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Mirror self at an x-axis at position y."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">y</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dx</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;X coordinate of the center of the bounding box in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""X coordinate of the center of the bounding box in um."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span>
 
     <span class="nd">@dx</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s center x-coordinate in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's center x-coordinate in um."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">(</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Y coordinate of the center of the bounding box in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Y coordinate of the center of the bounding box in um."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">y</span>
 
     <span class="nd">@dy</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s center y-coordinate in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's center y-coordinate in um."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dxmin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the x-coordinate of the left edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the x-coordinate of the left edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">left</span>
 
     <span class="nd">@dxmin</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dxmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s left x-coordinate in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's left x-coordinate in um."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">(</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dymin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the y-coordinate of the bottom edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the y-coordinate of the bottom edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">bottom</span>
 
     <span class="nd">@dymin</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dymin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s bottom y-coordinate in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's bottom y-coordinate in um."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">bottom</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dxmax</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the x-coordinate of the right edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the x-coordinate of the right edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">right</span>
 
     <span class="nd">@dxmax</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dxmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s right x-coordinate in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's right x-coordinate in um."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">(</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dymax</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the y-coordinate of the top edge of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the y-coordinate of the top edge of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">top</span>
 
     <span class="nd">@dymax</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dymax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s top y-coordinate in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's top y-coordinate in um."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">top</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dxsize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the width of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the width of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
 
     <span class="nd">@dxsize</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dxsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the width of the bounding box in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Sets the width of the bounding box in um."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">(</span><span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dysize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the height of the bounding box.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns the height of the bounding box."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
 
     <span class="nd">@dysize</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dysize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__val</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the height of the bounding box in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Sets the height of the bounding box in um."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">__val</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dcenter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Coordinate of the center of the bounding box in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Coordinate of the center of the bounding box in um."""</span>
         <span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">center</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">center</span><span class="o">.</span><span class="n">y</span>
 
     <span class="nd">@dcenter</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dcenter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Moves self so that the bbox&#39;s center coordinate in um.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Moves self so that the bbox's center coordinate in um."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
             <span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">(</span>
                 <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">y</span>
@@ -8107,12 +8107,12 @@
         <span class="n">origin</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
         <span class="n">destination</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move self in um.</span>
+<span class="w">        </span><span class="sd">"""Move self in um.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            origin: reference point to move</span>
 <span class="sd">            destination: move origin so that it will land on this coordinate</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="o">*</span><span class="n">origin</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -8128,12 +8128,12 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">dmovex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">dmovex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move self in x-direction in um.</span>
+<span class="w">        </span><span class="sd">"""Move self in x-direction in um.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            origin: reference point to move</span>
 <span class="sd">            destination: move origin so that it will land on this coordinate</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -8147,12 +8147,12 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">dmovey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">dmovey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move self in y-direction in um.</span>
+<span class="w">        </span><span class="sd">"""Move self in y-direction in um.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            origin: reference point to move</span>
 <span class="sd">            destination: move origin so that it will land on this coordinate</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">origin</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -8160,12 +8160,12 @@
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">drotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Rotate self by a given angle in degrees.</span>
+<span class="w">        </span><span class="sd">"""Rotate self by a given angle in degrees.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            angle: angle to rotate self</span>
 <span class="sd">            center: reference point to rotate around</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">t</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">center</span><span class="p">:</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="o">*</span><span class="n">center</span><span class="p">)</span>
@@ -8178,7 +8178,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">dmirror</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mirror self at a line.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Mirror self at a line."""</span>
         <span class="n">p1_</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">p2_</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">(</span><span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">mirror_v</span> <span class="o">=</span> <span class="n">p2_</span> <span class="o">-</span> <span class="n">p1_</span>
@@ -8200,12 +8200,12 @@
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">dmirror_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mirror self at an y-axis at position x.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Mirror self at an y-axis at position x."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">dmirror_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mirror self at an x-axis at position y.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Mirror self at an x-axis at position y."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">y</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -8954,7 +8954,7 @@
 <span class="normal">719</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dmirror</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mirror self at a line.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Mirror self at a line."""</span>
     <span class="n">p1_</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">p2_</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">(</span><span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">mirror_v</span> <span class="o">=</span> <span class="n">p2_</span> <span class="o">-</span> <span class="n">p1_</span>
@@ -9002,7 +9002,7 @@
 <span class="normal">722</span>
 <span class="normal">723</span>
 <span class="normal">724</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dmirror_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mirror self at an y-axis at position x.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Mirror self at an y-axis at position x."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
@@ -9033,7 +9033,7 @@
 <span class="normal">727</span>
 <span class="normal">728</span>
 <span class="normal">729</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dmirror_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mirror self at an x-axis at position y.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Mirror self at an x-axis at position y."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">y</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
@@ -9133,12 +9133,12 @@
     <span class="n">origin</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
     <span class="n">destination</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Move self in um.</span>
+<span class="w">    </span><span class="sd">"""Move self in um.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        origin: reference point to move</span>
 <span class="sd">        destination: move origin so that it will land on this coordinate</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="o">*</span><span class="n">origin</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
@@ -9233,12 +9233,12 @@
 <span class="normal">658</span>
 <span class="normal">659</span>
 <span class="normal">660</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dmovex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Move self in x-direction in um.</span>
+<span class="w">    </span><span class="sd">"""Move self in x-direction in um.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        origin: reference point to move</span>
 <span class="sd">        destination: move origin so that it will land on this coordinate</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
@@ -9331,12 +9331,12 @@
 <span class="normal">677</span>
 <span class="normal">678</span>
 <span class="normal">679</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dmovey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Move self in y-direction in um.</span>
+<span class="w">    </span><span class="sd">"""Move self in y-direction in um.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        origin: reference point to move</span>
 <span class="sd">        destination: move origin so that it will land on this coordinate</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">origin</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
@@ -9428,12 +9428,12 @@
 <span class="normal">693</span>
 <span class="normal">694</span>
 <span class="normal">695</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">drotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rotate self by a given angle in degrees.</span>
+<span class="w">    </span><span class="sd">"""Rotate self by a given angle in degrees.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        angle: angle to rotate self</span>
 <span class="sd">        center: reference point to rotate around</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">t</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">center</span><span class="p">:</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="o">*</span><span class="n">center</span><span class="p">)</span>
@@ -9490,7 +9490,7 @@
 <span class="normal">507</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">imirror</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mirror self at a line.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Mirror self at a line."""</span>
     <span class="n">p1_</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span>
     <span class="n">p2_</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span>
     <span class="n">mirror_v</span> <span class="o">=</span> <span class="n">p2_</span> <span class="o">-</span> <span class="n">p1_</span>
@@ -9537,7 +9537,7 @@
 <span class="normal">510</span>
 <span class="normal">511</span>
 <span class="normal">512</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">imirror_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mirror self at an y-axis at position x.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Mirror self at an y-axis at position x."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
@@ -9568,7 +9568,7 @@
 <span class="normal">515</span>
 <span class="normal">516</span>
 <span class="normal">517</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">imirror_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mirror self at an x-axis at position y.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Mirror self at an x-axis at position y."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">y</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
@@ -9664,12 +9664,12 @@
 <span class="normal">435</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">imove</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Move self in dbu.</span>
+<span class="w">    </span><span class="sd">"""Move self in dbu.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        origin: reference point to move [dbu]</span>
 <span class="sd">        destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="o">*</span><span class="n">origin</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
@@ -9764,12 +9764,12 @@
 <span class="normal">452</span>
 <span class="normal">453</span>
 <span class="normal">454</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">imovex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Move self in x-direction in dbu.</span>
+<span class="w">    </span><span class="sd">"""Move self in x-direction in dbu.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        origin: reference point to move [dbu]</span>
 <span class="sd">        destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
@@ -9862,12 +9862,12 @@
 <span class="normal">471</span>
 <span class="normal">472</span>
 <span class="normal">473</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">imovey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Move self in y-direction in dbu.</span>
+<span class="w">    </span><span class="sd">"""Move self in y-direction in dbu.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        origin: reference point to move [dbu]</span>
 <span class="sd">        destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">origin</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
@@ -9907,7 +9907,7 @@
 <span class="normal">482</span>
 <span class="normal">483</span>
 <span class="normal">484</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">irotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rotate self in increments of 90°.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Rotate self in increments of 90°."""</span>
     <span class="n">t</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">center</span><span class="p">:</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="o">*</span><span class="n">center</span><span class="p">)</span>
@@ -9949,7 +9949,7 @@
 <span class="normal">304</span>
 <span class="normal">305</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mirror</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mirror self at a line.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Mirror self at a line."""</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -9984,7 +9984,7 @@
 <span class="normal">309</span>
 <span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mirror_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mirror self at an y-axis at position x.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Mirror self at an y-axis at position x."""</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -10019,7 +10019,7 @@
 <span class="normal">314</span>
 <span class="normal">315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mirror_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mirror self at an x-axis at position y.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Mirror self at an x-axis at position y."""</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -10120,12 +10120,12 @@
     <span class="n">origin</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
     <span class="n">destination</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Move self in dbu.</span>
+<span class="w">    </span><span class="sd">"""Move self in dbu.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        origin: reference point to move [dbu]</span>
 <span class="sd">        destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="o">*</span><span class="n">origin</span><span class="p">))</span>  <span class="c1"># ty:ignore[no-matching-overload]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -10222,12 +10222,12 @@
 <span class="normal">274</span>
 <span class="normal">275</span>
 <span class="normal">276</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">movex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Move self in x-direction in dbu.</span>
+<span class="w">    </span><span class="sd">"""Move self in x-direction in dbu.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        origin: reference point to move [dbu]</span>
 <span class="sd">        destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">x</span><span class="o">=</span><span class="n">origin</span><span class="p">))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -10320,12 +10320,12 @@
 <span class="normal">293</span>
 <span class="normal">294</span>
 <span class="normal">295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">movey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Move self in y-direction in dbu.</span>
+<span class="w">    </span><span class="sd">"""Move self in y-direction in dbu.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        origin: reference point to move [dbu]</span>
 <span class="sd">        destination: move origin so that it will land on this coordinate [dbu]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">destination</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_trans</span><span class="p">()(</span><span class="n">y</span><span class="o">=</span><span class="n">origin</span><span class="p">))</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -10364,7 +10364,7 @@
 <span class="normal">299</span>
 <span class="normal">300</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rotate self.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Rotate self."""</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -10500,14 +10500,14 @@
     <span class="n">_bf</span><span class="p">:</span> <span class="n">BoxFunction</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">:</span> <span class="n">BoxFunction</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize this object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Initialize this object."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bf</span> <span class="o">=</span> <span class="n">bbox</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;SizeInfo: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">west</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">east</span><span class="si">=}</span><span class="s2">,&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">south</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">north</span><span class="si">=}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">"SizeInfo: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">west</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">east</span><span class="si">=}</span><span class="s2">,"</span>
+            <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">south</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">north</span><span class="si">=}</span><span class="s2">"</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">LayerEnum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SizeInfo</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
@@ -10627,7 +10627,7 @@
 <span class="normal">22</span>
 <span class="normal">23</span>
 <span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">:</span> <span class="n">BoxFunction</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize this object.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Initialize this object."""</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_bf</span> <span class="o">=</span> <span class="n">bbox</span>
 </code></pre></div></td></tr></table></div>
@@ -10908,7 +10908,7 @@
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

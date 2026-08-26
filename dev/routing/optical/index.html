@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5510,7 +5510,7 @@ For a quick intro see <a href="../overview/">Routing Overview</a>.</p>
 <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">infos</span> <span class="o">=</span> <span class="n">L</span>
 
 <span class="n">wg_enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span>
-    <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;WGSTD_OPT&quot;</span><span class="p">,</span> <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">)])</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"WGSTD_OPT"</span><span class="p">,</span> <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">)])</span>
 <span class="p">)</span>
 
 <span class="c1"># Euler bend — width and radius in µm</span>
@@ -5545,12 +5545,12 @@ before continuing to their end ports.</p>
 <p>Below, three East–West routes are forced to detour upward through a corridor at
 y = 80 µm (simulating a gap above an obstacle) before descending to their
 West-facing end ports.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_wp</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;opt_waypoints&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_wp</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"opt_waypoints"</span><span class="p">)</span>
 
 <span class="n">n</span> <span class="o">=</span> <span class="mi">3</span>
 <span class="n">wp_starts</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="c1"># angle=0 → East-facing</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
@@ -5560,7 +5560,7 @@ West-facing end ports.</p>
 <span class="p">]</span>
 <span class="n">wp_ends</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="c1"># angle=2 → West-facing (opposite to East, so routes connect left-to-right)</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">300</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
@@ -5591,11 +5591,11 @@ takes over.  Supplying a scalar applies the same stub length to all routes; a li
 gives per-route control (DBU).</p>
 <p>Stubs are useful when you need clearance from a device before bending, or when routing
 out of a dense array.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_stubs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;opt_stubs&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_stubs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"opt_stubs"</span><span class="p">)</span>
 
 <span class="n">stub_starts</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">15</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5606,7 +5606,7 @@ out of a dense array.</p>
 <span class="c1"># has an S-bend whose entry / exit stubs are clearly visible.</span>
 <span class="n">stub_ends</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">40</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">15</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">200</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5688,14 +5688,14 @@ of every bundle whose <code>route_name</code> it matches and rewrites the shorte
 backbones are generated), so routes need enough room for the inserted loops —
 increase <code>separation</code> or stagger ports as needed.</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="n">c_plm</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;opt_path_length_match&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_plm</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"opt_path_length_match"</span><span class="p">)</span>
 
 <span class="c1"># Stagger start ports so that each route naturally has a different path length.</span>
 <span class="c1"># Routes need sufficient horizontal separation (≥ 2× bend_radius) so the inserted</span>
-<span class="c1"># loops don&#39;t overlap adjacent waveguides.</span>
+<span class="c1"># loops don't overlap adjacent waveguides.</span>
 <span class="n">plm_starts</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">150</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="n">i</span> <span class="o">*</span> <span class="mi">200</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5704,7 +5704,7 @@ increase <code>separation</code> or stagger ports as needed.</p>
 <span class="p">]</span>
 <span class="n">plm_ends</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">400</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5721,14 +5721,14 @@ increase <code>separation</code> or stagger ports as needed.</p>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
-            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_demo&quot;</span><span class="p">],</span>
+            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"plm_demo"</span><span class="p">],</span>
             <span class="n">element</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># insert loop in the last backbone segment</span>
             <span class="n">loop_side</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># loops on the left side</span>
             <span class="n">loops</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loop_position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># centered in the segment</span>
         <span class="p">)</span>
     <span class="p">],</span>
-    <span class="n">route_name</span><span class="o">=</span><span class="s2">&quot;plm_demo&quot;</span><span class="p">,</span>
+    <span class="n">route_name</span><span class="o">=</span><span class="s2">"plm_demo"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">c_plm</span>
 </code></pre></div>
@@ -5759,7 +5759,7 @@ relative to the GC array:</p>
 
 <span class="c1"># Grating-coupler stand-in: a taper with a single WG port at the narrow</span>
 <span class="c1"># end.  The wide end (fibre side) extends north; the WG port faces south</span>
-<span class="c1"># so the loopback&#39;s U-turn naturally curls *south* of the array.  In a</span>
+<span class="c1"># so the loopback's U-turn naturally curls *south* of the array.  In a</span>
 <span class="c1"># real PDK this would be replaced by the actual GC component.</span>
 <span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">gc</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
@@ -5775,7 +5775,7 @@ relative to the GC array:</p>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># South-facing WG port</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5794,7 +5794,7 @@ relative to the GC array:</p>
 
 
 <span class="c1"># --- inside=False (outside loopback) ---</span>
-<span class="n">c_lb_outside</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;opt_loopback_outside&quot;</span><span class="p">)</span>
+<span class="n">c_lb_outside</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"opt_loopback_outside"</span><span class="p">)</span>
 
 <span class="n">gcs_out</span> <span class="o">=</span> <span class="p">[</span><span class="n">c_lb_outside</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="n">gc_cell</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_GCS</span><span class="p">)]</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inst</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gcs_out</span><span class="p">):</span>
@@ -5802,8 +5802,8 @@ relative to the GC array:</p>
 
 <span class="c1"># Loop only the two outermost GCs.</span>
 <span class="n">backbone_outside</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_loopback</span><span class="p">(</span>
-    <span class="n">gcs_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
-    <span class="n">gcs_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
+    <span class="n">gcs_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span>
+    <span class="n">gcs_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span>
     <span class="n">bend90_radius</span><span class="o">=</span><span class="n">bend_radius</span><span class="p">,</span>
     <span class="n">d_loop</span><span class="o">=</span><span class="n">bend_radius</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span>
     <span class="n">inside</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -5811,8 +5811,8 @@ relative to the GC array:</p>
 
 <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">place_manhattan</span><span class="p">(</span>
     <span class="n">c_lb_outside</span><span class="p">,</span>
-    <span class="n">gcs_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
-    <span class="n">gcs_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
+    <span class="n">gcs_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span>
+    <span class="n">gcs_out</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span>
     <span class="n">backbone_outside</span><span class="p">,</span>
     <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
@@ -5823,15 +5823,15 @@ relative to the GC array:</p>
 </code></pre></div>
 <img alt="png" src="../optical/output_10_0.png" /></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># --- inside=True (inner loopback — fold between the two outermost GCs) ---</span>
-<span class="n">c_lb_inside</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;opt_loopback_inside&quot;</span><span class="p">)</span>
+<span class="n">c_lb_inside</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"opt_loopback_inside"</span><span class="p">)</span>
 
 <span class="n">gcs_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">c_lb_inside</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span><span class="n">gc_cell</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_GCS</span><span class="p">)]</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inst</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gcs_in</span><span class="p">):</span>
     <span class="n">inst</span><span class="o">.</span><span class="n">dmove</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">GC_PITCH_UM</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
 <span class="n">backbone_inside</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_loopback</span><span class="p">(</span>
-    <span class="n">gcs_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
-    <span class="n">gcs_in</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
+    <span class="n">gcs_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span>
+    <span class="n">gcs_in</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span>
     <span class="n">bend90_radius</span><span class="o">=</span><span class="n">bend_radius</span><span class="p">,</span>
     <span class="n">d_loop</span><span class="o">=</span><span class="n">bend_radius</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
     <span class="n">inside</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -5839,8 +5839,8 @@ relative to the GC array:</p>
 
 <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">place_manhattan</span><span class="p">(</span>
     <span class="n">c_lb_inside</span><span class="p">,</span>
-    <span class="n">gcs_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
-    <span class="n">gcs_in</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span>
+    <span class="n">gcs_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span>
+    <span class="n">gcs_in</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span>
     <span class="n">backbone_inside</span><span class="p">,</span>
     <span class="n">straight_factory</span><span class="o">=</span><span class="n">straight_factory</span><span class="p">,</span>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
@@ -5856,16 +5856,16 @@ yourself (a list of <code>kdb.Point</code>) and call <code>place_manhattan</code
 waveguide segments and bend cells along it.</p>
 <p>This is the same function that <code>route_bundle</code> calls internally, exposed so that custom
 routing algorithms can drive the placer.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_pm</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;opt_place_manhattan_direct&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_pm</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"opt_place_manhattan_direct"</span><span class="p">)</span>
 
 <span class="n">pm_p1</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
     <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
     <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">pm_p2</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
     <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">200</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">100</span><span class="p">)),</span>
     <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
     <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -6020,7 +6020,7 @@ routing algorithms can drive the placer.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

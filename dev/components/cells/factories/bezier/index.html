@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5436,14 +5436,14 @@ longitudinal extent.</p>
     <span class="n">WGCLAD</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
-<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;FACTORIES_BEZIER_DEMO&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"FACTORIES_BEZIER_DEMO"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 <span class="n">L</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="basic-call">Basic call</h2>
 <div class="highlight"><pre><span></span><code><span class="n">bend_s</span> <span class="o">=</span> <span class="n">bend_s_bezier_factory</span><span class="p">(</span><span class="n">pdk</span><span class="p">)</span>
 
 <span class="n">b</span> <span class="o">=</span> <span class="n">bend_s</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;S-bend:&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"S-bend:"</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 <span class="n">b</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>S-bend: bend_s_bezier_CS028523d7_500_H5_L20_NP99_TS0_TS1
@@ -5464,8 +5464,8 @@ longitudinal extent.</p>
 Lower values trade smoothness for fewer vertices.</p>
 <div class="highlight"><pre><span></span><code><span class="n">b_lo</span> <span class="o">=</span> <span class="n">bend_s</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">nb_points</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">b_hi</span> <span class="o">=</span> <span class="n">bend_s</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">nb_points</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;low-res vertices:&quot;</span><span class="p">,</span> <span class="n">b_lo</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="o">.</span><span class="n">each</span><span class="p">()</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="o">.</span><span class="n">num_points</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hi-res  vertices:&quot;</span><span class="p">,</span> <span class="n">b_hi</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="o">.</span><span class="n">each</span><span class="p">()</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="o">.</span><span class="n">num_points</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"low-res vertices:"</span><span class="p">,</span> <span class="n">b_lo</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="o">.</span><span class="n">each</span><span class="p">()</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="o">.</span><span class="n">num_points</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"hi-res  vertices:"</span><span class="p">,</span> <span class="n">b_hi</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="o">.</span><span class="n">each</span><span class="p">()</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="o">.</span><span class="n">num_points</span><span class="p">())</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>low-res vertices: 40
 hi-res  vertices: 362
@@ -5488,18 +5488,18 @@ hi-res  vertices: 362
 that gets merged into <code>KCell.info</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">bend_s_meta</span> <span class="o">=</span> <span class="n">bend_s_bezier_factory</span><span class="p">(</span>
     <span class="n">pdk</span><span class="p">,</span>
-    <span class="n">additional_info</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;pdk&quot;</span><span class="p">:</span> <span class="s2">&quot;FACTORIES_BEZIER_DEMO&quot;</span><span class="p">,</span> <span class="s2">&quot;component_type&quot;</span><span class="p">:</span> <span class="s2">&quot;bezier_sbend&quot;</span><span class="p">},</span>
+    <span class="n">additional_info</span><span class="o">=</span><span class="p">{</span><span class="s2">"pdk"</span><span class="p">:</span> <span class="s2">"FACTORIES_BEZIER_DEMO"</span><span class="p">,</span> <span class="s2">"component_type"</span><span class="p">:</span> <span class="s2">"bezier_sbend"</span><span class="p">},</span>
 <span class="p">)</span>
 
 <span class="n">b_meta</span> <span class="o">=</span> <span class="n">bend_s_meta</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cell info:&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">b_meta</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"cell info:"</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">b_meta</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-08-24 23:07:31.135[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m823[0m - [31m[1mName conflict in kfactory.kcell::name at line 823
+<div class="highlight"><pre><span></span><code>[32m2026-08-26 11:46:01.603[0m | [31m[1mERROR   [0m | [36mkfactory.kcell[0m:[36mname[0m:[36m823[0m - [31m[1mName conflict in kfactory.kcell::name at line 823
 Renaming Unnamed_8 (cell_index=8) to bend_s_bezier_CS028523d7_500_H5_L20_NP99_TS0_TS1 would cause it to be named the same as:
  - bend_s_bezier_CS028523d7_500_H5_L20_NP99_TS0_TS1 (cell_index=0), function_name=_bend_s_bezier, basename=bend_s_bezier[0m
 
 
-cell info: {&#39;pdk&#39;: &#39;FACTORIES_BEZIER_DEMO&#39;, &#39;component_type&#39;: &#39;bezier_sbend&#39;}
+cell info: {'pdk': 'FACTORIES_BEZIER_DEMO', 'component_type': 'bezier_sbend'}
 </code></pre></div>
 <h2 id="see-also">See Also</h2>
 <table>
@@ -5579,7 +5579,7 @@ cell info: {&#39;pdk&#39;: &#39;FACTORIES_BEZIER_DEMO&#39;, &#39;component_type&
       <script id="__config" type="application/json">{"annotate":null,"base":"../../../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5625,7 +5625,7 @@ The angle convention is:</p>
 </table>
 <p><code>DCplxTrans(magnification, angle_deg, mirror, x_um, y_um)</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="n">port_left</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span>  <span class="c1"># 1 µm → DBU</span>
     <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># facing west at (-5, 0) µm</span>
     <span class="n">layer</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">),</span>
@@ -5633,7 +5633,7 @@ The angle convention is:</p>
 <span class="p">)</span>
 
 <span class="n">port_right</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span>
     <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># facing east at (+5, 0) µm</span>
     <span class="n">layer</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">),</span>
@@ -5643,13 +5643,13 @@ The angle convention is:</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">port_left</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">port_right</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Port(self.name=&#39;o1&#39;, self.width=1000, trans=r180 *1 -5,0, layer=WG (1/0), port_type=optical)
-Port(self.name=&#39;o2&#39;, self.width=1000, trans=r0 *1 5,0, layer=WG (1/0), port_type=optical)
+<div class="highlight"><pre><span></span><code>Port(self.name='o1', self.width=1000, trans=r180 *1 -5,0, layer=WG (1/0), port_type=optical)
+Port(self.name='o2', self.width=1000, trans=r0 *1 5,0, layer=WG (1/0), port_type=optical)
 </code></pre></div>
 <h2 id="adding-ports-to-a-cell">Adding ports to a cell</h2>
 <p>Use <code>cell.add_port(port=...)</code> to attach a port to a cell.  <code>draw_ports()</code> renders
 port markers so you can see direction and position in the notebook.</p>
-<div class="highlight"><pre><span></span><code><span class="n">wg</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;wg_ports_demo&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">wg</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"wg_ports_demo"</span><span class="p">)</span>
 <span class="n">wg</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
 <span class="n">wg</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">port_left</span><span class="p">)</span>
 <span class="n">wg</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">port_right</span><span class="p">)</span>
@@ -5667,18 +5667,18 @@ Individual ports can be accessed by name using <code>cell.ports["name"]</code> o
 <div class="highlight"><pre><span></span><code><span class="c1"># List all ports</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">wg</span><span class="o">.</span><span class="n">ports</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[&quot;DPort(self.name=&#39;o1&#39;, self.width=1.0, trans=r180 *1 -5,0, layer=WG (1/0), port_type=optical)&quot;, &quot;DPort(self.name=&#39;o2&#39;, self.width=1.0, trans=r0 *1 5,0, layer=WG (1/0), port_type=optical)&quot;]
+<div class="highlight"><pre><span></span><code>["DPort(self.name='o1', self.width=1.0, trans=r180 *1 -5,0, layer=WG (1/0), port_type=optical)", "DPort(self.name='o2', self.width=1.0, trans=r0 *1 5,0, layer=WG (1/0), port_type=optical)"]
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1"># Access by name</span>
-<span class="n">p</span> <span class="o">=</span> <span class="n">wg</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;name=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">  width=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2"> DBU  layer=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">layer_info</span><span class="si">}</span><span class="s2">  angle=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">angle</span><span class="si">}</span><span class="s2">°&quot;</span><span class="p">)</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">wg</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"name=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">  width=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2"> DBU  layer=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">layer_info</span><span class="si">}</span><span class="s2">  angle=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">angle</span><span class="si">}</span><span class="s2">°"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>name=o1  width=1000 DBU  layer=WG (1/0)  angle=2°
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1"># Inspect position in µm</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;x=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">wg</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="o">**-</span><span class="mi">1</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm, y=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">wg</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="o">**-</span><span class="mi">1</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"x=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">wg</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="o">**-</span><span class="mi">1</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm, y=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">wg</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="o">**-</span><span class="mi">1</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 <span class="c1"># or use the d-prefix convenience attributes:</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dcplx_trans = </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dcplx_trans = </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>x=-5.000 µm, y=0.000 µm
 dcplx_trans = r180 *1 -5,0
@@ -5688,28 +5688,28 @@ dcplx_trans = r180 *1 -5,0
 <code>"electrical"</code> by convention, but any string is valid.  Routing functions use
 <code>port_type</code> to avoid accidentally connecting an optical port to an electrical one.</p>
 <div class="highlight"><pre><span></span><code><span class="n">elec_port</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;e1&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"e1"</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">2.0</span><span class="p">),</span>
     <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
     <span class="n">layer</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">METAL</span><span class="p">),</span>
     <span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
-    <span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;electrical&quot;</span><span class="p">,</span>
+    <span class="n">port_type</span><span class="o">=</span><span class="s2">"electrical"</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;port_type = </span><span class="si">{</span><span class="n">elec_port</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"port_type = </span><span class="si">{</span><span class="n">elec_port</span><span class="o">.</span><span class="n">port_type</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>port_type = electrical
 </code></pre></div>
 <h2 id="filtering-the-ports-collection">Filtering the <code>Ports</code> collection</h2>
 <p><code>Ports</code> exposes several filter helpers — they all return a plain <code>list[Port]</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Build a cell with a mix of optical and electrical ports</span>
-<span class="n">mixed</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;mixed_ports&quot;</span><span class="p">)</span>
+<span class="n">mixed</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"mixed_ports"</span><span class="p">)</span>
 <span class="n">mixed</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
 
 <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">ptype</span> <span class="ow">in</span> <span class="p">[</span>
-    <span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="s2">&quot;optical&quot;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="s2">&quot;optical&quot;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">&quot;e1&quot;</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">METAL</span><span class="p">,</span> <span class="s2">&quot;electrical&quot;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">&quot;e2&quot;</span><span class="p">,</span> <span class="mi">270</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">METAL</span><span class="p">,</span> <span class="s2">&quot;electrical&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="s2">"optical"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"o2"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="s2">"optical"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"e1"</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">METAL</span><span class="p">,</span> <span class="s2">"electrical"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"e2"</span><span class="p">,</span> <span class="mi">270</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">METAL</span><span class="p">,</span> <span class="s2">"electrical"</span><span class="p">),</span>
 <span class="p">]:</span>
     <span class="n">mixed</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
@@ -5723,46 +5723,46 @@ dcplx_trans = r180 *1 -5,0
     <span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1"># Filter by port_type</span>
-<span class="n">optical</span> <span class="o">=</span> <span class="n">mixed</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;optical&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Optical ports:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">optical</span><span class="p">])</span>
+<span class="n">optical</span> <span class="o">=</span> <span class="n">mixed</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">"optical"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Optical ports:"</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">optical</span><span class="p">])</span>
 
-<span class="n">electrical</span> <span class="o">=</span> <span class="n">mixed</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">&quot;electrical&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Electrical ports:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">electrical</span><span class="p">])</span>
+<span class="n">electrical</span> <span class="o">=</span> <span class="n">mixed</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">port_type</span><span class="o">=</span><span class="s2">"electrical"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Electrical ports:"</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">electrical</span><span class="p">])</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Optical ports: [&#39;o1&#39;, &#39;o2&#39;]
-Electrical ports: [&#39;e1&#39;, &#39;e2&#39;]
+<div class="highlight"><pre><span></span><code>Optical ports: ['o1', 'o2']
+Electrical ports: ['e1', 'e2']
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1"># Filter by angle (facing direction)</span>
 <span class="n">west_facing</span> <span class="o">=</span> <span class="n">mixed</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;West-facing ports:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">west_facing</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"West-facing ports:"</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">west_facing</span><span class="p">])</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>West-facing ports: []
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1"># Filter by regex on port name</span>
-<span class="n">o_ports</span> <span class="o">=</span> <span class="n">mixed</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^o&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ports starting with &#39;o&#39;:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">o_ports</span><span class="p">])</span>
+<span class="n">o_ports</span> <span class="o">=</span> <span class="n">mixed</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s2">"^o"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Ports starting with 'o':"</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">o_ports</span><span class="p">])</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Ports starting with &#39;o&#39;: [&#39;o1&#39;, &#39;o2&#39;]
+<div class="highlight"><pre><span></span><code>Ports starting with 'o': ['o1', 'o2']
 </code></pre></div>
 <h2 id="bulk-port-operations-add_ports-and-copy_ports">Bulk port operations: <code>add_ports</code> and <code>copy_ports</code></h2>
 <p>When placing instances inside a parent cell, you often want to expose the child's
 ports on the parent.  <code>add_ports</code> copies ports from another collection, optionally
 adding a prefix to avoid name collisions.</p>
-<div class="highlight"><pre><span></span><code><span class="n">parent</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;two_wg_parent&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">parent</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"two_wg_parent"</span><span class="p">)</span>
 
 <span class="n">s</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 <span class="n">wg1</span> <span class="o">=</span> <span class="n">parent</span> <span class="o">&lt;&lt;</span> <span class="n">s</span>
 <span class="n">wg2</span> <span class="o">=</span> <span class="n">parent</span> <span class="o">&lt;&lt;</span> <span class="n">s</span>
 <span class="n">wg2</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DTrans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>  <span class="c1"># shift 5 µm north (in DBU: 5000 nm)</span>
 
-<span class="n">parent</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">wg1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;top_&quot;</span><span class="p">)</span>
-<span class="n">parent</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">wg2</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;bot_&quot;</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">wg1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"top_"</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">wg2</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"bot_"</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">ports</span><span class="p">])</span>
 <span class="n">parent</span><span class="o">.</span><span class="n">draw_ports</span><span class="p">()</span>
 <span class="n">parent</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[&#39;top_o1&#39;, &#39;top_o2&#39;, &#39;bot_o1&#39;, &#39;bot_o2&#39;]
+<div class="highlight"><pre><span></span><code>['top_o1', 'top_o2', 'bot_o1', 'bot_o2']
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
@@ -5774,24 +5774,24 @@ Optical ports get an <code>o</code> prefix, electrical ports get <code>e</code>.
 <div class="highlight"><pre><span></span><code><span class="n">parent</span><span class="o">.</span><span class="n">auto_rename_ports</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">ports</span><span class="p">])</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[&#39;o1&#39;, &#39;o3&#39;, &#39;o2&#39;, &#39;o4&#39;]
+<div class="highlight"><pre><span></span><code>['o1', 'o3', 'o2', 'o4']
 </code></pre></div>
 <h2 id="port-based-placement-with-connect">Port-based placement with <code>connect</code></h2>
 <p><code>instance.connect("port_name", other_port)</code> moves and rotates the instance so that
 the named port aligns face-to-face with <code>other_port</code>.  This is the primary way to
 assemble circuits without manually computing positions.</p>
-<div class="highlight"><pre><span></span><code><span class="n">circuit</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;connected_chain&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">circuit</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"connected_chain"</span><span class="p">)</span>
 
 <span class="n">seg1</span> <span class="o">=</span> <span class="n">circuit</span> <span class="o">&lt;&lt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 <span class="n">seg2</span> <span class="o">=</span> <span class="n">circuit</span> <span class="o">&lt;&lt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 <span class="n">seg3</span> <span class="o">=</span> <span class="n">circuit</span> <span class="o">&lt;&lt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 
-<span class="c1"># Chain: seg2&#39;s o1 aligns with seg1&#39;s o2, then seg3&#39;s o1 aligns with seg2&#39;s o2</span>
-<span class="n">seg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
-<span class="n">seg3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">seg2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+<span class="c1"># Chain: seg2's o1 aligns with seg1's o2, then seg3's o1 aligns with seg2's o2</span>
+<span class="n">seg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
+<span class="n">seg3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">seg2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 
-<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;in_&quot;</span><span class="p">)</span>
-<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg3</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;out_&quot;</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"in_"</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">seg3</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"out_"</span><span class="p">)</span>
 <span class="n">circuit</span><span class="o">.</span><span class="n">draw_ports</span><span class="p">()</span>
 <span class="n">circuit</span>
 </code></pre></div>
@@ -5804,14 +5804,14 @@ assemble circuits without manually computing positions.</p>
 layouts.</p>
 <div class="highlight"><pre><span></span><code><span class="n">bend</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_euler</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
 
-<span class="n">loop</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;u_bend&quot;</span><span class="p">)</span>
+<span class="n">loop</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"u_bend"</span><span class="p">)</span>
 <span class="n">b1</span> <span class="o">=</span> <span class="n">loop</span> <span class="o">&lt;&lt;</span> <span class="n">bend</span>
 <span class="n">b2</span> <span class="o">=</span> <span class="n">loop</span> <span class="o">&lt;&lt;</span> <span class="n">bend</span>
 <span class="c1"># Mirror b2 so both inputs face the same direction, forming a U-shape</span>
-<span class="n">b2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">],</span> <span class="n">mirror</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">b2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">],</span> <span class="n">mirror</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">loop</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;left_&quot;</span><span class="p">)</span>
-<span class="n">loop</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b2</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;right_&quot;</span><span class="p">)</span>
+<span class="n">loop</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b1</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"left_"</span><span class="p">)</span>
+<span class="n">loop</span><span class="o">.</span><span class="n">add_ports</span><span class="p">(</span><span class="n">b2</span><span class="o">.</span><span class="n">ports</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"right_"</span><span class="p">)</span>
 <span class="n">loop</span><span class="o">.</span><span class="n">draw_ports</span><span class="p">()</span>
 <span class="n">loop</span>
 </code></pre></div>
@@ -5943,7 +5943,7 @@ layouts.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

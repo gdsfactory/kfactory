@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -6238,7 +6238,7 @@
 <span class="normal">794</span>
 <span class="normal">795</span>
 <span class="normal">796</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AsymmetricCrossSection</span><span class="p">(</span><span class="n">TAsymmetricCrossSection</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;dbu-flavored wrapper around an `AsymmetricalCrossSection`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""dbu-flavored wrapper around an `AsymmetricalCrossSection`."""</span>
 
     <span class="nd">@overload</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">AsymmetricalCrossSection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
@@ -6273,8 +6273,8 @@
         <span class="k">if</span> <span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">section_min</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">section_max</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;If no base is given, section_min, section_max, and layer&quot;</span>
-                    <span class="s2">&quot; must be defined&quot;</span>
+                    <span class="s2">"If no base is given, section_min, section_max, and layer"</span>
+                    <span class="s2">" must be defined"</span>
                 <span class="p">)</span>
             <span class="n">base</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span>
                 <span class="n">AsymmetricalCrossSection</span><span class="p">(</span>
@@ -6282,7 +6282,7 @@
                     <span class="n">section_min</span><span class="o">=</span><span class="n">section_min</span><span class="p">,</span>
                     <span class="n">section_max</span><span class="o">=</span><span class="n">section_max</span><span class="p">,</span>
                     <span class="n">sections</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">sections</span><span class="p">),</span>
-                    <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
                     <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
                     <span class="n">radius_min</span><span class="o">=</span><span class="n">radius_min</span><span class="p">,</span>
                     <span class="n">bbox_sections</span><span class="o">=</span><span class="n">bbox_sections</span> <span class="ow">or</span> <span class="p">{},</span>
@@ -6632,48 +6632,48 @@ always grid-aligned regardless of width parity.</p>
 <span class="normal">571</span>
 <span class="normal">572</span>
 <span class="normal">573</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AsymmetricalCrossSection</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cross section composed of independent layer strips at signed bounds.</span>
+<span class="w">    </span><span class="sd">"""Cross section composed of independent layer strips at signed bounds.</span>
 
 <span class="sd">    The main strip (`layer`, `section_min`, `section_max`) is the port</span>
 <span class="sd">    reference; `sections` holds any additional strips. All bounds are signed</span>
 <span class="sd">    integer dbu relative to the port centerline (`x = 0`). Strip edges are</span>
 <span class="sd">    always grid-aligned regardless of width parity.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span>
     <span class="n">section_min</span><span class="p">:</span> <span class="n">dbu</span>
     <span class="n">section_max</span><span class="p">:</span> <span class="n">dbu</span>
     <span class="n">sections</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">CrossSectionLayer</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">radius</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">radius_min</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">bbox_sections</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="n">dbu</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;before&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"before"</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_normalize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">data</span>
-        <span class="n">sections</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sections&quot;</span><span class="p">,</span> <span class="p">())</span>
+        <span class="n">sections</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sections"</span><span class="p">,</span> <span class="p">())</span>
         <span class="n">coerced</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CrossSectionLayer</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">CrossSectionLayer</span><span class="p">):</span>
                 <span class="n">coerced</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">coerced</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CrossSectionLayer</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sections&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_normalize_sections</span><span class="p">(</span><span class="n">coerced</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">):</span>
-            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_asym_auto_name</span><span class="p">(</span>
-                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;layer&quot;</span><span class="p">],</span>
-                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;section_min&quot;</span><span class="p">],</span>
-                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;section_max&quot;</span><span class="p">],</span>
-                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sections&quot;</span><span class="p">],</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bbox_sections&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{},</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"sections"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_normalize_sections</span><span class="p">(</span><span class="n">coerced</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_asym_auto_name</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"layer"</span><span class="p">],</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"section_min"</span><span class="p">],</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"section_max"</span><span class="p">],</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"sections"</span><span class="p">],</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"bbox_sections"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{},</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">auto_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deterministic structural name (hash of geometry, excluding radius).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Deterministic structural name (hash of geometry, excluding radius)."""</span>
         <span class="k">return</span> <span class="n">_asym_auto_name</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="p">,</span>
@@ -6684,27 +6684,27 @@ always grid-aligned regardless of width parity.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_named</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether an explicit name was given (vs. the derived structural name).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Whether an explicit name was given (vs. the derived structural name)."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_name</span><span class="p">()</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_min</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;section_min must be strictly less than section_max&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; (got section_min=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">,&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; section_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">).&quot;</span>
+                <span class="s2">"section_min must be strictly less than section_max"</span>
+                <span class="sa">f</span><span class="s2">" (got section_min=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">,"</span>
+                <span class="sa">f</span><span class="s2">" section_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">)."</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Main strip width in dbu (`section_max - section_min`).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Main strip width in dbu (`section_max - section_min`)."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_min</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">main_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Main layer of the cross section (parity with SymmetricalCrossSection).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Main layer of the cross section (parity with SymmetricalCrossSection)."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DAsymmetricalCrossSection</span><span class="p">:</span>
@@ -6729,11 +6729,11 @@ always grid-aligned regardless of width parity.</p>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Whether this cross section is symmetric."""</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_all_strips</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return (section_min, section_max) for main + every aux section.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Return (section_min, section_max) for main + every aux section."""</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="p">),</span>
             <span class="o">*</span><span class="p">((</span><span class="n">s</span><span class="o">.</span><span class="n">section_min</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">section_max</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">),</span>
@@ -6746,7 +6746,7 @@ always grid-aligned regardless of width parity.</p>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">hi</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">hi</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all_strips</span><span class="p">())</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">model_copy</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">update</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span> <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">update</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span> <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsymmetricalCrossSection</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">model_copy</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="n">update</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">)</span>
 
@@ -6927,7 +6927,7 @@ always grid-aligned regardless of width parity.</p>
 <span class="normal">439</span>
 <span class="normal">440</span>
 <span class="normal">441</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">auto_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deterministic structural name (hash of geometry, excluding radius).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Deterministic structural name (hash of geometry, excluding radius)."""</span>
     <span class="k">return</span> <span class="n">_asym_auto_name</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="p">,</span>
@@ -6962,7 +6962,7 @@ always grid-aligned regardless of width parity.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">489</span>
 <span class="normal">490</span>
 <span class="normal">491</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Whether this cross section is symmetric."""</span>
     <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7096,31 +7096,31 @@ edges are always grid-aligned. The strip's width is the derived
 <span class="normal">264</span>
 <span class="normal">265</span>
 <span class="normal">266</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CrossSectionLayer</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Single strip in an asymmetrical cross section.</span>
+<span class="w">    </span><span class="sd">"""Single strip in an asymmetrical cross section.</span>
 
 <span class="sd">    A strip on `layer` spanning `[section_min, section_max]` in dbu relative to</span>
 <span class="sd">    the port centerline (`offset=0`). Both bounds are signed integer dbu, so</span>
-<span class="sd">    edges are always grid-aligned. The strip&#39;s width is the derived</span>
+<span class="sd">    edges are always grid-aligned. The strip's width is the derived</span>
 <span class="sd">    `section_max - section_min`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span>
     <span class="n">section_min</span><span class="p">:</span> <span class="n">dbu</span>
     <span class="n">section_max</span><span class="p">:</span> <span class="n">dbu</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_min</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;section_min must be strictly less than section_max (got&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; section_min=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">,&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; section_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">).&quot;</span>
+                <span class="s2">"section_min must be strictly less than section_max (got"</span>
+                <span class="sa">f</span><span class="s2">" section_min=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">,"</span>
+                <span class="sa">f</span><span class="s2">" section_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">)."</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Width of the strip in dbu (`section_max - section_min`).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Width of the strip in dbu (`section_max - section_min`)."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_min</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_sort_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
@@ -7410,8 +7410,8 @@ edges are always grid-aligned. The strip's width is the derived
             <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">[</span><span class="n">cross_section</span><span class="p">]</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">AsymmetricalCrossSection</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Cross section </span><span class="si">{</span><span class="n">cross_section</span><span class="si">!r}</span><span class="s2"> is symmetric; use &quot;</span>
-                    <span class="s2">&quot;get_(symmetrical_)cross_section.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Cross section </span><span class="si">{</span><span class="n">cross_section</span><span class="si">!r}</span><span class="s2"> is symmetric; use "</span>
+                    <span class="s2">"get_(symmetrical_)cross_section."</span>
                 <span class="p">)</span>
             <span class="k">return</span> <span class="n">xs</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="n">DAsymmetricalCrossSection</span><span class="p">):</span>
@@ -7423,18 +7423,18 @@ edges are always grid-aligned. The strip's width is the derived
     <span class="k">def</span><span class="w"> </span><span class="nf">_register</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="n">SymmetricalCrossSection</span> <span class="o">|</span> <span class="n">AsymmetricalCrossSection</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymmetricalCrossSection</span> <span class="o">|</span> <span class="n">AsymmetricalCrossSection</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register/resolve a cross section by its canonical (structural) name.</span>
+<span class="w">        </span><span class="sd">"""Register/resolve a cross section by its canonical (structural) name.</span>
 
 <span class="sd">        Entries are keyed by their `auto_name()` and, when named, additionally by</span>
 <span class="sd">        the explicit name. Existence is a single `get(auto_name())`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">auto</span> <span class="o">=</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">auto_name</span><span class="p">()</span>
         <span class="n">canonical</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_sections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">auto</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">canonical</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">is_named</span> <span class="ow">and</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">CrossSectionNamingConflictError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Cross section name </span><span class="si">{</span><span class="n">cross_section</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is already &quot;</span>
-                    <span class="s2">&quot;registered for a different structural signature.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Cross section name </span><span class="si">{</span><span class="n">cross_section</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is already "</span>
+                    <span class="s2">"registered for a different structural signature."</span>
                 <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">[</span><span class="n">auto</span><span class="p">]</span> <span class="o">=</span> <span class="n">cross_section</span>
             <span class="k">if</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">is_named</span><span class="p">:</span>
@@ -7446,9 +7446,9 @@ edges are always grid-aligned. The strip's width is the derived
             <span class="k">if</span> <span class="n">canonical</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">_resolve_radius</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">CrossSectionNamingConflictError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Cannot register cross section </span><span class="si">{</span><span class="n">cross_section</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">: the same &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;structural signature is already registered as </span><span class="si">{</span><span class="n">canonical</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">.&quot;</span>
-                <span class="s2">&quot; A structure can have at most one name.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Cannot register cross section </span><span class="si">{</span><span class="n">cross_section</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">: the same "</span>
+                <span class="sa">f</span><span class="s2">"structural signature is already registered as </span><span class="si">{</span><span class="n">canonical</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">."</span>
+                <span class="s2">" A structure can have at most one name."</span>
             <span class="p">)</span>
         <span class="c1"># Promote the unnamed canonical to the named one (radius must match).</span>
         <span class="n">_resolve_radius</span><span class="p">(</span><span class="n">canonical</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">)</span>
@@ -7470,8 +7470,8 @@ edges are always grid-aligned. The strip's width is the derived
             <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">[</span><span class="n">cross_section</span><span class="p">]</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">SymmetricalCrossSection</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Cross section </span><span class="si">{</span><span class="n">cross_section</span><span class="si">!r}</span><span class="s2"> is asymmetric; use &quot;</span>
-                    <span class="s2">&quot;get_asymmetrical_cross_section.&quot;</span>
+                    <span class="sa">f</span><span class="s2">"Cross section </span><span class="si">{</span><span class="n">cross_section</span><span class="si">!r}</span><span class="s2"> is asymmetric; use "</span>
+                    <span class="s2">"get_asymmetrical_cross_section."</span>
                 <span class="p">)</span>
             <span class="k">return</span> <span class="n">xs</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="n">TCrossSection</span><span class="p">):</span>
@@ -7493,22 +7493,22 @@ edges are always grid-aligned. The strip's width is the derived
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="n">DSymmetricalCrossSection</span><span class="p">):</span>
             <span class="n">cross_section</span> <span class="o">=</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;unit&quot;</span><span class="p">,</span> <span class="s2">&quot;dbu&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;dbu&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"unit"</span><span class="p">,</span> <span class="s2">"dbu"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"dbu"</span><span class="p">:</span>
             <span class="n">cross_section</span> <span class="o">=</span> <span class="n">SymmetricalCrossSection</span><span class="p">(</span>
-                <span class="n">width</span><span class="o">=</span><span class="n">cross_section</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
+                <span class="n">width</span><span class="o">=</span><span class="n">cross_section</span><span class="p">[</span><span class="s2">"width"</span><span class="p">],</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
                 <span class="n">enclosure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer_enclosures</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span>
                     <span class="n">LayerEnclosureSpec</span><span class="p">(</span>
-                        <span class="n">sections</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sections&quot;</span><span class="p">,</span> <span class="p">[]),</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
-                        <span class="n">main_layer</span><span class="o">=</span><span class="n">cross_section</span><span class="p">[</span><span class="s2">&quot;layer&quot;</span><span class="p">],</span>
-                        <span class="n">name</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;enclosure&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+                        <span class="n">sections</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sections"</span><span class="p">,</span> <span class="p">[]),</span>  <span class="c1"># ty:ignore[invalid-argument-type]</span>
+                        <span class="n">main_layer</span><span class="o">=</span><span class="n">cross_section</span><span class="p">[</span><span class="s2">"layer"</span><span class="p">],</span>
+                        <span class="n">name</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"enclosure"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">),</span>
                     <span class="p">),</span>
                     <span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
                 <span class="p">),</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cross_section</span> <span class="o">=</span> <span class="n">SymmetricalCrossSection</span><span class="p">(</span>
-                <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">cross_section</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]),</span>
+                <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">cross_section</span><span class="p">[</span><span class="s2">"width"</span><span class="p">]),</span>
                 <span class="n">enclosure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layer_enclosures</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span>
                     <span class="n">LayerEnclosureSpec</span><span class="p">(</span>
                         <span class="n">sections</span><span class="o">=</span><span class="p">[</span>
@@ -7519,14 +7519,14 @@ edges are always grid-aligned. The strip's width is the derived
                                 <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">section</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">section</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
                             <span class="p">)</span>
-                            <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sections&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                            <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sections"</span><span class="p">,</span> <span class="p">[])</span>
                         <span class="p">],</span>
-                        <span class="n">main_layer</span><span class="o">=</span><span class="n">cross_section</span><span class="p">[</span><span class="s2">&quot;layer&quot;</span><span class="p">],</span>
-                        <span class="n">name</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;enclosure&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+                        <span class="n">main_layer</span><span class="o">=</span><span class="n">cross_section</span><span class="p">[</span><span class="s2">"layer"</span><span class="p">],</span>
+                        <span class="n">name</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"enclosure"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">),</span>
                     <span class="p">),</span>
                     <span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
                 <span class="p">),</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">cross_section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="n">registered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_register</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">registered</span><span class="p">,</span> <span class="n">SymmetricalCrossSection</span><span class="p">)</span>
@@ -7681,7 +7681,7 @@ edges are always grid-aligned. The strip's width is the derived
 <span class="normal">892</span>
 <span class="normal">893</span>
 <span class="normal">894</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DAsymmetricCrossSection</span><span class="p">(</span><span class="n">TAsymmetricCrossSection</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;um-flavored wrapper around an `AsymmetricalCrossSection`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""um-flavored wrapper around an `AsymmetricalCrossSection`."""</span>
 
     <span class="nd">@overload</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">AsymmetricalCrossSection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
@@ -7716,8 +7716,8 @@ edges are always grid-aligned. The strip's width is the derived
         <span class="k">if</span> <span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">section_min</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">section_max</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;If no base is given, section_min, section_max, and layer&quot;</span>
-                    <span class="s2">&quot; must be defined&quot;</span>
+                    <span class="s2">"If no base is given, section_min, section_max, and layer"</span>
+                    <span class="s2">" must be defined"</span>
                 <span class="p">)</span>
             <span class="n">base</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span>
                 <span class="n">DAsymmetricalCrossSection</span><span class="p">(</span>
@@ -7917,7 +7917,7 @@ edges are always grid-aligned. The strip's width is the derived
 <span class="normal">617</span>
 <span class="normal">618</span>
 <span class="normal">619</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DAsymmetricalCrossSection</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;um based AsymmetricalCrossSection.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""um based AsymmetricalCrossSection."""</span>
 
     <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span>
     <span class="n">section_min</span><span class="p">:</span> <span class="nb">float</span>
@@ -7928,23 +7928,23 @@ edges are always grid-aligned. The strip's width is the derived
     <span class="n">radius_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">bbox_sections</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_min</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;section_min must be strictly less than section_max&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; (got section_min=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">,&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; section_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">).&quot;</span>
+                <span class="s2">"section_min must be strictly less than section_max"</span>
+                <span class="sa">f</span><span class="s2">" (got section_min=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">,"</span>
+                <span class="sa">f</span><span class="s2">" section_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">)."</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Main strip width in um (`section_max - section_min`).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Main strip width in um (`section_max - section_min`)."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_min</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Whether this cross section is symmetric."""</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsymmetricalCrossSection</span><span class="p">:</span>
@@ -7953,7 +7953,7 @@ edges are always grid-aligned. The strip's width is the derived
             <span class="n">section_min</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="p">),</span>
             <span class="n">section_max</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="p">),</span>
             <span class="n">sections</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">to_itype</span><span class="p">(</span><span class="n">kcl</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
             <span class="n">radius</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">radius_min</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius_min</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -8020,7 +8020,7 @@ edges are always grid-aligned. The strip's width is the derived
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">603</span>
 <span class="normal">604</span>
 <span class="normal">605</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Whether this cross section is symmetric."""</span>
     <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8112,25 +8112,25 @@ edges are always grid-aligned. The strip's width is the derived
 <span class="normal">294</span>
 <span class="normal">295</span>
 <span class="normal">296</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DCrossSectionLayer</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;um based CrossSectionLayer.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""um based CrossSectionLayer."""</span>
 
     <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span>
     <span class="n">section_min</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">section_max</span><span class="p">:</span> <span class="nb">float</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_min</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;section_min must be strictly less than section_max (got&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; section_min=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">,&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; section_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">).&quot;</span>
+                <span class="s2">"section_min must be strictly less than section_max (got"</span>
+                <span class="sa">f</span><span class="s2">" section_min=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">,"</span>
+                <span class="sa">f</span><span class="s2">" section_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">)."</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Width of the strip in um (`section_max - section_min`).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Width of the strip in um (`section_max - section_min`)."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_min</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrossSectionLayer</span><span class="p">:</span>
@@ -8258,24 +8258,24 @@ edges are always grid-aligned. The strip's width is the derived
 <span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DSymmetricalCrossSection</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;um based CrossSection.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""um based CrossSection."""</span>
 
     <span class="n">width</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">DLayerEnclosure</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Width must be greater than 0.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Width must be greater than 0."</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Whether this cross section is symmetric."""</span>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymmetricalCrossSection</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to a dbu based CrossSection.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Convert to a dbu based CrossSection."""</span>
         <span class="k">return</span> <span class="n">SymmetricalCrossSection</span><span class="p">(</span>
             <span class="n">width</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
             <span class="n">enclosure</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">to_itype</span><span class="p">(</span><span class="n">kcl</span><span class="p">)),</span>
@@ -8317,7 +8317,7 @@ edges are always grid-aligned. The strip's width is the derived
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">198</span>
 <span class="normal">199</span>
 <span class="normal">200</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Whether this cross section is symmetric."""</span>
     <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8350,7 +8350,7 @@ edges are always grid-aligned. The strip's width is the derived
 <span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymmetricalCrossSection</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert to a dbu based CrossSection.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Convert to a dbu based CrossSection."""</span>
     <span class="k">return</span> <span class="n">SymmetricalCrossSection</span><span class="p">(</span>
         <span class="n">width</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
         <span class="n">enclosure</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">to_itype</span><span class="p">(</span><span class="n">kcl</span><span class="p">)),</span>
@@ -8576,11 +8576,11 @@ edges are always grid-aligned. The strip's width is the derived
 <span class="normal">180</span>
 <span class="normal">181</span>
 <span class="normal">182</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SymmetricalCrossSection</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;CrossSection which is symmetrical to its main_layer/width.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""CrossSection which is symmetrical to its main_layer/width."""</span>
 
     <span class="n">width</span><span class="p">:</span> <span class="n">dbu</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">radius</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">radius_min</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -8592,75 +8592,75 @@ edges are always grid-aligned. The strip's width is the derived
         <span class="n">radius</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">radius_min</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialized the CrossSection.</span>
+<span class="w">        </span><span class="sd">"""Initialized the CrossSection.</span>
 
 <span class="sd">        `bbox_sections` live on the `enclosure` — build the enclosure with them.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
             <span class="n">enclosure</span><span class="o">=</span><span class="n">enclosure</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">enclosure</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">enclosure</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
             <span class="n">radius_min</span><span class="o">=</span><span class="n">radius_min</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">bbox_sections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="n">dbu</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Bounding-box sections (owned by the enclosure).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Bounding-box sections (owned by the enclosure)."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">bbox_sections</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">auto_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">"</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_named</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether an explicit name was given (vs. the enclosure-derived name).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Whether an explicit name was given (vs. the enclosure-derived name)."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_name</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">extent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dbu</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">0</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;before&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"before"</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">data</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;enclosure&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">'enclosure'</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">'width'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">return</span> <span class="n">data</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_enclosure_main_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">main_layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Enclosures of cross sections must have a main layer.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Enclosures of cross sections must have a main layer."</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Width of symmetrical cross sections must have be a multiple of 2 dbu. &quot;</span>
-                <span class="s2">&quot;This could cause cross sections and extrusions to become unsymmetrical&quot;</span>
-                <span class="s2">&quot; otherwise.&quot;</span>
+                <span class="s2">"Width of symmetrical cross sections must have be a multiple of 2 dbu. "</span>
+                <span class="s2">"This could cause cross sections and extrusions to become unsymmetrical"</span>
+                <span class="s2">" otherwise."</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cross section with width 0 is not allowed.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Cross section with width 0 is not allowed."</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Width must be greater than 0.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Width must be greater than 0."</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">main_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Main Layer of the enclosure and cross section.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Main Layer of the enclosure and cross section."""</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">main_layer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">main_layer</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Whether this cross section is symmetric."""</span>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DSymmetricalCrossSection</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to a um based CrossSection.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Convert to a um based CrossSection."""</span>
         <span class="k">return</span> <span class="n">DSymmetricalCrossSection</span><span class="p">(</span>
             <span class="n">width</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
             <span class="n">enclosure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">kcl</span><span class="p">),</span>
@@ -8679,7 +8679,7 @@ edges are always grid-aligned. The strip's width is the derived
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">get_xmax</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">model_copy</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">update</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span> <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">update</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span> <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymmetricalCrossSection</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">model_copy</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="n">update</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">)</span>
 
@@ -8831,14 +8831,14 @@ edges are always grid-aligned. The strip's width is the derived
     <span class="n">radius</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">radius_min</span><span class="p">:</span> <span class="n">dbu</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialized the CrossSection.</span>
+<span class="w">    </span><span class="sd">"""Initialized the CrossSection.</span>
 
 <span class="sd">    `bbox_sections` live on the `enclosure` — build the enclosure with them.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">enclosure</span><span class="o">=</span><span class="n">enclosure</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">enclosure</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">enclosure</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
         <span class="n">radius_min</span><span class="o">=</span><span class="n">radius_min</span><span class="p">,</span>
     <span class="p">)</span>
@@ -8869,7 +8869,7 @@ edges are always grid-aligned. The strip's width is the derived
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
 <span class="normal">140</span>
 <span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Whether this cross section is symmetric."""</span>
     <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8902,7 +8902,7 @@ edges are always grid-aligned. The strip's width is the derived
 <span class="normal">147</span>
 <span class="normal">148</span>
 <span class="normal">149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DSymmetricalCrossSection</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert to a um based CrossSection.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Convert to a um based CrossSection."""</span>
     <span class="k">return</span> <span class="n">DSymmetricalCrossSection</span><span class="p">(</span>
         <span class="n">width</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
         <span class="n">enclosure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">kcl</span><span class="p">),</span>
@@ -9034,13 +9034,13 @@ across units via <code>.base</code>.</p>
 <span class="normal">708</span>
 <span class="normal">709</span>
 <span class="normal">710</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TAsymmetricCrossSection</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unit-flavored wrapper around an `AsymmetricalCrossSection` base.</span>
+<span class="w">    </span><span class="sd">"""Unit-flavored wrapper around an `AsymmetricalCrossSection` base.</span>
 
 <span class="sd">    Mirrors `TCrossSection` for the symmetric case: both the dbu wrapper</span>
 <span class="sd">    (`AsymmetricCrossSection`) and the um wrapper (`DAsymmetricCrossSection`)</span>
 <span class="sd">    hold the same `AsymmetricalCrossSection` as `_base`, so they compare equal</span>
 <span class="sd">    across units via `.base`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">_base</span><span class="p">:</span> <span class="n">AsymmetricalCrossSection</span> <span class="o">=</span> <span class="n">PrivateAttr</span><span class="p">()</span>
     <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span>
@@ -9062,7 +9062,7 @@ across units via <code>.base</code>.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">layer</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Whether this cross section is symmetric."""</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
@@ -9150,7 +9150,7 @@ across units via <code>.base</code>.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">659</span>
 <span class="normal">660</span>
 <span class="normal">661</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Whether this cross section is symmetric."""</span>
     <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -9379,7 +9379,7 @@ across units via <code>.base</code>.</p>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">model_copy</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">update</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span> <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">update</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span> <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -9391,11 +9391,11 @@ across units via <code>.base</code>.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">main_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Main Layer of the enclosure and cross section.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Main Layer of the enclosure and cross section."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">main_layer</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Whether this cross section is symmetric."""</span>
         <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -9458,7 +9458,7 @@ across units via <code>.base</code>.</p>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">997</span>
 <span class="normal">998</span>
 <span class="normal">999</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether this cross section is symmetric.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Whether this cross section is symmetric."""</span>
     <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -9537,7 +9537,7 @@ across units via <code>.base</code>.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

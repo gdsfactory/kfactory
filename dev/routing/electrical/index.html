@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5549,12 +5549,12 @@ Supply <code>place_layer</code> to draw all wires on a specific layer.</p>
 <code>0</code> = East, <code>1</code> = North, <code>2</code> = West, <code>3</code> = South.
 The most common pattern is start facing North (<code>angle=1</code>) and end facing South
 (<code>angle=3</code>) with end ports above start ports, producing S-shaped wires.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_basic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;elec_basic_bundle&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_basic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"elec_basic_bundle"</span><span class="p">)</span>
 
 <span class="n">n</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="n">starts_basic</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WIRE_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
@@ -5563,7 +5563,7 @@ The most common pattern is start facing North (<code>angle=1</code>) and end fac
 <span class="p">]</span>
 <span class="n">ends_basic</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">10</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">150</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WIRE_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
@@ -5588,11 +5588,11 @@ The most common pattern is start facing North (<code>angle=1</code>) and end fac
 DBU) to draw all wires at a uniform width, or pass a list to set per-route widths.
 This is useful when routing between ports of different widths or when the route must
 be narrower than the pad.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_rw</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;elec_route_width&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_rw</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"elec_route_width"</span><span class="p">)</span>
 
 <span class="n">starts_rw</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;pad_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"pad_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="c1"># Wide pads: 10 µm</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">20</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
@@ -5602,7 +5602,7 @@ be narrower than the pad.</p>
 <span class="p">]</span>
 <span class="n">ends_rw</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;wire_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"wire_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="c1"># Narrow landing pads: 2 µm</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">20</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">120</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WIRE_WIDTH</span><span class="p">,</span>
@@ -5632,11 +5632,11 @@ per-route control (all values in DBU).</p>
 <p>Stubs are useful for:
 - maintaining clearance from a dense pad array before the wires fan out, or
 - ensuring a minimum straight segment from a component port before turning.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_stubs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;elec_stubs&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_stubs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"elec_stubs"</span><span class="p">)</span>
 
 <span class="n">starts_stub</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">12</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WIRE_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
@@ -5645,7 +5645,7 @@ per-route control (all values in DBU).</p>
 <span class="p">]</span>
 <span class="n">ends_stub</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">12</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">200</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WIRE_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
@@ -5679,11 +5679,11 @@ continuing to their end ports.</p>
 <p>The example below routes 4 wires North from their start pads, forces them through a
 narrow East-facing corridor in the middle of the layout, then continues up to the
 end ports.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_wp</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;elec_waypoints&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_wp</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"elec_waypoints"</span><span class="p">)</span>
 
 <span class="n">starts_wp</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">15</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WIRE_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
@@ -5692,7 +5692,7 @@ end ports.</p>
 <span class="p">]</span>
 <span class="n">ends_wp</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">15</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">300</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WIRE_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
@@ -5724,14 +5724,14 @@ bounding box — an isolated box floating in empty space between the bundles
 is treated as if it weren't there.  Place the obstacle so it covers at
 least one of the start- or end-port regions.</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="n">c_obs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;elec_obstacle&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_obs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"elec_obstacle"</span><span class="p">)</span>
 
 <span class="c1"># North-facing start ports at the bottom; East-facing end ports on the right.</span>
-<span class="c1"># The bend the router must make to get from &quot;north&quot; to &quot;east&quot; gives the</span>
+<span class="c1"># The bend the router must make to get from "north" to "east" gives the</span>
 <span class="c1"># obstacle something meaningful to deflect.</span>
 <span class="n">starts_obs</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">20</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WIRE_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
@@ -5740,7 +5740,7 @@ least one of the start- or end-port regions.</p>
 <span class="p">]</span>
 <span class="n">ends_obs</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">120</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">40</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WIRE_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
@@ -5802,7 +5802,7 @@ signal pairs.</p>
 </table>
 <p>For two 1 µm rails separated by a 2 µm gap, set
 <code>width_rails = 4 µm</code> (total = rail + gap + rail) and <code>separation_rails = 2 µm</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_dr</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;elec_dual_rails&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_dr</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"elec_dual_rails"</span><span class="p">)</span>
 
 <span class="c1"># Total outer width: rail(1µm) + gap(2µm) + rail(1µm) = 4µm</span>
 <span class="n">DR_TOTAL</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># outer path width</span>
@@ -5810,7 +5810,7 @@ signal pairs.</p>
 
 <span class="n">starts_dr</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">20</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">DR_TOTAL</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
@@ -5819,7 +5819,7 @@ signal pairs.</p>
 <span class="p">]</span>
 <span class="n">ends_dr</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">20</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">200</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">DR_TOTAL</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">METAL1</span><span class="p">,</span>
@@ -5972,7 +5972,7 @@ signal pairs.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

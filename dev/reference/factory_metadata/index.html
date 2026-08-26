@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5610,12 +5610,12 @@ simulation packages) can define their own schemas on top.</p>
 <span class="normal">67</span>
 <span class="normal">68</span>
 <span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FactoryMetadata</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolved metadata for a cell factory.</span>
+<span class="w">    </span><span class="sd">"""Resolved metadata for a cell factory.</span>
 
 <span class="sd">    Aggregated from all registered providers for a given factory.</span>
 <span class="sd">    Fields are intentionally loosely typed so consumers (gfp, PDKs,</span>
 <span class="sd">    simulation packages) can define their own schemas on top.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">device_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">PortSpec</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
@@ -5724,7 +5724,7 @@ simulation packages) can define their own schemas on top.</p>
 <span class="normal">143</span>
 <span class="normal">144</span>
 <span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FactoryMetadataRegistry</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stores metadata provider registrations and resolves them per factory.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Stores metadata provider registrations and resolves them per factory."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -5733,16 +5733,16 @@ simulation packages) can define their own schemas on top.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">target_kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fqn&quot;</span><span class="p">,</span> <span class="s2">&quot;object&quot;</span><span class="p">],</span>
+        <span class="n">target_kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"fqn"</span><span class="p">,</span> <span class="s2">"object"</span><span class="p">],</span>
         <span class="n">target_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">kind</span><span class="p">:</span> <span class="n">FactoryMetadataProviderKind</span><span class="p">,</span>
         <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
         <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">position</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;append&quot;</span><span class="p">,</span> <span class="s2">&quot;prepend&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;append&quot;</span><span class="p">,</span>
+        <span class="n">position</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"append"</span><span class="p">,</span> <span class="s2">"prepend"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"append"</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register a metadata provider for a target factory.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">position</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">,</span> <span class="s2">&quot;prepend&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown model provider position: </span><span class="si">{</span><span class="n">position</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Register a metadata provider for a target factory."""</span>
+        <span class="k">if</span> <span class="n">position</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"append"</span><span class="p">,</span> <span class="s2">"prepend"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown model provider position: </span><span class="si">{</span><span class="n">position</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">_FactoryMetadataProviderRecord</span><span class="p">(</span>
@@ -5764,15 +5764,15 @@ simulation packages) can define their own schemas on top.</p>
         <span class="n">qualified_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return all provider records matching a factory by name, FQN, or identity.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Return all provider records matching a factory by name, FQN, or identity."""</span>
         <span class="n">object_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
             <span class="n">record</span>
             <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">&quot;name&quot;</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span>
-                <span class="ow">or</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">&quot;fqn&quot;</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">qualified_name</span><span class="p">)</span>
-                <span class="ow">or</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">object_id</span><span class="p">)</span>
+                <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">"name"</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">"fqn"</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">qualified_name</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">"object"</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">object_id</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -5799,7 +5799,7 @@ simulation packages) can define their own schemas on top.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">target_kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;fqn&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">],</span> <span class="n">target_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">FactoryMetadataProviderKind</span><span class="p">,</span> <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;append&#39;</span><span class="p">,</span> <span class="s1">&#39;prepend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;append&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">target_kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'name'</span><span class="p">,</span> <span class="s1">'fqn'</span><span class="p">,</span> <span class="s1">'object'</span><span class="p">],</span> <span class="n">target_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">FactoryMetadataProviderKind</span><span class="p">,</span> <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'append'</span><span class="p">,</span> <span class="s1">'prepend'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'append'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5837,16 +5837,16 @@ simulation packages) can define their own schemas on top.</p>
 <span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">target_kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fqn&quot;</span><span class="p">,</span> <span class="s2">&quot;object&quot;</span><span class="p">],</span>
+    <span class="n">target_kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"fqn"</span><span class="p">,</span> <span class="s2">"object"</span><span class="p">],</span>
     <span class="n">target_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">kind</span><span class="p">:</span> <span class="n">FactoryMetadataProviderKind</span><span class="p">,</span>
     <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">position</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;append&quot;</span><span class="p">,</span> <span class="s2">&quot;prepend&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;append&quot;</span><span class="p">,</span>
+    <span class="n">position</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"append"</span><span class="p">,</span> <span class="s2">"prepend"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"append"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a metadata provider for a target factory.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">position</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">,</span> <span class="s2">&quot;prepend&quot;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown model provider position: </span><span class="si">{</span><span class="n">position</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">"""Register a metadata provider for a target factory."""</span>
+    <span class="k">if</span> <span class="n">position</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"append"</span><span class="p">,</span> <span class="s2">"prepend"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown model provider position: </span><span class="si">{</span><span class="n">position</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="n">_FactoryMetadataProviderRecord</span><span class="p">(</span>
@@ -5908,15 +5908,15 @@ simulation packages) can define their own schemas on top.</p>
     <span class="n">qualified_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return all provider records matching a factory by name, FQN, or identity.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return all provider records matching a factory by name, FQN, or identity."""</span>
     <span class="n">object_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
         <span class="n">record</span>
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">&quot;name&quot;</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span>
-            <span class="ow">or</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">&quot;fqn&quot;</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">qualified_name</span><span class="p">)</span>
-            <span class="ow">or</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">object_id</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">"name"</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">"fqn"</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">qualified_name</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">target_kind</span> <span class="o">==</span> <span class="s2">"object"</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">target_key</span> <span class="o">==</span> <span class="n">object_id</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -5982,17 +5982,17 @@ interface without instantiating it.</p>
 <span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortSpec</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Structured port descriptor for cell metadata.</span>
+<span class="w">    </span><span class="sd">"""Structured port descriptor for cell metadata.</span>
 
 <span class="sd">    Declares a logical port with its kind, physical side, and optional</span>
 <span class="sd">    cross-section or aliasing information. Used by external tools</span>
-<span class="sd">    (simulation runners, schematic editors) to understand a cell&#39;s</span>
+<span class="sd">    (simulation runners, schematic editors) to understand a cell's</span>
 <span class="sd">    interface without instantiating it.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">side</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;bottom&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">side</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">"left"</span><span class="p">,</span> <span class="s2">"right"</span><span class="p">,</span> <span class="s2">"top"</span><span class="p">,</span> <span class="s2">"bottom"</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
     <span class="n">orientation</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">270</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
     <span class="n">order</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
@@ -6070,7 +6070,7 @@ interface without instantiating it.</p>
 <span class="normal">174</span>
 <span class="normal">175</span>
 <span class="normal">176</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">call_provider</span><span class="p">(</span><span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Invoke a provider with the subset of cell params its signature accepts.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Invoke a provider with the subset of cell params its signature accepts."""</span>
     <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
     <span class="n">accepts_kwargs</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
         <span class="n">p</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_KEYWORD</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
@@ -6086,7 +6086,7 @@ interface without instantiating it.</p>
             <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">,</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Metadata provider </span><span class="si">{</span><span class="n">provider</span><span class="si">!r}</span><span class="s2"> has unsupported parameter </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Metadata provider </span><span class="si">{</span><span class="n">provider</span><span class="si">!r}</span><span class="s2"> has unsupported parameter </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">."</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
             <span class="n">provider_kwargs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
@@ -6094,8 +6094,8 @@ interface without instantiating it.</p>
             <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Metadata provider </span><span class="si">{</span><span class="n">provider</span><span class="si">!r}</span><span class="s2"> requires parameters unavailable &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;from the cell factory: </span><span class="si">{</span><span class="n">missing</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+            <span class="sa">f</span><span class="s2">"Metadata provider </span><span class="si">{</span><span class="n">provider</span><span class="si">!r}</span><span class="s2"> requires parameters unavailable "</span>
+            <span class="sa">f</span><span class="s2">"from the cell factory: </span><span class="si">{</span><span class="n">missing</span><span class="si">!r}</span><span class="s2">."</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">provider</span><span class="p">(</span><span class="o">**</span><span class="n">provider_kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6155,33 +6155,33 @@ interface without instantiating it.</p>
 <span class="normal">209</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">provider_result_to_patch</span><span class="p">(</span>
     <span class="n">record</span><span class="p">:</span> <span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_FactoryMetadataPatch</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a provider&#39;s return value into a metadata patch.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Convert a provider's return value into a metadata patch."""</span>
     <span class="k">match</span> <span class="n">record</span><span class="o">.</span><span class="n">kind</span><span class="p">:</span>
-        <span class="k">case</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span>
+        <span class="k">case</span> <span class="s2">"metadata"</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">_metadata_result_to_patch</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-        <span class="k">case</span> <span class="s2">&quot;model&quot;</span><span class="p">:</span>
+        <span class="k">case</span> <span class="s2">"model"</span><span class="p">:</span>
             <span class="n">models</span> <span class="o">=</span> <span class="n">_coerce_models</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">_FactoryMetadataPatch</span><span class="p">(</span>
                 <span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span>
                 <span class="n">models_position</span><span class="o">=</span><span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">case</span> <span class="s2">&quot;device_type&quot;</span><span class="p">:</span>
+        <span class="k">case</span> <span class="s2">"device_type"</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">_FactoryMetadataPatch</span><span class="p">(</span>
                 <span class="n">device_type</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">case</span> <span class="s2">&quot;ports&quot;</span><span class="p">:</span>
+        <span class="k">case</span> <span class="s2">"ports"</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">_FactoryMetadataPatch</span><span class="p">(</span><span class="n">ports</span><span class="o">=</span><span class="n">_coerce_ports</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
-        <span class="k">case</span> <span class="s2">&quot;tags&quot;</span><span class="p">:</span>
+        <span class="k">case</span> <span class="s2">"tags"</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">_FactoryMetadataPatch</span><span class="p">(</span><span class="n">tags</span><span class="o">=</span><span class="n">_coerce_tags</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
-        <span class="k">case</span> <span class="s2">&quot;display&quot;</span><span class="p">:</span>
+        <span class="k">case</span> <span class="s2">"display"</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">_FactoryMetadataPatch</span><span class="p">(</span>
                 <span class="n">display</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">_coerce_display</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">case</span> <span class="s2">&quot;info&quot;</span><span class="p">:</span>
+        <span class="k">case</span> <span class="s2">"info"</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">_FactoryMetadataPatch</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;info provider must return a mapping.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"info provider must return a mapping."</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">_FactoryMetadataPatch</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6271,7 +6271,7 @@ interface without instantiating it.</p>
     <span class="n">providers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">],</span>
     <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FactoryMetadata</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve all providers for a factory into a single FactoryMetadata.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Resolve all providers for a factory into a single FactoryMetadata."""</span>
     <span class="n">device_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">ports</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">PortSpec</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">models</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -6290,18 +6290,18 @@ interface without instantiating it.</p>
                 <span class="ow">and</span> <span class="ow">not</span> <span class="n">record</span><span class="o">.</span><span class="n">replace</span>
             <span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Conflicting metadata device_type values: &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_type</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">patch</span><span class="o">.</span><span class="n">device_type</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+                    <span class="s2">"Conflicting metadata device_type values: "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">device_type</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">patch</span><span class="o">.</span><span class="n">device_type</span><span class="si">!r}</span><span class="s2">."</span>
                 <span class="p">)</span>
             <span class="n">device_type</span> <span class="o">=</span> <span class="n">patch</span><span class="o">.</span><span class="n">device_type</span>
 
         <span class="k">if</span> <span class="n">patch</span><span class="o">.</span><span class="n">ports</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ports</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ports</span> <span class="o">!=</span> <span class="n">patch</span><span class="o">.</span><span class="n">ports</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">record</span><span class="o">.</span><span class="n">replace</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Conflicting metadata port declarations.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Conflicting metadata port declarations."</span><span class="p">)</span>
             <span class="n">ports</span> <span class="o">=</span> <span class="n">patch</span><span class="o">.</span><span class="n">ports</span>
 
         <span class="k">if</span> <span class="n">patch</span><span class="o">.</span><span class="n">models</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">patch</span><span class="o">.</span><span class="n">models_position</span> <span class="o">==</span> <span class="s2">&quot;prepend&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">patch</span><span class="o">.</span><span class="n">models_position</span> <span class="o">==</span> <span class="s2">"prepend"</span><span class="p">:</span>
                 <span class="n">models</span> <span class="o">=</span> <span class="n">patch</span><span class="o">.</span><span class="n">models</span> <span class="o">+</span> <span class="n">models</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">models</span> <span class="o">=</span> <span class="n">models</span> <span class="o">+</span> <span class="n">patch</span><span class="o">.</span><span class="n">models</span>
@@ -6311,13 +6311,13 @@ interface without instantiating it.</p>
 
         <span class="k">if</span> <span class="n">patch</span><span class="o">.</span><span class="n">display</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">display</span> <span class="ow">and</span> <span class="n">patch</span><span class="o">.</span><span class="n">display</span> <span class="o">!=</span> <span class="n">display</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">record</span><span class="o">.</span><span class="n">replace</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Conflicting metadata display declarations.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Conflicting metadata display declarations."</span><span class="p">)</span>
             <span class="n">display</span> <span class="o">=</span> <span class="n">patch</span><span class="o">.</span><span class="n">display</span>
 
         <span class="k">if</span> <span class="n">patch</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">patch</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">info</span> <span class="ow">and</span> <span class="n">info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Conflicting metadata info key: </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Conflicting metadata info key: </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2">."</span><span class="p">)</span>
                 <span class="n">info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="k">return</span> <span class="n">FactoryMetadata</span><span class="p">(</span>
@@ -6396,7 +6396,7 @@ interface without instantiating it.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

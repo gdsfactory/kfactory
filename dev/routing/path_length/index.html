@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5618,7 +5618,7 @@ each shorter router until all lengths are equal.</p>
 <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">infos</span> <span class="o">=</span> <span class="n">L</span>
 
 <span class="n">wg_enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_enclosure</span><span class="p">(</span>
-    <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;WGSTD_PLM&quot;</span><span class="p">,</span> <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">)])</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"WGSTD_PLM"</span><span class="p">,</span> <span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">)])</span>
 <span class="p">)</span>
 
 <span class="c1"># Euler bend — width and radius in µm</span>
@@ -5646,12 +5646,12 @@ each shorter router until all lengths are equal.</p>
 <p>Three North-facing start ports are staggered vertically (each 200 µm shorter than the
 previous) so that each route naturally has a different path length.  Without
 path-length matching the routes reach their end ports at different total lengths.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_baseline</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;plm_baseline&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_baseline</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"plm_baseline"</span><span class="p">)</span>
 
 <span class="c1"># Staggered starts: port 0 is longest, port 2 is shortest</span>
 <span class="n">baseline_starts</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">150</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="n">i</span> <span class="o">*</span> <span class="mi">200</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5660,7 +5660,7 @@ path-length matching the routes reach their end ports at different total lengths
 <span class="p">]</span>
 <span class="n">baseline_ends</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">400</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5677,7 +5677,7 @@ path-length matching the routes reach their end ports at different total lengths
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unmatched lengths (µm):&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes_baseline</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Unmatched lengths (µm):"</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes_baseline</span><span class="p">])</span>
 <span class="n">c_baseline</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Unmatched lengths (µm): [558.0, 738.0, 868.0]
@@ -5691,11 +5691,11 @@ all to the longest value.</p>
 <p>Pass <code>constraints=[kf.PathLengthMatch(route_names=["..."], element=-1, loop_side=-1,
 loops=1, loop_position=0)]</code> plus <code>route_name="..."</code> to insert loops in the last
 backbone segment (<code>element=-1</code>), on the left side, centered in the segment.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_plm</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;plm_basic&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_plm</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"plm_basic"</span><span class="p">)</span>
 
 <span class="n">plm_starts</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">150</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="n">i</span> <span class="o">*</span> <span class="mi">200</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5704,7 +5704,7 @@ backbone segment (<code>element=-1</code>), on the left side, centered in the se
 <span class="p">]</span>
 <span class="n">plm_ends</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">400</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5721,17 +5721,17 @@ backbone segment (<code>element=-1</code>), on the left side, centered in the se
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
-            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_basic&quot;</span><span class="p">],</span>
+            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"plm_basic"</span><span class="p">],</span>
             <span class="n">element</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># last backbone segment</span>
             <span class="n">loop_side</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># loops protrude to the left (-1=left, 0=center, 1=right)</span>
             <span class="n">loops</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># one squiggle loop per route</span>
             <span class="n">loop_position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># loop is centered in the segment</span>
         <span class="p">)</span>
     <span class="p">],</span>
-    <span class="n">route_name</span><span class="o">=</span><span class="s2">&quot;plm_basic&quot;</span><span class="p">,</span>
+    <span class="n">route_name</span><span class="o">=</span><span class="s2">"plm_basic"</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Matched lengths (µm):&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes_plm</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Matched lengths (µm):"</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes_plm</span><span class="p">])</span>
 <span class="n">c_plm</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Matched lengths (µm): [918.9, 918.9, 918.9]
@@ -5775,11 +5775,11 @@ side that avoids neighbouring structures.</p>
 so the routes need to be closer in path length than for left/center loops.  Here
 we halve the y-stagger (<code>100</code> µm instead of <code>200</code>) so the squiggle stays compact
 enough to clear the neighbour — verifiable with <code>c.connectivity_check()</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_right</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;plm_loop_right&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_right</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"plm_loop_right"</span><span class="p">)</span>
 
 <span class="n">rs_starts</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">150</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="n">i</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5788,7 +5788,7 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
 <span class="p">]</span>
 <span class="n">rs_ends</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">400</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5805,14 +5805,14 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
-            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_right&quot;</span><span class="p">],</span>
+            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"plm_right"</span><span class="p">],</span>
             <span class="n">element</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loop_side</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># ← right</span>
             <span class="n">loops</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loop_position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">],</span>
-    <span class="n">route_name</span><span class="o">=</span><span class="s2">&quot;plm_right&quot;</span><span class="p">,</span>
+    <span class="n">route_name</span><span class="o">=</span><span class="s2">"plm_right"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">c_right</span>
 </code></pre></div>
@@ -5820,11 +5820,11 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
 </code></pre></div>
 <img alt="png" src="../path_length/output_10_0.png" /></p>
 <h3 id="loop_side-center-symmetric">loop_side = center (symmetric)</h3>
-<div class="highlight"><pre><span></span><code><span class="n">c_center</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;plm_loop_center&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_center</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"plm_loop_center"</span><span class="p">)</span>
 
 <span class="n">lc_starts</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">150</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="n">i</span> <span class="o">*</span> <span class="mi">200</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5833,7 +5833,7 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
 <span class="p">]</span>
 <span class="n">lc_ends</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">400</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5850,14 +5850,14 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
-            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_center&quot;</span><span class="p">],</span>
+            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"plm_center"</span><span class="p">],</span>
             <span class="n">element</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loop_side</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># ← center (symmetric around route axis)</span>
             <span class="n">loops</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loop_position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">],</span>
-    <span class="n">route_name</span><span class="o">=</span><span class="s2">&quot;plm_center&quot;</span><span class="p">,</span>
+    <span class="n">route_name</span><span class="o">=</span><span class="s2">"plm_center"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">c_center</span>
 </code></pre></div>
@@ -5891,11 +5891,11 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
 </tr>
 </tbody>
 </table>
-<div class="highlight"><pre><span></span><code><span class="n">c_pos_end</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;plm_loop_pos_end&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_pos_end</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"plm_loop_pos_end"</span><span class="p">)</span>
 
 <span class="n">pe_starts</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">150</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="n">i</span> <span class="o">*</span> <span class="mi">200</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5904,7 +5904,7 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
 <span class="p">]</span>
 <span class="n">pe_ends</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">400</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5921,14 +5921,14 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
-            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_pos_end&quot;</span><span class="p">],</span>
+            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"plm_pos_end"</span><span class="p">],</span>
             <span class="n">element</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loop_side</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loops</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loop_position</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># ← near the end of the segment</span>
         <span class="p">)</span>
     <span class="p">],</span>
-    <span class="n">route_name</span><span class="o">=</span><span class="s2">&quot;plm_pos_end&quot;</span><span class="p">,</span>
+    <span class="n">route_name</span><span class="o">=</span><span class="s2">"plm_pos_end"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">c_pos_end</span>
 </code></pre></div>
@@ -5940,11 +5940,11 @@ enough to clear the neighbour — verifiable with <code>c.connectivity_check()</
 loop may become very tall.  Increasing <code>loops</code> splits the extra length across multiple
 smaller squiggles, which keeps the loop footprint compact and avoids collision with
 neighbouring structures.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c_loops2</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;plm_loops_2&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_loops2</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"plm_loops_2"</span><span class="p">)</span>
 
 <span class="n">l2_starts</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">150</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="n">i</span> <span class="o">*</span> <span class="mi">200</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5953,7 +5953,7 @@ neighbouring structures.</p>
 <span class="p">]</span>
 <span class="n">l2_ends</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">400</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -5970,17 +5970,17 @@ neighbouring structures.</p>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
-            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_loops_2&quot;</span><span class="p">],</span>
+            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"plm_loops_2"</span><span class="p">],</span>
             <span class="n">element</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loop_side</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loops</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>  <span class="c1"># ← two squiggle loops per route</span>
             <span class="n">loop_position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">],</span>
-    <span class="n">route_name</span><span class="o">=</span><span class="s2">&quot;plm_loops_2&quot;</span><span class="p">,</span>
+    <span class="n">route_name</span><span class="o">=</span><span class="s2">"plm_loops_2"</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Matched lengths (µm):&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes_l2</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Matched lengths (µm):"</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes_l2</span><span class="p">])</span>
 <span class="n">c_loops2</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Matched lengths (µm): [969.7, 969.7, 969.7]
@@ -6021,11 +6021,11 @@ several length properties that are useful for diagnostics:</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight"><pre><span></span><code><span class="n">c_inspect</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">&quot;plm_inspect&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c_inspect</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="s2">"plm_inspect"</span><span class="p">)</span>
 
 <span class="n">ins_starts</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">150</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="o">-</span><span class="n">i</span> <span class="o">*</span> <span class="mi">200</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -6034,7 +6034,7 @@ several length properties that are useful for diagnostics:</p>
 <span class="p">]</span>
 <span class="n">ins_ends</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">400</span><span class="p">)),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">WG_WIDTH</span><span class="p">,</span>
         <span class="n">layer_info</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
@@ -6051,23 +6051,23 @@ several length properties that are useful for diagnostics:</p>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
     <span class="n">constraints</span><span class="o">=</span><span class="p">[</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">PathLengthMatch</span><span class="p">(</span>
-            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plm_inspect&quot;</span><span class="p">],</span>
+            <span class="n">route_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"plm_inspect"</span><span class="p">],</span>
             <span class="n">element</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loop_side</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loops</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">loop_position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">],</span>
-    <span class="n">route_name</span><span class="o">=</span><span class="s2">&quot;plm_inspect&quot;</span><span class="p">,</span>
+    <span class="n">route_name</span><span class="o">=</span><span class="s2">"plm_inspect"</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Route&#39;</span><span class="si">:</span><span class="s2">&lt;8</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;length (µm)&#39;</span><span class="si">:</span><span class="s2">&gt;14</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;straights (µm)&#39;</span><span class="si">:</span><span class="s2">&gt;16</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;n_bend90&#39;</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">52</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'Route'</span><span class="si">:</span><span class="s2">&lt;8</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'length (µm)'</span><span class="si">:</span><span class="s2">&gt;14</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'straights (µm)'</span><span class="si">:</span><span class="s2">&gt;16</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'n_bend90'</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">52</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">routes_ins</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">&lt;6</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">&gt;13.3f</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">length_straights</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">&gt;15.3f</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">n_bend90</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">&lt;6</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">&gt;13.3f</span><span class="si">}</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">length_straights</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">&gt;15.3f</span><span class="si">}</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">n_bend90</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Route       length (µm)   straights (µm)   n_bend90
@@ -6231,7 +6231,7 @@ geometry may become cramped.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5729,9 +5729,9 @@ coordinates.</p>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1"># Convert to DBU integers for low-level operations</span>
 <span class="n">box_dbu</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">box_um</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DBU: </span><span class="si">{</span><span class="n">box_dbu</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DBU width : </span><span class="si">{</span><span class="n">box_dbu</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2"> nm&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;µm  width : </span><span class="si">{</span><span class="n">box_um</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2"> µm&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DBU: </span><span class="si">{</span><span class="n">box_dbu</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DBU width : </span><span class="si">{</span><span class="n">box_dbu</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2"> nm"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"µm  width : </span><span class="si">{</span><span class="n">box_um</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2"> µm"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>DBU: (-2500,-5000;2500,5000)
 DBU width : 5000 nm
@@ -5753,7 +5753,7 @@ DBU width : 5000 nm
 <span class="n">poly_b</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">polygon_from_array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 
 <span class="c1"># Both produce equivalent polygons</span>
-<span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;polygon_demo&quot;</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"polygon_demo"</span><span class="p">)</span>
 <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">poly_a</span><span class="p">)</span>
 <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WGEX</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">poly_b</span><span class="p">)</span>
 <span class="n">c</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
@@ -5764,7 +5764,7 @@ DBU width : 5000 nm
 <h3 id="dpolygon-ellipse-helper">DPolygon — ellipse helper</h3>
 <p><code>DPolygon.ellipse(bbox, n_points)</code> inscribes an ellipse inside <code>bbox</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">ellipse</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span><span class="o">.</span><span class="n">ellipse</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="mi">64</span><span class="p">)</span>
-<span class="n">e_cell</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ellipse_demo&quot;</span><span class="p">)</span>
+<span class="n">e_cell</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"ellipse_demo"</span><span class="p">)</span>
 <span class="n">e_cell</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">ellipse</span><span class="p">)</span>
 <span class="n">e_cell</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
@@ -5774,7 +5774,7 @@ DBU width : 5000 nm
 <h2 id="inserting-shapes-into-a-cell">Inserting shapes into a cell</h2>
 <p>All shapes live inside a cell on a specific layer.
 <code>cell.shapes(layer_index).insert(shape)</code> adds the shape to that layer.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;shapes_on_layers&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"shapes_on_layers"</span><span class="p">)</span>
 
 <span class="c1"># Box on WG layer</span>
 <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -5814,9 +5814,9 @@ DBU width : 5000 nm
 typically disallow it on cell instances.</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="n">textgen</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">TextGenerator</span><span class="o">.</span><span class="n">default_generator</span><span class="p">()</span>
-<span class="n">text_region</span> <span class="o">=</span> <span class="n">textgen</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;kfactory&quot;</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span>
+<span class="n">text_region</span> <span class="o">=</span> <span class="n">textgen</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">"kfactory"</span><span class="p">,</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span>
 
-<span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;text_transforms&quot;</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"text_transforms"</span><span class="p">)</span>
 <span class="c1"># Place text at origin</span>
 <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">text_region</span><span class="p">)</span>
 <span class="c1"># Translate +10 µm in y</span>
@@ -5838,18 +5838,18 @@ typically disallow it on cell instances.</p>
 <p>Labels record metadata directly in the GDS file (e.g. port names, cell IDs).
 They are not fabricated — use <code>kf.kdb.Text</code> for labels and polygon-based text
 (via <code>TextGenerator</code>) for visible text shapes.</p>
-<div class="highlight"><pre><span></span><code><span class="n">anno</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;label_demo&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">anno</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"label_demo"</span><span class="p">)</span>
 <span class="n">s</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span>
 <span class="n">inst</span> <span class="o">=</span> <span class="n">anno</span> <span class="o">&lt;&lt;</span> <span class="n">s</span>
 
 <span class="c1"># Attach a label at the instance origin</span>
 <span class="n">anno</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">FLOORPLAN</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-    <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot;waveguide_1&quot;</span><span class="p">,</span> <span class="n">inst</span><span class="o">.</span><span class="n">trans</span><span class="p">)</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">"waveguide_1"</span><span class="p">,</span> <span class="n">inst</span><span class="o">.</span><span class="n">trans</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="c1"># Dynamic label: embed a measurement</span>
 <span class="n">anno</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">FLOORPLAN</span><span class="p">))</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;width=</span><span class="si">{</span><span class="n">anno</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">um&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"width=</span><span class="si">{</span><span class="n">anno</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">um"</span><span class="p">,</span>
         <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="n">anno</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">anno</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">top</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">)</span>
@@ -5909,31 +5909,31 @@ Convert a <code>DPolygon</code> to a <code>Region</code> with <code>kcl.to_dbu(p
 <span class="n">r2</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">e2</span><span class="p">))</span>
 </code></pre></div>
 <h3 id="not-a-b">NOT (A − B)</h3>
-<div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">&quot;not_demo&quot;</span><span class="p">,</span> <span class="n">r1</span> <span class="o">-</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">"not_demo"</span><span class="p">,</span> <span class="n">r1</span> <span class="o">-</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
 <img alt="png" src="../geometry/output_19_0.png" /></p>
 <h3 id="and-a-b">AND (A ∩ B)</h3>
-<div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">&quot;and_demo&quot;</span><span class="p">,</span> <span class="n">r1</span> <span class="o">&amp;</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">"and_demo"</span><span class="p">,</span> <span class="n">r1</span> <span class="o">&amp;</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
 <img alt="png" src="../geometry/output_21_0.png" /></p>
 <h3 id="or-union-a-b">OR / union (A + B)</h3>
-<div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">&quot;or_demo&quot;</span><span class="p">,</span> <span class="n">r1</span> <span class="o">+</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">"or_demo"</span><span class="p">,</span> <span class="n">r1</span> <span class="o">+</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
 <img alt="png" src="../geometry/output_23_0.png" /></p>
 <h3 id="or-merged-single-polygon-result-after-merge">OR merged — single-polygon result after <code>.merge()</code></h3>
-<div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">&quot;or_merged_demo&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">r1</span> <span class="o">+</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">merge</span><span class="p">())</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">"or_merged_demo"</span><span class="p">,</span> <span class="p">(</span><span class="n">r1</span> <span class="o">+</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">merge</span><span class="p">())</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
 <img alt="png" src="../geometry/output_25_0.png" /></p>
 <h3 id="xor-a-b">XOR (A ⊕ B)</h3>
-<div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">&quot;xor_demo&quot;</span><span class="p">,</span> <span class="n">r1</span> <span class="o">^</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">_show</span><span class="p">(</span><span class="s2">"xor_demo"</span><span class="p">,</span> <span class="n">r1</span> <span class="o">^</span> <span class="n">r2</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
@@ -5944,9 +5944,9 @@ Convert a <code>DPolygon</code> to a <code>Region</code> with <code>kcl.to_dbu(p
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;demo_geometry.gds&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"demo_geometry.gds"</span>
     <span class="n">anno</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrote </span><span class="si">{</span><span class="n">out</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">out</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span><span class="si">}</span><span class="s2"> bytes)&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Wrote </span><span class="si">{</span><span class="n">out</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">out</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span><span class="si">}</span><span class="s2"> bytes)"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Wrote demo_geometry.gds (1012 bytes)
 </code></pre></div>
@@ -6091,7 +6091,7 @@ Convert a <code>DPolygon</code> to a <code>Region</code> with <code>kcl.to_dbu(p
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

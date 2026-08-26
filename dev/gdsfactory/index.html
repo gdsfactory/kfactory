@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5541,7 +5541,7 @@ is the internal index of the layer, meaning KLayout will keep layers in a mappin
 <p>Or it can be done dynamically with a slightly more complex syntax.</p>
 <div class="admonition example">
 <p class="admonition-title">Dynamic LayerEnum</p>
-<div class="highlight"><pre><span></span><code><span class="n">LAYER</span> <span class="o">=</span> <span class="n">kfactory</span><span class="o">.</span><span class="n">LayerEnum</span><span class="p">(</span><span class="s2">&quot;LAYER&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;WG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;WGEXCLUDE&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)})</span>
+<div class="highlight"><pre><span></span><code><span class="n">LAYER</span> <span class="o">=</span> <span class="n">kfactory</span><span class="o">.</span><span class="n">LayerEnum</span><span class="p">(</span><span class="s2">"LAYER"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"WG"</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"WGEXCLUDE"</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)})</span>
 </code></pre></div>
 </div>
 <p>The first argument represents the name of the enum that will be used for the <code>__str__</code> or <code>__repr__</code> methods.
@@ -5550,10 +5550,10 @@ This will make sure that the behavior is the same as the one that was constructe
 <p>The LayerEnum also allows mapping from string to layer index and layer number and datatype:</p>
 <div class="admonition example">
 <p class="admonition-title">Accessing LayerEnum by index or name and getting layer number &amp; datatype</p>
-<div class="highlight"><pre><span></span><code>&gt;&gt;&gt; LAYER = kfactory.LayerEnum(&quot;LAYER&quot;, {&quot;WG&quot;: (1,0), &quot;WGEXCLUDE&quot;: (1,1)})
+<div class="highlight"><pre><span></span><code>&gt;&gt;&gt; LAYER = kfactory.LayerEnum("LAYER", {"WG": (1,0), "WGEXCLUDE": (1,1)})
 &gt;&gt;&gt; LAYER.WG
 &lt;LAYER.WG: 0&gt;
-&gt;&gt;&gt; LAYER[&quot;WG&quot;]
+&gt;&gt;&gt; LAYER["WG"]
 &lt;LAYER.WG: 0&gt;
 &gt;&gt;&gt; LAYER(0)
 &lt;LAYER.WG: 0&gt;
@@ -5673,9 +5673,9 @@ Using the <code>LAYER</code> object from above, a code could look like this:</p>
 <div class="admonition example">
 <p class="admonition-title">Text</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># dbu based</span>
-<span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">LAYER</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kfactory</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">&quot;any string here&quot;</span><span class="p">,</span> <span class="n">x_dbu</span><span class="p">,</span> <span class="n">y_dbu</span><span class="p">))</span>
+<span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">LAYER</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kfactory</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="s2">"any string here"</span><span class="p">,</span> <span class="n">x_dbu</span><span class="p">,</span> <span class="n">y_dbu</span><span class="p">))</span>
 <span class="c1"># um based</span>
-<span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">LAYER</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kfactory</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DText</span><span class="p">(</span><span class="s2">&quot;any string here&quot;</span><span class="p">,</span> <span class="n">x_um</span><span class="p">,</span> <span class="n">y_um</span><span class="p">))</span>
+<span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">LAYER</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kfactory</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DText</span><span class="p">(</span><span class="s2">"any string here"</span><span class="p">,</span> <span class="n">x_um</span><span class="p">,</span> <span class="n">y_um</span><span class="p">))</span>
 </code></pre></div>
 </div>
 <h2 id="connecting-ports">Connecting Ports</h2>
@@ -5685,11 +5685,11 @@ This also means that a port is aware of mirroring. Since a <code>connect</code> 
 <div class="admonition example">
 <p class="admonition-title">Example</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># inst1,inst2 are instances</span>
-<span class="c1"># connect inst1 &quot;o1&quot; to inst2 &quot;o2&quot;</span>
-<span class="n">inst1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">inst2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+<span class="c1"># connect inst1 "o1" to inst2 "o2"</span>
+<span class="n">inst1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">inst2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
 <span class="c1"># also possible</span>
-<span class="n">inst1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">inst2</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">)</span>
-<span class="c1">### If inst2 &quot;o2&quot; had trans.is_mirror() == True, inst1&#39;s transformation now also has is_mirror() == True</span>
+<span class="n">inst1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">inst2</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">)</span>
+<span class="c1">### If inst2 "o2" had trans.is_mirror() == True, inst1's transformation now also has is_mirror() == True</span>
 </code></pre></div>
 </div>
 <h2 id="cross-sections-enclosures">Cross-Sections &amp; Enclosures</h2>
@@ -5721,11 +5721,11 @@ it defines a symmetric waveguide profile by combining a core layer with an enclo
 <span class="n">enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WGEX</span><span class="p">),</span> <span class="mi">2000</span><span class="p">)],</span>
                          <span class="n">main_layer</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">))</span>
 <span class="n">xs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">SymmetricalCrossSection</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">enclosure</span><span class="o">=</span><span class="n">enc</span><span class="p">,</span>
-                                  <span class="n">layer</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;xs_wg&quot;</span><span class="p">)</span>
+                                  <span class="n">layer</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">"xs_wg"</span><span class="p">)</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>   <span class="c1"># registers &amp; returns the cross-section</span>
 
 <span class="c1"># Later — retrieve by name (hashable, safe inside @kf.cell):</span>
-<span class="n">xs_retrieved</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="s2">&quot;xs_wg&quot;</span><span class="p">)</span>
+<span class="n">xs_retrieved</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="s2">"xs_wg"</span><span class="p">)</span>
 </code></pre></div>
 <p>See <a href="../components/cross_sections/">Cross-Sections &amp; Enclosures</a> for a full walkthrough.</p>
 <p>Beyond cross-sections, kfactory provides a more generalised cladding system: enclosures are not limited
@@ -5866,7 +5866,7 @@ for details.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

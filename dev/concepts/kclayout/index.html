@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5519,8 +5519,8 @@ default layout aware of these layers so helpers like <code>find_layer</code> wor
 <p><code>kf.kcl</code> is always available after <code>import kfactory as kf</code>. It holds the global
 namespace of cells.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Name and grid size of the default layout</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;name : </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dbu  : </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="si">}</span><span class="s2"> µm  (</span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> nm grid)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"name : </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dbu  : </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="si">}</span><span class="s2"> µm  (</span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> nm grid)"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>name : DEFAULT
 dbu  : 0.001 µm  (1 nm grid)
@@ -5540,10 +5540,10 @@ dbu  : 0.001 µm  (1 nm grid)
 <h2 id="creating-a-second-layout-second-pdk">Creating a second layout (second PDK)</h2>
 <p>Pass a name string to <code>KCLayout(...)</code>. You can also set a different <code>dbu</code> to
 simulate a PDK with a coarser grid (e.g. 5 nm instead of 1 nm).</p>
-<div class="highlight"><pre><span></span><code><span class="n">kcl2</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;DEMO_PDK&quot;</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">kcl2</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"DEMO_PDK"</span><span class="p">,</span> <span class="n">infos</span><span class="o">=</span><span class="n">LAYER</span><span class="p">)</span>
 <span class="n">kcl2</span><span class="o">.</span><span class="n">dbu</span> <span class="o">=</span> <span class="mf">0.005</span>  <span class="c1"># 5 nm grid</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;name : </span><span class="si">{</span><span class="n">kcl2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dbu  : </span><span class="si">{</span><span class="n">kcl2</span><span class="o">.</span><span class="n">dbu</span><span class="si">}</span><span class="s2"> µm  (</span><span class="si">{</span><span class="n">kcl2</span><span class="o">.</span><span class="n">dbu</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> nm grid)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"name : </span><span class="si">{</span><span class="n">kcl2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dbu  : </span><span class="si">{</span><span class="n">kcl2</span><span class="o">.</span><span class="n">dbu</span><span class="si">}</span><span class="s2"> µm  (</span><span class="si">{</span><span class="n">kcl2</span><span class="o">.</span><span class="n">dbu</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> nm grid)"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>name : DEMO_PDK
 dbu  : 0.005 µm  (5 nm grid)
@@ -5559,32 +5559,32 @@ After registration, the factory is accessible by name via <code>kcl2.factories</
 <div class="highlight"><pre><span></span><code><span class="n">sf2</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">factories</span><span class="o">.</span><span class="n">straight</span><span class="o">.</span><span class="n">straight_dbu_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl2</span><span class="p">)</span>
 
 <span class="c1"># Register a cross section on kcl2, then call the factory by name with it.</span>
-<span class="c1"># (`kcl2.factories[&quot;straight&quot;]` is cross-section-first — pass `cross_section=`.)</span>
+<span class="c1"># (`kcl2.factories["straight"]` is cross-section-first — pass `cross_section=`.)</span>
 <span class="n">kcl2</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span>
-    <span class="n">kf</span><span class="o">.</span><span class="n">CrossSectionSpecDict</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;dbu&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">)</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">CrossSectionSpecDict</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"dbu"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"WG"</span><span class="p">)</span>
 <span class="p">)</span>
-<span class="n">s2</span> <span class="o">=</span> <span class="n">kcl2</span><span class="o">.</span><span class="n">factories</span><span class="p">[</span><span class="s2">&quot;straight&quot;</span><span class="p">](</span><span class="n">length</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="s2">&quot;WG&quot;</span><span class="p">)</span>
+<span class="n">s2</span> <span class="o">=</span> <span class="n">kcl2</span><span class="o">.</span><span class="n">factories</span><span class="p">[</span><span class="s2">"straight"</span><span class="p">](</span><span class="n">length</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="s2">"WG"</span><span class="p">)</span>
 <span class="n">s2</span><span class="o">.</span><span class="n">settings</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>KCellSettings(cross_section=&#39;WG&#39;, length=10000)
+<div class="highlight"><pre><span></span><code>KCellSettings(cross_section='WG', length=10000)
 </code></pre></div>
 <h2 id="dbu-vs-m-dimensions-across-layouts">DBU vs µm dimensions across layouts</h2>
 <p>The same physical width (1 µm) occupies different numbers of database units
 depending on the grid size. The <code>dbbox()</code> method always returns µm regardless
 of <code>dbu</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Default layout: 1 nm grid  → 1 µm = 1000 dbu</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- default kcl (1 nm grid) ---&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  height dbu : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  height µm  : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  width  dbu : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  width  µm  : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"--- default kcl (1 nm grid) ---"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  height dbu : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  height µm  : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  width  dbu : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  width  µm  : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="c1"># DEMO_PDK: 5 nm grid  → 1 µm = 200 dbu</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- DEMO_PDK (5 nm grid) ---&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  height dbu : </span><span class="si">{</span><span class="n">s2</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  height µm  : </span><span class="si">{</span><span class="n">s2</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  width  dbu : </span><span class="si">{</span><span class="n">s2</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  width  µm  : </span><span class="si">{</span><span class="n">s2</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"--- DEMO_PDK (5 nm grid) ---"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  height dbu : </span><span class="si">{</span><span class="n">s2</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  height µm  : </span><span class="si">{</span><span class="n">s2</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  width  dbu : </span><span class="si">{</span><span class="n">s2</span><span class="o">.</span><span class="n">bbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  width  µm  : </span><span class="si">{</span><span class="n">s2</span><span class="o">.</span><span class="n">dbbox</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>--- default kcl (1 nm grid) ---
   height dbu : 1000
@@ -5599,13 +5599,13 @@ of <code>dbu</code>.</p>
 </code></pre></div>
 <p>Port widths follow the same rule — <code>ports.print()</code> shows DBU values by default;
 pass <code>unit="um"</code> to see physical (µm) values instead.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== ports in DBU ===&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">"=== ports in DBU ==="</span><span class="p">)</span>
 <span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">print</span><span class="p">()</span>
 <span class="n">s2</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">print</span><span class="p">()</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== ports in µm ===&quot;</span><span class="p">)</span>
-<span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">&quot;um&quot;</span><span class="p">)</span>
-<span class="n">s2</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">&quot;um&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== ports in µm ==="</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">"um"</span><span class="p">)</span>
+<span class="n">s2</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">"um"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>=== ports in DBU ===
 
@@ -5659,12 +5659,12 @@ pass <code>unit="um"</code> to see physical (µm) values instead.</p>
 <h2 id="mixing-cells-from-different-layouts">Mixing cells from different layouts</h2>
 <p>Cells from any <code>KCLayout</code> can be instantiated inside a cell belonging to another
 layout. kfactory copies the referenced cell's geometry transparently.</p>
-<div class="highlight"><pre><span></span><code><span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">(</span><span class="s2">&quot;mixed_pdks&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">(</span><span class="s2">"mixed_pdks"</span><span class="p">)</span>
 <span class="n">si_default</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">s</span>  <span class="c1"># instance of the 1 nm-grid straight</span>
 <span class="n">si_demo</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">s2</span>  <span class="c1"># instance of the 5 nm-grid straight</span>
 
 <span class="c1"># Connect port o1 of the demo cell to port o2 of the default cell</span>
-<span class="n">si_demo</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">si_default</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">)</span>
+<span class="n">si_demo</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">si_default</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">)</span>
 <span class="n">c</span>
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
@@ -5677,16 +5677,16 @@ file. <code>KCLayout.read()</code> loads it back.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
-    <span class="n">gds_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;demo.gds&quot;</span>
+    <span class="n">gds_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"demo.gds"</span>
     <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">gds_path</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;written: </span><span class="si">{</span><span class="n">gds_path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span><span class="si">}</span><span class="s2"> bytes&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"written: </span><span class="si">{</span><span class="n">gds_path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span><span class="si">}</span><span class="s2"> bytes"</span><span class="p">)</span>
 
     <span class="c1"># Load into a fresh layout to verify round-trip</span>
-    <span class="n">kcl3</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">&quot;LOADED&quot;</span><span class="p">)</span>
+    <span class="n">kcl3</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"LOADED"</span><span class="p">)</span>
     <span class="n">kcl3</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gds_path</span><span class="p">,</span> <span class="n">register_cells</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cells read back: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">kcl3</span><span class="o">.</span><span class="n">kcells</span><span class="o">.</span><span class="n">keys</span><span class="p">())[:</span><span class="mi">5</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cells read back: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">kcl3</span><span class="o">.</span><span class="n">kcells</span><span class="o">.</span><span class="n">keys</span><span class="p">())[:</span><span class="mi">5</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>written: 1180 bytes
+<div class="highlight"><pre><span></span><code>written: 1178 bytes
 cells read back: [1, 0, 2]
 </code></pre></div>
 <h2 id="key-attributes-at-a-glance">Key attributes at a glance</h2>
@@ -5824,7 +5824,7 @@ cells read back: [1, 0, 2]
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

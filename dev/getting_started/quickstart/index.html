@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5475,12 +5475,12 @@ duplicate geometry in the layout.</p>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">straight</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Straight waveguide with WG core and WGEX exclusion zone.</span>
+<span class="w">    </span><span class="sd">"""Straight waveguide with WG core and WGEX exclusion zone.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        width: waveguide width in µm</span>
 <span class="sd">        length: waveguide length in µm</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
     <span class="n">ex</span> <span class="o">=</span> <span class="n">width</span> <span class="o">+</span> <span class="mf">2.0</span>  <span class="c1"># 1 µm exclusion on each side</span>
 
@@ -5496,7 +5496,7 @@ duplicate geometry in the layout.</p>
     <span class="n">wd</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
             <span class="n">width</span><span class="o">=</span><span class="n">wd</span><span class="p">,</span>
             <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
@@ -5505,7 +5505,7 @@ duplicate geometry in the layout.</p>
     <span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
         <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
             <span class="n">width</span><span class="o">=</span><span class="n">wd</span><span class="p">,</span>
             <span class="n">dcplx_trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">layer</span><span class="o">=</span><span class="n">wl</span><span class="p">,</span>
@@ -5540,7 +5540,7 @@ duplicate geometry in the layout.</p>
 <span class="k">def</span><span class="w"> </span><span class="nf">l_shaped_arm</span><span class="p">(</span>
     <span class="n">wg_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">bend_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span> <span class="n">arm_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple L-shaped arm: straight → 90° Euler bend → straight.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Simple L-shaped arm: straight → 90° Euler bend → straight."""</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
 
     <span class="n">_wg</span> <span class="o">=</span> <span class="n">straight</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">wg_width</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">arm_length</span><span class="p">)</span>
@@ -5552,12 +5552,12 @@ duplicate geometry in the layout.</p>
     <span class="n">i_wg2</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">_wg</span>
 
     <span class="c1"># Connect in a chain</span>
-    <span class="n">i_bend</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">i_wg1</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">)</span>
-    <span class="n">i_wg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span> <span class="n">i_bend</span><span class="p">,</span> <span class="s2">&quot;o2&quot;</span><span class="p">)</span>
+    <span class="n">i_bend</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">i_wg1</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">)</span>
+    <span class="n">i_wg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">i_bend</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">)</span>
 
     <span class="c1"># Expose the outer ports on the parent cell</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_wg1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">])</span>
-    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_wg2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">])</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_wg1</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o1"</span><span class="p">])</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">i_wg2</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">"o2"</span><span class="p">])</span>
     <span class="n">c</span><span class="o">.</span><span class="n">auto_rename_ports</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">c</span>
 
@@ -5570,16 +5570,16 @@ duplicate geometry in the layout.</p>
 <img alt="png" src="../quickstart/output_9_0.png" /></p>
 <h2 id="5-inspect-the-result">5. Inspect the result</h2>
 <p>Every cell carries metadata you can inspect:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cell name    :&quot;</span><span class="p">,</span> <span class="n">arm</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bounding box :&quot;</span><span class="p">,</span> <span class="n">arm</span><span class="o">.</span><span class="n">dbbox</span><span class="p">(),</span> <span class="s2">&quot;µm&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">"Cell name    :"</span><span class="p">,</span> <span class="n">arm</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Bounding box :"</span><span class="p">,</span> <span class="n">arm</span><span class="o">.</span><span class="n">dbbox</span><span class="p">(),</span> <span class="s2">"µm"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ports:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Ports:"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">arm</span><span class="o">.</span><span class="n">ports</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">:</span><span class="s2">4s</span><span class="si">}</span><span class="s2">  layer=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;  width=</span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">width</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;  @ (</span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">) µm&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;  angle=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">°&quot;</span>
+        <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">:</span><span class="s2">4s</span><span class="si">}</span><span class="s2">  layer=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">layer</span><span class="si">}</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"  width=</span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">width</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> µm"</span>
+        <span class="sa">f</span><span class="s2">"  @ (</span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">) µm"</span>
+        <span class="sa">f</span><span class="s2">"  angle=</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">90</span><span class="si">}</span><span class="s2">°"</span>
     <span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Cell name    : l_shaped_arm_WW1_BR10_AL20
@@ -5684,7 +5684,7 @@ GDS to the viewer:</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

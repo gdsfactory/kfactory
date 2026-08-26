@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5686,8 +5686,8 @@
 <h2 id="logging">Logging</h2>
 <p>Logging is done through <a href="https://github.com/Delgan/loguru"><code>loguru</code></a>. KFactory allows configuration of the log level.
 The logger can be used to log the message to the console.</p>
-<div class="highlight"><pre><span></span><code><span class="n">kfactory</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;message </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">var1</span><span class="p">,</span> <span class="n">var2</span><span class="p">)</span>
-<span class="n">kfactory</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;f-string message </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">kfactory</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"message </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span> <span class="n">var1</span><span class="p">,</span> <span class="n">var2</span><span class="p">)</span>
+<span class="n">kfactory</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"f-string message </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="logging-options">Logging Options</h3>
 <p>Below are some basic configurations available in kfactory. loguru also supports various
@@ -5785,11 +5785,11 @@ so anything below "INFO" is not sent to an output. This can be configured either
 <p>Alternatively <code>kfactory.logger.log(level: str | int, message: str)</code> can be used.</p>
 <p>Setting the loglevel through environment:</p>
 <h5 id="linuxmacos">Linux/MacOS</h5>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">KFACTORY_LOGFILTER_LEVEL</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">KFACTORY_LOGFILTER_LEVEL</span><span class="o">=</span><span class="s2">"DEBUG"</span>
 </code></pre></div>
 <p>This can of course also be done in a way which requires setting it only once. (under Linux/MacOS): <code>KFACTORY_LOGFILTER_LEVEL="DEBUG" python my_file.py</code></p>
 <h5 id="windows">Windows</h5>
-<div class="highlight"><pre><span></span><code>setx KFACTORY_LOGFILTER_LEVEL=&quot;DEBUG&quot;
+<div class="highlight"><pre><span></span><code>setx KFACTORY_LOGFILTER_LEVEL="DEBUG"
 </code></pre></div>
 <h3 id="using-loguru-to-give-more-comprehensive-traceback">Using loguru to give more comprehensive traceback</h3>
 <p>loguru's logger offers a catch decorator to catch exceptions and give a more conprehensive traceback.</p>
@@ -5799,7 +5799,7 @@ so anything below "INFO" is not sent to an output. This can be configured either
 <span class="nd">@kf</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">catch</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">42</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;x is not 42, it&#39;s </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"x is not 42, it's </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">run_test</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -5811,20 +5811,20 @@ so anything below "INFO" is not sent to an output. This can be configured either
 </code></pre></div>
 <p>This will produce a traceback with infos about the values:</p>
 <div class="highlight"><pre><span></span><code>2023-05-31 17:56:45.816 | INFO     | kfactory.conf:__init__:105 - LogLevel: INFO
-2023-05-31 17:56:45.890 | ERROR    | __main__:run_test:11 - An error has been caught in function &#39;run_test&#39;, process &#39;MainProcess&#39; (28352), thread &#39;MainThread&#39; (139734375601984):
+2023-05-31 17:56:45.890 | ERROR    | __main__:run_test:11 - An error has been caught in function 'run_test', process 'MainProcess' (28352), thread 'MainThread' (139734375601984):
 Traceback (most recent call last):
 
-  File &quot;/home/sgoeldi/repos/kfactory/test.py&quot;, line 15, in &lt;module&gt;
+  File "/home/sgoeldi/repos/kfactory/test.py", line 15, in &lt;module&gt;
     run_test(20)
     └ &lt;function run_test at 0x7f15c421f100&gt;
 
-&gt; File &quot;/home/sgoeldi/repos/kfactory/test.py&quot;, line 11, in run_test
+&gt; File "/home/sgoeldi/repos/kfactory/test.py", line 11, in run_test
     return test(x)
            │    └ 20
            └ &lt;function test at 0x7f16717d13a0&gt;
 
-  File &quot;/home/sgoeldi/repos/kfactory/test.py&quot;, line 7, in test
-    raise ValueError(f&quot;x is not 42, it&#39;s {x}&quot;)
+  File "/home/sgoeldi/repos/kfactory/test.py", line 7, in test
+    raise ValueError(f"x is not 42, it's {x}")
 </code></pre></div>
 <h2 id="jupyter-widget">Jupyter Widget</h2>
 <p>By default kfactory will provide a <code>IPython.Image</code> for notebooks. Instead of the image a simple interactive Jupyter widget may be used. The widget is not very performant and might impact performance for larger notebooks.
@@ -5886,7 +5886,7 @@ It can be configured in <code>kfactory.config.display_type</code>. Available opt
       <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>

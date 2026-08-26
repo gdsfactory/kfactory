@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.54">
+      <meta name="generator" content="zensical-0.0.57">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.20815dad.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.5da3a30f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.812a03bb.min.css">
       
       
 
@@ -5511,7 +5511,7 @@
         <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Waveguide defined by a cross section, length in dbu.</span>
+<span class="w">        </span><span class="sd">"""Waveguide defined by a cross section, length in dbu.</span>
 
 <span class="sd">        Either pass a ``cross_section`` (name, spec, or instance) or the legacy</span>
 <span class="sd">        ``width``/``layer``/``enclosure`` (all dbu) which is normalized into a</span>
@@ -5523,7 +5523,7 @@
 <span class="sd">            width: Waveguide width. [dbu] (legacy; requires ``layer``)</span>
 <span class="sd">            layer: Main layer of the waveguide. (legacy)</span>
 <span class="sd">            enclosure: Definition of slab/excludes. [dbu] (legacy)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -5711,7 +5711,7 @@ cross section.</p>
     <span class="n">layer</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">enclosure</span><span class="p">:</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KC_co</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Waveguide defined by a cross section, length in dbu.</span>
+<span class="w">    </span><span class="sd">"""Waveguide defined by a cross section, length in dbu.</span>
 
 <span class="sd">    Either pass a ``cross_section`` (name, spec, or instance) or the legacy</span>
 <span class="sd">    ``width``/``layer``/``enclosure`` (all dbu) which is normalized into a</span>
@@ -5723,7 +5723,7 @@ cross section.</p>
 <span class="sd">        width: Waveguide width. [dbu] (legacy; requires ``layer``)</span>
 <span class="sd">        layer: Main layer of the waveguide. (legacy)</span>
 <span class="sd">        enclosure: Definition of slab/excludes. [dbu] (legacy)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="o">...</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -5749,10 +5749,10 @@ cross section.</p>
 
 </h3>
           <div class="doc-overloads">
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">straight_dbu_factory</span><span class="p">(</span><span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;optical&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">CellKWargs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">StraightFactory</span><span class="p">[</span><span class="n">KCell</span><span class="p">]</span>
-</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">straight_dbu_factory</span><span class="p">(</span><span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">],</span> <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;optical&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">CellKWargs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">StraightFactory</span><span class="p">[</span><span class="n">KC</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">straight_dbu_factory</span><span class="p">(</span><span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'optical'</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">CellKWargs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">StraightFactory</span><span class="p">[</span><span class="n">KCell</span><span class="p">]</span>
+</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">straight_dbu_factory</span><span class="p">(</span><span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">],</span> <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'optical'</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">CellKWargs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">StraightFactory</span><span class="p">[</span><span class="n">KC</span><span class="p">]</span>
 </code></pre></div>          </div>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">straight_dbu_factory</span><span class="p">(</span><span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;optical&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">CellKWargs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">StraightFactory</span><span class="p">[</span><span class="n">KC</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">straight_dbu_factory</span><span class="p">(</span><span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span> <span class="n">additional_info</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'optical'</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">CellKWargs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">StraightFactory</span><span class="p">[</span><span class="n">KC</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5978,10 +5978,10 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
     <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span>
     <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;optical&quot;</span><span class="p">,</span>
+    <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"optical"</span><span class="p">,</span>
     <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">:</span> <span class="n">Unpack</span><span class="p">[</span><span class="n">CellKWargs</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StraightFactory</span><span class="p">[</span><span class="n">KC</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a function generating straights [dbu length].</span>
+<span class="w">    </span><span class="sd">"""Returns a function generating straights [dbu length].</span>
 
 <span class="sd">    The returned function is the generic interface: it accepts either a</span>
 <span class="sd">    ``cross_section`` or the legacy ``width``/``layer``/``enclosure`` (all dbu),</span>
@@ -5992,9 +5992,9 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
 <span class="sd">        additional_info: Add additional key/values to the</span>
 <span class="sd">            [`KCell.info`][kfactory.settings.Info]. Can be a static dict</span>
 <span class="sd">            mapping info name to info value. Or can a callable which takes the straight</span>
-<span class="sd">            functions&#39; parameters as kwargs and returns a dict with the mapping.</span>
+<span class="sd">            functions' parameters as kwargs and returns a dict with the mapping.</span>
 <span class="sd">        cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">_additional_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">_is_additional_info_func</span><span class="p">(</span><span class="n">additional_info</span><span class="p">):</span>
         <span class="n">_additional_info_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
@@ -6011,33 +6011,33 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
         <span class="n">_additional_info_func</span> <span class="o">=</span> <span class="n">additional_info_func</span>
         <span class="n">_additional_info</span> <span class="o">=</span> <span class="n">additional_info</span> <span class="ow">or</span> <span class="p">{}</span>  <span class="c1"># ty:ignore[invalid-assignment]</span>
 
-    <span class="n">ports</span> <span class="o">=</span> <span class="n">cell_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ports&quot;</span><span class="p">)</span>
+    <span class="n">ports</span> <span class="o">=</span> <span class="n">cell_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ports"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ports</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">kcl</span><span class="o">.</span><span class="n">rename_function</span> <span class="o">==</span> <span class="n">rename_clockwise</span><span class="p">:</span>
-            <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;ports&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;o1&quot;</span><span class="p">],</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;o2&quot;</span><span class="p">]}</span>
+            <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">"ports"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"left"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"o1"</span><span class="p">],</span> <span class="s2">"right"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"o2"</span><span class="p">]}</span>
         <span class="k">elif</span> <span class="n">kcl</span><span class="o">.</span><span class="n">rename_function</span> <span class="o">==</span> <span class="n">rename_by_direction</span><span class="p">:</span>
-            <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;ports&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;left&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;W0&quot;</span><span class="p">],</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;E0&quot;</span><span class="p">]}</span>
-    <span class="n">cell_kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;basename&quot;</span><span class="p">,</span> <span class="s2">&quot;straight&quot;</span><span class="p">)</span>
-    <span class="n">basename</span> <span class="o">=</span> <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">&quot;basename&quot;</span><span class="p">]</span>
+            <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">"ports"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"left"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"W0"</span><span class="p">],</span> <span class="s2">"right"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"E0"</span><span class="p">]}</span>
+    <span class="n">cell_kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"basename"</span><span class="p">,</span> <span class="s2">"straight"</span><span class="p">)</span>
+    <span class="n">basename</span> <span class="o">=</span> <span class="n">cell_kwargs</span><span class="p">[</span><span class="s2">"basename"</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">output_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">output_type</span><span class="p">,</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;type[KC]&quot;</span><span class="p">,</span> <span class="n">KCell</span><span class="p">),</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">)</span>
+        <span class="n">cell</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">output_type</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s2">"type[KC]"</span><span class="p">,</span> <span class="n">KCell</span><span class="p">),</span> <span class="o">**</span><span class="n">cell_kwargs</span><span class="p">)</span>
 
     <span class="nd">@cell</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_straight</span><span class="p">(</span>
         <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span>
         <span class="n">length</span><span class="p">:</span> <span class="n">dbu</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Waveguide defined by a cross section.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Waveguide defined by a cross section."""</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">kcl</span><span class="o">.</span><span class="n">kcell</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Negative lengths are not allowed </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2"> as ports&quot;</span>
-                <span class="s2">&quot; will be inverted. Please use a positive number. Forcing positive&quot;</span>
-                <span class="s2">&quot; lengths.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Negative lengths are not allowed </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2"> as ports"</span>
+                <span class="s2">" will be inverted. Please use a positive number. Forcing positive"</span>
+                <span class="s2">" lengths."</span>
             <span class="p">)</span>
             <span class="n">length</span> <span class="o">=</span> <span class="o">-</span><span class="n">length</span>
 
@@ -6048,23 +6048,23 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
         <span class="p">)</span>
 
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o1&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="n">port_type</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;o2&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"o2"</span><span class="p">,</span>
             <span class="n">trans</span><span class="o">=</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
             <span class="n">port_type</span><span class="o">=</span><span class="n">port_type</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;width_um&quot;</span><span class="p">:</span> <span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
-            <span class="s2">&quot;length_um&quot;</span><span class="p">:</span> <span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">length</span><span class="p">),</span>
-            <span class="s2">&quot;width_dbu&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
-            <span class="s2">&quot;length_dbu&quot;</span><span class="p">:</span> <span class="n">length</span><span class="p">,</span>
+            <span class="s2">"width_um"</span><span class="p">:</span> <span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
+            <span class="s2">"length_um"</span><span class="p">:</span> <span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">length</span><span class="p">),</span>
+            <span class="s2">"width_dbu"</span><span class="p">:</span> <span class="n">xs</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+            <span class="s2">"length_dbu"</span><span class="p">:</span> <span class="n">length</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="n">_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_additional_info_func</span><span class="p">(</span><span class="n">cross_section</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">))</span>
         <span class="n">_info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_additional_info</span><span class="p">)</span>
@@ -6090,7 +6090,7 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
         <span class="k">if</span> <span class="n">cross_section</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Provide a cross_section, or width and layer (legacy call).&quot;</span>
+                    <span class="s2">"Provide a cross_section, or width and layer (legacy call)."</span>
                 <span class="p">)</span>
             <span class="n">xs</span> <span class="o">=</span> <span class="n">cross_section_from_width</span><span class="p">(</span><span class="n">kcl</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -6166,7 +6166,7 @@ functions' parameters as kwargs and returns a dict with the mapping.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tabs","navigation.tabs.sticky"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.49251538.min.js"></script>
       
     
   </body>
