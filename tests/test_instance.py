@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from tempfile import NamedTemporaryFile
 from typing import Any
 
 import klayout.db as kdb
@@ -6,6 +7,7 @@ import pytest
 
 import kfactory as kf
 from kfactory import exceptions
+from kfactory.conf import PROPID
 from tests.conftest import Layers
 
 
@@ -723,3 +725,98 @@ def test_to_dtype(kcl: kf.KCLayout) -> None:
     ref = dref.to_itype()
     assert ref.bbox() == kf.kdb.Box(-5000, -5000, 5000, 5000)
     assert isinstance(ref, kf.Instance)
+
+
+def test_instance_info_default_empty(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=layers.WG)
+    assert dict(ref.info) == {}
+    assert isinstance(ref.info, kf.settings.Info)
+
+
+def test_instance_info_mutation_persists(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=layers.WG)
+
+    # every cell-info-style mutation writes straight through to the instance
+    ref.info["measure"] = "spectrum"
+    ref.info.wavelength = 1550
+    ref.info.update({"port": "o1"})
+
+    assert dict(ref.info) == {
+        "measure": "spectrum",
+        "wavelength": 1550,
+        "port": "o1",
+    }
+    # persisted on the underlying kdb property, not just the wrapper
+    assert ref.instance.property(PROPID.INFO) is not None
+
+
+def test_instance_info_assignment_replaces(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=layers.WG)
+    ref.info["stale"] = 1
+    ref.info = {"measure": "power"}
+    assert dict(ref.info) == {"measure": "power"}
+    # accepts another Info too
+    ref.info = kf.settings.Info(measure="loss")
+    assert dict(ref.info) == {"measure": "loss"}
+
+
+def test_instance_info_per_placement_keeps_caching(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    child = straight_factory(width=0.5, length=1, layer=layers.WG)
+    c = kcl.kcell()
+    a = c << child
+    b = c << child
+    b.dmovey(10)
+
+    a.info["measure"] = "spectrum"
+    b.info["measure"] = "power"
+
+    # the same cached cell is reused for both placements ...
+    assert a.cell_index == b.cell_index
+    # ... yet each instance carries its own info
+    assert dict(a.info) == {"measure": "spectrum"}
+    assert dict(b.info) == {"measure": "power"}
+
+
+def test_instance_info_gds_roundtrip() -> None:
+    kcl_write = kf.KCLayout("TEST_INSTANCE_INFO_WRITE")
+    child = kcl_write.kcell("child")
+    child.shapes(kcl_write.layer(1, 0)).insert(kf.kdb.Box(10_000, 1000))
+    top = kcl_write.kcell("top")
+    a = top << child
+    b = top << child
+    b.dmovey(10)
+    a.info["measure"] = "spectrum"
+    a.info.wavelength = 1550
+    b.info["measure"] = "power"
+
+    kcl_read = kf.KCLayout("TEST_INSTANCE_INFO_READ")
+    with NamedTemporaryFile(suffix=".gds") as tf:
+        top.write(tf.name)
+        kcl_read.read(tf.name)
+
+    top_read = kcl_read["top"]
+    infos = sorted((dict(inst.info) for inst in top_read.insts), key=repr)
+    assert infos == [
+        {"measure": "power"},
+        {"measure": "spectrum", "wavelength": 1550},
+    ]
+
+
+def test_instance_info_rejects_non_metadata(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=layers.WG)
+    with pytest.raises(ValueError):
+        ref.info["bad"] = object()

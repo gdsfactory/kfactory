@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import json
 from abc import abstractmethod
 from hashlib import sha3_512
 from typing import (
@@ -12,6 +13,7 @@ from typing import (
 )
 
 import klayout.db as kdb
+from pydantic import PrivateAttr
 
 from .conf import PROPID, config, logger
 from .exceptions import (
@@ -23,8 +25,11 @@ from .exceptions import (
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .port import DPort, Port, ProtoPort
+from .settings import Info
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
     from .instance_pins import (
@@ -43,8 +48,63 @@ if TYPE_CHECKING:
     from .kcell import AnyKCell, AnyTKCell, DKCell, KCell, ProtoTKCell
     from .layer import LayerEnum
     from .layout import KCLayout
+    from .typings import MetaData
 
-__all__ = ["DInstance", "Instance", "ProtoInstance", "ProtoTInstance", "VInstance"]
+__all__ = [
+    "DInstance",
+    "Instance",
+    "InstanceInfo",
+    "ProtoInstance",
+    "ProtoTInstance",
+    "VInstance",
+]
+
+
+class InstanceInfo(Info):
+    """Per-instance ``info`` bound to a KLayout instance's user properties.
+
+    Behaves like the cell-level :class:`~kfactory.settings.Info`: values are
+    restricted to JSON-compatible metadata (``int``, ``float``, ``str``,
+    ``tuple``, ``list``, ``dict`` or ``None``) and can be accessed either as
+    attributes or items. Unlike the cell version, every mutation is immediately
+    serialized to a single JSON blob stored on the underlying ``kdb.Instance``
+    under :attr:`~kfactory.conf.PROPID.INFO`, so the change persists on the
+    instance (and survives a GDS/OASIS roundtrip).
+
+    Instances are wrapped lazily, so this object is created on each ``inst.info``
+    access. It writes straight through to the instance, meaning
+    ``inst.info["key"] = value`` persists exactly like ``cell.info["key"] =
+    value`` does for cells.
+
+    Note:
+        Tuples are stored as JSON arrays and therefore read back as ``list``,
+        matching how cell info behaves when it is serialized to GDS metadata.
+    """
+
+    _instance: kdb.Instance | None = PrivateAttr(default=None)
+    _prop_id: int = PrivateAttr(default=PROPID.INFO)
+
+    def _bind(self, instance: kdb.Instance, prop_id: int) -> Self:
+        """Bind this info object to an instance property for write-back."""
+        self._instance = instance
+        self._prop_id = prop_id
+        return self
+
+    def _persist(self) -> None:
+        """Serialize the current info to the bound instance property."""
+        if self._instance is not None:
+            self._instance.set_property(self._prop_id, json.dumps(self.model_dump()))
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        """Validate/store the value, then write back to the instance."""
+        super().__setattr__(name, value)
+        if not name.startswith("_"):
+            self._persist()
+
+    def update(self, data: dict[str, MetaData]) -> None:
+        """Update several values at once and write back to the instance."""
+        super().update(data)
+        self._persist()
 
 
 class ProtoInstance[T: (int, float)](GeometricObject[T]):
@@ -157,6 +217,43 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
     @purpose.setter
     def purpose(self, value: str | None) -> None:
         self._instance.set_property(PROPID.PURPOSE, value)
+
+    @property
+    def info(self) -> InstanceInfo:
+        """Per-instance info, mirroring the cell-level ``info`` API.
+
+        Returns an :class:`InstanceInfo` bound to this instance. Reads and
+        mutations go through the instance's GDS user properties (a single JSON
+        blob under :attr:`~kfactory.conf.PROPID.INFO`), so different placements
+        of the *same* cached cell can carry different info without wrapper cells
+        and without breaking cell caching::
+
+            ref = cell << other
+            ref.info["measure"] = "spectrum"  # persists on this instance only
+            ref.info.wavelength = 1550
+            ref.info.update({"port": "o1"})
+
+        Assigning replaces the whole info dict; the value may be a mapping or
+        another :class:`~kfactory.settings.Info`::
+
+            ref.info = {"measure": "power"}
+
+        Note:
+            Flattening the instance discards its properties, so per-instance
+            info is lost on flatten (the same as instance names).
+        """
+        prop = self._instance.property(PROPID.INFO)
+        data: dict[str, Any] = json.loads(prop) if prop is not None else {}
+        return InstanceInfo(**data)._bind(self._instance, PROPID.INFO)
+
+    @info.setter
+    def info(self, value: Info | Mapping[str, Any]) -> None:
+        # NOTE: annotated with ``Any`` rather than the recursive ``MetaData``
+        # alias here on purpose - the latter overflows ``ty`` in this position.
+        # The runtime ``Info(**data)`` call below still validates the metadata
+        # types (raising on unsupported values, like the cell-level info).
+        data = value.model_dump() if isinstance(value, Info) else dict(value)
+        self._instance.set_property(PROPID.INFO, json.dumps(Info(**data).model_dump()))
 
     @property
     def cell_index(self) -> int:

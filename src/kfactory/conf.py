@@ -64,6 +64,8 @@ class PROPID(IntEnum):
     """Instance name."""
     PURPOSE = 1
     """Instance purpose (e.g. 'routing')."""
+    INFO = 2
+    """Per-instance info dict, stored as a single JSON blob (see ``Instance.info``)."""
 
 
 class PORTDIRECTION(IntEnum):
