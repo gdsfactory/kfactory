@@ -59,6 +59,40 @@ __all__ = [
     "VInstance",
 ]
 
+_GDS_MAX_PROPERTY_BYTES = 65530
+"""Maximum byte length of a single GDS property value.
+
+GDS stores each property value in a record whose length field is two bytes, so a
+``PROPVALUE`` payload cannot exceed 65530 bytes. Instance info is written as one
+JSON blob under a single property, so an oversized blob makes the whole layout
+unwritable to GDS (KLayout raises ``String max. length overflow``). OASIS has no
+such limit; cell info is unaffected because it uses native layout meta info.
+"""
+
+
+def _set_info_property(instance: kdb.Instance, prop_id: int, blob: str) -> None:
+    """Write an info blob to an instance property, logging if not GDS-writable.
+
+    The size limit only applies to GDS, so the value is stored regardless and
+    OASIS output keeps working; the log flags the problem at assignment time
+    instead of letting the GDS write fail later with an unattributable error.
+
+    Args:
+        instance: The KLayout instance to write the property on.
+        prop_id: The property id to store the blob under.
+        blob: The serialized info blob.
+    """
+    size = len(blob.encode("utf-8"))
+    if size > _GDS_MAX_PROPERTY_BYTES:
+        logger.error(
+            f"Instance info for a placement of cell {instance.cell.name!r} is "
+            f"{size} bytes, exceeding the GDS per-property limit of "
+            f"{_GDS_MAX_PROPERTY_BYTES} bytes; writing this layout to GDS will "
+            "fail with a 'String max. length overflow' error (OASIS is "
+            "unaffected)."
+        )
+    instance.set_property(prop_id, blob)
+
 
 class InstanceInfo(Info):
     """Per-instance ``info`` bound to a KLayout instance's user properties.
@@ -100,8 +134,8 @@ class InstanceInfo(Info):
     def _persist(self) -> None:
         """Serialize the current info to the bound instance property."""
         if self._instance is not None:
-            self._instance.set_property(
-                self._prop_id, serialize_info_blob(self.model_dump())
+            _set_info_property(
+                self._instance, self._prop_id, serialize_info_blob(self.model_dump())
             )
 
     def __setattr__(self, name: str, value: Any) -> None:
@@ -262,8 +296,8 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
         # The runtime ``Info(**data)`` call below still validates the metadata
         # types (raising on unsupported values, like the cell-level info).
         data = value.model_dump() if isinstance(value, Info) else dict(value)
-        self._instance.set_property(
-            PROPID.INFO, serialize_info_blob(Info(**data).model_dump())
+        _set_info_property(
+            self._instance, PROPID.INFO, serialize_info_blob(Info(**data).model_dump())
         )
 
     @property

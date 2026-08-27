@@ -898,3 +898,43 @@ def test_instance_info_collection_shape_roundtrip() -> None:
     for key, value in shapes.items():
         assert type(read_info[key]) is type(value)
         assert read_info[key].to_s() == value.to_s()
+
+
+def test_instance_info_oversize_blob_logs_error(
+    kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    """An info blob over the GDS per-property limit logs an error, without raising.
+
+    The value is still stored (OASIS has no such limit); the log flags the
+    GDS-unwritable blob at assignment time.
+    """
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=kf.kdb.LayerInfo(1, 0))
+
+    errors: list[str] = []
+    sink_id = kf.logger.add(lambda m: errors.append(str(m)), level="ERROR")
+    try:
+        ref.info["huge"] = "x" * 70_000
+    finally:
+        kf.logger.remove(sink_id)
+
+    assert any("GDS per-property limit" in m for m in errors)
+    # not raised: the value is still stored per-instance
+    assert len(dict(ref.info)["huge"]) == 70_000
+
+
+def test_instance_info_normal_size_logs_nothing(
+    kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    """A normal-size info blob does not log an error."""
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=kf.kdb.LayerInfo(1, 0))
+
+    errors: list[str] = []
+    sink_id = kf.logger.add(lambda m: errors.append(str(m)), level="ERROR")
+    try:
+        ref.info["small"] = "x" * 100
+    finally:
+        kf.logger.remove(sink_id)
+
+    assert not errors
