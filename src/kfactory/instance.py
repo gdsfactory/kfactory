@@ -62,20 +62,34 @@ __all__ = [
 _GDS_MAX_PROPERTY_BYTES = 65530
 """Maximum byte length of a single GDS property value.
 
-GDS stores each property value in a record whose length field is two bytes, so a
-``PROPVALUE`` payload cannot exceed 65530 bytes. Instance info is written as one
-JSON blob under a single property, so an oversized blob makes the whole layout
-unwritable to GDS (KLayout raises ``String max. length overflow``). OASIS has no
-such limit; cell info is unaffected because it uses native layout meta info.
+A GDS ``PROPVALUE`` record is ``4-byte header + value`` and its length field is a
+16-bit integer, so read as unsigned the value cannot exceed 65530 bytes. Instance
+info is written as one JSON blob under a single property, so a larger blob makes
+the whole layout unwritable to GDS (KLayout raises ``String max. length
+overflow``). OASIS has no such limit; cell info is unaffected because it uses
+native layout meta info.
+"""
+
+_GDS_SPEC_PROPERTY_BYTES = 32764
+"""GDS-spec-safe byte length of a single property value.
+
+The strict GDS spec treats the 16-bit record-length field as *signed* (max
+0x8000), so a ``PROPVALUE`` record longer than 32768 bytes -- i.e. a value over
+32764 bytes -- has the high bit set and reads as negative to strict parsers.
+KLayout writes and reads such records by treating the field as unsigned (and
+warns), but other GDS tools may misinterpret or reject them. This is an
+interoperability limit, not a data-integrity one.
 """
 
 
 def _set_info_property(instance: kdb.Instance, prop_id: int, blob: str) -> None:
-    """Write an info blob to an instance property, logging if not GDS-writable.
+    """Write an info blob to an instance property, logging any GDS size problem.
 
-    The size limit only applies to GDS, so the value is stored regardless and
+    The size limits only apply to GDS, so the value is stored regardless and
     OASIS output keeps working; the log flags the problem at assignment time
-    instead of letting the GDS write fail later with an unattributable error.
+    instead of letting it surface later (a hard write failure over the 64 KB
+    record limit, or silent interoperability breakage over the 32 KB
+    strict-spec limit).
 
     Args:
         instance: The KLayout instance to write the property on.
@@ -90,6 +104,14 @@ def _set_info_property(instance: kdb.Instance, prop_id: int, blob: str) -> None:
             f"{_GDS_MAX_PROPERTY_BYTES} bytes; writing this layout to GDS will "
             "fail with a 'String max. length overflow' error (OASIS is "
             "unaffected)."
+        )
+    elif size > _GDS_SPEC_PROPERTY_BYTES:
+        logger.warning(
+            f"Instance info for a placement of cell {instance.cell.name!r} is "
+            f"{size} bytes; the GDS property record exceeds the strict GDS "
+            f"spec's signed 16-bit length limit ({_GDS_SPEC_PROPERTY_BYTES} "
+            "bytes of value). KLayout reads it back correctly, but other GDS "
+            "tools may misinterpret or reject the record (OASIS is unaffected)."
         )
     instance.set_property(prop_id, blob)
 

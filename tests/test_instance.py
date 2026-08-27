@@ -923,18 +923,54 @@ def test_instance_info_oversize_blob_logs_error(
     assert len(dict(ref.info)["huge"]) == 70_000
 
 
+def test_instance_info_interop_zone_logs_warning() -> None:
+    """A blob over the strict-GDS-spec size warns but still round-trips.
+
+    Between the 32 KB strict-spec limit and the 64 KB hard limit the record is
+    written and read back correctly by KLayout (interoperability risk only), so
+    it must warn -- not error -- and the value must survive a GDS roundtrip.
+    """
+    kcl_write = kf.KCLayout("TEST_INSTANCE_INFO_INTEROP_WRITE")
+    child = kcl_write.kcell("child")
+    child.shapes(kcl_write.layer(1, 0)).insert(kf.kdb.Box(10_000, 1000))
+    top = kcl_write.kcell("top")
+    ref = top << child
+
+    records: list[tuple[str, str]] = []
+    sink_id = kf.logger.add(
+        lambda m: records.append((m.record["level"].name, m.record["message"])),
+        level="WARNING",
+    )
+    try:
+        ref.info["big"] = "x" * 40_000  # > 32764 (spec) but <= 65530 (hard)
+    finally:
+        kf.logger.remove(sink_id)
+
+    levels = {level for level, _ in records}
+    assert "WARNING" in levels
+    assert "ERROR" not in levels
+    assert any("strict GDS spec" in msg for _, msg in records)
+
+    # still round-trips through GDS (KLayout reads oversized-per-spec records)
+    kcl_read = kf.KCLayout("TEST_INSTANCE_INFO_INTEROP_READ")
+    with NamedTemporaryFile(suffix=".gds") as tf:
+        top.write(tf.name)
+        kcl_read.read(tf.name)
+    assert len(next(iter(kcl_read["top"].insts)).info["big"]) == 40_000
+
+
 def test_instance_info_normal_size_logs_nothing(
     kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
 ) -> None:
-    """A normal-size info blob does not log an error."""
+    """A normal-size info blob does not log a warning or error."""
     c = kcl.kcell()
     ref = c << straight_factory(width=0.5, length=1, layer=kf.kdb.LayerInfo(1, 0))
 
-    errors: list[str] = []
-    sink_id = kf.logger.add(lambda m: errors.append(str(m)), level="ERROR")
+    records: list[str] = []
+    sink_id = kf.logger.add(lambda m: records.append(str(m)), level="WARNING")
     try:
         ref.info["small"] = "x" * 100
     finally:
         kf.logger.remove(sink_id)
 
-    assert not errors
+    assert not records
