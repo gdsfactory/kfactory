@@ -820,3 +820,58 @@ def test_instance_info_rejects_non_metadata(
     ref = c << straight_factory(width=0.5, length=1, layer=layers.WG)
     with pytest.raises(ValueError):
         ref.info["bad"] = object()
+
+
+def test_instance_info_kdb_shape_roundtrip() -> None:
+    """kdb shapes must survive assignment and a GDS roundtrip (like cell info)."""
+    kcl_write = kf.KCLayout("TEST_INSTANCE_INFO_SHAPE_WRITE")
+    child = kcl_write.kcell("child")
+    child.shapes(kcl_write.layer(1, 0)).insert(kf.kdb.Box(10_000, 1000))
+    top = kcl_write.kcell("top")
+    ref = top << child
+
+    shapes: dict[str, object] = {
+        "box": kf.kdb.Box(0, 0, 500, 500),
+        "dbox": kf.kdb.DBox(0, 0, 1.5, 2.5),
+        "point": kf.kdb.Point(10, 20),
+        "vector": kf.kdb.Vector(3, 4),
+        "trans": kf.kdb.Trans(1, False, 100, 200),
+        "dcplx_trans": kf.kdb.DCplxTrans(1.0, 30.0, False, 1.0, 2.0),
+        "layer_info": kf.kdb.LayerInfo(1, 0),
+        "polygon": kf.kdb.Polygon(kf.kdb.Box(0, 0, 100, 100)),
+    }
+    for key, value in shapes.items():
+        ref.info[key] = value
+
+    # readable in-memory straight after assignment
+    for key, value in shapes.items():
+        assert str(ref.info[key]) == str(value)
+
+    kcl_read = kf.KCLayout("TEST_INSTANCE_INFO_SHAPE_READ")
+    with NamedTemporaryFile(suffix=".gds") as tf:
+        top.write(tf.name)
+        kcl_read.read(tf.name)
+
+    read_info = next(iter(kcl_read["top"].insts)).info
+    for key, value in shapes.items():
+        assert type(read_info[key]) is type(value)
+        assert str(read_info[key]) == str(value)
+
+
+def test_instance_info_rejects_non_roundtrippable_shapes() -> None:
+    """kdb collection/matrix shapes only work on cell info, not per-instance.
+
+    They serialize but cannot be reconstructed through instance properties, so
+    assignment must fail fast with a clear error instead of crashing on read.
+    """
+    kcl = kf.KCLayout("TEST_INSTANCE_INFO_BAD_SHAPE")
+    child = kcl.kcell("child")
+    top = kcl.kcell("top")
+    ref = top << child
+    for value in (
+        kf.kdb.Region(kf.kdb.Box(0, 0, 50, 50)),
+        kf.kdb.Edges([kf.kdb.Edge(0, 0, 10, 10)]),
+        kf.kdb.Matrix2d(1, 0, 0, 1),
+    ):
+        with pytest.raises(ValueError):
+            ref.info["bad"] = value

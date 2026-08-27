@@ -25,6 +25,7 @@ from .exceptions import (
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .port import DPort, Port, ProtoPort
+from .serialization import deserialize_setting, serialize_setting
 from .settings import Info
 
 if TYPE_CHECKING:
@@ -60,16 +61,49 @@ __all__ = [
 ]
 
 
+def _dump_instance_info(data: dict[str, Any]) -> str:
+    """Serialize an info dict to the JSON blob stored on an instance property.
+
+    Reuses the cell-level ``serialize_setting`` scheme so that ``kdb`` shapes
+    (``Box``, ``Trans``, ``LayerInfo``, ``Polygon``, ...) survive the JSON
+    encoding that instance properties require.
+
+    A handful of ``kdb`` collection/matrix types (``Region``, ``Edges``,
+    ``Texts``, ``EdgePairs``, ``Matrix2d``, ``Matrix3d``, ``LayerProperties``)
+    can be *serialized* but not reconstructed by ``deserialize_setting`` (they
+    have no ``from_s``). Those round-trip on a cell (native layout meta info) but
+    not through instance properties, so they are rejected here with a clear error
+    at assignment time instead of crashing later when the info is read back.
+    """
+    blob = json.dumps(serialize_setting(data))
+    try:
+        deserialize_setting(json.loads(blob))
+    except Exception as e:
+        raise ValueError(
+            "Instance info value cannot be stored per-instance: it serializes "
+            "but is not reconstructable through instance properties. kdb "
+            "collection/matrix types (Region, Edges, Texts, EdgePairs, "
+            "Matrix2d, Matrix3d, LayerProperties) are only supported on cell "
+            f"info, not on instance info. Offending data: {data!r}"
+        ) from e
+    return blob
+
+
+def _load_instance_info(blob: str) -> dict[str, Any]:
+    """Deserialize an instance-property JSON blob back into an info dict."""
+    return deserialize_setting(json.loads(blob))
+
+
 class InstanceInfo(Info):
     """Per-instance ``info`` bound to a KLayout instance's user properties.
 
     Behaves like the cell-level :class:`~kfactory.settings.Info`: values are
     restricted to JSON-compatible metadata (``int``, ``float``, ``str``,
-    ``tuple``, ``list``, ``dict`` or ``None``) and can be accessed either as
-    attributes or items. Unlike the cell version, every mutation is immediately
-    serialized to a single JSON blob stored on the underlying ``kdb.Instance``
-    under :attr:`~kfactory.conf.PROPID.INFO`, so the change persists on the
-    instance (and survives a GDS/OASIS roundtrip).
+    ``tuple``, ``list``, ``dict``, ``None`` or serializable ``kdb`` shapes) and
+    can be accessed either as attributes or items. Unlike the cell version,
+    every mutation is immediately serialized to a single JSON blob stored on the
+    underlying ``kdb.Instance`` under :attr:`~kfactory.conf.PROPID.INFO`, so the
+    change persists on the instance (and survives a GDS/OASIS roundtrip).
 
     Instances are wrapped lazily, so this object is created on each ``inst.info``
     access. It writes straight through to the instance, meaning
@@ -79,6 +113,14 @@ class InstanceInfo(Info):
     Note:
         Tuples are stored as JSON arrays and therefore read back as ``list``,
         matching how cell info behaves when it is serialized to GDS metadata.
+
+    Note:
+        A few ``kdb`` collection/matrix types (``Region``, ``Edges``, ``Texts``,
+        ``EdgePairs``, ``Matrix2d``, ``Matrix3d``, ``LayerProperties``) are only
+        supported on *cell* info (native layout meta info), not on instance
+        info; assigning one raises ``ValueError``. All other serializable ``kdb``
+        shapes (boxes, points, vectors, transformations, polygons, edges, paths,
+        texts, ``LayerInfo``, ...) round-trip fine.
     """
 
     _instance: kdb.Instance | None = PrivateAttr(default=None)
@@ -93,7 +135,9 @@ class InstanceInfo(Info):
     def _persist(self) -> None:
         """Serialize the current info to the bound instance property."""
         if self._instance is not None:
-            self._instance.set_property(self._prop_id, json.dumps(self.model_dump()))
+            self._instance.set_property(
+                self._prop_id, _dump_instance_info(self.model_dump())
+            )
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Validate/store the value, then write back to the instance."""
@@ -243,7 +287,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
             info is lost on flatten (the same as instance names).
         """
         prop = self._instance.property(PROPID.INFO)
-        data: dict[str, Any] = json.loads(prop) if prop is not None else {}
+        data: dict[str, Any] = _load_instance_info(prop) if prop is not None else {}
         return InstanceInfo(**data)._bind(self._instance, PROPID.INFO)
 
     @info.setter
@@ -253,7 +297,9 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
         # The runtime ``Info(**data)`` call below still validates the metadata
         # types (raising on unsupported values, like the cell-level info).
         data = value.model_dump() if isinstance(value, Info) else dict(value)
-        self._instance.set_property(PROPID.INFO, json.dumps(Info(**data).model_dump()))
+        self._instance.set_property(
+            PROPID.INFO, _dump_instance_info(Info(**data).model_dump())
+        )
 
     @property
     def cell_index(self) -> int:
