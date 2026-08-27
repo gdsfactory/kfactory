@@ -858,20 +858,43 @@ def test_instance_info_kdb_shape_roundtrip() -> None:
         assert str(read_info[key]) == str(value)
 
 
-def test_instance_info_rejects_non_roundtrippable_shapes() -> None:
-    """kdb collection/matrix shapes only work on cell info, not per-instance.
+def test_instance_info_collection_shape_roundtrip() -> None:
+    """kdb collection/matrix shapes round-trip on instances, same as cell info.
 
-    They serialize but cannot be reconstructed through instance properties, so
-    assignment must fail fast with a clear error instead of crashing on read.
+    These types lack ``from_s`` and used to be rejected per-instance; the codec
+    now encodes them element-wise so they survive a GDS roundtrip.
     """
-    kcl = kf.KCLayout("TEST_INSTANCE_INFO_BAD_SHAPE")
-    child = kcl.kcell("child")
-    top = kcl.kcell("top")
+    kcl_write = kf.KCLayout("TEST_INSTANCE_INFO_COLL_WRITE")
+    child = kcl_write.kcell("child")
+    child.shapes(kcl_write.layer(1, 0)).insert(kf.kdb.Box(10_000, 1000))
+    top = kcl_write.kcell("top")
     ref = top << child
-    for value in (
-        kf.kdb.Region(kf.kdb.Box(0, 0, 50, 50)),
-        kf.kdb.Edges([kf.kdb.Edge(0, 0, 10, 10)]),
-        kf.kdb.Matrix2d(1, 0, 0, 1),
-    ):
-        with pytest.raises(ValueError):
-            ref.info["bad"] = value
+
+    shapes: dict[str, object] = {
+        "region": kf.kdb.Region(
+            [
+                kf.kdb.Polygon(kf.kdb.Box(0, 0, 50, 50)),
+                kf.kdb.Polygon(kf.kdb.Box(100, 0, 150, 60)),
+            ]
+        ),
+        "edges": kf.kdb.Edges([kf.kdb.Edge(0, 0, 10, 10), kf.kdb.Edge(1, 1, 2, 2)]),
+        # text content deliberately contains the delimiters to_s reuses
+        "texts": kf.kdb.Texts([kf.kdb.Text("a;b)c", kf.kdb.Trans())]),
+        "edge_pairs": kf.kdb.EdgePairs(
+            [kf.kdb.EdgePair(kf.kdb.Edge(0, 0, 1, 1), kf.kdb.Edge(2, 2, 3, 3))]
+        ),
+        "matrix2d": kf.kdb.Matrix2d(1.5, 2.0, 3.0, 4.0),
+        "matrix3d": kf.kdb.Matrix3d(1, 0, 5, 0, 1, 7, 0, 0, 1),
+    }
+    for key, value in shapes.items():
+        ref.info[key] = value
+
+    kcl_read = kf.KCLayout("TEST_INSTANCE_INFO_COLL_READ")
+    with NamedTemporaryFile(suffix=".gds") as tf:
+        top.write(tf.name)
+        kcl_read.read(tf.name)
+
+    read_info = next(iter(kcl_read["top"].insts)).info
+    for key, value in shapes.items():
+        assert type(read_info[key]) is type(value)
+        assert read_info[key].to_s() == value.to_s()
