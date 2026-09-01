@@ -76,7 +76,7 @@ optional-dependencies.docs = [
 ]
 optional-dependencies.ipy = [
   "ipyevents>=2.0.4,<2.1",
-  "ipython>=9.16.1,<9.17",
+  "ipython>=9.16.1,<9.18",
   "ipytree>=0.2.2,<0.3",
   "ipywidgets>=8.1.9,<8.2",
 ]
