@@ -140,6 +140,26 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
         """Whether this cross section is symmetric."""
         return True
 
+    def get_sections(self) -> tuple[CrossSectionLayer, ...]:
+        """Absolute signed dbu strips of the realised profile, main strip first.
+
+        The main strip is `width` centered on the center line; the enclosure's
+        edge-relative bands are resolved against that width, so a 3 µm band sits
+        at ±3.25 µm for a 500 nm core and at ±3.55 µm for an 1100 nm one.
+
+        The main strip is always first and is never merged into the others, even
+        when the enclosure carries a band on the main layer. The remaining
+        strips are normalized per layer (touching or overlapping ones are
+        merged) and sorted, matching `AsymmetricalCrossSection.sections`.
+        """
+        half = self.width // 2
+        return (
+            CrossSectionLayer(
+                layer=self.main_layer, section_min=-half, section_max=half
+            ),
+            *_enclosure_strips(self.width, self.enclosure),
+        )
+
     def to_dtype(self, kcl: KCLayout) -> DSymmetricalCrossSection:
         """Convert to a um based CrossSection."""
         return DSymmetricalCrossSection(
@@ -296,6 +316,20 @@ class DCrossSectionLayer(BaseModel, arbitrary_types_allowed=True):
         )
 
 
+def _to_dsections(
+    kcl: KCLayout, sections: Sequence[CrossSectionLayer]
+) -> tuple[DCrossSectionLayer, ...]:
+    """Convert dbu strips to their um counterparts."""
+    return tuple(
+        DCrossSectionLayer(
+            layer=s.layer,
+            section_min=kcl.to_um(s.section_min),
+            section_max=kcl.to_um(s.section_max),
+        )
+        for s in sections
+    )
+
+
 def _layer_sort_key(layer: kdb.LayerInfo) -> tuple[str, int, int]:
     return (layer.name, layer.layer, layer.datatype)
 
@@ -387,6 +421,42 @@ def _normalize_sections(
             )
         )
     return tuple(merged)
+
+
+def _enclosure_strips(
+    width: dbu, enclosure: LayerEnclosure
+) -> tuple[CrossSectionLayer, ...]:
+    """Resolve edge-relative enclosure bands to absolute signed dbu strips.
+
+    An enclosure band is stored relative to the *edge* of the main layer, so it
+    has to be resolved against the current core `width`: a section with only
+    `d_max` covers the core plus `d_max` on either side and becomes the single
+    strip `[-(width / 2 + d_max), width / 2 + d_max]`, while a section with
+    `d_min` is a ring around the core and becomes the two strips
+    `[width / 2 + d_min, width / 2 + d_max]` and its mirror image.
+
+    Bands that resolve to an empty strip (a shrink of at least half the core,
+    i.e. `width / 2 + d_max <= 0`) are dropped, and the result is normalized per
+    layer, so a ring whose inner radius reaches past the center line comes back
+    as one strip rather than two overlapping ones.
+    """
+    half = width // 2
+    strips: list[CrossSectionLayer] = []
+    for layer, layer_section in enclosure.layer_sections.items():
+        for section in layer_section.sections:
+            if section.d_min is None:
+                bands = ((-(half + section.d_max), half + section.d_max),)
+            else:
+                bands = (
+                    (-(half + section.d_max), -(half + section.d_min)),
+                    (half + section.d_min, half + section.d_max),
+                )
+            strips.extend(
+                CrossSectionLayer(layer=layer, section_min=lo, section_max=hi)
+                for lo, hi in bands
+                if lo < hi
+            )
+    return _normalize_sections(strips)
 
 
 class AsymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=True):
@@ -489,6 +559,22 @@ class AsymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=T
     def is_symmetric(self) -> bool:
         """Whether this cross section is symmetric."""
         return False
+
+    def get_sections(self) -> tuple[CrossSectionLayer, ...]:
+        """Absolute signed dbu strips of the realised profile, main strip first.
+
+        The counterpart of `SymmetricalCrossSection.get_sections`: here the
+        strips are already absolute, so this is the main strip followed by the
+        normalized `sections`.
+        """
+        return (
+            CrossSectionLayer(
+                layer=self.layer,
+                section_min=self.section_min,
+                section_max=self.section_max,
+            ),
+            *self.sections,
+        )
 
     def _all_strips(self) -> tuple[tuple[int, int], ...]:
         """Return (section_min, section_max) for main + every aux section."""
@@ -678,6 +764,13 @@ class TAsymmetricCrossSection[T: (int, float)](ABC):
         self,
     ) -> tuple[CrossSectionLayer, ...] | tuple[DCrossSectionLayer, ...]: ...
 
+    @abstractmethod
+    def get_sections(
+        self,
+    ) -> tuple[CrossSectionLayer, ...] | tuple[DCrossSectionLayer, ...]:
+        """Absolute strips of the realised profile, main strip first."""
+        ...
+
     @property
     @abstractmethod
     def radius(self) -> T | None: ...
@@ -780,6 +873,10 @@ class AsymmetricCrossSection(TAsymmetricCrossSection[int]):
     def sections(self) -> tuple[CrossSectionLayer, ...]:
         return self._base.sections
 
+    def get_sections(self) -> tuple[CrossSectionLayer, ...]:
+        """Absolute signed dbu strips of the realised profile, main strip first."""
+        return self._base.get_sections()
+
     @property
     def radius(self) -> int | None:
         return self._base.radius
@@ -864,14 +961,11 @@ class DAsymmetricCrossSection(TAsymmetricCrossSection[float]):
 
     @property
     def sections(self) -> tuple[DCrossSectionLayer, ...]:
-        return tuple(
-            DCrossSectionLayer(
-                layer=s.layer,
-                section_min=self.kcl.to_um(s.section_min),
-                section_max=self.kcl.to_um(s.section_max),
-            )
-            for s in self._base.sections
-        )
+        return _to_dsections(self.kcl, self._base.sections)
+
+    def get_sections(self) -> tuple[DCrossSectionLayer, ...]:
+        """Absolute signed um strips of the realised profile, main strip first."""
+        return _to_dsections(self.kcl, self._base.get_sections())
 
     @property
     def radius(self) -> float | None:
@@ -959,6 +1053,13 @@ class TCrossSection[T: (int, float)](ABC):
     @property
     @abstractmethod
     def sections(self) -> dict[kdb.LayerInfo, list[tuple[T | None, T]]]: ...
+
+    @abstractmethod
+    def get_sections(
+        self,
+    ) -> tuple[CrossSectionLayer, ...] | tuple[DCrossSectionLayer, ...]:
+        """Absolute strips of the realised profile, main strip first."""
+        ...
 
     @property
     @abstractmethod
@@ -1073,6 +1174,14 @@ class CrossSection(TCrossSection[int]):
             layer: [(section.d_min, section.d_max) for section in sections.sections]
             for layer, sections in items
         }
+
+    def get_sections(self) -> tuple[CrossSectionLayer, ...]:
+        """Absolute signed dbu strips of the realised profile, main strip first.
+
+        Unlike `sections`, which returns the enclosure's edge-relative bands,
+        this resolves them against the core width and includes the main strip.
+        """
+        return self._base.get_sections()
 
     @property
     def bbox_sections(self) -> dict[kdb.LayerInfo, int]:
@@ -1189,6 +1298,14 @@ class DCrossSection(TCrossSection[float]):
             ]
             for layer, sections in items
         }
+
+    def get_sections(self) -> tuple[DCrossSectionLayer, ...]:
+        """Absolute signed um strips of the realised profile, main strip first.
+
+        Unlike `sections`, which returns the enclosure's edge-relative bands,
+        this resolves them against the core width and includes the main strip.
+        """
+        return _to_dsections(self.kcl, self._base.get_sections())
 
     @property
     def bbox_sections(self) -> dict[kdb.LayerInfo, float]:

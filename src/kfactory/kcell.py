@@ -3907,7 +3907,15 @@ class ProtoCells(Mapping[int, KC_co], ABC):
             del self._kcl.tkcells[cell_index]
 
     @abstractmethod
-    def _generate_dict(self) -> dict[int, KC_co]: ...
+    def _generate_dict(self) -> Mapping[int, KC_co]:
+        """Snapshot of the layout's cells, wrapped in this class' cell flavour.
+
+        Annotated as a `Mapping` rather than a `dict`: `dict` is invariant in
+        its value type, so returning one would force `KC_co` to be invariant and
+        break the covariance `ProtoCells` is declared with. Implementations
+        still return a plain `dict`.
+        """
+        ...
 
     def __iter__(self) -> Iterator[int]:
         return iter(self._kcl.tkcells)
