@@ -979,3 +979,179 @@ def test_asymmetric_unnamed_resolves_to_named(kcl: kf.KCLayout) -> None:
     assert not unnamed.is_named
     resolved = kcl.get_asymmetrical_cross_section(unnamed)
     assert resolved is named
+
+
+def _strips(
+    sections: tuple[kf.CrossSectionLayer, ...],
+) -> list[tuple[str, int, int]]:
+    """Compact comparable form of a `get_sections()` result."""
+    return [(str(s.layer), s.section_min, s.section_max) for s in sections]
+
+
+def test_get_sections_asymmetric(kcl: kf.KCLayout) -> None:
+    """The asymmetric type is already absolute: main strip, then `sections`."""
+    acs = kcl.get_asymmetrical_cross_section(_make_asym("gs_asym"))
+    assert _strips(acs.get_sections()) == [
+        ("WG (1/0)", -250, 250),
+        ("SLAB (2/0)", -100, 900),
+    ]
+    # The main strip is first, not sorted in with the rest.
+    assert acs.get_sections()[0].layer == acs.main_layer
+    assert acs.get_sections()[1:] == acs.sections
+
+
+def test_get_sections_symmetric_resolves_against_width(kcl: kf.KCLayout) -> None:
+    """Enclosure bands are edge-relative, so they scale with the core."""
+    wg = kf.kdb.LayerInfo(1, 0, "WG")
+    slab = kf.kdb.LayerInfo(2, 0, "SLAB")
+
+    def xs(width: int, name: str) -> kf.SymmetricalCrossSection:
+        return kcl.get_symmetrical_cross_section(
+            kf.SymmetricalCrossSection(
+                width=width,
+                enclosure=kcl.get_enclosure(
+                    kf.LayerEnclosure(sections=[(slab, 3000)], main_layer=wg)
+                ),
+                name=name,
+            )
+        )
+
+    # A 3 um band sits at +-3.25 um for a 500 nm core ...
+    assert _strips(xs(500, "gs_sym_500").get_sections()) == [
+        ("WG (1/0)", -250, 250),
+        ("SLAB (2/0)", -3250, 3250),
+    ]
+    # ... and at +-3.55 um for an 1100 nm one.
+    assert _strips(xs(1100, "gs_sym_1100").get_sections()) == [
+        ("WG (1/0)", -550, 550),
+        ("SLAB (2/0)", -3550, 3550),
+    ]
+
+
+def test_get_sections_symmetric_bare_core(kcl: kf.KCLayout) -> None:
+    """A cross section without cladding resolves to just its main strip."""
+    wg = kf.kdb.LayerInfo(1, 0, "WG")
+    base = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(
+            width=500,
+            enclosure=kcl.get_enclosure(kf.LayerEnclosure(sections=[], main_layer=wg)),
+            name="gs_bare",
+        )
+    )
+    assert _strips(base.get_sections()) == [("WG (1/0)", -250, 250)]
+
+
+def test_get_sections_symmetric_ring_band(kcl: kf.KCLayout) -> None:
+    """A band with a `d_min` is a ring around the core: two mirrored strips."""
+    wg = kf.kdb.LayerInfo(1, 0, "WG")
+    clad = kf.kdb.LayerInfo(111, 0, "CLAD")
+    base = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(
+            width=1000,
+            enclosure=kcl.get_enclosure(
+                kf.LayerEnclosure(sections=[(clad, 500, 2000)], main_layer=wg)
+            ),
+            name="gs_ring",
+        )
+    )
+    assert _strips(base.get_sections()) == [
+        ("WG (1/0)", -500, 500),
+        ("CLAD (111/0)", -2500, -1000),
+        ("CLAD (111/0)", 1000, 2500),
+    ]
+
+
+def test_get_sections_symmetric_ring_past_center(kcl: kf.KCLayout) -> None:
+    """A ring whose inner edge reaches the center line collapses to one strip."""
+    wg = kf.kdb.LayerInfo(1, 0, "WG")
+    clad = kf.kdb.LayerInfo(111, 0, "CLAD")
+    base = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(
+            width=1000,
+            # d_min == -width / 2 -> the two halves touch at x = 0.
+            enclosure=kcl.get_enclosure(
+                kf.LayerEnclosure(sections=[(clad, -500, 2000)], main_layer=wg)
+            ),
+            name="gs_ring_center",
+        )
+    )
+    assert _strips(base.get_sections()) == [
+        ("WG (1/0)", -500, 500),
+        ("CLAD (111/0)", -2500, 2500),
+    ]
+
+
+def test_get_sections_symmetric_drops_empty_bands(kcl: kf.KCLayout) -> None:
+    """A shrink of at least half the core leaves nothing behind."""
+    wg = kf.kdb.LayerInfo(1, 0, "WG")
+    fill = kf.kdb.LayerInfo(2, 0, "FILL")
+    gone = kf.kdb.LayerInfo(3, 0, "GONE")
+    base = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(
+            width=500,
+            enclosure=kcl.get_enclosure(
+                kf.LayerEnclosure(
+                    # FILL shrinks to +-150; GONE shrinks to nothing.
+                    sections=[(fill, -100), (gone, -250)],
+                    main_layer=wg,
+                )
+            ),
+            name="gs_shrink",
+        )
+    )
+    assert _strips(base.get_sections()) == [
+        ("WG (1/0)", -250, 250),
+        ("FILL (2/0)", -150, 150),
+    ]
+
+
+def test_get_sections_symmetric_main_layer_band_stays_separate(
+    kcl: kf.KCLayout,
+) -> None:
+    """The main strip is never merged into an enclosure band on its own layer."""
+    wg = kf.kdb.LayerInfo(1, 0, "WG")
+    base = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(
+            width=500,
+            enclosure=kcl.get_enclosure(
+                kf.LayerEnclosure(sections=[(wg, 1000)], main_layer=wg)
+            ),
+            name="gs_same_layer",
+        )
+    )
+    sections = base.get_sections()
+    assert sections[0].layer == base.main_layer
+    assert (sections[0].section_min, sections[0].section_max) == (-250, 250)
+    assert _strips(sections[1:]) == [("WG (1/0)", -1250, 1250)]
+
+
+def test_get_sections_wrappers(kcl: kf.KCLayout) -> None:
+    """Both wrapper flavours expose the same strips in their own unit."""
+    wg = kf.kdb.LayerInfo(1, 0, "WG")
+    slab = kf.kdb.LayerInfo(2, 0, "SLAB")
+    sym = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(
+            width=500,
+            enclosure=kcl.get_enclosure(
+                kf.LayerEnclosure(sections=[(slab, 3000)], main_layer=wg)
+            ),
+            name="gs_wrap_sym",
+        )
+    )
+    asym = kcl.get_asymmetrical_cross_section(_make_asym("gs_wrap_asym"))
+
+    for base, ixs, dxs in (
+        (sym, kf.CrossSection(kcl=kcl, base=sym), kf.DCrossSection(kcl=kcl, base=sym)),
+        (
+            asym,
+            kf.AsymmetricCrossSection(kcl=kcl, base=asym),
+            kf.DAsymmetricCrossSection(kcl=kcl, base=asym),
+        ),
+    ):
+        assert ixs.get_sections() == base.get_sections()
+        assert [
+            (str(s.layer), s.section_min, s.section_max) for s in dxs.get_sections()
+        ] == [
+            (str(s.layer), kcl.to_um(s.section_min), kcl.to_um(s.section_max))
+            for s in base.get_sections()
+        ]
