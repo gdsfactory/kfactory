@@ -566,10 +566,8 @@ class AsymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=T
                 for s in self.sections
             ),
             name=self.name,
-            radius=kcl.to_um(self.radius) if self.radius is not None else None,
-            radius_min=kcl.to_um(self.radius_min)
-            if self.radius_min is not None
-            else None,
+            radius=kcl.to_um(self.radius),
+            radius_min=kcl.to_um(self.radius_min),
             bbox_sections={k: kcl.to_um(v) for k, v in self.bbox_sections.items()},
         )
 
@@ -714,10 +712,8 @@ class DAsymmetricalCrossSection(BaseModel, arbitrary_types_allowed=True):
             section_max=kcl.to_dbu(self.section_max),
             sections=tuple(s.to_itype(kcl) for s in self.sections),
             name=self.name or "",
-            radius=kcl.to_dbu(self.radius) if self.radius is not None else None,
-            radius_min=kcl.to_dbu(self.radius_min)
-            if self.radius_min is not None
-            else None,
+            radius=kcl.to_dbu(self.radius),
+            radius_min=kcl.to_dbu(self.radius_min),
             bbox_sections={k: kcl.to_dbu(v) for k, v in self.bbox_sections.items()},
         )
 
@@ -986,13 +982,11 @@ class DAsymmetricCrossSection(TAsymmetricCrossSection[float]):
 
     @property
     def radius(self) -> float | None:
-        r = self._base.radius
-        return self.kcl.to_um(r) if r is not None else None
+        return self.kcl.to_um(self._base.radius)
 
     @property
     def radius_min(self) -> float | None:
-        r = self._base.radius_min
-        return self.kcl.to_um(r) if r is not None else None
+        return self.kcl.to_um(self._base.radius_min)
 
     @property
     def bbox_sections(self) -> dict[kdb.LayerInfo, float]:
@@ -1306,9 +1300,7 @@ class DCrossSection(TCrossSection[float]):
         return {
             layer: [
                 (
-                    self.kcl.to_um(section.d_min)
-                    if section.d_min is not None
-                    else None,
+                    self.kcl.to_um(section.d_min),
                     self.kcl.to_um(section.d_max),
                 )
                 for section in sections.sections
