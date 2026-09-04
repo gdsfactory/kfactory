@@ -166,14 +166,27 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
             width=kcl.to_um(self.width),
             enclosure=self.enclosure.to_dtype(kcl),
             name=self.name,
+            radius=kcl.to_um(self.radius),
+            radius_min=kcl.to_um(self.radius_min),
         )
 
     def get_xmax(self) -> int:
-        return self.width // 2 + max(
-            s.d_max
-            for sections in self.enclosure.layer_sections.values()
-            for s in sections.sections
+        """Outer edge of the profile in dbu.
+
+        The core always reaches `width // 2`, so the enclosure can only push the
+        extent outwards: a cross section with no bands at all is just its core,
+        and a band that shrinks inwards (negative `d_max`) does not pull the
+        extent inside the core it sits on.
+        """
+        outermost = max(
+            (
+                s.d_max
+                for sections in self.enclosure.layer_sections.values()
+                for s in sections.sections
+            ),
+            default=0,
         )
+        return self.width // 2 + max(outermost, 0)
 
     def get_xmin(self) -> int:
         # Symmetric by construction: the full extent is mirrored about the center line.
@@ -208,6 +221,8 @@ class DSymmetricalCrossSection(BaseModel):
     width: float
     enclosure: DLayerEnclosure
     name: str | None = None
+    radius: float | None = None
+    radius_min: float | None = None
 
     @model_validator(mode="after")
     def _validate_width(self) -> Self:
@@ -225,6 +240,8 @@ class DSymmetricalCrossSection(BaseModel):
             width=kcl.to_dbu(self.width),
             enclosure=kcl.get_enclosure(self.enclosure.to_itype(kcl)),
             name=self.name,
+            radius=kcl.to_dbu(self.radius),
+            radius_min=kcl.to_dbu(self.radius_min),
         )
 
 
@@ -1276,8 +1293,8 @@ class DCrossSection(TCrossSection[float]):
                         ],
                     ),
                     name=name,
-                    radius=kcl.to_dbu(radius) if radius else None,
-                    radius_min=kcl.to_dbu(radius_min) if radius_min else None,
+                    radius=kcl.to_dbu(radius),
+                    radius_min=kcl.to_dbu(radius_min),
                 )
             )
         self.kcl = kcl
