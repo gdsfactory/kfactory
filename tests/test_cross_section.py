@@ -1155,3 +1155,153 @@ def test_get_sections_wrappers(kcl: kf.KCLayout) -> None:
             (str(s.layer), kcl.to_um(s.section_min), kcl.to_um(s.section_max))
             for s in base.get_sections()
         ]
+
+
+def test_symmetric_extent_without_cladding(kcl: kf.KCLayout) -> None:
+    """A cross section with no enclosure bands is just its core.
+
+    Regression: `get_xmax` took `max()` over the enclosure's bands, so a bare
+    core raised `ValueError: max() iterable argument is empty` — the shape every
+    single-section profile and every port-derived core has.
+    """
+    wg = kf.kdb.LayerInfo(1, 0, "WG")
+    base = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(
+            width=500,
+            enclosure=kcl.get_enclosure(kf.LayerEnclosure(sections=[], main_layer=wg)),
+            name="bare_extent",
+        )
+    )
+    assert base.get_xmax() == 250
+    assert base.get_xmin() == -250
+    assert kf.CrossSection(kcl=kcl, base=base).get_xmin_xmax() == (-250, 250)
+    assert kf.DCrossSection(kcl=kcl, base=base).get_xmin_xmax() == (
+        kcl.to_um(-250),
+        kcl.to_um(250),
+    )
+    # Consistent with the strips the profile actually realises.
+    assert base.get_sections()[0].section_max == base.get_xmax()
+
+
+def test_symmetric_extent_with_only_shrunk_bands(kcl: kf.KCLayout) -> None:
+    """A band shrinking inwards cannot pull the extent inside the core.
+
+    Regression: `get_xmax` returned `width // 2 + max(d_max)` unclamped, so an
+    enclosure holding only a negative band reported 150 for a profile whose core
+    reaches 250.
+    """
+    wg = kf.kdb.LayerInfo(1, 0, "WG")
+    fill = kf.kdb.LayerInfo(2, 0, "FILL")
+    base = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(
+            width=500,
+            enclosure=kcl.get_enclosure(
+                kf.LayerEnclosure(
+                    sections=[(fill, -100)], main_layer=wg, name="shrunk_only"
+                )
+            ),
+            name="shrunk_extent",
+        )
+    )
+    assert base.get_xmax() == 250
+    assert base.get_xmin() == -250
+    # The outermost strip of the realised profile agrees.
+    assert max(s.section_max for s in base.get_sections()) == 250
+    # A band reaching past the core still wins.
+    grown = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(
+            width=500,
+            enclosure=kcl.get_enclosure(
+                kf.LayerEnclosure(
+                    sections=[(fill, -100), (fill, 1000)],
+                    main_layer=wg,
+                    name="shrunk_and_grown",
+                )
+            ),
+            name="grown_extent",
+        )
+    )
+    assert grown.get_xmax() == 1250
+
+
+def test_symmetric_radius_survives_um_conversion(kcl: kf.KCLayout) -> None:
+    """`radius`/`radius_min` round-trip through the um flavour.
+
+    Regression: `DSymmetricalCrossSection` had no radius fields, so `to_dtype`
+    dropped them and `to_itype` could not restore them — data that survived the
+    file round trip but died on an in-memory unit conversion.
+    """
+    enc = kcl.get_enclosure(
+        kf.LayerEnclosure(
+            sections=[(kf.kdb.LayerInfo(2, 0, "S"), 500)],
+            main_layer=kf.kdb.LayerInfo(1, 0, "WG"),
+            name="radius_um_enc",
+        )
+    )
+    xs = kf.SymmetricalCrossSection(
+        width=1000, enclosure=enc, name="radius_um", radius=10_000, radius_min=5_000
+    )
+
+    dxs = xs.to_dtype(kcl)
+    assert dxs.radius == kcl.to_um(10_000)
+    assert dxs.radius_min == kcl.to_um(5_000)
+
+    back = dxs.to_itype(kcl)
+    assert back.radius == 10_000
+    assert back.radius_min == 5_000
+    assert back == xs
+
+    # An unset radius stays unset rather than becoming 0.
+    no_radius = kf.SymmetricalCrossSection(
+        width=1000, enclosure=enc, name="radius_um_none"
+    )
+    assert no_radius.to_dtype(kcl).radius is None
+    assert no_radius.to_dtype(kcl).to_itype(kcl).radius is None
+    assert no_radius.to_dtype(kcl).radius_min is None
+    assert no_radius.to_dtype(kcl).to_itype(kcl).radius_min is None
+
+
+def test_symmetric_wrapper_radius_from_um(kcl: kf.KCLayout) -> None:
+    """The um wrapper's constructor keeps the radius it was given.
+
+    Including `radius=0`: the constructor used to test the radius for
+    truthiness, so a zero radius was converted to "unset" instead of to 0.
+    """
+    wg = kf.kdb.LayerInfo(1, 0, "WG")
+    slab = kf.kdb.LayerInfo(2, 0, "S")
+    dxs = kf.DCrossSection(
+        kcl,
+        width=1.0,
+        layer=wg,
+        sections=[(slab, 0.5)],
+        radius=10.0,
+        radius_min=5.0,
+        name="wrapper_radius_um",
+    )
+    assert dxs.radius == 10.0
+    assert dxs.radius_min == 5.0
+    assert dxs.base.radius == kcl.to_dbu(10.0)
+    assert dxs.base.radius_min == kcl.to_dbu(5.0)
+
+    zero = kf.DCrossSection(
+        kcl,
+        width=2.0,
+        layer=wg,
+        sections=[(slab, 0.5)],
+        radius=0.0,
+        radius_min=0.0,
+        name="wrapper_radius_um_zero",
+    )
+    assert zero.base.radius == 0
+    assert zero.base.radius_min == 0
+
+    # An omitted radius is still unset.
+    unset = kf.DCrossSection(
+        kcl,
+        width=3.0,
+        layer=wg,
+        sections=[(slab, 0.5)],
+        name="wrapper_radius_um_unset",
+    )
+    assert unset.base.radius is None
+    assert unset.base.radius_min is None
