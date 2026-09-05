@@ -12,6 +12,7 @@ from typing import (
 )
 
 import klayout.db as kdb
+from pydantic import PrivateAttr
 
 from .conf import PROPID, config, logger
 from .exceptions import (
@@ -23,8 +24,12 @@ from .exceptions import (
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .port import DPort, Port, ProtoPort
+from .serialization import deserialize_info_blob, serialize_info_blob
+from .settings import Info
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
     from .instance_pins import (
@@ -43,8 +48,128 @@ if TYPE_CHECKING:
     from .kcell import AnyKCell, AnyTKCell, DKCell, KCell, ProtoTKCell
     from .layer import LayerEnum
     from .layout import KCLayout
+    from .typings import MetaData
 
-__all__ = ["DInstance", "Instance", "ProtoInstance", "ProtoTInstance", "VInstance"]
+__all__ = [
+    "DInstance",
+    "Instance",
+    "InstanceInfo",
+    "ProtoInstance",
+    "ProtoTInstance",
+    "VInstance",
+]
+
+_GDS_MAX_PROPERTY_BYTES = 65530
+"""Maximum byte length of a single GDS property value.
+
+A GDS ``PROPVALUE`` record is ``4-byte header + value`` and its length field is a
+16-bit integer, so read as unsigned the value cannot exceed 65530 bytes. Instance
+info is written as one JSON blob under a single property, so a larger blob makes
+the whole layout unwritable to GDS (KLayout raises ``String max. length
+overflow``). OASIS has no such limit; cell info is unaffected because it uses
+native layout meta info.
+"""
+
+_GDS_SPEC_PROPERTY_BYTES = 32764
+"""GDS-spec-safe byte length of a single property value.
+
+The strict GDS spec treats the 16-bit record-length field as *signed* (max
+0x8000), so a ``PROPVALUE`` record longer than 32768 bytes -- i.e. a value over
+32764 bytes -- has the high bit set and reads as negative to strict parsers.
+KLayout writes and reads such records by treating the field as unsigned (and
+warns), but other GDS tools may misinterpret or reject them. This is an
+interoperability limit, not a data-integrity one.
+"""
+
+
+def _set_info_property(instance: kdb.Instance, prop_id: int, blob: str) -> None:
+    """Write an info blob to an instance property, logging any GDS size problem.
+
+    The size limits only apply to GDS, so the value is stored regardless and
+    OASIS output keeps working; the log flags the problem at assignment time
+    instead of letting it surface later (a hard write failure over the 64 KB
+    record limit, or silent interoperability breakage over the 32 KB
+    strict-spec limit).
+
+    Args:
+        instance: The KLayout instance to write the property on.
+        prop_id: The property id to store the blob under.
+        blob: The serialized info blob.
+    """
+    size = len(blob.encode("utf-8"))
+    if size > _GDS_MAX_PROPERTY_BYTES:
+        logger.error(
+            f"Instance info for a placement of cell {instance.cell.name!r} is "
+            f"{size} bytes, exceeding the GDS per-property limit of "
+            f"{_GDS_MAX_PROPERTY_BYTES} bytes; writing this layout to GDS will "
+            "fail with a 'String max. length overflow' error (OASIS is "
+            "unaffected)."
+        )
+    elif size > _GDS_SPEC_PROPERTY_BYTES:
+        logger.warning(
+            f"Instance info for a placement of cell {instance.cell.name!r} is "
+            f"{size} bytes; the GDS property record exceeds the strict GDS "
+            f"spec's signed 16-bit length limit ({_GDS_SPEC_PROPERTY_BYTES} "
+            "bytes of value). KLayout reads it back correctly, but other GDS "
+            "tools may misinterpret or reject the record (OASIS is unaffected)."
+        )
+    instance.set_property(prop_id, blob)
+
+
+class InstanceInfo(Info):
+    """Per-instance ``info`` bound to a KLayout instance's user properties.
+
+    Behaves like the cell-level :class:`~kfactory.settings.Info`: values are
+    restricted to JSON-compatible metadata (``int``, ``float``, ``str``,
+    ``tuple``, ``list``, ``dict``, ``None`` or serializable ``kdb`` shapes) and
+    can be accessed either as attributes or items. Unlike the cell version,
+    every mutation is immediately serialized to a single JSON blob stored on the
+    underlying ``kdb.Instance`` under :attr:`~kfactory.conf.PROPID.INFO`, so the
+    change persists on the instance (and survives a GDS/OASIS roundtrip).
+
+    Cells store their info as native layout meta info; instances have no such
+    channel, so the same value set is round-tripped through the shared
+    :func:`~kfactory.serialization.serialize_setting` codec into one string
+    property. The codec is symmetric for every supported shape, so instance info
+    accepts exactly the same types as cell info (including collection/matrix
+    shapes like ``Region``, ``Edges``, ``Matrix2d``, ...).
+
+    Instances are wrapped lazily, so this object is created on each ``inst.info``
+    access. It writes straight through to the instance, meaning
+    ``inst.info["key"] = value`` persists exactly like ``cell.info["key"] =
+    value`` does for cells.
+
+    Note:
+        Tuples are stored as JSON arrays and therefore read back as ``list``,
+        matching how cell info behaves when it is serialized to GDS metadata.
+    """
+
+    _instance: kdb.Instance | None = PrivateAttr(default=None)
+    _prop_id: int = PrivateAttr(default=PROPID.INFO)
+
+    def _bind(self, instance: kdb.Instance, prop_id: int) -> Self:
+        """Bind this info object to an instance property for write-back."""
+        self._instance = instance
+        self._prop_id = prop_id
+        return self
+
+    def _persist(self) -> None:
+        """Serialize the current info to the bound instance property."""
+        if self._instance is not None:
+            _set_info_property(
+                self._instance, self._prop_id, serialize_info_blob(self.model_dump())
+            )
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        """Validate/store the value, then write back to the instance."""
+        super().__setattr__(name, value)
+        if not name.startswith("_"):
+            self._persist()
+
+    def update(self, data: dict[str, MetaData]) -> None:
+        """Update several values at once and write back to the instance."""
+        super().update(data)
+        self._persist()
 
 
 class ProtoInstance[T: (int, float)](GeometricObject[T]):
@@ -157,6 +282,45 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
     @purpose.setter
     def purpose(self, value: str | None) -> None:
         self._instance.set_property(PROPID.PURPOSE, value)
+
+    @property
+    def info(self) -> InstanceInfo:
+        """Per-instance info, mirroring the cell-level ``info`` API.
+
+        Returns an :class:`InstanceInfo` bound to this instance. Reads and
+        mutations go through the instance's GDS user properties (a single JSON
+        blob under :attr:`~kfactory.conf.PROPID.INFO`), so different placements
+        of the *same* cached cell can carry different info without wrapper cells
+        and without breaking cell caching::
+
+            ref = cell << other
+            ref.info["measure"] = "spectrum"  # persists on this instance only
+            ref.info.wavelength = 1550
+            ref.info.update({"port": "o1"})
+
+        Assigning replaces the whole info dict; the value may be a mapping or
+        another :class:`~kfactory.settings.Info`::
+
+            ref.info = {"measure": "power"}
+
+        Note:
+            Flattening the instance discards its properties, so per-instance
+            info is lost on flatten (the same as instance names).
+        """
+        prop = self._instance.property(PROPID.INFO)
+        data: dict[str, Any] = deserialize_info_blob(prop) if prop is not None else {}
+        return InstanceInfo(**data)._bind(self._instance, PROPID.INFO)
+
+    @info.setter
+    def info(self, value: Info | Mapping[str, Any]) -> None:
+        # NOTE: annotated with ``Any`` rather than the recursive ``MetaData``
+        # alias here on purpose - the latter overflows ``ty`` in this position.
+        # The runtime ``Info(**data)`` call below still validates the metadata
+        # types (raising on unsupported values, like the cell-level info).
+        data = value.model_dump() if isinstance(value, Info) else dict(value)
+        _set_info_property(
+            self._instance, PROPID.INFO, serialize_info_blob(Info(**data).model_dump())
+        )
 
     @property
     def cell_index(self) -> int:

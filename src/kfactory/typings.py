@@ -12,7 +12,6 @@ from typing import (
 )
 
 import klayout.db as kdb
-from klayout import lay
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -90,7 +89,6 @@ type SerializableShape = (
     | kdb.DEdgePair
     | kdb.EdgePairs
     | kdb.Edges
-    | lay.LayerProperties
     | kdb.Matrix2d
     | kdb.Matrix3d
     | kdb.Path

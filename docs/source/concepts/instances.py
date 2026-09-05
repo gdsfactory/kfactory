@@ -224,6 +224,46 @@ b30b.flatten()  # merges geometry into parent to close sub-nm gaps
 angled
 
 # %% [markdown]
+# ## Per-instance info
+#
+# A cell's `info` is shared by *every* placement of that cell. When you need
+# metadata that differs **per placement** — e.g. which measurement each copy of a
+# reusable device is used for — attach it to the instance instead via `inst.info`.
+#
+# `inst.info` mirrors `cell.info`: attribute- or item-style access, and the same
+# metadata types (Python scalars/containers and `kdb` shapes). It is stored on the
+# instance's GDS user properties, so different placements of the *same cached cell*
+# carry different info without breaking cell caching, and it survives a GDS/OASIS
+# roundtrip.
+
+# %%
+device = kf.KCell(name="reusable_device")
+device.shapes(kf.kcl.find_layer(L.WG)).insert(kf.kdb.DBox(0, 0, 20, 10))
+device.info["component"] = "mzi"  # shared by every placement
+
+circuit = kf.KCell(name="per_instance_info")
+ref_a = circuit << device
+ref_b = circuit << device
+ref_b.dmovey(30)
+
+# per-placement metadata: same cached cell, different info on each instance
+ref_a.info["measure"] = "spectrum"
+ref_a.info.wavelength_nm = 1550  # attribute-style assignment also persists
+ref_b.info["measure"] = "power"
+
+# a single cell definition is reused, yet each instance keeps its own info
+assert ref_a.cell_index == ref_b.cell_index
+assert dict(ref_a.info) == {"measure": "spectrum", "wavelength_nm": 1550}
+assert dict(ref_b.info) == {"measure": "power"}
+print("cell.info :", dict(device.info))
+print("ref_a.info:", dict(ref_a.info))
+print("ref_b.info:", dict(ref_b.info))
+
+# %% [markdown]
+# > **Note:** `inst.info` lives on the instance's properties, so — like the
+# > instance name — it is discarded when the instance is flattened into its parent.
+
+# %% [markdown]
 # ## Summary
 #
 # | Task | API |
@@ -235,6 +275,7 @@ angled
 # | Regular array | `parent.create_inst(child, na=N, nb=M, a=vec_a, b=vec_b)` |
 # | Access array port | `arr_inst["port_name", col, row]` |
 # | Expose child ports | `parent.add_ports(inst.ports, prefix="…")` |
+# | Per-placement metadata | `inst.info["key"] = value` |
 # | Flatten into parent | `inst.flatten()` |
 
 # %% [markdown]

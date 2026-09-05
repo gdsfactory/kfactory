@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import inspect
+import json
 from collections import UserDict, UserList
 from collections.abc import Callable, Hashable
 from hashlib import sha3_512
@@ -11,7 +12,7 @@ from typing import TYPE_CHECKING, Any, TypeGuard, overload
 import numpy as np
 import toolz
 
-from . import kdb, lay
+from . import kdb
 from .conf import config
 from .exceptions import CellNameError
 
@@ -257,8 +258,58 @@ def check_metadata_type(value: Any) -> MetaData:
     raise ValueError(msg)
 
 
+# ``kdb`` collection wrappers have ``to_s`` but no ``from_s``. They are encoded
+# element-wise instead: each element (which *does* have ``from_s``) is dumped via
+# its own ``to_s`` into a JSON list, so the payload is robust to the delimiter
+# characters (``;``, ``)``, ``'``) that ``to_s`` reuses inside and between
+# elements. Maps the wrapper class name to (wrapper_class, element_class).
+_COLLECTION_SHAPES: dict[str, tuple[type[Any], type[Any]]] = {
+    "Region": (kdb.Region, kdb.Polygon),
+    "Edges": (kdb.Edges, kdb.Edge),
+    "Texts": (kdb.Texts, kdb.Text),
+    "EdgePairs": (kdb.EdgePairs, kdb.EdgePair),
+}
+# ``kdb`` matrices also lack ``from_s``; they are encoded as a JSON list of their
+# scalar components and rebuilt through their component constructor.
+_MATRIX_SHAPES: frozenset[str] = frozenset({"Matrix2d", "Matrix3d"})
+
+
+def _serialize_shape(shape: SerializableShape) -> str:
+    """Encode a ``kdb`` shape as a ``!#ClassName <payload>`` string."""
+    cls_name = type(shape).__name__
+    if cls_name in _COLLECTION_SHAPES:
+        return f"!#{cls_name} " + json.dumps([e.to_s() for e in shape.each()])
+    if cls_name == "Matrix2d":
+        return "!#Matrix2d " + json.dumps(
+            [shape.m11(), shape.m12(), shape.m21(), shape.m22()]
+        )
+    if cls_name == "Matrix3d":
+        return "!#Matrix3d " + json.dumps(
+            [shape.m(i, j) for i in range(3) for j in range(3)]
+        )
+    return f"!#{cls_name} {shape!s}"
+
+
+def _deserialize_shape(cls_name: str, payload: str) -> SerializableShape:
+    """Rebuild a ``kdb`` shape from a ``!#ClassName <payload>`` string."""
+    if cls_name in _COLLECTION_SHAPES:
+        wrapper_cls, element_cls = _COLLECTION_SHAPES[cls_name]
+        return wrapper_cls([element_cls.from_s(s) for s in json.loads(payload)])
+    if cls_name in _MATRIX_SHAPES:
+        return getattr(kdb, cls_name)(*json.loads(payload))
+    if cls_name == "LayerInfo":
+        return kdb.LayerInfo.from_string(payload)
+    return getattr(kdb, cls_name).from_s(payload)
+
+
 def serialize_setting(setting: MetaData) -> JSONSerializable:
-    """Serialize a setting."""
+    """Serialize a setting to a JSON-compatible form.
+
+    ``kdb`` shapes are encoded as a ``!#ClassName <payload>`` string so they
+    survive JSON/YAML/GDS-property stores that cannot hold native ``kdb``
+    objects. The inverse is :func:`deserialize_setting`; the two are symmetric
+    for every shape in :data:`~kfactory.typings.SerializableShape`.
+    """
     if setting is None:
         return None
     if isinstance(setting, dict):
@@ -270,12 +321,12 @@ def serialize_setting(setting: MetaData) -> JSONSerializable:
     if isinstance(setting, tuple):
         return tuple(serialize_setting(s) for s in setting)
     if serializible_shape_guard(setting):
-        return f"!#{setting.__class__.__name__} {setting!s}"
+        return _serialize_shape(setting)
     return setting  # ty:ignore[invalid-return-type]
 
 
 def deserialize_setting(setting: JSONSerializable) -> MetaData:
-    """Deserialize a setting."""
+    """Deserialize a setting produced by :func:`serialize_setting`."""
     if isinstance(setting, dict):
         return {
             name: deserialize_setting(_setting) for name, _setting in setting.items()
@@ -285,13 +336,27 @@ def deserialize_setting(setting: JSONSerializable) -> MetaData:
     if isinstance(setting, tuple):
         return tuple(deserialize_setting(s) for s in setting)
     if isinstance(setting, str) and setting.startswith("!#"):
-        cls_name, value = setting.removeprefix("!#").split(" ", 1)
-        match cls_name:
-            case "LayerInfo":
-                return getattr(kdb, cls_name).from_string(value)
-            case _:
-                return getattr(kdb, cls_name).from_s(value)
+        cls_name, payload = setting.removeprefix("!#").split(" ", 1)
+        return _deserialize_shape(cls_name, payload)
     return setting
+
+
+def serialize_info_blob(info: dict[str, MetaData]) -> str:
+    """Serialize an info dict to a single JSON blob for string-only stores.
+
+    Used where metadata must round-trip through a single string value (e.g. a
+    ``kdb.Instance`` user property, which GDS coerces to a string), as opposed
+    to the native per-cell meta info used for cells.
+    """
+    return json.dumps(serialize_setting(info))
+
+
+def deserialize_info_blob(blob: str) -> dict[str, MetaData]:
+    """Deserialize a JSON info blob produced by :func:`serialize_info_blob`."""
+    data = deserialize_setting(json.loads(blob))
+    if not isinstance(data, dict):
+        raise TypeError(f"Info blob did not decode to a dict: {blob!r}")
+    return data
 
 
 def get_cell_name(
@@ -342,7 +407,6 @@ _SERIALIZABLE_SHAPES: UnionType = (
     | kdb.Trans
     | kdb.VCplxTrans
     | kdb.Vector
-    | lay.LayerProperties
     | _ISHAPES
     | _DSHAPES
 )

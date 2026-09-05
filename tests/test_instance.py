@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from tempfile import NamedTemporaryFile
 from typing import Any
 
 import klayout.db as kdb
@@ -6,6 +7,7 @@ import pytest
 
 import kfactory as kf
 from kfactory import exceptions
+from kfactory.conf import PROPID
 from tests.conftest import Layers
 
 
@@ -723,3 +725,252 @@ def test_to_dtype(kcl: kf.KCLayout) -> None:
     ref = dref.to_itype()
     assert ref.bbox() == kf.kdb.Box(-5000, -5000, 5000, 5000)
     assert isinstance(ref, kf.Instance)
+
+
+def test_instance_info_default_empty(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=layers.WG)
+    assert dict(ref.info) == {}
+    assert isinstance(ref.info, kf.settings.Info)
+
+
+def test_instance_info_mutation_persists(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=layers.WG)
+
+    # every cell-info-style mutation writes straight through to the instance
+    ref.info["measure"] = "spectrum"
+    ref.info.wavelength = 1550
+    ref.info.update({"port": "o1"})
+
+    assert dict(ref.info) == {
+        "measure": "spectrum",
+        "wavelength": 1550,
+        "port": "o1",
+    }
+    # persisted on the underlying kdb property, not just the wrapper
+    assert ref.instance.property(PROPID.INFO) is not None
+
+
+def test_instance_info_assignment_replaces(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=layers.WG)
+    ref.info["stale"] = 1
+    ref.info = {"measure": "power"}
+    assert dict(ref.info) == {"measure": "power"}
+    # accepts another Info too
+    ref.info = kf.settings.Info(measure="loss")
+    assert dict(ref.info) == {"measure": "loss"}
+
+
+def test_instance_info_per_placement_keeps_caching(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    child = straight_factory(width=0.5, length=1, layer=layers.WG)
+    c = kcl.kcell()
+    a = c << child
+    b = c << child
+    b.dmovey(10)
+
+    a.info["measure"] = "spectrum"
+    b.info["measure"] = "power"
+
+    # the same cached cell is reused for both placements ...
+    assert a.cell_index == b.cell_index
+    # ... yet each instance carries its own info
+    assert dict(a.info) == {"measure": "spectrum"}
+    assert dict(b.info) == {"measure": "power"}
+
+
+def test_instance_info_gds_roundtrip() -> None:
+    kcl_write = kf.KCLayout("TEST_INSTANCE_INFO_WRITE")
+    child = kcl_write.kcell("child")
+    child.shapes(kcl_write.layer(1, 0)).insert(kf.kdb.Box(10_000, 1000))
+    top = kcl_write.kcell("top")
+    a = top << child
+    b = top << child
+    b.dmovey(10)
+    a.info["measure"] = "spectrum"
+    a.info.wavelength = 1550
+    b.info["measure"] = "power"
+
+    kcl_read = kf.KCLayout("TEST_INSTANCE_INFO_READ")
+    with NamedTemporaryFile(suffix=".gds") as tf:
+        top.write(tf.name)
+        kcl_read.read(tf.name)
+
+    top_read = kcl_read["top"]
+    infos = sorted((dict(inst.info) for inst in top_read.insts), key=repr)
+    assert infos == [
+        {"measure": "power"},
+        {"measure": "spectrum", "wavelength": 1550},
+    ]
+
+
+def test_instance_info_rejects_non_metadata(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=layers.WG)
+    with pytest.raises(ValueError):
+        ref.info["bad"] = object()
+
+
+def test_instance_info_kdb_shape_roundtrip() -> None:
+    """kdb shapes must survive assignment and a GDS roundtrip (like cell info)."""
+    kcl_write = kf.KCLayout("TEST_INSTANCE_INFO_SHAPE_WRITE")
+    child = kcl_write.kcell("child")
+    child.shapes(kcl_write.layer(1, 0)).insert(kf.kdb.Box(10_000, 1000))
+    top = kcl_write.kcell("top")
+    ref = top << child
+
+    shapes: dict[str, object] = {
+        "box": kf.kdb.Box(0, 0, 500, 500),
+        "dbox": kf.kdb.DBox(0, 0, 1.5, 2.5),
+        "point": kf.kdb.Point(10, 20),
+        "vector": kf.kdb.Vector(3, 4),
+        "trans": kf.kdb.Trans(1, False, 100, 200),
+        "dcplx_trans": kf.kdb.DCplxTrans(1.0, 30.0, False, 1.0, 2.0),
+        "layer_info": kf.kdb.LayerInfo(1, 0),
+        "polygon": kf.kdb.Polygon(kf.kdb.Box(0, 0, 100, 100)),
+    }
+    for key, value in shapes.items():
+        ref.info[key] = value
+
+    # readable in-memory straight after assignment
+    for key, value in shapes.items():
+        assert str(ref.info[key]) == str(value)
+
+    kcl_read = kf.KCLayout("TEST_INSTANCE_INFO_SHAPE_READ")
+    with NamedTemporaryFile(suffix=".gds") as tf:
+        top.write(tf.name)
+        kcl_read.read(tf.name)
+
+    read_info = next(iter(kcl_read["top"].insts)).info
+    for key, value in shapes.items():
+        assert type(read_info[key]) is type(value)
+        assert str(read_info[key]) == str(value)
+
+
+def test_instance_info_collection_shape_roundtrip() -> None:
+    """kdb collection/matrix shapes round-trip on instances, same as cell info.
+
+    These types lack ``from_s`` and used to be rejected per-instance; the codec
+    now encodes them element-wise so they survive a GDS roundtrip.
+    """
+    kcl_write = kf.KCLayout("TEST_INSTANCE_INFO_COLL_WRITE")
+    child = kcl_write.kcell("child")
+    child.shapes(kcl_write.layer(1, 0)).insert(kf.kdb.Box(10_000, 1000))
+    top = kcl_write.kcell("top")
+    ref = top << child
+
+    shapes: dict[str, object] = {
+        "region": kf.kdb.Region(
+            [
+                kf.kdb.Polygon(kf.kdb.Box(0, 0, 50, 50)),
+                kf.kdb.Polygon(kf.kdb.Box(100, 0, 150, 60)),
+            ]
+        ),
+        "edges": kf.kdb.Edges([kf.kdb.Edge(0, 0, 10, 10), kf.kdb.Edge(1, 1, 2, 2)]),
+        # text content deliberately contains the delimiters to_s reuses
+        "texts": kf.kdb.Texts([kf.kdb.Text("a;b)c", kf.kdb.Trans())]),
+        "edge_pairs": kf.kdb.EdgePairs(
+            [kf.kdb.EdgePair(kf.kdb.Edge(0, 0, 1, 1), kf.kdb.Edge(2, 2, 3, 3))]
+        ),
+        "matrix2d": kf.kdb.Matrix2d(1.5, 2.0, 3.0, 4.0),
+        "matrix3d": kf.kdb.Matrix3d(1, 0, 5, 0, 1, 7, 0, 0, 1),
+    }
+    for key, value in shapes.items():
+        ref.info[key] = value
+
+    kcl_read = kf.KCLayout("TEST_INSTANCE_INFO_COLL_READ")
+    with NamedTemporaryFile(suffix=".gds") as tf:
+        top.write(tf.name)
+        kcl_read.read(tf.name)
+
+    read_info = next(iter(kcl_read["top"].insts)).info
+    for key, value in shapes.items():
+        assert type(read_info[key]) is type(value)
+        assert read_info[key].to_s() == value.to_s()
+
+
+def test_instance_info_oversize_blob_logs_error(
+    kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    """An info blob over the GDS per-property limit logs an error, without raising.
+
+    The value is still stored (OASIS has no such limit); the log flags the
+    GDS-unwritable blob at assignment time.
+    """
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=kf.kdb.LayerInfo(1, 0))
+
+    errors: list[str] = []
+    sink_id = kf.logger.add(lambda m: errors.append(str(m)), level="ERROR")
+    try:
+        ref.info["huge"] = "x" * 70_000
+    finally:
+        kf.logger.remove(sink_id)
+
+    assert any("GDS per-property limit" in m for m in errors)
+    # not raised: the value is still stored per-instance
+    assert len(dict(ref.info)["huge"]) == 70_000
+
+
+def test_instance_info_interop_zone_logs_warning() -> None:
+    """A blob over the strict-GDS-spec size warns but still round-trips.
+
+    Between the 32 KB strict-spec limit and the 64 KB hard limit the record is
+    written and read back correctly by KLayout (interoperability risk only), so
+    it must warn -- not error -- and the value must survive a GDS roundtrip.
+    """
+    kcl_write = kf.KCLayout("TEST_INSTANCE_INFO_INTEROP_WRITE")
+    child = kcl_write.kcell("child")
+    child.shapes(kcl_write.layer(1, 0)).insert(kf.kdb.Box(10_000, 1000))
+    top = kcl_write.kcell("top")
+    ref = top << child
+
+    records: list[tuple[str, str]] = []
+    sink_id = kf.logger.add(
+        lambda m: records.append((m.record["level"].name, m.record["message"])),
+        level="WARNING",
+    )
+    try:
+        ref.info["big"] = "x" * 40_000  # > 32764 (spec) but <= 65530 (hard)
+    finally:
+        kf.logger.remove(sink_id)
+
+    levels = {level for level, _ in records}
+    assert "WARNING" in levels
+    assert "ERROR" not in levels
+    assert any("strict GDS spec" in msg for _, msg in records)
+
+    # still round-trips through GDS (KLayout reads oversized-per-spec records)
+    kcl_read = kf.KCLayout("TEST_INSTANCE_INFO_INTEROP_READ")
+    with NamedTemporaryFile(suffix=".gds") as tf:
+        top.write(tf.name)
+        kcl_read.read(tf.name)
+    assert len(next(iter(kcl_read["top"].insts)).info["big"]) == 40_000
+
+
+def test_instance_info_normal_size_logs_nothing(
+    kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    """A normal-size info blob does not log a warning or error."""
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=kf.kdb.LayerInfo(1, 0))
+
+    records: list[str] = []
+    sink_id = kf.logger.add(lambda m: records.append(str(m)), level="WARNING")
+    try:
+        ref.info["small"] = "x" * 100
+    finally:
+        kf.logger.remove(sink_id)
+
+    assert not records
