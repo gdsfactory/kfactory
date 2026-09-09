@@ -33,6 +33,26 @@ def _get_path_stem(p: Path) -> str | None:
     return None
 
 
+@pytest.mark.parametrize(
+    ("placement", "expected"),
+    [
+        ({"x": 10}, {"x": 10}),
+        ({"xmin": 10}, {"x": 10, "anchor": {"x": "left"}}),
+        ({"ymin": 20}, {"y": 20, "anchor": {"y": "bottom"}}),
+        (
+            {"xmin": 10, "ymin": 20},
+            {"x": 10, "y": 20, "anchor": {"x": "left", "y": "bottom"}},
+        ),
+        ({"port": "o1"}, {"anchor": {"port": "o1"}}),
+    ],
+)
+def test_sanitize_pic_yml_anchor(
+    placement: dict[str, Any], expected: dict[str, Any]
+) -> None:
+    data = kf.schematic.sanitize_pic_yml({"placements": {"instance": placement}})
+    assert data["placements"]["instance"] == expected
+
+
 def test_schematic() -> None:
     yaml = YAML(typ=["rt", "safe", "string"])
     schema_yaml = """
