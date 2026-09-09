@@ -2076,14 +2076,44 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     self.add_port(port=port, keep_mirror=True)
 
     def ibbox(self, layer: int | None = None) -> kdb.Box:
+        """Bounds in dbu, including approximate bounds of pending virtual instances.
+
+        With pending vinsts, warn that bounds may be inaccurate until
+        insert_vinsts() materializes their geometry.
+        """
         if layer is None:
-            return self._base.kdb_cell.bbox()
-        return self._base.kdb_cell.bbox(layer)
+            box = self._base.kdb_cell.bbox()
+        else:
+            box = self._base.kdb_cell.bbox(layer)
+        if self.vinsts:
+            logger.warning(
+                "Bounding box of cell {!r} includes virtual instances and may be "
+                "inaccurate until insert_vinsts() has been called.",
+                self.name,
+            )
+            for vinst in self.vinsts:
+                box += vinst.ibbox(layer)
+        return box
 
     def dbbox(self, layer: int | None = None) -> kdb.DBox:
+        """Bounds in micrometers, including pending virtual instances.
+
+        With pending vinsts, warn that bounds may be inaccurate until
+        insert_vinsts() materializes their geometry.
+        """
         if layer is None:
-            return self._base.kdb_cell.dbbox()
-        return self._base.kdb_cell.dbbox(layer)
+            box = self._base.kdb_cell.dbbox()
+        else:
+            box = self._base.kdb_cell.dbbox(layer)
+        if self.vinsts:
+            logger.warning(
+                "Bounding box of cell {!r} includes virtual instances and may be "
+                "inaccurate until insert_vinsts() has been called.",
+                self.name,
+            )
+            for vinst in self.vinsts:
+                box += vinst.dbbox(layer)
+        return box
 
     def l2n_ports(
         self,
@@ -3301,7 +3331,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             box += self.shapes(layer__).bbox()
 
         for vinst in self.insts:
-            box += vinst.dbbox()
+            box += vinst.dbbox(layer)
 
         return box
 
