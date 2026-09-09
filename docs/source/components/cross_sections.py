@@ -481,6 +481,42 @@ except CrossSectionSymmetryMismatchError as e:
 # works by default and adding `mirror=True` would over-mirror it and raise.
 
 # %% [markdown]
+# ## Bounding-box layers
+#
+# Both symmetric and asymmetric cross-section wrappers provide `add_bbox`.
+# It draws `bbox_sections`, not the ordinary cladding `sections`, into a KCell,
+# DKCell, or VKCell. Choose the reference bounds using one of these alternatives:
+#
+# ```python
+# xs.add_bbox(cell)  # all geometry, including instances
+# xs.add_bbox(cell, ref=xs.layer)  # bounds on one layer
+# xs.add_bbox(cell, ref=instance)  # transformed instance bounds
+# xs.add_bbox(cell, ref=kf.kdb.DBox(0, -1, 10, 1))  # explicit micrometer box
+# xs.add_bbox(cell, ref=xs.layer, top=0)  # no padding on the top edge
+# ```
+#
+# `ref` accepts a LayerInfo, a layer index in the target layout, an integer Box
+# in the target layout's dbu, or a DBox in micrometers.
+# Instance, DInstance, and VInstance references are also supported, using their
+# transformed bounds in their parent's coordinates. Those coordinates must
+# match the target cell's coordinate system. Cells are not accepted as ref;
+# use cell.dbbox() explicitly instead.
+#
+# The cross section, target, and any instance reference must share the exact
+# same KCLayout object. Equal dbu values are insufficient: layer indices belong
+# to their layout. A mismatch raises ValueError before resolving layers or
+# inserting geometry.
+#
+# Padding and the optional `top`, `bottom`, `left`, and `right` overrides use the wrapper's
+# units: micrometers for DCrossSection/DAsymmetricCrossSection and dbu for
+# CrossSection/AsymmetricCrossSection. None uses the layer's stored padding;
+# zero suppresses padding on that edge. All bbox layers use the same original
+# reference bounds, so padding does not accumulate between layers. Empty
+# references draw nothing, and locked cells are rejected. Cross-section
+# metadata and supplied boxes are unchanged.
+# Real cells use integer DBU boxes and padding, converted before drawing.
+# Virtual cells use a separate micrometer implementation without grid snapping.
+#
 # ## Summary
 #
 # | Need | Use |
