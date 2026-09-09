@@ -2724,9 +2724,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         **cross_section_kwargs: Any,
     ) -> DCrossSection | DAsymmetricCrossSection:
         if callable(cross_section):
-            return self.kcl.get_dcross_section(
-                cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
-            )
+            return self.kcl.get_dcross_section(cross_section(**cross_section_kwargs))
         if isinstance(cross_section, dict) and "settings" in cross_section:
             return DCrossSection(
                 kcl=self.kcl,
@@ -3195,9 +3193,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         **cross_section_kwargs: Any,
     ) -> CrossSection | AsymmetricCrossSection:
         if callable(cross_section):
-            return self.kcl.get_icross_section(
-                cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
-            )
+            return self.kcl.get_icross_section(cross_section(**cross_section_kwargs))
         if isinstance(cross_section, dict) and "settings" in cross_section:
             return CrossSection(
                 kcl=self.kcl,
@@ -3323,9 +3319,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         **cross_section_kwargs: Any,
     ) -> DCrossSection | DAsymmetricCrossSection:
         if callable(cross_section):
-            return self.kcl.get_dcross_section(
-                cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
-            )
+            return self.kcl.get_dcross_section(cross_section(**cross_section_kwargs))
         if isinstance(cross_section, dict) and "settings" in cross_section:
             return DCrossSection(
                 kcl=self.kcl,

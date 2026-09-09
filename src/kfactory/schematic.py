@@ -3260,7 +3260,7 @@ def sanitize_pic_yml[T: (int, float)](data: dict[str, Any]) -> dict[str, Any]:
                     placement["anchor"] = _anchor_mapping[port]
                 else:
                     placement["anchor"] = {"port": port}
-            anchor: FixedAnchorDict = placement.get("anchor", {})
+            anchor: dict[str, Any] = placement.get("anchor", {})
             if "xmin" in placement:
                 anchor["x"] = "left"
                 placement["x"] = placement.pop("xmin")
