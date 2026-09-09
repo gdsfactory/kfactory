@@ -85,7 +85,10 @@ def test_invalid_base_port_trans(kcl: kf.KCLayout, layers: Layers) -> None:
         )
 
 
-def test_base_port_ser_model(kcl: kf.KCLayout, layers: Layers) -> None:
+@pytest.mark.parametrize("complex_transform", [False, True])
+def test_base_port_ser_model(
+    kcl: kf.KCLayout, layers: Layers, complex_transform: bool
+) -> None:
     port = kf.port.BasePort(
         name="o1",
         kcl=kcl,
@@ -93,19 +96,25 @@ def test_base_port_ser_model(kcl: kf.KCLayout, layers: Layers) -> None:
             CrossSectionSpecDict(layer=layers.WG, width=2000)
         ),
         port_type="optical",
-        trans=kf.kdb.Trans(1, 0),
+        trans=None if complex_transform else kf.kdb.Trans(1, 0),
+        dcplx_trans=kf.kdb.DCplxTrans(1, 0) if complex_transform else None,
     )
-    assert port.ser_model()
-    port = kf.port.BasePort(
-        name="o2",
-        kcl=kcl,
-        cross_section=kcl.get_symmetrical_cross_section(
-            CrossSectionSpecDict(layer=layers.WG, width=2000)
-        ),
-        port_type="optical",
-        dcplx_trans=kf.kdb.DCplxTrans(1, 0),
-    )
-    assert port.ser_model()
+    serialized = port.ser_model()
+    assert serialized == {
+        "name": "o1",
+        "kcl": kcl,
+        "cross_section": port.cross_section,
+        "asymmetric_cross_section": None,
+        "trans": port.trans,
+        "dcplx_trans": port.dcplx_trans,
+        "info": port.info,
+        "port_type": "optical",
+    }
+    assert serialized["info"] is not port.info
+    if complex_transform:
+        assert serialized["dcplx_trans"] is not port.dcplx_trans
+    else:
+        assert serialized["trans"] is not port.trans
 
 
 def test_base_port_get_trans(kcl: kf.KCLayout, layers: Layers) -> None:
