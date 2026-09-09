@@ -1564,6 +1564,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#bounding-box-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Bounding-box layers
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#summary" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -5673,6 +5684,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#bounding-box-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Bounding-box layers
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#summary" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -6232,6 +6254,35 @@ checks, and it's not bypassable by <code>allow_width_mismatch=True</code>.</p>
 asymmetric ports to end up with opposite mirror orientations (an M90 join). A
 natural <code>o2 → o1</code> chain already satisfies this via the port frames, so it
 works by default and adding <code>mirror=True</code> would over-mirror it and raise.</p>
+<h2 id="bounding-box-layers">Bounding-box layers</h2>
+<p>Both symmetric and asymmetric cross-section wrappers provide <code>add_bbox</code>.
+It draws <code>bbox_sections</code>, not the ordinary cladding <code>sections</code>, into a KCell,
+DKCell, or VKCell. Choose the reference bounds using one of these alternatives:</p>
+<div class="highlight"><pre><span></span><code><span class="n">xs</span><span class="o">.</span><span class="n">add_bbox</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>  <span class="c1"># all geometry, including instances</span>
+<span class="n">xs</span><span class="o">.</span><span class="n">add_bbox</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">xs</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>  <span class="c1"># bounds on one layer</span>
+<span class="n">xs</span><span class="o">.</span><span class="n">add_bbox</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span>  <span class="c1"># transformed instance bounds</span>
+<span class="n">xs</span><span class="o">.</span><span class="n">add_bbox</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DBox</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># explicit micrometer box</span>
+<span class="n">xs</span><span class="o">.</span><span class="n">add_bbox</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">xs</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># no padding on the top edge</span>
+</code></pre></div>
+<p><code>ref</code> accepts a LayerInfo, a layer index in the target layout, an integer Box
+in the target layout's dbu, or a DBox in micrometers.
+Instance, DInstance, and VInstance references are also supported, using their
+transformed bounds in their parent's coordinates. Those coordinates must
+match the target cell's coordinate system. Cells are not accepted as ref;
+use cell.dbbox() explicitly instead.</p>
+<p>The cross section, target, and any instance reference must share the exact
+same KCLayout object. Equal dbu values are insufficient: layer indices belong
+to their layout. A mismatch raises ValueError before resolving layers or
+inserting geometry.</p>
+<p>Padding and the optional <code>top</code>, <code>bottom</code>, <code>left</code>, and <code>right</code> overrides use the wrapper's
+units: micrometers for DCrossSection/DAsymmetricCrossSection and dbu for
+CrossSection/AsymmetricCrossSection. None uses the layer's stored padding;
+zero suppresses padding on that edge. All bbox layers use the same original
+reference bounds, so padding does not accumulate between layers. Empty
+references draw nothing, and locked cells are rejected. Cross-section
+metadata and supplied boxes are unchanged.
+Real cells use integer DBU boxes and padding, converted before drawing.
+Virtual cells use a separate micrometer implementation without grid snapping.</p>
 <h2 id="summary">Summary</h2>
 <table>
 <thead>
