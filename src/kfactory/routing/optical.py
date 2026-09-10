@@ -17,7 +17,12 @@ from ..conf import (
 from ..instance import Instance, ProtoTInstance
 from ..instance_group import InstanceGroup, ProtoTInstanceGroup
 from ..kcell import DKCell, KCell, ProtoTKCell
-from .generic import ManhattanRoute, PlacerFunction, get_radius
+from .generic import (
+    ManhattanRoute,
+    PlacerFunction,
+    _check_cross_section_compatibility,
+    get_radius,
+)
 from .generic import (
     route_bundle as route_bundle_generic,
 )
@@ -754,21 +759,6 @@ def route_bundle(
         raise
 
 
-def _check_asymmetric_connection(p1: Port, p2: Port) -> None:
-    """Reject opposing asymmetric ports whose transverse profiles do not align."""
-    if (
-        p1.is_symmetric()
-        or p2.is_symmetric()
-        or (p1.base.asymmetric_cross_section != p2.base.asymmetric_cross_section)
-    ):
-        raise ValueError("Asymmetric route ports must carry the same cross section.")
-    if p1.mirror == p2.mirror:
-        raise ValueError(
-            f"Asymmetric route ports {p1.name!r} and {p2.name!r} have incompatible "
-            "transverse orientations. Their mirror flags must be opposite."
-        )
-
-
 def _bend90_geometry(
     cell: ProtoTKCell[Any], port_type: str
 ) -> tuple[Port, Port, kdb.Trans]:
@@ -860,10 +850,9 @@ def place_manhattan_asymmetric(
         raise ValueError("Asymmetric placement requires a straight_factory.")
     c = KCell(base=c.base)
     xs = p1.base.asymmetric_cross_section
-    if xs is None or xs != p2.base.asymmetric_cross_section:
-        raise ValueError(
-            "Asymmetric route endpoints must carry the same cross section."
-        )
+    if xs is None:
+        raise ValueError("Asymmetric placement requires asymmetric cross sections.")
+    _check_cross_section_compatibility(p1, p2)
     if route_width is not None and route_width != p1.width:
         raise ValueError("Changing an asymmetric route width requires a transition.")
     if p1.kcl is not c.kcl or p2.kcl is not c.kcl:
@@ -934,14 +923,14 @@ def place_manhattan_asymmetric(
             allow_layer_mismatch=allow_layer_mismatch,
             allow_type_mismatch=allow_type_mismatch,
         )
-        _check_asymmetric_connection(inst.ports[name], target)
+        _check_cross_section_compatibility(inst.ports[name], target)
         route.instances.append(inst)
         return inst
 
     def straight(start: Port, end: Port) -> tuple[Port, Port]:
         length = round((end.trans.disp - start.trans.disp).length())
         if not length:
-            _check_asymmetric_connection(start, end)
+            _check_cross_section_compatibility(start, end)
             return end.copy(), start.copy()
         cell = straight_factory(width=start.width, length=length)
         ports = KCell(base=cell.base).ports.filter(port_type=port_type)
@@ -949,7 +938,7 @@ def place_manhattan_asymmetric(
             raise ValueError("A straight must have two routing ports.")
         inst = connect(cell, ports[0].name, start)
         first, last = inst.ports[ports[0].name], inst.ports[ports[1].name]
-        _check_asymmetric_connection(last, end)
+        _check_cross_section_compatibility(last, end)
         if last.trans.disp != end.trans.disp or (last.angle - end.angle) % 4 != 2:
             raise ValueError("The asymmetric straight does not reach its destination.")
         route.length_straights += length

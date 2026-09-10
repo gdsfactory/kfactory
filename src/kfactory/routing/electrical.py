@@ -19,7 +19,7 @@ from ..cross_section import CrossSection, SymmetricalCrossSection
 from ..enclosure import LayerEnclosure
 from ..kcell import DKCell, KCell, ProtoTKCell
 from ..port import DPort, Port
-from .generic import ManhattanRoute
+from .generic import ManhattanRoute, _check_cross_section_compatibility
 from .generic import route_bundle as route_bundle_generic
 from .length_functions import get_length_from_backbone
 from .manhattan import (
@@ -27,7 +27,7 @@ from .manhattan import (
     route_manhattan,
     route_smart,
 )
-from .optical import _check_asymmetric_connection, vec_angle
+from .optical import vec_angle
 from .steps import Step, Straight
 
 if TYPE_CHECKING:
@@ -700,7 +700,11 @@ def place_asymmetric_wire(
     """
     if kwargs:
         raise ValueError(f"Unsupported asymmetric wire arguments: {kwargs.keys()}")
-    _check_asymmetric_connection(p1, p2)
+    _check_cross_section_compatibility(p1, p2)
+    if p1.is_symmetric():
+        raise ValueError(
+            "Asymmetric wire placement requires asymmetric cross sections."
+        )
     if route_width is not None and route_width != p1.width:
         raise ValueError("Changing an asymmetric route width requires a transition.")
     if layer_info is not None and layer_info != p1.layer_info:

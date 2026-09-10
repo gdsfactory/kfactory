@@ -125,6 +125,46 @@ def test_generic_rejects_mixed_endpoint_pair(
         )
 
 
+@pytest.mark.parametrize("mismatch", ["profile", "mirror"])
+def test_generic_checks_all_asymmetric_pairs_before_placement(
+    kcl: kf.KCLayout, xs: kf.AsymmetricalCrossSection, mismatch: str
+) -> None:
+    first = kf.Port(name="first", cross_section=xs, kcl=kcl, trans=kf.kdb.Trans())
+    second = first.copy()
+    second.trans = kf.kdb.Trans(0, False, 0, 30_000)
+    ends = [p.copy_polar(d=80_000, mirror=True) for p in (first, second)]
+    if mismatch == "mirror":
+        ends[1].mirror = False
+    else:
+        other = kf.AsymmetricalCrossSection(
+            layer=xs.layer,
+            section_min=xs.section_min,
+            section_max=xs.section_max,
+            sections=(
+                kf.CrossSectionLayer(
+                    layer=xs.layer, section_min=5000, section_max=6000
+                ),
+            ),
+        )
+        ends[1] = kf.Port(
+            name="other", cross_section=other, kcl=kcl, trans=ends[1].trans
+        )
+
+    def unexpected(*args: Any, **kwargs: Any) -> ManhattanRoute:
+        pytest.fail("Every endpoint pair must be validated before placing any route")
+
+    with pytest.raises(ValueError):
+        route_bundle(
+            c=kcl.kcell(),
+            start_ports=[first.base, second.base],
+            end_ports=[p.base for p in ends],
+            placer_function=unexpected,
+            asymmetric_placer_function=unexpected,
+            routing_kwargs={"bend90_radius": 0, "separation": 5000},
+            on_placer_error=None,
+        )
+
+
 @pytest.mark.parametrize("rotation", range(4))
 @pytest.mark.parametrize("mirror", [False, True])
 def test_electrical_asymmetric_geometry(

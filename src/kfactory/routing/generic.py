@@ -41,6 +41,37 @@ class PlacerError(ValueError):
     pass
 
 
+def _check_cross_section_compatibility(
+    p1: ProtoPort[Any],
+    p2: ProtoPort[Any],
+    *,
+    allow_symmetric_mismatch: bool = False,
+) -> None:
+    """Check profiles and transverse orientation without checking position or angle.
+
+    Profiles must have the same symmetry and match structurally. Asymmetric
+    profiles additionally require opposite mirror flags. Symmetric routing can
+    explicitly allow different profiles; its width, layer and port-type mismatch
+    policies remain the responsibility of the placer and ``connect()``. This
+    allowance never relaxes asymmetric checks.
+    """
+    symmetric = p1.is_symmetric()
+    if symmetric != p2.is_symmetric():
+        raise ValueError(
+            f"Route endpoints {p1.name!r} and {p2.name!r} mix symmetric and "
+            "asymmetric cross sections. Add an explicit transition first."
+        )
+    if p1.base.any_cross_section != p2.base.any_cross_section and not (
+        symmetric and allow_symmetric_mismatch
+    ):
+        raise ValueError("Route ports must carry the same cross section.")
+    if not symmetric and p1.mirror == p2.mirror:
+        raise ValueError(
+            f"Asymmetric route ports {p1.name!r} and {p2.name!r} have incompatible "
+            "transverse orientations. Their mirror flags must be opposite."
+        )
+
+
 class PlacerFunction(Protocol):
     """A placer function. Used to place Instances given a path."""
 
@@ -525,11 +556,9 @@ def route_bundle(
     for router in routers:
         sp = start_mapping[router.start_transformation]
         ep = end_mapping[router.end_transformation]
-        if sp.is_symmetric() != ep.is_symmetric():
-            raise ValueError(
-                f"Route endpoints {sp.name!r} and {ep.name!r} mix symmetric and "
-                "asymmetric cross sections. Add an explicit transition first."
-            )
+        _check_cross_section_compatibility(
+            Port(base=sp), Port(base=ep), allow_symmetric_mismatch=True
+        )
         start_ports.append(sp)
         end_ports.append(ep)
 
