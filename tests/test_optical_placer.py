@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import partial
 from typing import TYPE_CHECKING
 
 import pytest
@@ -399,11 +400,13 @@ def test_place_manhattan_bend_ports_not_90(
         )
 
 
+@pytest.mark.parametrize("point_count", [0, 1])
 def test_place_manhattan_too_few_points(
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     kcl: kf.KCLayout,
     layers: Layers,
+    point_count: int,
 ) -> None:
     """Less than 2 points should return an empty route."""
     c = kcl.kcell("pm_few_pts")
@@ -413,7 +416,7 @@ def test_place_manhattan_too_few_points(
         c,
         p1,
         p2,
-        [kf.kdb.Point(0, 0)],
+        [kf.kdb.Point(0, 0)] * point_count,
         bend90_cell=bend90,
         straight_factory=straight_factory_dbu,
     )
@@ -708,12 +711,14 @@ def test_place_manhattan_with_sbends_extra_kwargs(
         )
 
 
+@pytest.mark.parametrize("point_count", [0, 1])
 def test_place_manhattan_with_sbends_too_few_points(
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     kcl: kf.KCLayout,
     layers: Layers,
     wg_enc: kf.LayerEnclosure,
+    point_count: int,
 ) -> None:
     """Less than 2 points returns empty-instance route."""
     c = kcl.kcell("pmws_few_pts")
@@ -740,7 +745,7 @@ def test_place_manhattan_with_sbends_too_few_points(
         c,
         p1,
         p2,
-        [kf.kdb.Point(0, 0)],
+        [kf.kdb.Point(0, 0)] * point_count,
         bend90_cell=bend90,
         straight_factory=straight_factory_dbu,
         sbend_factory=sbend_factory,
@@ -789,6 +794,58 @@ def test_place_manhattan_with_sbends_straight_path(
 
 
 # route_loopback parallel-error
+
+
+@pytest.mark.parametrize("with_sbends", [False, True])
+@pytest.mark.parametrize("span", [29_999, 30_000, 30_001, 40_000])
+def test_symmetric_segment_taper_thresholds(
+    kcl: kf.KCLayout,
+    layers: Layers,
+    wg_enc: kf.LayerEnclosure,
+    bend90: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    with_sbends: bool,
+    span: int,
+) -> None:
+    """Use the same taper threshold at the start, between bends and at the end."""
+    taper = kf.factories.taper.taper_factory(kcl=kcl)(
+        width1=500, width2=1000, length=5000, layer=layers.WG, enclosure=wg_enc
+    )
+    start = _make_o_port(kcl, layers, "start", 0, 0, 0)
+    end = _make_o_port(kcl, layers, "end", 2, 2 * span, span)
+
+    def unexpected_sbend(*args: object, **kwargs: object) -> kf.InstanceGroup:
+        pytest.fail("A Manhattan backbone should not use S-bends")
+
+    placer = (
+        partial(place_manhattan_with_sbends, sbend_factory=unexpected_sbend)
+        if with_sbends
+        else place_manhattan
+    )
+    route = placer(
+        kcl.kcell(),
+        start,
+        end,
+        [
+            kf.kdb.Point(0, 0),
+            kf.kdb.Point(span, 0),
+            kf.kdb.Point(span, span),
+            kf.kdb.Point(2 * span, span),
+        ],
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90,
+        taper_cell=taper,
+        min_straight_taper=10_000,
+        purpose="segment-regression",
+    )
+    expected_tapers = (4 if span >= 30_000 else 0) + (2 if span >= 40_000 else 0)
+    assert route.n_taper == expected_tapers
+    assert route.n_bend90 == 2
+    assert len(route.instances) == 5 + expected_tapers
+    assert route.length_straights == 3 * span - 40_000 - expected_tapers * 5000
+    assert route.start_port.trans == start.copy_polar().trans
+    assert route.end_port.trans == end.copy_polar().trans
+    assert all(inst.purpose == "segment-regression" for inst in route.instances)
 
 
 def test_route_loopback_non_parallel_raises(kcl: kf.KCLayout, layers: Layers) -> None:
