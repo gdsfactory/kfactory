@@ -12,6 +12,7 @@ from kfactory.routing.optical import (
     _place_straight,
     _place_tapered_straight,
     place_manhattan,
+    place_manhattan_asymmetric,
     place_manhattan_with_sbends,
     vec_angle_sbend,
 )
@@ -55,6 +56,152 @@ def test_vec_angle_sbend_old_vertical_left() -> None:
 
 
 # _place_straight
+
+
+@pytest.mark.parametrize("port_type", ["optical", "electrical"])
+@pytest.mark.parametrize("rotation", range(4))
+@pytest.mark.parametrize("mirror", [False, True])
+@pytest.mark.parametrize("dy", [0, 40_000, -40_000])
+@pytest.mark.parametrize("span", [20_000, 80_000])
+def test_asymmetric_route_geometry(
+    kcl: kf.KCLayout,
+    layers: Layers,
+    port_type: str,
+    rotation: int,
+    mirror: bool,
+    dy: int,
+    span: int,
+) -> None:
+    """Both GS conductors must remain connected through either bend handedness."""
+    xs = kf.AsymmetricalCrossSection(
+        layer=layers.WG,
+        section_min=-1000,
+        section_max=1000,
+        sections=(
+            kf.CrossSectionLayer(layer=layers.WG, section_min=3000, section_max=5000),
+        ),
+        radius=10_000,
+    )
+
+    def extrude(points: list[kf.kdb.Point], end_angle: int) -> kf.KCell:
+        cell = kcl.kcell()
+        kf.enclosure.extrude_path_cross_section(
+            cell, [kcl.to_um(p) for p in points], xs, 0, end_angle * 90
+        )
+        cell.create_port(
+            name="in",
+            cross_section=xs,
+            port_type=port_type,
+            trans=kf.kdb.Trans(2, True, points[0].to_v()),
+        )
+        cell.create_port(
+            name="out",
+            cross_section=xs,
+            port_type=port_type,
+            trans=kf.kdb.Trans(end_angle, False, points[-1].to_v()),
+        )
+        return cell
+
+    def straight(width: int, length: int) -> kf.KCell:
+        assert width == xs.width
+        return extrude([kf.kdb.Point(0, 0), kf.kdb.Point(length, 0)], 0)
+
+    bends = tuple(
+        extrude(
+            [
+                kf.kdb.Point(0, 0),
+                kf.kdb.Point(10_000, 0),
+                kf.kdb.Point(10_000, sign * 10_000),
+            ],
+            sign % 4,
+        )
+        for sign in (1, -1)
+    )
+    points = (
+        [kf.kdb.Point(0, 0), kf.kdb.Point(span, 0)]
+        if dy == 0
+        else [
+            kf.kdb.Point(0, 0),
+            kf.kdb.Point(span // 2, 0),
+            kf.kdb.Point(span // 2, dy),
+            kf.kdb.Point(span, dy),
+        ]
+    )
+    transform = kf.kdb.Trans(rotation, mirror, 100_000, 200_000)
+    p1 = kf.Port(
+        name="start",
+        cross_section=xs,
+        kcl=kcl,
+        port_type=port_type,
+        trans=transform,
+    )
+    p2 = kf.Port(
+        name="end",
+        cross_section=xs,
+        kcl=kcl,
+        port_type=port_type,
+        trans=transform * kf.kdb.Trans(2, True, points[-1].to_v()),
+    )
+    cell = kcl.kcell()
+    route = place_manhattan_asymmetric(
+        cell,
+        p1,
+        p2,
+        [transform * p for p in points],
+        straight_factory=straight,
+        bend90_cell=(bends[0], bends[1]),
+        port_type=port_type,
+    )
+    # Include each bend's tangent points so extrusion samples the same corners.
+    expected_points = [points[0]]
+    for before, corner, after in zip(points, points[1:], points[2:], strict=False):
+        incoming, outgoing = corner - before, after - corner
+        expected_points.extend(
+            [
+                corner - incoming * (10_000 / incoming.length()),
+                corner,
+                corner + outgoing * (10_000 / outgoing.length()),
+            ]
+        )
+    expected_points.append(points[-1])
+    expected_points = [
+        p
+        for i, p in enumerate(expected_points)
+        if i == 0 or p != expected_points[i - 1]
+    ]
+    expected = extrude(expected_points, 0)
+    expected_region = kf.kdb.Region(expected.begin_shapes_rec(kcl.layer(layers.WG)))
+    expected_region.transform(transform)
+    actual = kf.kdb.Region(cell.begin_shapes_rec(kcl.layer(layers.WG)))
+    assert (actual ^ expected_region).is_empty()
+    assert actual.merged().count() == 2
+    assert route.start_port.trans == p1.trans * kf.kdb.Trans.M90
+    assert route.end_port.trans == p2.trans * kf.kdb.Trans.M90
+
+    if dy:
+        with pytest.raises(ValueError, match="opposite-handed bends"):
+            place_manhattan_asymmetric(
+                kcl.kcell(),
+                p1,
+                p2,
+                [transform * p for p in points],
+                straight_factory=straight,
+                bend90_cell=(bends[0], bends[0]),
+                port_type=port_type,
+            )
+
+    incompatible_end = p2.copy()
+    incompatible_end.mirror = not p2.mirror
+    with pytest.raises(ValueError, match="incompatible transverse orientations"):
+        place_manhattan_asymmetric(
+            kcl.kcell(),
+            p1,
+            incompatible_end,
+            [transform * p for p in points],
+            straight_factory=straight,
+            bend90_cell=(bends[0], bends[1]),
+            port_type=port_type,
+        )
 
 
 def test_place_straight_basic(
