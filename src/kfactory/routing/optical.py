@@ -786,33 +786,6 @@ def _bend90_geometry(
     return p1, p2, corner
 
 
-def _place_bend90(
-    c: KCell,
-    cells: tuple[ProtoTKCell[Any], ...],
-    previous_port: Port,
-    position: kdb.Trans,
-    port_type: str,
-    purpose: str | None,
-) -> tuple[Instance, Port, Port]:
-    """Choose a bend that preserves the incoming profile, then place it."""
-    for cell in cells:
-        p1, p2, corner = _bend90_geometry(cell, port_type)
-        trans = position * corner.inverted()
-        if not p1.is_symmetric() and (
-            (trans * p1.trans).mirror == previous_port.mirror
-        ):
-            continue
-        bend = c << cell
-        bend.purpose = purpose
-        bend.trans = trans
-        return bend, bend.ports[p1.name], bend.ports[p2.name]
-    raise ValueError(
-        "No bend preserves the asymmetric route's transverse orientation. "
-        "Pass a pair of opposite-handed bends as bend90_cell; mirroring one "
-        "asymmetric bend also swaps its transverse sections."
-    )
-
-
 def place_manhattan_asymmetric(
     c: ProtoTKCell[Any],
     p1: Port,
@@ -835,7 +808,8 @@ def place_manhattan_asymmetric(
     """Place an asymmetric profile using two opposite-handed 90° bends.
 
     Both bends must carry the endpoint cross section and have the same radius.
-    At each corner, choose the bend that keeps the incoming transverse profile.
+    Classify the bends once by input orientation, then select directly at each
+    corner to preserve the incoming transverse profile.
     Straight and taper connections preserve all bands, not just the core width.
     Width/profile changes require explicit transitions; mismatch flags cannot
     override profile compatibility. S-bend factories are not supported here.
@@ -871,19 +845,19 @@ def place_manhattan_asymmetric(
     ):
         raise ValueError("The backbone must respect the route ports' angles.")
     radius = 0
-    bend_mirrors = set()
+    bends: dict[bool, tuple[ProtoTKCell[Any], Port, Port, kdb.Trans]] = {}
     for bend in bend90_cell:
         if bend.kcl is not c.kcl:
             raise ValueError("Asymmetric bends must share the target cell's KCLayout.")
-        bp1, bp2, _ = _bend90_geometry(bend, port_type)
+        bp1, bp2, corner = _bend90_geometry(bend, port_type)
         if any(p.base.asymmetric_cross_section != xs for p in (bp1, bp2)):
             raise ValueError("Both bend ports must carry the route cross section.")
         bend_radius = get_radius([bp1, bp2])
         if radius and radius != bend_radius:
             raise ValueError("Asymmetric route bends must have the same radius.")
         radius = bend_radius
-        bend_mirrors.add(bp1.mirror)
-    if len(bend_mirrors) != 2:
+        bends[bp1.mirror] = bend, bp1, bp2, corner.inverted()
+    if len(bends) != 2:
         raise ValueError("Asymmetric placement requires two opposite-handed bends.")
     route = ManhattanRoute(
         backbone=list(pts),
@@ -969,14 +943,13 @@ def place_manhattan_asymmetric(
         turn = (vec_angle(outgoing) - vec_angle(incoming)) % 4
         if turn not in (1, 3):
             raise ValueError("Bend waypoints must describe 90° turns.")
-        bend, bend_in, bend_out = _place_bend90(
-            c,
-            bend90_cell,
-            previous,
-            kdb.Trans((vec_angle(incoming) + 2) % 4, turn == 1, pts[i].to_v()),
-            port_type,
-            purpose,
-        )
+        position = kdb.Trans((vec_angle(incoming) + 2) % 4, turn == 1, pts[i].to_v())
+        # The placed input must have the opposite mirror flag to the previous port.
+        bend_cell, bp1, bp2, corner_inverse = bends[position.mirror == previous.mirror]
+        bend = c << bend_cell
+        bend.purpose = purpose
+        bend.trans = position * corner_inverse
+        bend_in, bend_out = bend.ports[bp1.name], bend.ports[bp2.name]
         first, _ = segment(previous, bend_in)
         if i == 1:
             route.start_port = first

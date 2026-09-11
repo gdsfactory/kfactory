@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import partial
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pytest
 
@@ -64,6 +65,7 @@ def test_vec_angle_sbend_old_vertical_left() -> None:
 @pytest.mark.parametrize("mirror", [False, True])
 @pytest.mark.parametrize("dy", [0, 40_000, -40_000])
 @pytest.mark.parametrize("span", [20_000, 80_000])
+@pytest.mark.parametrize("reverse_bends", [False, True])
 def test_asymmetric_route_geometry(
     kcl: kf.KCLayout,
     layers: Layers,
@@ -72,6 +74,7 @@ def test_asymmetric_route_geometry(
     mirror: bool,
     dy: int,
     span: int,
+    reverse_bends: bool,
 ) -> None:
     """Both GS conductors must remain connected through either bend handedness."""
     xs = kf.AsymmetricalCrossSection(
@@ -144,15 +147,23 @@ def test_asymmetric_route_geometry(
         trans=transform * kf.kdb.Trans(2, True, points[-1].to_v()),
     )
     cell = kcl.kcell()
-    route = place_manhattan_asymmetric(
-        cell,
-        p1,
-        p2,
-        [transform * p for p in points],
-        straight_factory=straight,
-        bend90_cell=(bends[0], bends[1]),
-        port_type=port_type,
-    )
+    if reverse_bends:
+        bends = bends[::-1]
+    with patch(
+        "kfactory.routing.optical._bend90_geometry",
+        wraps=kf.routing.optical._bend90_geometry,
+    ) as geometry:
+        route = place_manhattan_asymmetric(
+            cell,
+            p1,
+            p2,
+            [transform * p for p in points],
+            straight_factory=straight,
+            bend90_cell=(bends[0], bends[1]),
+            port_type=port_type,
+        )
+        # Each bend is inspected once, regardless of the number of route corners.
+        assert geometry.call_count == 2
     # Include each bend's tangent points so extrusion samples the same corners.
     expected_points = [points[0]]
     for before, corner, after in zip(points, points[1:], points[2:], strict=False):
