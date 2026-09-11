@@ -75,7 +75,7 @@ repos:
           - pytest
           - pytest-regressions
           - "klayout>=0.30.8"
-          - "kfnetlist>=0.2.2"
+          - "kfnetlist @ git+https://github.com/gdsfactory/kfnetlist.git@a163eb44aa2f18e1d73ac9c8996f8c80f1969f43"
           - types-cachetools
           - loguru
           - pydantic-settings
