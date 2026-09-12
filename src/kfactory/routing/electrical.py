@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from itertools import pairwise
 from typing import TYPE_CHECKING, Any, Literal, Protocol, cast, overload
 
 import numpy as np
@@ -18,7 +19,7 @@ from ..cross_section import CrossSection, SymmetricalCrossSection
 from ..enclosure import LayerEnclosure
 from ..kcell import DKCell, KCell, ProtoTKCell
 from ..port import DPort, Port
-from .generic import ManhattanRoute
+from .generic import ManhattanRoute, _check_cross_section_compatibility
 from .generic import route_bundle as route_bundle_generic
 from .length_functions import get_length_from_backbone
 from .manhattan import (
@@ -37,6 +38,7 @@ if TYPE_CHECKING:
     from .utils import RouteDebug
 
 __all__ = [
+    "place_asymmetric_wire",
     "place_dual_rails",
     "place_single_wire",
     "route_bundle",
@@ -242,6 +244,11 @@ def route_bundle(
                     "waypoints": waypoints,
                 },
                 placer_function=place_single_wire,
+                asymmetric_placer_function=place_asymmetric_wire,
+                asymmetric_placer_kwargs={
+                    "route_width": route_width,
+                    "layer_info": place_layer,
+                },
                 placer_kwargs={
                     "route_width": route_width,
                 },
@@ -365,6 +372,11 @@ def route_bundle(
                 "waypoints": waypoints,
             },
             placer_function=place_single_wire,
+            asymmetric_placer_function=place_asymmetric_wire,
+            asymmetric_placer_kwargs={
+                "route_width": route_width,
+                "layer_info": place_layer,
+            },
             placer_kwargs={
                 "route_width": route_width,
                 "layer_info": place_layer,
@@ -668,6 +680,96 @@ def route_dual_rails(
     hole_path = kdb.Path(pts, hole_width_)
     final_poly = kdb.Region(path.polygon()) - kdb.Region(hole_path.polygon())
     c.shapes(layer_).insert(final_poly)
+
+
+def place_asymmetric_wire(
+    c: KCell,
+    p1: Port,
+    p2: Port,
+    pts: Sequence[kdb.Point],
+    route_width: int | None = None,
+    layer_info: kdb.LayerInfo | None = None,
+    **kwargs: Any,
+) -> ManhattanRoute:
+    """Draw every signed band of an asymmetric profile along a Manhattan backbone.
+
+    Bands are joined with mitered corners in integer coordinates and merged per
+    layer. The start port's mirror flag determines the transverse orientation.
+    Endpoints must carry the same profile with opposite mirror flags. Changing
+    width requires an explicit transition rather than discarding auxiliary bands.
+    """
+    if kwargs:
+        raise ValueError(f"Unsupported asymmetric wire arguments: {kwargs.keys()}")
+    _check_cross_section_compatibility(p1, p2)
+    if p1.is_symmetric():
+        raise ValueError(
+            "Asymmetric wire placement requires asymmetric cross sections."
+        )
+    if route_width is not None and route_width != p1.width:
+        raise ValueError("Changing an asymmetric route width requires a transition.")
+    if layer_info is not None and layer_info != p1.layer_info:
+        raise ValueError("Changing an asymmetric route layer requires a transition.")
+    if p1.kcl is not c.kcl or p2.kcl is not c.kcl:
+        raise ValueError("Asymmetric wire ports must share the target cell's KCLayout.")
+    points = [p for i, p in enumerate(pts) if i == 0 or p != pts[i - 1]]
+    if len(points) < 2:
+        raise ValueError("An asymmetric wire needs at least two distinct points.")
+    vectors = [b - a for a, b in pairwise(points)]
+    if any(v.x and v.y for v in vectors):
+        raise ValueError("Asymmetric wires require a Manhattan backbone.")
+    if (
+        points[0] != p1.trans.disp.to_p()
+        or points[-1] != p2.trans.disp.to_p()
+        or vec_angle(vectors[0]) != p1.angle
+        or (vec_angle(vectors[-1]) + 2) % 4 != p2.angle
+    ):
+        raise ValueError(
+            "The backbone must meet the asymmetric ports' positions and angles."
+        )
+    normals = [
+        kdb.Vector(-(v.y > 0) + (v.y < 0), (v.x > 0) - (v.x < 0)) for v in vectors
+    ]
+    before, after = [normals[0], *normals], [*normals, normals[-1]]
+
+    def boundary(offset: int) -> list[kdb.Point]:
+        if p1.mirror:
+            offset = -offset
+        result = []
+        for point, n1, n2 in zip(points, before, after, strict=True):
+            denominator = 1 + n1.x * n2.x + n1.y * n2.y
+            if not denominator:
+                raise ValueError(
+                    "An asymmetric wire cannot reverse direction at a waypoint."
+                )
+            result.append(
+                kdb.Point(
+                    point.x + offset * (n1.x + n2.x) // denominator,
+                    point.y + offset * (n1.y + n2.y) // denominator,
+                )
+            )
+        return result
+
+    regions: dict[kdb.LayerInfo, kdb.Region] = {}
+    for section in p1.base.any_cross_section.get_sections():
+        polygon = kdb.Polygon(
+            boundary(section.section_min) + boundary(section.section_max)[::-1]
+        )
+        regions.setdefault(section.layer, kdb.Region()).insert(polygon)
+    polygons = {}
+    for layer, region in regions.items():
+        shapes = list(region.merged().each())
+        polygons[layer] = shapes
+        for shape in shapes:
+            c.shapes(c.kcl.layer(layer)).insert(shape)
+    return ManhattanRoute(
+        backbone=points,
+        start_port=p1.copy_polar(mirror=True),
+        end_port=p2.copy_polar(mirror=True),
+        instances=[],
+        polygons=polygons,
+        length_straights=round(sum(v.length() for v in vectors)),
+        length_function=get_length_from_backbone,
+    )
 
 
 def place_single_wire(
