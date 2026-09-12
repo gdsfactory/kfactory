@@ -90,9 +90,9 @@ class ProtoTInstances[T: (int, float)](ProtoInstances[T, ProtoTInstance[T]], ABC
 
     def __delitem__(self, item: ProtoTInstance[Any] | int) -> None:
         if isinstance(item, int):
-            list(self._insts)[item].delete()
+            self[item].delete()
         else:
-            self._get_inst(item.instance).delete()
+            Instance(self._tkcell.kcl, self._get_inst(item.instance)).delete()
 
     def __contains__(self, key: str | int | ProtoTInstance[Any]) -> bool:
         try:
@@ -110,15 +110,17 @@ class ProtoTInstances[T: (int, float)](ProtoInstances[T, ProtoTInstance[T]], ABC
     def __getitem__(self, key: str | int) -> ProtoTInstance[T]: ...
 
     def clear(self) -> None:
-        for inst in self._insts:
+        for inst in self:
             inst.delete()
 
     def append(self, inst: ProtoTInstance[Any]) -> None:
         """Append a new instance."""
-        self._tkcell.kdb_cell.insert(inst.instance)
+        from .kcell import KCell
+
+        KCell(base=self._tkcell).insert(inst.to_itype())
 
     def remove(self, inst: ProtoTInstance[Any]) -> None:
-        inst.instance.delete()
+        inst.delete()
 
     def to_itype(self) -> Instances:
         return Instances(cell=self._tkcell)
