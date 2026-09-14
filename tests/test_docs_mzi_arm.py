@@ -23,7 +23,7 @@ def mzi_arm(layers: Layers) -> Callable[..., kf.KCell]:
     source = Path(__file__).parents[1] / "docs/source/components/cells/overview.py"
     function = next(
         node
-        for node in ast.parse(source.read_text()).body
+        for node in ast.parse(source.read_text(encoding="utf-8")).body
         if isinstance(node, ast.FunctionDef) and node.name == "mzi_arm"
     )
     namespace = {
