@@ -70,11 +70,24 @@ The build runs in two stages:
 1. **Pre-build** (`docs-build-source`): `docs/scripts/build_docs_source.py`
    converts every jupytext `.py` notebook under `docs/source/` to
    executed `.md` + a downloadable `.ipynb`, and writes mkdocstrings
-   stub pages under `docs/source-built/reference/`. Outputs go to
+   stub pages and a native literate-nav `SUMMARY.md` under
+   `docs/source-built/reference/`. Outputs go to
    `docs/source-built/` (gitignored). Runs are cached by content hash
    in `docs/.build-cache/` — only changed notebooks re-execute.
-2. **Render**: zensical reads `docs/source-built/` and produces the
-   final HTML in `docs/site/`.
+2. **Render**: zensical uses `docs/zensical.yml` to read `docs/source-built/`
+   and produces the final HTML and `objects.inv` in `docs/site/`.
+
+API navigation is generated from the Python package tree; edit
+`gen_api_reference` in the pre-build script to change its structure.
+When moving documentation pages or renaming headings, add page or anchor
+mappings under `plugins.redirects.redirect_maps` in `docs/zensical.yml`
+to preserve existing links.
+
+Release deployments use Mike copy aliases so `latest/objects.inv` and its
+linked API pages are available together. Downstream documentation can use
+`https://gdsfactory.github.io/kfactory/latest/objects.inv` after deploying
+a release with this configuration, or a numbered version's inventory to
+pin its references. Development documentation uses `dev/objects.inv`.
 
 Any exception in a notebook stops the build. Always run `just docs`
 locally before opening a docs PR.

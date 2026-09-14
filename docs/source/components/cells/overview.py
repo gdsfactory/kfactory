@@ -323,43 +323,76 @@ print(f"wg_a is wg_c: {wg_a is wg_c}")  # False — different length
 # %% [markdown]
 # ## Assembling components
 #
-# Use the `<<` operator to place cell instances and `connect()` to snap ports:
+# Assemble an MZI arm from two lower L-bends and an inverted U across the top.
+# The U consists of two 90° bends joined by a horizontal straight of `length`.
+# Each vertical leg receives a `delta_length / 2` straight, adding `delta_length`
+# to the optical path while keeping the input and output positions fixed.
+# All dimensions passed to the cell factories below are in **µm**.
+#
+# ```text
+#              ┌────── length ──────┐
+#              │                    │
+#       delta_length / 2      delta_length / 2
+#              │                    │
+#    o1 ───────┘                    └─────── o2
+# ```
+#
+# Use `<<` to place instances and `connect()` to snap their ports. Traverse
+# the two top bends from `o2` to `o1` to turn back down toward the output.
 
 
 # %%
 @kf.cell
-def mzi_stub() -> kf.KCell:
-    """A minimal MZI stub — two bends connected via straights."""
+def mzi_arm(length: float = 20.0, delta_length: float = 20.0) -> kf.KCell:
+    """Assemble an MZI arm with a top straight and two equal delay legs.
+
+    Args:
+        length: Length of the horizontal top straight in µm. Must be positive.
+        delta_length: Extra path length in µm, split equally between the legs.
+            Must be nonnegative. Zero connects the bends directly.
+    """
+    if length <= 0 or delta_length < 0:
+        raise ValueError("length must be positive and delta_length nonnegative")
     c = kf.KCell()
 
     enc = kf.LayerEnclosure(dsections=[(L.WGCLAD, 2)], kcl=kf.kcl)
 
-    # Bend instances (euler)
-    b1 = c << bend_euler(width=0.5, radius=10.0, layer=L.WG)
-    b2 = c << bend_euler(width=0.5, radius=10.0, layer=L.WG)
-    b3 = c << bend_euler(width=0.5, radius=10.0, layer=L.WG)
-    b4 = c << bend_euler(width=0.5, radius=10.0, layer=L.WG)
+    bend = bend_euler(width=0.5, radius=10.0, layer=L.WG, enclosure=enc)
+    left_l = c << bend
+    top_left = c << bend
+    top_right = c << bend
+    right_l = c << bend
+    top = c << straight(width=0.5, length=length, layer=L.WG, enclosure=enc)
 
-    # Connect bends into a U-shape
-    b2.connect("o1", b1.ports["o2"])
-    b3.connect("o1", b2.ports["o2"])
-    b4.connect("o1", b3.ports["o2"])
+    # Left L turns upward. Add half the extra length before entering the U.
+    left_end = left_l.ports["o2"]
+    if delta_length > 0:
+        delay = straight(width=0.5, length=delta_length / 2, layer=L.WG, enclosure=enc)
+        left_delay = c << delay
+        left_delay.connect("o1", left_end)
+        left_end = left_delay.ports["o2"]
 
-    # Straight arm between b1 and b4
-    arm_length = kf.routing.optical.get_radius(
-        bend_euler(width=0.5, radius=10.0, layer=L.WG)
-    )
-    s1 = c << straight(width=0.5, length=arm_length * 2, layer=L.WG, enclosure=enc)
-    s1.connect("o1", b4.ports["o2"])
+    # Inverted U: upward → rightward → downward.
+    top_left.connect("o2", left_end)
+    top.connect("o1", top_left.ports["o1"])
+    top_right.connect("o2", top.ports["o2"])
 
-    c.add_ports(b1.ports.filter(port_type="optical", regex="o1"))
-    c.add_ports(s1.ports.filter(port_type="optical", regex="o2"))
-    c.auto_rename_ports()
+    # Descend by the same extra length, then turn right through the second L.
+    right_end = top_right.ports["o1"]
+    if delta_length > 0:
+        right_delay = c << delay
+        right_delay.connect("o1", right_end)
+        right_end = right_delay.ports["o2"]
+    right_l.connect("o1", right_end)
+
+    c.add_port(name="o1", port=left_l.ports["o1"])
+    c.add_port(name="o2", port=right_l.ports["o2"])
     return c
 
 
-mzi = mzi_stub()
-mzi.plot()
+# 20 µm total extra length gives a 10 µm straight in each vertical leg.
+arm = mzi_arm(length=20.0, delta_length=20.0)
+arm.plot()
 
 # %% [markdown]
 # ## See Also

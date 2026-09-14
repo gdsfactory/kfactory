@@ -18,7 +18,8 @@
 # # Circular Bends
 #
 # `bend_circular_factory(kcl)` produces constant-radius arc bends. Unlike euler
-# bends, `kf.routing.optical.get_radius` returns exactly the nominal radius.
+# bends, the footprint radius equals the nominal radius (up to DBU rounding).
+# `kf.routing.optical.get_radius` returns DBU, so convert it to µm for comparison.
 # Arguments `width` and `radius` are in **µm**.
 
 # %%
@@ -38,7 +39,8 @@ bend_circ = bend_circular_factory(pdk)
 
 bc90 = bend_circ(width=0.5, radius=10.0, layer=L.WG)
 print("circular bend:", bc90.name)
-print("footprint radius:", kf.routing.optical.get_radius(bc90), "µm (== nominal)")
+footprint_radius_um = bc90.kcl.to_um(kf.routing.optical.get_radius(bc90.ports))
+print("footprint radius:", footprint_radius_um, "µm (== nominal)")
 bc90
 
 # %% [markdown]

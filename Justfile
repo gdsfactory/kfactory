@@ -14,7 +14,7 @@ MIKE := "mike @ git+https://github.com/squidfunk/mike.git"
 
 # Clean documentation build
 docs-clean:
-    rm -rf site
+    rm -rf docs/site
 
 # Pre-build docs source: convert jupytext .py to .md+.ipynb (with download
 # button), generate mkdocstrings API reference stubs into docs/source-built/.
@@ -24,31 +24,32 @@ docs-build-source python_version="3.14":
 
 # Build documentation (zensical) from the pre-built source
 docs python_version="3.14": docs-build-source
-    uv run -p {{python_version}} --with-editable . --extra docs --with "{{MIKE}}" --isolated zensical build -f docs/zensical-built.yml
+    uv run -p {{python_version}} --with-editable . --extra docs --with "{{MIKE}}" --isolated zensical build -f docs/zensical.yml
 
 # Serve documentation locally (zensical) from the pre-built source
 docs-serve python_version="3.14": docs-build-source
-    uv run -p {{python_version}} --with-editable . --extra docs --with "{{MIKE}}" --isolated zensical serve -f docs/zensical-built.yml
+    uv run -p {{python_version}} --with-editable . --extra docs --with "{{MIKE}}" --isolated zensical serve -f docs/zensical.yml
 
 # Deploy docs to gh-pages as the "dev" version (tracks main)
 docs-deploy-dev python_version="3.14": docs-build-source
     uv run -p {{python_version}} --with . --extra docs --with "{{MIKE}}" --isolated mike deploy \
-        --config-file docs/zensical-built.yml \
-        --alias-type=redirect \
+        --config-file docs/zensical.yml \
+        --alias-type=copy \
         --push \
         --update-aliases \
         dev
 
 # Deploy docs to gh-pages as a tagged release version + set "latest" as default
+# Copy aliases include objects.inv and assets, which HTML redirects cannot serve.
 docs-deploy-release version python_version="3.14": docs-build-source
     uv run -p {{python_version}} --with . --extra docs --with "{{MIKE}}" --isolated mike deploy \
-        --config-file docs/zensical-built.yml \
-        --alias-type=redirect \
+        --config-file docs/zensical.yml \
+        --alias-type=copy \
         --push \
         --update-aliases \
         {{version}} latest
     uv run -p {{python_version}} --with . --extra docs --with "{{MIKE}}" --isolated mike set-default \
-        --config-file docs/zensical-built.yml \
+        --config-file docs/zensical.yml \
         --push \
         latest
 
