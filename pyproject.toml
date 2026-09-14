@@ -68,8 +68,6 @@ optional-dependencies.docs = [
   "griffe-warnings-deprecated>=1.1.1,<1.2",
   "kfactory[docs]",
   "kfactory[notebooks]",                     # transitively pulls in kfactory[ipy]
-  "mkdocs-literate-nav>=0.6.3,<0.7",
-  "mkdocs-video>=1.5,<1.6",
   "mkdocstrings[python]>=1.0.6,<1.1",
   "pymdown-extensions>=11.0.2,<11.1",
   "zensical>=0.0.61,<0.1",

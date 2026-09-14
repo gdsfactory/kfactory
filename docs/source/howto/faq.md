@@ -163,17 +163,20 @@ Euler (clothoid) bends are longer than a circular arc of the same nominal radius
 because the curvature ramps up gradually.  Their physical footprint extends further
 than the radius you passed to the factory.
 
-Always use `kf.routing.optical.get_radius(bend_cell)` when you need the actual
-footprint radius for routing calculations:
+Use `kf.routing.optical.get_radius(bend_cell.ports)` for the actual footprint
+radius **in DBU**. Convert to µm before passing it to a µm-based factory or
+comparing it with the nominal radius:
 
 ```python
 bend90 = kf.factories.euler.bend_euler_factory(kcl=kf.kcl)(
     width=0.5, radius=10, layer=L.WG, angle=90,
 )
-r_eff = kf.routing.optical.get_radius(bend90)   # > 10 µm for euler bends
+radius_dbu = kf.routing.optical.get_radius(bend90.ports)
+radius_um = bend90.kcl.to_um(radius_dbu)  # > 10 µm for euler bends
 ```
 
-Circular bends return the nominal radius unchanged (`get_radius(bend)` == `radius`).
+For circular bends, `radius_um` equals the nominal radius up to DBU rounding.
+DBU-based routing functions take `radius_dbu` directly.
 
 ---
 

@@ -63,7 +63,7 @@ straight_factory = partial(
     layer=L.WG,
     enclosure=wg_enc,
 )
-bend_radius = kf.routing.optical.get_radius(bend90)
+bend_radius = kf.routing.optical.get_radius(bend90.ports)
 
 wl = kf.kcl.find_layer(L.WG)
 

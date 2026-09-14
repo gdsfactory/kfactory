@@ -802,8 +802,8 @@ class Ports(ProtoPorts[int], ICreatePort):
             port: The port to add
             name: Overwrite the name of the port
             keep_mirror: Keep the mirror flag from the original port if `True`,
-                else set [Port.trans.mirror][kfactory.Port.trans] (or the complex
-                equivalent) to `False`.
+                else set [Port.trans.mirror][kfactory.port.ProtoPort.trans]
+                (or the complex equivalent) to `False`.
         """
         if port.kcl == self.kcl:
             base = port.base.model_copy()
@@ -936,8 +936,8 @@ class DPorts(ProtoPorts[float], DCreatePort):
             port: The port to add
             name: Overwrite the name of the port
             keep_mirror: Keep the mirror flag from the original port if `True`,
-                else set [Port.trans.mirror][kfactory.Port.trans] (or the complex
-                equivalent) to `False`.
+                else set [Port.trans.mirror][kfactory.port.ProtoPort.trans]
+                (or the complex equivalent) to `False`.
         """
         if port.kcl == self.kcl:
             base = port.base.model_copy()

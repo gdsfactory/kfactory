@@ -65,12 +65,12 @@ b180
 # ### Effective radius
 #
 # Euler bends are clothoid curves — the actual footprint extends beyond the
-# nominal radius. Use `kf.routing.optical.get_radius(bend)` to get the footprint
-# radius for routing spacing calculations.
+# nominal radius. Use `kf.routing.optical.get_radius(bend.ports)` to get the
+# footprint radius in DBU. Convert it to µm before comparing with the nominal radius.
 
 # %%
-footprint_r = kf.routing.optical.get_radius(b90)
-print(f"nominal radius: 10.0 µm, footprint radius: {footprint_r:.3f} µm")
+footprint_radius_um = b90.kcl.to_um(kf.routing.optical.get_radius(b90.ports))
+print(f"nominal radius: 10.0 µm, footprint radius: {footprint_radius_um:.3f} µm")
 
 # %% [markdown]
 # ## `bend_s_euler_factory` — S-bends

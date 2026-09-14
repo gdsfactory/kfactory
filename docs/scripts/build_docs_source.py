@@ -367,7 +367,7 @@ def convert_notebook(
 
 def gen_api_reference(out_root: Path, src_pkg: Path) -> list[Path]:
     """Mirror src/kfactory/**/*.py to out_root/reference/**/*.md with
-    mkdocstrings ::: directive stubs. Replaces gen_ref_pages.py.
+    mkdocstrings ::: directive stubs and a literate-nav SUMMARY.md.
 
     URL layout (drops the redundant `kfactory/` prefix):
         kfactory/__init__.py          → reference/index.md         (`::: kfactory`)
@@ -387,8 +387,7 @@ def gen_api_reference(out_root: Path, src_pkg: Path) -> list[Path]:
 
     written: list[Path] = []
     # Tree of (depth, title, doc_rel) preserving traversal order.
-    # Used to splice the API nav into zensical.yml since zensical 0.0.40
-    # doesn't render `literate-nav` SUMMARY.md into the side panel.
+    # Native literate-nav reads the tree from reference/SUMMARY.md.
     api_tree: list[tuple[int, str, str]] = []
 
     for py in sorted(src_pkg.rglob("*.py")):
@@ -412,8 +411,7 @@ def gen_api_reference(out_root: Path, src_pkg: Path) -> list[Path]:
         # Package pages: render the package docstring only (members: false).
         # Re-exports would otherwise pull in the entire library on the
         # top-level page. Leaf modules render full mkdocstrings content.
-        # Submodule navigation goes through the side nav, which the build
-        # script splices into zensical.yml from `api_tree` below.
+        # Submodule navigation goes through the generated SUMMARY.md.
         if is_package:
             target.write_text(f"::: {ident}\n    options:\n      members: false\n")
         else:
@@ -423,77 +421,39 @@ def gen_api_reference(out_root: Path, src_pkg: Path) -> list[Path]:
         title = parts[-1] if parts else "kfactory"
         api_tree.append((depth, title, doc_rel.as_posix()))
 
-    # Build the YAML fragment for splicing into zensical.yml's nav.
-    # Format: nested mapping so the API tab in the side nav has a tree.
-    api_nav_yaml = _api_tree_to_yaml(api_tree, indent=10)
-    (out_root / "_api_nav.yml").write_text(api_nav_yaml)
+    (ref_root / "SUMMARY.md").write_text(_api_tree_to_markdown(api_tree))
+    # Remove the obsolete artifact when restoring an older docs cache.
+    (out_root / "_api_nav.yml").unlink(missing_ok=True)
     return written
 
 
-def _api_tree_to_yaml(tree: list[tuple[int, str, str]], indent: int = 0) -> str:
+def _api_tree_to_markdown(tree: list[tuple[int, str, str]]) -> str:
     """Render the flat DFS-order (depth, title, doc_rel) list as a nested
-    YAML nav fragment. Entries whose next sibling has greater depth are
+    Markdown navigation list. Entries whose next sibling has greater depth are
     treated as subpackage headers; their `index.md` is rendered as an
     "Overview" child below the header.
 
-    Output (indent=10):
-              - Overview: reference/index.md
-              - cells:
-                  - Overview: reference/cells/index.md
-                  - bezier: reference/cells/bezier.md
-                  - virtual:
-                      - Overview: reference/cells/virtual/index.md
-                      - circular: reference/cells/virtual/circular.md
-              - cli: reference/cli.md
-              ...
+    Links are relative to reference/SUMMARY.md. The top-level package
+    overview and its submodules are siblings, avoiding a redundant
+    "kfactory" section around the whole API.
     """
     n = len(tree)
     is_pkg = [i + 1 < n and tree[i + 1][0] > tree[i][0] for i in range(n)]
-    pad = " " * indent
     lines: list[str] = []
     for i, (depth, title, doc_rel) in enumerate(tree):
         # Tree depth 0 = root package (kfactory); its direct children
         # become siblings of "Overview" so the side-nav doesn't have
         # a redundant "kfactory:" wrapper. Effective indent column:
         # depth 0 and 1 → 0, depth 2 → 4, depth 3 → 8, …
-        col = pad + ("    " * max(0, depth - 1))
-        link = f"reference/{doc_rel}"
+        col = "    " * max(0, depth - 1)
         if depth == 0 and is_pkg[i]:
-            lines.append(f"{col}- Overview: {link}")
+            lines.append(f"{col}- [Overview]({doc_rel})")
         elif is_pkg[i]:
-            lines.append(f"{col}- {title}:")
-            lines.append(f"{col}    - Overview: {link}")
+            lines.append(f"{col}- {title}")
+            lines.append(f"{col}    - [Overview]({doc_rel})")
         else:
-            lines.append(f"{col}- {title}: {link}")
+            lines.append(f"{col}- [{title}]({doc_rel})")
     return "\n".join(lines) + "\n"
-
-
-def splice_zensical_config(
-    src_yml: Path, out_yml: Path, api_nav_fragment: Path
-) -> None:
-    """Replace `- API: reference/   # SPLICE_API` in src_yml with
-       - API:
-         <fragment children>
-    written to out_yml. Plain text replacement (preserves the rest of
-    the YAML's comments + formatting); zensical's YAML loader still
-    validates it.
-    """
-    text = src_yml.read_text()
-    marker_re = re.compile(
-        r"^([ \t]*)- API:[ \t]*reference/[ \t]*#[ \t]*SPLICE_API[ \t]*$",
-        re.MULTILINE,
-    )
-    match = marker_re.search(text)
-    if not match:
-        raise RuntimeError(
-            f"Could not find `# SPLICE_API` marker in {src_yml}; the "
-            "API nav block won't be auto-generated. Add the marker back "
-            "or update the regex in build_docs_source.py."
-        )
-    indent = match.group(1)
-    fragment = api_nav_fragment.read_text().rstrip("\n")
-    spliced = f"{indent}- API:\n{fragment}"
-    out_yml.write_text(marker_re.sub(spliced, text, count=1))
 
 
 def gen_diagrams(out_root: Path) -> list[Path]:
@@ -660,13 +620,6 @@ def main(argv: list[str] | None = None) -> int:
     print("[stage3] generating API reference …", flush=True)
     ref_files = gen_api_reference(out_root, REPO_ROOT / "src" / "kfactory")
     print(f"  wrote {len(ref_files)} reference pages", flush=True)
-
-    # Stage 3.5: splice API nav into zensical.yml → docs/zensical-built.yml
-    src_cfg = REPO_ROOT / "docs/zensical.yml"
-    spliced_cfg = REPO_ROOT / "docs/zensical-built.yml"
-    fragment = out_root / "_api_nav.yml"
-    splice_zensical_config(src_cfg, spliced_cfg, fragment)
-    print(f"[stage3.5] wrote {spliced_cfg.relative_to(REPO_ROOT)}", flush=True)
 
     # Stage 4: logo (κ generated from a real kfactory KCell → GDS + SVG)
     print("[stage4] generating κ logo …", flush=True)
