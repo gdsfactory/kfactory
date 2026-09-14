@@ -1837,14 +1837,17 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     kdb.LayoutMetaInfo("kfactory:basename", self.basename, None, True)
                 )
 
-            if self.instance_infos:
+            # Reading inst.info can create an empty entry; do not persist it.
+            instance_infos = {
+                instance_name: info
+                for instance_name, instance_info in self.instance_infos.items()
+                if (info := instance_info.model_dump())
+            }
+            if instance_infos:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
                         "kfactory:instance_infos",
-                        {
-                            instance_name: info.model_dump()
-                            for instance_name, info in self.instance_infos.items()
-                        },
+                        instance_infos,
                         None,
                         True,
                     )

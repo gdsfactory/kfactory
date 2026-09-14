@@ -97,6 +97,45 @@ def test_instance_info_roundtrip(kcl: kf.KCLayout, tmp_path: Path, suffix: str) 
     assert len(list(restored.each_cell())) == 2
 
 
+@pytest.mark.parametrize("suffix", [".gds", ".oas"])
+@pytest.mark.parametrize("populated", [False, True])
+def test_empty_instance_info_not_written(
+    kcl: kf.KCLayout, tmp_path: Path, suffix: str, populated: bool
+) -> None:
+    parent = kcl.kcell("parent")
+    child = kcl.kcell("child")
+    child.shapes(kcl.layer(1, 0)).insert(kf.kdb.Box(500))
+    empty = parent << child
+    empty.name = "empty"
+    empty_info = empty.info
+    other = parent << child
+    other.name = "other"
+    other.info = Info(enabled=False) if populated else Info()
+    path = tmp_path / f"empty_instance_info{suffix}"
+
+    parent.write(path)
+
+    layout = kf.kdb.Layout()
+    layout.read(str(path))
+    metadata = {
+        meta.name: meta.value for meta in layout.cell("parent").each_meta_info()
+    }
+    if populated:
+        assert metadata["kfactory:instance_infos"] == {"other": {"enabled": False}}
+    else:
+        assert "kfactory:instance_infos" not in metadata
+    assert empty.info is empty_info
+
+    # Rewriting after clearing the last entry must remove persisted metadata.
+    other.info = Info()
+    parent.write(path)
+    layout = kf.kdb.Layout()
+    layout.read(str(path))
+    assert "kfactory:instance_infos" not in {
+        meta.name for meta in layout.cell("parent").each_meta_info()
+    }
+
+
 @pytest.mark.parametrize("virtual_child", [False, True])
 @pytest.mark.parametrize("angle", [0, 30])
 def test_virtual_instance_info_materialization(
