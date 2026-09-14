@@ -15,9 +15,11 @@ from kfactory.cells.straight import straight
 from tests.conftest import Layers
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def mzi_arm(layers: Layers) -> Callable[..., kf.KCell]:
     # Execute the actual documented function without running unrelated plots.
+    # Keep one decorated factory/cache for the shared layout across test cases.
+    # Redefining it per test creates duplicate names for the reference arm.
     source = Path(__file__).parents[1] / "docs/source/components/cells/overview.py"
     function = next(
         node
@@ -79,3 +81,12 @@ def test_mzi_arm_invalid_lengths(
 ) -> None:
     with pytest.raises(ValueError, match="length must be positive"):
         mzi_arm(length=length, delta_length=delta_length)
+
+
+def test_mzi_arm_layout_export(
+    mzi_arm: Callable[..., kf.KCell], tmp_path: Path
+) -> None:
+    arm = mzi_arm(length=20.0, delta_length=0.0)
+    # Export the whole layout, as later routing tests do. Exporting only one
+    # arm would miss duplicate names created by earlier fixture invocations.
+    arm.kcl.write(tmp_path / "mzi_arms.oas")
