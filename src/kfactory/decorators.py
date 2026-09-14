@@ -682,10 +682,6 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
         return self._f(*args, **kwargs)
 
     def __len__(self) -> int:
-        del_cells = [hk for hk, kc in self.cache.items() if kc._destroyed()]
-        for hk in del_cells:
-            del self.cache[hk]
-
         return len(self.cache)
 
     @functools.cached_property

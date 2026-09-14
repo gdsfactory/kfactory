@@ -715,6 +715,27 @@ def test_factory_name(
     assert cell.factory_name == "straight"
 
 
+def test_factory_len_does_not_scan_cache(
+    kcl: kf.KCLayout, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    @kcl.cell
+    def cached_cell() -> kf.KCell:
+        return kcl.kcell()
+
+    cell = cached_cell()
+    cell.locked = False
+    cell.kdb_cell.delete()
+    factory = kcl.factories["cached_cell"]
+
+    def unexpected_scan() -> None:
+        pytest.fail("len() and bool() must not scan the factory cache")
+
+    monkeypatch.setattr(factory.cache, "items", unexpected_scan)
+    assert len(factory) == 1
+    assert bool(factory)
+    assert len(factory.cache) == 1
+
+
 def test_prune(kcl: kf.KCLayout) -> None:
     @kcl.cell
     def test2() -> kf.KCell:

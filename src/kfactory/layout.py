@@ -2117,9 +2117,16 @@ class KCLayout(
             self.rebuild()
 
     def rebuild(self) -> None:
-        """Rebuild the KCLayout based on the Layout object."""
+        """Rebuild cell tracking and remove destroyed cells from registered caches."""
         kcells2delete: list[int] = []
         with self.thread_lock:
+            for factory in self.factories.all():
+                deleted_keys = [
+                    key for key, cell in factory.cache.items() if cell.destroyed()
+                ]
+                for key in deleted_keys:
+                    del factory.cache[key]
+
             for ci, c in self.tkcells.items():
                 if c.kdb_cell._destroyed():
                     kcells2delete.append(ci)
