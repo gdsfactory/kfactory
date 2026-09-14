@@ -41,6 +41,37 @@ class PlacerError(ValueError):
     pass
 
 
+def _check_cross_section_compatibility(
+    p1: ProtoPort[Any],
+    p2: ProtoPort[Any],
+    *,
+    allow_symmetric_mismatch: bool = False,
+) -> None:
+    """Check profiles and transverse orientation without checking position or angle.
+
+    Profiles must have the same symmetry and match structurally. Asymmetric
+    profiles additionally require opposite mirror flags. Symmetric routing can
+    explicitly allow different profiles; its width, layer and port-type mismatch
+    policies remain the responsibility of the placer and ``connect()``. This
+    allowance never relaxes asymmetric checks.
+    """
+    symmetric = p1.is_symmetric()
+    if symmetric != p2.is_symmetric():
+        raise ValueError(
+            f"Route endpoints {p1.name!r} and {p2.name!r} mix symmetric and "
+            "asymmetric cross sections. Add an explicit transition first."
+        )
+    if p1.base.any_cross_section != p2.base.any_cross_section and not (
+        symmetric and allow_symmetric_mismatch
+    ):
+        raise ValueError("Route ports must carry the same cross section.")
+    if not symmetric and p1.mirror == p2.mirror:
+        raise ValueError(
+            f"Asymmetric route ports {p1.name!r} and {p2.name!r} have incompatible "
+            "transverse orientations. Their mirror flags must be opposite."
+        )
+
+
 class PlacerFunction(Protocol):
     """A placer function. Used to place Instances given a path."""
 
@@ -141,7 +172,15 @@ def check_collisions(
     if collision_edges or not inter_route_collisions.is_empty():
         if collision_check_layers is None:
             collision_check_layers = list(
-                {p.any_cross_section.main_layer for p in start_ports}
+                {
+                    layer
+                    for p in (*start_ports, *end_ports)
+                    for layer in (
+                        [p.any_cross_section.main_layer]
+                        if p.is_symmetric()
+                        else [s.layer for s in p.any_cross_section.get_sections()]
+                    )
+                }
             )
         dbu = c.kcl.dbu
         db = rdb.ReportDatabase("Routing Errors")
@@ -300,6 +339,8 @@ def route_bundle(
     routing_kwargs: dict[str, Any] | None = None,
     placer_function: PlacerFunction,
     placer_kwargs: dict[str, Any] | None = None,
+    asymmetric_placer_function: PlacerFunction | None = None,
+    asymmetric_placer_kwargs: dict[str, Any] | None = None,
     constraints: Sequence[Constraint] | None = None,
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
@@ -384,6 +425,11 @@ def route_bundle(
             )
             ```
         placer_kwargs: Additional kwargs passed to the placer_function.
+        asymmetric_placer_function: Placer for routes with asymmetric endpoint
+            profiles. Required if any endpoint is asymmetric. Selection happens
+            per route after port sorting; symmetric routes use placer_function.
+        asymmetric_placer_kwargs: Arguments for the asymmetric placer, independent
+            of placer_kwargs.
         constraints: Routing constraints to enforce after routing but before placement.
             Each constraint's `enforce` method is called with the routers and routing
             kwargs (e.g. separation, bend90_radius).
@@ -408,6 +454,8 @@ def route_bundle(
         starts = []
     if placer_kwargs is None:
         placer_kwargs = {}
+    if asymmetric_placer_kwargs is None:
+        asymmetric_placer_kwargs = {}
     if routing_kwargs is None:
         routing_kwargs = {"bbox_routing": "minimal"}
     if route_debug is not None:
@@ -420,6 +468,10 @@ def route_bundle(
             " the same size as the end ports and be the same length."
         )
     length = len(start_ports)
+    if asymmetric_placer_function is None and any(
+        not p.is_symmetric() for p in (*start_ports, *end_ports)
+    ):
+        raise ValueError("Asymmetric ports require an asymmetric_placer_function.")
     if starts is None or starts == []:
         starts = [[]] * length
     elif isinstance(starts, int):
@@ -504,6 +556,9 @@ def route_bundle(
     for router in routers:
         sp = start_mapping[router.start_transformation]
         ep = end_mapping[router.end_transformation]
+        _check_cross_section_compatibility(
+            Port(base=sp), Port(base=ep), allow_symmetric_mismatch=True
+        )
         start_ports.append(sp)
         end_ports.append(ep)
 
@@ -517,13 +572,20 @@ def route_bundle(
     placer_errors: list[Exception] = []
     error_routes: list[tuple[BasePort, BasePort, list[kdb.Point], int]] = []
     for router, ps, pe in zip(routers, start_ports, end_ports, strict=False):
+        if ps.is_symmetric():
+            placer = placer_function
+            kwargs = placer_kwargs
+        else:
+            assert asymmetric_placer_function is not None
+            placer = asymmetric_placer_function
+            kwargs = asymmetric_placer_kwargs
         try:
-            route = placer_function(
+            route = placer(
                 c,
                 Port(base=ps),
                 Port(base=pe),
                 router.start.pts,
-                **placer_kwargs,
+                **kwargs,
             )
             routes.append(route)
         except Exception as e:

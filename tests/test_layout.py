@@ -254,6 +254,37 @@ def test_kclayout_rebuild(kcl: kf.KCLayout, layers: Layers) -> None:
     assert len(list(kcl.layout.each_cell())) == 1
 
 
+@pytest.mark.parametrize("output_type", [kf.KCell, kf.DKCell])
+def test_rebuild_cleans_factory_caches(
+    kcl: kf.KCLayout, output_type: type[kf.KCell] | type[kf.DKCell]
+) -> None:
+    def cached_cell(value: int) -> kf.KCell:
+        return kcl.kcell()
+
+    first = kcl.cell(output_type=output_type)(cached_cell)
+    second = kcl.cell(output_type=output_type)(cached_cell)
+    deleted = [first(1), second(2)]
+    live = [first(3), second(4)]
+    factories = kcl.factories.get_all_by_name("cached_cell")
+    assert len(factories) == 2
+    deleted_indices = [cell.cell_index() for cell in deleted]
+    for cell in deleted:
+        cell.locked = False
+        cell.kdb_cell.delete()
+    assert all(len(factory.cache) == 2 for factory in factories)
+
+    kcl.rebuild()
+
+    assert all(ci not in kcl.tkcells for ci in deleted_indices)
+    for factory, cell in zip(factories, live, strict=True):
+        assert list(factory.cache.values()) == [cell]
+        assert not cell.destroyed()
+    assert first(3) is live[0]
+    assert second(4) is live[1]
+    assert not first(1).destroyed()
+    assert not second(2).destroyed()
+
+
 def test_kclayout_delete_stale_destroyed_layout(kcl: kf.KCLayout) -> None:
     kcl.kcell(name="cached_cell")
     kcl.library.delete()

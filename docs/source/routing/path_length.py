@@ -79,7 +79,7 @@ straight_factory = partial(
 WG_WIDTH = kf.kcl.to_dbu(0.5)  # 500 DBU
 
 # Effective routing radius of the euler bend (larger than the nominal 10 µm)
-bend_radius = kf.routing.optical.get_radius(bend90)
+bend_radius = kf.routing.optical.get_radius(bend90.ports)
 
 # %% [markdown]
 # ## 1 · Baseline — unequal path lengths

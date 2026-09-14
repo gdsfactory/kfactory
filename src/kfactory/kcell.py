@@ -553,6 +553,7 @@ class TKCell(BaseKCell):
     lvs_equivalent_ports: list[list[str]] | None = None
     virtual: bool = False
     vtrans: kdb.DCplxTrans | None = None
+    instance_infos: dict[str, Info] = Field(default_factory=dict)
     _schematic: TSchematic[Any] | None = PrivateAttr(default=None)
     _library_cell: KCell | None = PrivateAttr(default=None)
 
@@ -945,6 +946,10 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         c._base.settings = self.settings.model_copy()
         c._base.settings_units = self.settings_units.model_copy()
         c._base.info = self.info.model_copy()
+        c._base.instance_infos = {
+            name: info.model_copy(deep=True)
+            for name, info in self.instance_infos.items()
+        }
         c._base.vinsts = self._base.vinsts.dup()
 
         return c
@@ -1305,6 +1310,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
             vinst.insert_into_flat(self)
         self._base.vinsts = VInstances()
         self._base.kdb_cell.flatten(False)
+        self.instance_infos.clear()
 
         if merge:
             for layer in self.kcl.layout.layer_indexes():
@@ -1683,7 +1689,15 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         if self.locked:
             raise LockedError(self)
         if isinstance(inst, Instance):
-            return Instance(self.kcl, self._base.kdb_cell.insert(inst.instance))
+            info = (
+                inst.parent_cell.instance_infos.get(inst.name)
+                if inst.is_named()
+                else None
+            )
+            inserted = Instance(self.kcl, self._base.kdb_cell.insert(inst.instance))
+            if info is not None:
+                inserted.info = info
+            return inserted
         if not property_id:
             return Instance(self.kcl, self._base.kdb_cell.insert(inst))
         assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
@@ -1823,6 +1837,19 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     kdb.LayoutMetaInfo("kfactory:basename", self.basename, None, True)
                 )
 
+            if self.instance_infos:
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(
+                        "kfactory:instance_infos",
+                        {
+                            instance_name: info.model_dump()
+                            for instance_name, info in self.instance_infos.items()
+                        },
+                        None,
+                        True,
+                    )
+                )
+
     def get_meta_data(
         self,
         meta_format: Literal["v1", "v2", "v3"] | None = None,
@@ -1864,6 +1891,13 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         self._base.function_name = meta.value
                     elif meta.name == "kfactory:basename":
                         self._base.basename = meta.value
+                    elif meta.name == "kfactory:instance_infos":
+                        v = meta.value
+                        if isinstance(v, dict):
+                            self._base.instance_infos = {
+                                instance_name: Info(**info)
+                                for instance_name, info in v.items()
+                            }
 
                 if not self.is_library_cell():
                     for index in sorted(port_dict.keys()):
@@ -2560,6 +2594,16 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 (self.kcl.name, self.factory_name, self.settings.model_dump()),
             )
         raise NotImplementedError
+
+    @property
+    def instance_infos(self) -> dict[str, Info]:
+        """Per-instance metadata, keyed by explicit instance names.
+
+        Access through ``inst.info`` and rename through ``inst.name`` to keep
+        the mapping in sync. Instance wrappers are transient; their parent
+        cell owns this mapping and serializes it as native KLayout metadata.
+        """
+        return self._base.instance_infos
 
 
 def _reconstruct(

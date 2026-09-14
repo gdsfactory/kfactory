@@ -291,24 +291,25 @@ print(f"euler bbox   (µm):   {b.dbbox()}")
 #
 # Euler (clothoid) bends extend further than their nominal radius because the
 # clothoid transitions ramp up gradually.  Always use
-# `kf.routing.optical.get_radius(bend_cell)` to get the **footprint radius**
-# that routing algorithms need, not the nominal value you passed to the factory.
+# `kf.routing.optical.get_radius(bend_cell.ports)` to get the **footprint radius
+# in DBU** that routing algorithms need. Convert to µm before comparing with
+# the nominal radius passed to the factory.
 #
-# Circular bends return the exact nominal radius — `get_radius` is still safe
-# to use but adds no correction.
+# Circular bends have the same footprint and nominal radius, up to DBU rounding.
 
 # %%
 bend90 = bend_euler_f(width=0.5, radius=10.0, layer=L.WG)
 
 nominal_radius = 10.0  # what we asked for
-footprint_radius = opt.get_radius(bend90)  # what routing needs
+footprint_radius_dbu = opt.get_radius(bend90.ports)  # what DBU routing needs
+footprint_radius_um = bend90.kcl.to_um(footprint_radius_dbu)
 
 print(f"nominal radius  : {nominal_radius:.3f} µm")
-print(f"footprint radius: {footprint_radius:.3f} µm")
-print(f"difference      : {footprint_radius - nominal_radius:.3f} µm")
+print(f"footprint radius: {footprint_radius_um:.3f} µm")
+print(f"difference      : {footprint_radius_um - nominal_radius:.3f} µm")
 
 # %% [markdown]
-# > **Rule:** Pass `footprint_radius` (not `nominal_radius`) to
+# > **Rule:** Pass `footprint_radius_dbu` to
 # > `route_loopback(bend90_radius=...)`, `place_manhattan(...)`, and
 # > similar functions. Using the nominal value causes "distance too small" errors.
 
@@ -527,7 +528,7 @@ print(f"canvas bbox (µm): {canvas.dbbox()}")
 # | KCLayout `infos=` | Pass the **class** (`infos=LAYER`), not an instance |
 # | Unhashable `@kf.cell` args | Pass cross-sections / layers as **name strings** |
 # | Wrong factory units | `straight_dbu_factory` → DBU; euler/circular → µm |
-# | Routing with euler bends | Use `opt.get_radius(bend)` for footprint radius |
+# | Routing with euler bends | Use `opt.get_radius(bend.ports)` for footprint radius in DBU |
 # | Headless collision errors | Pass `on_collision=None` in CI / doc builds |
 # | PDK port layout mismatch | Always pass `kcl=pdk` to `kf.Port(...)` |
 # | Enclosure µm sections | Pass `kcl=` to `LayerEnclosure(dsections=...)` |

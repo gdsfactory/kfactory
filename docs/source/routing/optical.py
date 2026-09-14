@@ -69,8 +69,8 @@ straight_factory = partial(
 
 WG_WIDTH = kf.kcl.to_dbu(0.5)  # 500 DBU
 
-# Effective routing radius of the euler bend (larger than the nominal 10 µm)
-bend_radius = kf.routing.optical.get_radius(bend90)
+# Effective routing radius in DBU (footprint larger than the nominal 10 µm)
+bend_radius = kf.routing.optical.get_radius(bend90.ports)
 
 # %% [markdown]
 # ## 1 · Waypoints — guiding routes through fixed points

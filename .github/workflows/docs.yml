@@ -40,4 +40,4 @@ jobs:
           restore-keys: |
             docs-source-built-${{ matrix.python-version }}-
       - name: Build docs
-        run: just docs
+        run: just docs "${{ matrix.python-version }}"

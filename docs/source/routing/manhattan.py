@@ -71,7 +71,8 @@ straight_factory = partial(
 )
 
 WG_WIDTH = kf.kcl.to_dbu(0.5)  # 500 DBU
-BEND_RADIUS = kf.routing.optical.get_radius(bend90)  # actual footprint radius in DBU
+# Actual footprint radius in DBU
+BEND_RADIUS = kf.routing.optical.get_radius(bend90.ports)
 
 print(f"WG width:    {WG_WIDTH} DBU  ({WG_WIDTH / 1000:.3f} µm)")
 print(f"Bend radius: {BEND_RADIUS} DBU  ({BEND_RADIUS / 1000:.3f} µm)")
@@ -83,7 +84,7 @@ print(f"Bend radius: {BEND_RADIUS} DBU  ({BEND_RADIUS / 1000:.3f} µm)")
 # axis-aligned waypoints connecting two ports.  No geometry is created yet.
 #
 # The `bend90_radius` must be the **actual footprint** radius of the bend cell
-# (use `kf.routing.optical.get_radius(bend_cell)`).  Passing the nominal radius
+# (use `kf.routing.optical.get_radius(bend_cell.ports)`).  Passing the nominal radius
 # of an euler bend will produce collisions because the euler footprint is larger.
 
 # %%
@@ -313,7 +314,7 @@ c_info
 #
 # | Pitfall | Fix |
 # |---|---|
-# | Passing nominal bend radius to `route_manhattan` | Use `kf.routing.optical.get_radius(bend_cell)` — euler bends extend beyond their nominal radius |
+# | Passing nominal bend radius to `route_manhattan` | Use `kf.routing.optical.get_radius(bend_cell.ports)` — euler bends extend beyond their nominal radius |
 # | `place_manhattan` raises "distance too small" | The backbone segments are shorter than the bend footprint; increase port separation or use a smaller bend |
 # | Steps with `dist` smaller than `bend90_radius` | The step must be at least as large as the bend radius; `Straight(dist=...)` will raise a `ValueError` if violated |
 # | Forgetting that all coordinates are DBU | Multiply µm values by 1000 (or use `kf.kcl.to_dbu(x_µm)`) |

@@ -225,7 +225,7 @@ kfactory has comprehensive routing support across several sub-modules:
 !!! note "Effective bend radius"
 
     Euler bends extend slightly beyond their nominal radius. Always use
-    `kf.routing.optical.get_radius(bend_cell)` (not the nominal µm value) when passing
-    `bend90_radius` to routing functions. See [Euler Bends](components/cells/factories/euler.py) for details.
+    `kf.routing.optical.get_radius(bend_cell.ports)` (not the nominal µm value) when passing
+    `bend90_radius` to DBU-based routing functions; the result is in DBU. See [Euler Bends](components/cells/factories/euler.py) for details.
 
 See the [Routing](routing/overview.py) section for full examples.

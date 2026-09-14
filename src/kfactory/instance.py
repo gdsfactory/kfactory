@@ -23,6 +23,7 @@ from .exceptions import (
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .port import DPort, Port, ProtoPort
+from .settings import Info
 
 if TYPE_CHECKING:
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
@@ -87,6 +88,14 @@ class ProtoInstance[T: (int, float)](GeometricObject[T]):
     @abstractmethod
     def ports(self) -> ProtoInstancePorts[T, ProtoInstance[T]]: ...
 
+    @property
+    @abstractmethod
+    def info(self) -> Info: ...
+
+    @info.setter
+    @abstractmethod
+    def info(self, info: Info) -> None: ...
+
 
 class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
     _instance: kdb.Instance
@@ -143,7 +152,20 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
 
     @name.setter
     def name(self, value: str | None) -> None:
+        """Set an explicit name, migrating its metadata on rename.
+
+        Clear the instance's info before removing its name. Use this setter
+        instead of changing the underlying KLayout name property directly.
+        """
+        old_name = self.name if self.is_named() else None
+        infos = self.parent_cell.instance_infos
+        if value is None and old_name in infos and infos[old_name].model_dump():
+            raise ValueError("Cannot remove the name of an instance with info.")
         self.instance.set_property(PROPID.NAME, value)
+        if old_name != value and old_name in infos:
+            info = infos.pop(old_name)
+            if value is not None:
+                infos[value] = info
 
     @property
     @abstractmethod
@@ -520,10 +542,43 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
             levels: If level < #hierarchy-levels -> pull the sub instances to self,
                 else pull the polygons. None will always flatten all levels.
         """
+        parent = self.parent_cell
+        name = self.name if self.is_named() else None
         if levels:
             self._instance.flatten(levels)
         else:
             self._instance.flatten()
+        if name is not None:
+            parent.instance_infos.pop(name, None)
+
+    def delete(self) -> None:
+        """Delete the instance and its parent-owned metadata."""
+        parent = self.parent_cell
+        name = self.name if self.is_named() else None
+        self._instance.delete()
+        if name is not None:
+            parent.instance_infos.pop(name, None)
+
+    @property
+    def info(self) -> Info:
+        """Metadata owned by the parent cell and keyed by an explicit name."""
+        if self.is_named():
+            return self.parent_cell.instance_infos.setdefault(self.name, Info())
+        raise ValueError(
+            "Unnamed instances cannot have an info object. Please name the instance "
+            "first with `inst.name=`."
+        )
+
+    @info.setter
+    def info(self, info: Info) -> None:
+        if self.is_named():
+            self.parent_cell.instance_infos[self.name] = info.model_copy(deep=True)
+            return
+
+        raise ValueError(
+            "Unnamed instances cannot have an info object. Please name the instance "
+            "first with `inst.name=`."
+        )
 
 
 class Instance(ProtoTInstance[int], DBUGeometricObject):
@@ -695,6 +750,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     _name: str | None
     cell: AnyKCell
     trans: kdb.DCplxTrans
+    _info: Info | None
     a: kdb.DVector
     b: kdb.DVector
     na: int = 1
@@ -713,6 +769,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     ) -> None:
         self.kcl = cell.kcl
         self._name = name
+        self._info = None
         self.cell = cell
         self.trans = trans or kdb.DCplxTrans()
         self.a = a
@@ -726,7 +783,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
 
     @name.setter
     def name(self, value: str | None) -> None:
+        if value is None and self._info is not None and self._info.model_dump():
+            raise ValueError("Cannot remove the name of an instance with info.")
         self._name = value
+        if value is None:
+            self._info = None
 
     @property
     def dcplx_trans(self) -> kdb.DCplxTrans:
@@ -854,8 +915,10 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 cell=cell_, na=self.na, nb=self.nb, a=self.a, b=self.b
             )
             inst_.transform(base_trans)
-            if self._name:
+            if self._name is not None:
                 inst_.name = self._name
+                if self._info is not None:
+                    inst_.info = self._info
             return Instance(kcl=self.cell.kcl, instance=inst_.instance)
 
         assert isinstance(self.cell, ProtoTKCell)
@@ -871,8 +934,10 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             inst_ = cell.create_inst(
                 cell=self.cell, na=self.na, nb=self.nb, a=self.a, b=self.b
             )
-            if self._name:
+            if self._name is not None:
                 inst_.name = self._name
+                if self._info is not None:
+                    inst_.info = self._info
             inst_.transform(base_trans)
             return Instance(kcl=self.cell.kcl, instance=inst_.instance)
         if cell.kcl.layout_cell(cell_name) is None:
@@ -899,8 +964,10 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             cell=tkcell, na=self.na, nb=self.nb, a=self.a, b=self.b
         )
         inst_.transform(base_trans)
-        if self._name:
+        if self._name is not None:
             inst_.name = self._name
+            if self._info is not None:
+                inst_.info = self._info
         return Instance(kcl=self.cell.kcl, instance=inst_.instance)
 
     @overload
@@ -1136,7 +1203,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         self.trans = kdb.DCplxTrans(trans) * self.trans
 
     def dup(self) -> VInstance:
-        return VInstance(
+        inst = VInstance(
             cell=self.cell,
             trans=self.trans,
             name=self.name,
@@ -1145,6 +1212,31 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             na=self.na,
             nb=self.nb,
         )
+        if self._info is not None:
+            inst.info = self._info
+        return inst
 
     def copy(self) -> VInstance:
         return self.dup()
+
+    @property
+    def info(self) -> Info:
+        if self._name is not None:
+            if self._info is None:
+                self._info = Info()
+            return self._info
+        raise ValueError(
+            "Unnamed instances cannot have an info object. Please name the instance "
+            "first with `inst.name=`."
+        )
+
+    @info.setter
+    def info(self, info: Info) -> None:
+        if self._name is not None:
+            self._info = info.model_copy(deep=True)
+            return
+
+        raise ValueError(
+            "Unnamed instances cannot have an info object. Please name the instance "
+            "first with `inst.name=`."
+        )

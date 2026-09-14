@@ -3,6 +3,7 @@ name: docs to gh-pages
 # Multi-version deployment via mike (zensical fork, installed at runtime via --with):
 #   push to main      → `dev` version       (always tracks latest main)
 #   push to vX.Y.Z    → `<X.Y.Z>` version + `latest` alias (set as default)
+# Aliases are copies so latest/objects.inv is available to inventory clients.
 #
 # Pre-existing v2.5.x version dirs on gh-pages stay intact — mike only
 # rewrites the version it's deploying plus versions.json + the alias target.
