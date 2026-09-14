@@ -556,6 +556,9 @@ class TKCell(BaseKCell):
     instance_infos: dict[str, Info] = Field(default_factory=dict)
     _schematic: TSchematic[Any] | None = PrivateAttr(default=None)
     _library_cell: KCell | None = PrivateAttr(default=None)
+    _vinstance_source: (
+        tuple[Literal["virtual", "real"], str, int, kdb.DCplxTrans] | None
+    ) = PrivateAttr(default=None)
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -723,9 +726,16 @@ class TKCell(BaseKCell):
 
 
 class TVCell(BaseKCell):
+    # Shared by wrappers of this base, but never by independently created cells.
+    _identity: int = PrivateAttr()
     _locked: bool = PrivateAttr(default=False)
     shapes: dict[int, VShapes] = Field(default_factory=dict)
     _name: str | None = PrivateAttr(default=None)
+
+    def model_post_init(self, context: Any) -> None:
+        with self.kcl.thread_lock:
+            self._identity = self.kcl._next_virtual_cell_id
+            self.kcl._next_virtual_cell_id += 1
 
     @property
     def locked(self) -> bool:
