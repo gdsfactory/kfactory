@@ -39,6 +39,8 @@ jobs:
         with:
           fetch-depth: 0   # mike needs full history of gh-pages
 
+      - name: Set up Rust for kfnetlist source build
+        uses: dtolnay/rust-toolchain@stable
       - uses: astral-sh/setup-uv@v7
       - uses: extractions/setup-just@v4
 

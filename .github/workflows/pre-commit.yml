@@ -14,5 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Set up Rust for kfnetlist source build
+        uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-python@v7
       - uses: pre-commit/action@v3.0.1

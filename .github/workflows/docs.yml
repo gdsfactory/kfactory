@@ -24,6 +24,8 @@ jobs:
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt install graphviz graphviz-dev
       - uses: actions/checkout@v7
+      - name: Set up Rust for kfnetlist source build
+        uses: dtolnay/rust-toolchain@stable
       - uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
