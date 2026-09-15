@@ -1,4 +1,4 @@
-# KFactory 3.1.0
+# KFactory 3.2.0
 
 [![codecov](https://codecov.io/gh/gdsfactory/kfactory/graph/badge.svg?token=dArcfnQE4w)](https://codecov.io/gh/gdsfactory/kfactory)
 
