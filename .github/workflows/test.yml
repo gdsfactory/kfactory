@@ -29,6 +29,8 @@ jobs:
           submodules: recursive
           ssh-key: ${{ secrets.SUBMODULE_SSH_KEY }}
           persist-credentials: false
+      - name: Set up Rust for kfnetlist source build
+        uses: dtolnay/rust-toolchain@stable
       - uses: astral-sh/setup-uv@v7
       - uses: extractions/setup-just@v4
       - name: Install dependencies
@@ -58,6 +60,8 @@ jobs:
           submodules: recursive
           ssh-key: ${{ secrets.SUBMODULE_SSH_KEY }}
           persist-credentials: false
+      - name: Set up Rust for kfnetlist source build
+        uses: dtolnay/rust-toolchain@stable
       - uses: astral-sh/setup-uv@v7
       - uses: extractions/setup-just@v4
       - name: Install dependencies
