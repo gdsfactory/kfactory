@@ -17,6 +17,7 @@ from .conf import PROPID, config, logger
 from .exceptions import (
     AsymmetricMirrorRequiredError,
     CrossSectionSymmetryMismatchError,
+    DuplicateCellNameError,
     PortLayerMismatchError,
     PortTypeMismatchError,
     PortWidthMismatchError,
@@ -855,64 +856,144 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         cell: AnyTKCell,
         trans: kdb.DCplxTrans | None = None,
     ) -> Instance:
+        """Materialize this instance, reusing only matching source cells and transforms.
+
+        Raises:
+            DuplicateCellNameError: The virtual name belongs to a different base,
+                or the materialized name belongs to a different source or transform.
+        """
         from .kcell import KCell, ProtoTKCell, VKCell
 
-        if trans is None:
-            trans = kdb.DCplxTrans()
+        with cell.kcl.thread_lock:
+            if trans is None:
+                trans = kdb.DCplxTrans()
 
-        if isinstance(self.cell, VKCell):
+            if isinstance(self.cell, VKCell):
+                trans_ = trans * self.trans
+                base_trans = kdb.DCplxTrans(
+                    kdb.DCplxTrans(
+                        kdb.ICplxTrans(trans_, cell.kcl.dbu)
+                        .s_trans()
+                        .to_dtype(cell.kcl.dbu)
+                    )
+                )
+                trans_ = base_trans.inverted() * trans_
+                cell_name = self.cell.name
+                if cell_name is None:
+                    raise ValueError(
+                        "Cannot insert a non-flattened VInstance into a VKCell when the"
+                        f" name is 'None'. VKCell at {self.trans}"
+                    )
+                identity = (self.cell.kcl.name, self.cell.base._identity)
+                registered = cell.kcl._virtual_cell_identities.get(cell_name)
+                if registered is not None and registered != identity:
+                    raise DuplicateCellNameError(
+                        f"Virtual cell name {cell_name!r} is already registered to a"
+                        f" different cell in KCLayout {cell.kcl.name!r}."
+                        " Give distinct virtual cells unique names."
+                    )
+                virtual_name = cell_name
+                if trans_ != kdb.DCplxTrans():
+                    cell_name += f"_{trans_.hash():x}"
+                if cell.kcl.layout_cell(cell_name) is None:
+                    cell_ = KCell(kcl=self.cell.kcl, name=cell_name)  # self.cell.dup()
+                    cell.kcl._virtual_cell_identities[virtual_name] = identity
+                    for layer, shapes in self.cell.shapes().items():
+                        for shape in shapes.transform(trans_):
+                            if isinstance(shape, kdb.DPolygon | kdb.DSimplePolygon):
+                                cell_.shapes(layer).insert(shape.to_itype(cell.kcl.dbu))
+                            else:
+                                cell_.shapes(layer).insert(shape)
+                    for inst in self.cell.insts:
+                        inst.insert_into(cell=cell_, trans=trans_)
+                    cell_.name = cell_name
+                    for port in self.cell.ports:
+                        cell_.add_port(port=port.copy(trans_))
+                    for c_shapes in (
+                        cell_.shapes(layer) for layer in cell_.kcl.layer_indexes()
+                    ):
+                        if not c_shapes.is_empty():
+                            r = kdb.Region(c_shapes)
+                            r.merge()
+                            c_shapes.clear()
+                            c_shapes.insert(r)
+                    settings = self.cell.settings.model_copy()
+                    settings_units = self.cell.settings_units.model_copy()
+                    cell_.settings = settings
+                    cell_.info = self.cell.info.model_copy(deep=True)
+                    cell_.settings_units = settings_units
+                    cell_.function_name = self.cell.function_name
+                    cell_.basename = self.cell.basename
+                    cell_._base.virtual = True
+                    if trans_ != kdb.DCplxTrans.R0:
+                        cell_._base.vtrans = trans_
+                    cell_.base._vinstance_source = (
+                        "virtual",
+                        self.cell.kcl.name,
+                        self.cell.base._identity,
+                        trans_.dup(),
+                    )
+                else:
+                    cell_ = cell.kcl[cell_name]
+                    self._check_materialized_source(cell_, trans_)
+                inst_ = cell.create_inst(
+                    cell=cell_, na=self.na, nb=self.nb, a=self.a, b=self.b
+                )
+                inst_.transform(base_trans)
+                if self._name is not None:
+                    inst_.name = self._name
+                    if self._info is not None:
+                        inst_.info = self._info
+                return Instance(kcl=self.cell.kcl, instance=inst_.instance)
+
+            assert isinstance(self.cell, ProtoTKCell)
             trans_ = trans * self.trans
             base_trans = kdb.DCplxTrans(
-                kdb.DCplxTrans(
-                    kdb.ICplxTrans(trans_, cell.kcl.dbu)
-                    .s_trans()
-                    .to_dtype(cell.kcl.dbu)
-                )
+                kdb.ICplxTrans(trans_, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu)
             )
             trans_ = base_trans.inverted() * trans_
             cell_name = self.cell.name
-            if cell_name is None:
-                raise ValueError(
-                    "Cannot insert a non-flattened VInstance into a VKCell when the"
-                    f" name is 'None'. VKCell at {self.trans}"
-                )
             if trans_ != kdb.DCplxTrans():
                 cell_name += f"_{trans_.hash():x}"
+            else:
+                inst_ = cell.create_inst(
+                    cell=self.cell, na=self.na, nb=self.nb, a=self.a, b=self.b
+                )
+                if self._name is not None:
+                    inst_.name = self._name
+                    if self._info is not None:
+                        inst_.info = self._info
+                inst_.transform(base_trans)
+                return Instance(kcl=self.cell.kcl, instance=inst_.instance)
             if cell.kcl.layout_cell(cell_name) is None:
-                cell_ = KCell(kcl=self.cell.kcl, name=cell_name)  # self.cell.dup()
-                for layer, shapes in self.cell.shapes().items():
-                    for shape in shapes.transform(trans_):
-                        if isinstance(shape, kdb.DPolygon | kdb.DSimplePolygon):
-                            cell_.shapes(layer).insert(shape.to_itype(cell.kcl.dbu))
-                        else:
-                            cell_.shapes(layer).insert(shape)
-                for inst in self.cell.insts:
-                    inst.insert_into(cell=cell_, trans=trans_)
-                cell_.name = cell_name
-                for port in self.cell.ports:
-                    cell_.add_port(port=port.copy(trans_))
-                for c_shapes in (
-                    cell_.shapes(layer) for layer in cell_.kcl.layer_indexes()
-                ):
-                    if not c_shapes.is_empty():
-                        r = kdb.Region(c_shapes)
-                        r.merge()
-                        c_shapes.clear()
-                        c_shapes.insert(r)
+                tkcell = self.cell.dup()
+                tkcell.name = cell_name
+                tkcell.flatten(True)
+                for layer in tkcell.kcl.layer_indexes():
+                    tkcell.shapes(layer).transform(trans_)
+                for _port in tkcell.ports:
+                    _port.dcplx_trans = trans_ * _port.dcplx_trans
+                if trans_ != kdb.DCplxTrans.R0:
+                    tkcell._base.vtrans = trans_
                 settings = self.cell.settings.model_copy()
                 settings_units = self.cell.settings_units.model_copy()
-                cell_.settings = settings
-                cell_.info = self.cell.info.model_copy(deep=True)
-                cell_.settings_units = settings_units
-                cell_.function_name = self.cell.function_name
-                cell_.basename = self.cell.basename
-                cell_._base.virtual = True
-                if trans_ != kdb.DCplxTrans.R0:
-                    cell_._base.vtrans = trans_
+                tkcell.settings = settings
+                tkcell.info = self.cell.info.model_copy(deep=True)
+                tkcell.settings_units = settings_units
+                tkcell.function_name = self.cell.function_name
+                tkcell.basename = self.cell.basename
+                tkcell._base.vtrans = trans_
+                tkcell.base._vinstance_source = (
+                    "real",
+                    self.cell.kcl.name,
+                    self.cell.cell_index(),
+                    trans_.dup(),
+                )
             else:
-                cell_ = cell.kcl[cell_name]
+                tkcell = cell.kcl[cell_name]
+                self._check_materialized_source(tkcell, trans_)
             inst_ = cell.create_inst(
-                cell=cell_, na=self.na, nb=self.nb, a=self.a, b=self.b
+                cell=tkcell, na=self.na, nb=self.nb, a=self.a, b=self.b
             )
             inst_.transform(base_trans)
             if self._name is not None:
@@ -921,54 +1002,28 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     inst_.info = self._info
             return Instance(kcl=self.cell.kcl, instance=inst_.instance)
 
-        assert isinstance(self.cell, ProtoTKCell)
-        trans_ = trans * self.trans
-        base_trans = kdb.DCplxTrans(
-            kdb.ICplxTrans(trans_, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu)
-        )
-        trans_ = base_trans.inverted() * trans_
-        cell_name = self.cell.name
-        if trans_ != kdb.DCplxTrans():
-            cell_name += f"_{trans_.hash():x}"
-        else:
-            inst_ = cell.create_inst(
-                cell=self.cell, na=self.na, nb=self.nb, a=self.a, b=self.b
+    def _check_materialized_source(
+        self, cell: AnyTKCell, trans: kdb.DCplxTrans
+    ) -> None:
+        from .kcell import ProtoTKCell, VKCell
+
+        source = cell.base._vinstance_source
+        if isinstance(self.cell, VKCell):
+            expected = (
+                "virtual",
+                self.cell.kcl.name,
+                self.cell.base._identity,
+                trans,
             )
-            if self._name is not None:
-                inst_.name = self._name
-                if self._info is not None:
-                    inst_.info = self._info
-            inst_.transform(base_trans)
-            return Instance(kcl=self.cell.kcl, instance=inst_.instance)
-        if cell.kcl.layout_cell(cell_name) is None:
-            tkcell = self.cell.dup()
-            tkcell.name = cell_name
-            tkcell.flatten(True)
-            for layer in tkcell.kcl.layer_indexes():
-                tkcell.shapes(layer).transform(trans_)
-            for _port in tkcell.ports:
-                _port.dcplx_trans = trans_ * _port.dcplx_trans
-            if trans_ != kdb.DCplxTrans.R0:
-                tkcell._base.vtrans = trans_
-            settings = self.cell.settings.model_copy()
-            settings_units = self.cell.settings_units.model_copy()
-            tkcell.settings = settings
-            tkcell.info = self.cell.info.model_copy(deep=True)
-            tkcell.settings_units = settings_units
-            tkcell.function_name = self.cell.function_name
-            tkcell.basename = self.cell.basename
-            tkcell._base.vtrans = trans_
         else:
-            tkcell = cell.kcl[cell_name]
-        inst_ = cell.create_inst(
-            cell=tkcell, na=self.na, nb=self.nb, a=self.a, b=self.b
-        )
-        inst_.transform(base_trans)
-        if self._name is not None:
-            inst_.name = self._name
-            if self._info is not None:
-                inst_.info = self._info
-        return Instance(kcl=self.cell.kcl, instance=inst_.instance)
+            assert isinstance(self.cell, ProtoTKCell)
+            expected = ("real", self.cell.kcl.name, self.cell.cell_index(), trans)
+        if source != expected:
+            raise DuplicateCellNameError(
+                f"Cell name {cell.name!r} already exists in KCLayout {cell.kcl.name!r}"
+                " and was not materialized from the same source cell and transform."
+                " Give distinct cells unique names."
+            )
 
     @overload
     def insert_into_flat(
