@@ -13,17 +13,14 @@ from typing import (
     Protocol,
     TypedDict,
     cast,
-    overload,
 )
 
 import klayout.db as kdb
-import numpy as np
 
 from ..conf import (
     ANGLE_90,
     ANGLE_180,
     ANGLE_270,
-    MIN_POINTS_FOR_CLEAN,
     MIN_WAYPOINTS_FOR_ROUTING,
     logger,
 )
@@ -2773,45 +2770,33 @@ def _route_waypoints(
     return all_routers
 
 
-@overload
-def clean_points(points: list[kdb.Point]) -> list[kdb.Point]: ...
-
-
-@overload
-def clean_points(points: list[kdb.DPoint]) -> list[kdb.DPoint]: ...
-
-
-def clean_points(
-    points: list[kdb.Point] | list[kdb.DPoint],
-) -> list[kdb.Point] | list[kdb.DPoint]:
+def clean_points[TPoint: (kdb.Point, kdb.DPoint)](
+    points: Sequence[TPoint],
+) -> list[TPoint]:
     """Remove useless points from a manhattan type of list.
 
-    This will remove the middle points that are on a straight line.
+    Keeps the first and last points and every point where the direction changes,
+    dropping the middle points that are on a straight line as well as duplicates.
     """
-    if len(points) < MIN_POINTS_FOR_CLEAN:
-        return points
-    if len(points) == MIN_POINTS_FOR_CLEAN:
-        return points if points[1] != points[0] else points[:1]
-    p_p = points[0]
-    p = points[1]
+    cleaned = list(points[:1])
+    direction: kdb.Vector | kdb.DVector | None = None
 
-    del_points: list[int] = []
-
-    for i, p_n in enumerate(points[2:], 2):
-        v2 = p_n - p  # ty:ignore[unsupported-operator]
-        v1 = p - p_p  # ty:ignore[unsupported-operator]
-
+    for point in points[1:]:
+        last = cleaned[-1]
+        if point == last:
+            continue  # skipping duplicate
+        step = point - last  # ty:ignore[unsupported-operator]
         if (
-            (np.sign(v1.x) == np.sign(v2.x)) and (np.sign(v1.y) == np.sign(v2.y))
-        ) or v2.abs() == 0:
-            del_points.append(i - 1)
+            direction is not None
+            and step.vprod_sign(direction) == 0  # parallel
+            and step.sprod_sign(direction) > 0  # not u-turn
+        ):
+            cleaned[-1] = point
         else:
-            p_p = p
-            p = p_n
-    for i in reversed(del_points):
-        del points[i]
+            cleaned.append(point)
+            direction = step
 
-    return points
+    return cleaned
 
 
 def _is_manhattan(v: kdb.Vector | kdb.DVector) -> bool:
