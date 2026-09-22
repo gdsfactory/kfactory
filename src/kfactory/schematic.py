@@ -843,8 +843,6 @@ class Constraint(BaseModel, ABC, arbitrary_types_allowed=True):
     route_names: list[str]
     instance_names: list[str] = Field(default=[])
     on_failure: Literal["error", "show_error"] | None = "error"
-    _routes: dict[str | None, list[ManhattanRoute]] = PrivateAttr(default={})
-    _routers: dict[str | None, list[ManhattanRouter]] = PrivateAttr(default={})
 
     @abstractmethod
     def enforce(
@@ -910,12 +908,17 @@ class PathLengthMatch(Constraint):
     placed.  The `check` method verifies the final `ManhattanRoute` lengths
     are within `tolerance` of each other.
 
+    Every bundle the constraint is passed to is matched, each on its own. Bundles
+    listed together in `route_names` only match each other if `length` is set.
+
     Attributes:
         loops: Number of meander loops to use per route.
         loop_side: Which side of the route to place the loop on.
         loop_position: Where along the route to place the loop.
         element: Index of the straight segment to insert the loop into.
         tolerance: Maximum allowed length difference after enforcement.
+        length: Target path length [dbu]. Defaults to the longest route of the bundle.
+        all: Deprecated and ignored; every bundle is enforced.
     """
 
     loops: int = 1
@@ -934,7 +937,7 @@ class PathLengthMatch(Constraint):
     ) -> None:
         from .routing.optical import LoopPosition, LoopSide, path_length_match
 
-        if self.all or (len(self.route_names) - len(self._routers)) == 1:
+        if routers:
             path_length_match(
                 routers=routers,
                 element=self.element,
@@ -943,8 +946,6 @@ class PathLengthMatch(Constraint):
                 loop_position=LoopPosition(self.loop_position),
                 path_length=self.length,
             )
-
-        self._routers[route_name] = list(routers)
 
     def check(
         self,
