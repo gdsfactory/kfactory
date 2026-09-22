@@ -308,31 +308,32 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         )
 
     def __eq__(self, other: object) -> bool:
-        """Check if two ports are equal."""
+        """Check if two ports are equal.
+
+        Two ports are equal if they have the same placement, name, layout,
+        cross section, port type and info.
+
+        Placement is compared as `trans` if both ports store one,
+        and as `get_dcplx_trans()` otherwise.
+
+        To ask whether two ports are the same physical port regardless of name,
+        use [`is_coincident`][kfactory.port.BasePort.is_coincident].
+        """
         if not isinstance(other, BasePort):
             return False
+
+        if self.trans is not None and other.trans is not None:
+            same_placement = self.trans == other.trans
+        else:
+            same_placement = self.get_dcplx_trans() == other.get_dcplx_trans()
+
         return (
-            (self.trans is None and other.trans is None)
-            or (
-                (
-                    self.trans is not None
-                    and other.trans is not None
-                    and self.trans == other.trans
-                )
-                and (self.dcplx_trans is None and other.dcplx_trans is None)
-            )
-            or (
-                (
-                    self.dcplx_trans is not None
-                    and other.dcplx_trans is not None
-                    and self.dcplx_trans == other.dcplx_trans
-                )
-                and self.name == other.name
-                and self.kcl == other.kcl
-                and self.any_cross_section == other.any_cross_section
-                and self.port_type == other.port_type
-                and self.info == other.info
-            )
+            self.name == other.name
+            and self.kcl is other.kcl
+            and self.port_type == other.port_type
+            and self.any_cross_section == other.any_cross_section
+            and self.info == other.info
+            and same_placement
         )
 
     def check_connection(

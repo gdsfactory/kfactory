@@ -270,7 +270,11 @@ class ProtoPorts[T: (int, float)](Protocol):
         ...
 
     def __contains__(self, port: str | ProtoPort[Any] | BasePort) -> bool:
-        """Check whether a port is in this port collection."""
+        """Check whether a port is in this port collection.
+
+        A string is matched against the port names. A port is matched with
+        `BasePort.__eq__` against the collection's ports.
+        """
         if isinstance(port, ProtoPort):
             return port.base in self._bases
         if isinstance(port, BasePort):

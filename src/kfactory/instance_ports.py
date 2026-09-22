@@ -87,9 +87,13 @@ class ProtoTInstancePorts[T: (int, float)](
         return len(self.cell_ports) * self.instance.na * self.instance.nb
 
     def __contains__(self, port: str | ProtoPort[Any]) -> bool:
-        """Check whether a port is in this port collection."""
+        """Check whether a port is in this port collection.
+
+        A string is matched against the port names. A port is matched with
+        `BasePort.__eq__` against the instance's ports.
+        """
         if isinstance(port, ProtoPort):
-            return port.base in [p.base for p in self.instance.ports]
+            return any(port.base == p.base for p in self.instance.ports)
         return any(_port.name == port for _port in self.instance.ports)
 
     @property
@@ -428,9 +432,13 @@ class VInstancePorts(ProtoInstancePorts[float, VInstance]):
         yield from (p.copy(self.instance.trans) for p in self.cell_ports)
 
     def __contains__(self, port: str | ProtoPort[Any]) -> bool:
-        """Check if a port is in the instance."""
+        """Check whether a port is in this port collection.
+
+        A string is matched against the port names. A port is matched with
+        `BasePort.__eq__` against the instance's ports.
+        """
         if isinstance(port, ProtoPort):
-            return port.base in [p.base for p in self.instance.ports]
+            return any(port.base == p.base for p in self.instance.ports)
         return any(_port.name == port for _port in self.instance.ports)
 
     def filter(
