@@ -277,6 +277,36 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         assert self.trans is not None, "Both trans and dcplx_trans are None"
         return kdb.DCplxTrans(self.trans.to_dtype(self.kcl.dbu))
 
+    def is_coincident(self, other: BasePort) -> bool:
+        """Whether two handles denote one physical port, ignoring the name.
+
+        Re-exporting an instance's port on a cell (`c.add_port(name=...,
+        port=inst.ports[...])`) produces a different `BasePort` with a different
+        name for what is physically the same port. This answers whether two
+        ports are that same port: same layout, main layer, width, port type and
+        placement. The name, `info` and the rest of the cross section are not
+        compared.
+
+        Placement is compared as `get_dcplx_trans()`, so a port stored as a
+        `trans` and one stored as a `dcplx_trans` coincide when they are at the
+        same place.
+
+        Args:
+            other: The port to compare against.
+        """
+        if self is other:
+            return True
+
+        self_xs, other_xs = self.any_cross_section, other.any_cross_section
+
+        return (
+            self.kcl is other.kcl
+            and self_xs.main_layer.is_equivalent(other_xs.main_layer)
+            and self_xs.width == other_xs.width
+            and self.port_type == other.port_type
+            and self.get_dcplx_trans() == other.get_dcplx_trans()
+        )
+
     def __eq__(self, other: object) -> bool:
         """Check if two ports are equal."""
         if not isinstance(other, BasePort):
@@ -499,6 +529,13 @@ class ProtoPort[T: (int, float)](ABC):
         if isinstance(other, ProtoPort):
             return self._base == other._base
         return False
+
+    def is_coincident(self, other: ProtoPort[Any]) -> bool:
+        """Whether two ports denote one physical port, ignoring the name.
+
+        See [`BasePort.is_coincident`][kfactory.port.BasePort.is_coincident].
+        """
+        return self._base.is_coincident(other._base)
 
     @property
     def trans(self) -> kdb.Trans:

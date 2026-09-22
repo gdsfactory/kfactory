@@ -568,3 +568,89 @@ def test_create(
         trans=kf.kdb.Trans(1, 0),
     )
     oas_regression(cell)
+
+
+def test_port_is_coincident_re_export(kcl: kf.KCLayout, straight: kf.KCell) -> None:
+    c = kcl.kcell("is_coincident_re_export")
+    inst = c << straight
+    inst.rotate(1)
+    inst.move((1000, 500))
+    c.add_port(name="drop", port=inst.ports["o1"])
+    p_inst, p_top = inst.ports["o1"], c.ports["drop"]
+
+    assert p_top.base is not p_inst.base
+    assert p_top.name != p_inst.name
+    assert p_top.is_coincident(p_inst)
+    assert p_inst.is_coincident(p_top)
+    assert any(p_top.is_coincident(p) for p in inst.ports)
+    assert not any(c.ports["drop"].is_coincident(p) for p in [inst.ports["o2"]])
+
+
+@pytest.mark.parametrize("port", get_ports())
+def test_port_is_coincident(port: kf.port.ProtoPort[Any]) -> None:
+    assert port.is_coincident(port)
+
+    renamed = port.copy()
+    renamed.name = "other"
+    renamed.info = kf.Info(foo="bar")
+    assert port.is_coincident(renamed)
+
+    moved = port.copy()
+    moved.transform(kf.kdb.Trans(1, 0))
+    assert not port.is_coincident(moved)
+
+    rotated = port.copy()
+    rotated.transform(kf.kdb.Trans.R90)
+    assert not port.is_coincident(rotated)
+
+    retyped = port.copy()
+    retyped.port_type = "electrical"
+    assert not port.is_coincident(retyped)
+
+    widened = port.copy()
+    widened.cross_section = port.kcl.get_symmetrical_cross_section(
+        CrossSectionSpecDict(layer=layers.WG, width=4000)
+    )
+    assert not port.is_coincident(widened)
+
+    relayered = port.copy()
+    relayered.cross_section = port.kcl.get_symmetrical_cross_section(
+        CrossSectionSpecDict(layer=layers.WGEX, width=2000)
+    )
+    assert not port.is_coincident(relayered)
+
+
+def test_base_port_is_coincident_trans_and_dcplx_trans(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    xs = kcl.get_symmetrical_cross_section(
+        CrossSectionSpecDict(layer=layers.WG, width=2000)
+    )
+    simple = kf.port.BasePort(
+        name="o1",
+        kcl=kcl,
+        cross_section=xs,
+        port_type="optical",
+        trans=kf.kdb.Trans(1, False, 1000, 2000),
+    )
+    cplx = kf.port.BasePort(
+        name="o2",
+        kcl=kcl,
+        cross_section=xs,
+        port_type="optical",
+        dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 1, 2),
+    )
+    assert simple.is_coincident(cplx)
+    assert cplx.is_coincident(simple)
+
+    other_kcl = kf.KCLayout(name=kcl.name + "_other", infos=Layers)
+    elsewhere = kf.port.BasePort(
+        name="o1",
+        kcl=other_kcl,
+        cross_section=other_kcl.get_symmetrical_cross_section(
+            CrossSectionSpecDict(layer=layers.WG, width=2000)
+        ),
+        port_type="optical",
+        trans=kf.kdb.Trans(1, False, 1000, 2000),
+    )
+    assert not simple.is_coincident(elsewhere)
