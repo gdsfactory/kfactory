@@ -444,7 +444,8 @@ class ProtoKCell[T: (int, float), TB: BaseKCell](GeometricObject[T], ABC):
             port: The port to add.
             name: Overwrite the name of the port
             keep_mirror: Keep the mirror part of the transformation of a port if
-                `True`, else set the mirror flag to `False`.
+                `True`, else set the mirror flag to `False`. Ports with an
+                asymmetric cross section always keep their mirror flag.
         """
         if self.locked:
             raise LockedError(self)
@@ -467,7 +468,8 @@ class ProtoKCell[T: (int, float), TB: BaseKCell](GeometricObject[T], ABC):
             prefix: string to add in front of all the port names
             suffix: string to add at the end of all the port names
             keep_mirror: Keep the mirror part of the transformation of a port if
-                `True`, else set the mirror flag to `False`.
+                `True`, else set the mirror flag to `False`. Ports with an
+                asymmetric cross section always keep their mirror flag.
         """
         if self.locked:
             raise LockedError(self)

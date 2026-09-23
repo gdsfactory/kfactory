@@ -807,11 +807,13 @@ class Ports(ProtoPorts[int], ICreatePort):
             name: Overwrite the name of the port
             keep_mirror: Keep the mirror flag from the original port if `True`,
                 else set [Port.trans.mirror][kfactory.port.ProtoPort.trans]
-                (or the complex equivalent) to `False`.
+                (or the complex equivalent) to `False`. Ports with an asymmetric
+                cross section always keep their mirror flag, as it determines
+                which side of the port the cross section lies on.
         """
         if port.kcl == self.kcl:
             base = port.base.model_copy()
-            if not keep_mirror:
+            if not keep_mirror and port.is_symmetric():
                 if base.trans is not None:
                     base.trans.mirror = False
                 elif base.dcplx_trans is not None:
@@ -823,7 +825,7 @@ class Ports(ProtoPorts[int], ICreatePort):
             port_ = Port(base=base)
         else:
             dcplx_trans = port.dcplx_trans.dup()
-            if not keep_mirror:
+            if not keep_mirror and port.is_symmetric():
                 dcplx_trans.mirror = False
             base = port.base.model_copy()
             base.trans = kdb.Trans.R0
@@ -941,11 +943,13 @@ class DPorts(ProtoPorts[float], DCreatePort):
             name: Overwrite the name of the port
             keep_mirror: Keep the mirror flag from the original port if `True`,
                 else set [Port.trans.mirror][kfactory.port.ProtoPort.trans]
-                (or the complex equivalent) to `False`.
+                (or the complex equivalent) to `False`. Ports with an asymmetric
+                cross section always keep their mirror flag, as it determines
+                which side of the port the cross section lies on.
         """
         if port.kcl == self.kcl:
             base = port.base.model_copy()
-            if not keep_mirror:
+            if not keep_mirror and port.is_symmetric():
                 if base.trans is not None:
                     base.trans.mirror = False
                 elif base.dcplx_trans is not None:
@@ -957,7 +961,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
             port_ = DPort(base=base)
         else:
             dcplx_trans = port.dcplx_trans.dup()
-            if not keep_mirror:
+            if not keep_mirror and port.is_symmetric():
                 dcplx_trans.mirror = False
             base = port.base.model_copy()
             base.trans = kdb.Trans.R0

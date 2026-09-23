@@ -617,6 +617,33 @@ def test_port_is_coincident_re_export(
     assert not p_top.is_coincident(inst.ports["o2"])
 
 
+def test_port_is_coincident_re_export_asymmetric(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    sub = kcl.kcell("is_coincident_re_export_asymmetric_sub")
+    sub.add_port(
+        port=kf.Port(
+            base=kf.port.BasePort(
+                name="o1",
+                kcl=kcl,
+                asymmetric_cross_section=kcl.get_asymmetrical_cross_section(
+                    kf.AsymmetricalCrossSection(
+                        layer=layers.WG, section_min=-500, section_max=1500
+                    )
+                ),
+                port_type="optical",
+                trans=kf.kdb.Trans(2, False, 0, 0),
+            )
+        )
+    )
+    c = kcl.kcell("is_coincident_re_export_asymmetric")
+    inst = c << sub
+    inst.transform(kf.kdb.Trans.M0)
+    p_top = c.add_port(name="drop", port=inst.ports["o1"])
+
+    assert p_top.is_coincident(inst.ports["o1"])
+
+
 @pytest.mark.parametrize("port", get_ports())
 def test_port_is_coincident(port: kf.port.ProtoPort[Any]) -> None:
     assert port.is_coincident(port)
