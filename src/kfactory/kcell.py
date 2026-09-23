@@ -1794,12 +1794,13 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     self.add_meta_info(
                         kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
                     )
+            port_mapping = {id(p): i for i, p in enumerate(self._base.ports)}
             for i, pin in enumerate(self.pins):
                 meta_info = {
                     "name": pin.name,
                     "pin_type": pin.pin_type,
                     "info": pin.info.model_dump(),
-                    "ports": [self.base.ports.index(port.base) for port in pin.ports],
+                    "ports": [port_mapping[id(port.base)] for port in pin.ports],
                 }
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(f"kfactory:pins:{i}", meta_info, None, True)
