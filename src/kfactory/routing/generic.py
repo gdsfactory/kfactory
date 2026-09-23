@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from ..conf import logger
 from ..instance import Instance  # noqa: TC001
 from ..port import BasePort, Port, ProtoPort
+from ..spatial import collect_instance_region
 from ..typings import dbu  # noqa: TC001
 from .length_functions import LengthFunction, get_length_from_area
 from .manhattan import (
@@ -223,16 +224,7 @@ def check_collisions(
             for i, inst in enumerate(insts):
                 inst_region_ = kdb.Region(inst.bbox(layer_))
                 if not (inst_region & inst_region_).is_empty():
-                    # if inst_shapes is None:
-                    inst_shapes = kdb.Region()
-                    shape_it = c.begin_shapes_rec_overlapping(layer_, inst.bbox(layer_))
-                    shape_it.select_cells([inst.cell.cell_index()])
-                    shape_it.min_depth = 1
-                    for _it in shape_it.each():
-                        if _it.path()[0].inst() == inst.instance:
-                            inst_shapes.insert(
-                                _it.shape().polygon.transformed(_it.trans())
-                            )
+                    inst_shapes = collect_instance_region(c, layer_, inst)
                     for j, _reg in inst_regions.items():
                         if _reg & inst_region_:
                             reg = kdb.Region()
@@ -243,9 +235,9 @@ def check_collisions(
                             shape_it.min_depth = 1
                             for _it in shape_it.each():
                                 if _it.path()[0].inst() == insts[j].instance:
-                                    reg.insert(
-                                        _it.shape().polygon.transformed(_it.trans())
-                                    )
+                                    poly = _it.shape().polygon
+                                    if poly is not None:
+                                        reg.insert(poly.transformed(_it.trans()))
 
                             error_region_instances.insert(reg & inst_shapes)
                 inst_region += inst_region_
