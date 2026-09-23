@@ -614,6 +614,7 @@ def test_port_is_coincident_re_export(
     assert p_top.is_coincident(p_inst)
     assert p_inst.is_coincident(p_top)
     assert any(p_top.is_coincident(p) for p in inst.ports)
+    assert p_top.is_coincident(p_inst.base)
     assert not p_top.is_coincident(inst.ports["o2"])
 
 
@@ -820,3 +821,18 @@ def test_port_in_instance_ports_rotated(kcl: kf.KCLayout, straight: kf.KCell) ->
     assert pa != pb
     assert pa not in b.ports
     assert pa in a.ports
+    assert pa.base not in b.ports
+    assert pa.base in a.ports
+
+
+def test_port_in_vinstance_ports(kcl: kf.KCLayout, straight: kf.KCell) -> None:
+    c = kf.VKCell(name="port_in_vinstance_ports", kcl=kcl)
+    a = c << straight
+    b = c << straight
+    b.transform(kf.kdb.DCplxTrans(1, 21, False, 250, 175))
+    pa = a.ports["o1"]
+
+    assert pa in a.ports
+    assert pa.base in a.ports
+    assert pa not in b.ports
+    assert pa.base not in b.ports

@@ -47,7 +47,7 @@ class ProtoInstancePorts[T: (int, float), TI: ProtoInstance[Any]](HasCellPorts[T
     def __len__(self) -> int: ...
 
     @abstractmethod
-    def __contains__(self, port: str | ProtoPort[Any]) -> bool: ...
+    def __contains__(self, port: str | ProtoPort[Any] | BasePort) -> bool: ...
 
     @abstractmethod
     def __getitem__(self, key: int | str | None) -> ProtoPort[T]: ...
@@ -86,14 +86,16 @@ class ProtoTInstancePorts[T: (int, float)](
             return len(self.cell_ports)
         return len(self.cell_ports) * self.instance.na * self.instance.nb
 
-    def __contains__(self, port: str | ProtoPort[Any]) -> bool:
+    def __contains__(self, port: str | ProtoPort[Any] | BasePort) -> bool:
         """Check whether a port is in this port collection.
 
         A string is matched against the port names. A port is matched with
         `BasePort.__eq__` against the instance's ports.
         """
         if isinstance(port, ProtoPort):
-            return any(port.base == p.base for p in self.instance.ports)
+            port = port.base
+        if isinstance(port, BasePort):
+            return any(port == p.base for p in self.instance.ports)
         return any(_port.name == port for _port in self.instance.ports)
 
     @property
@@ -431,14 +433,16 @@ class VInstancePorts(ProtoInstancePorts[float, VInstance]):
         """Create a copy of the ports to iterate through."""
         yield from (p.copy(self.instance.trans) for p in self.cell_ports)
 
-    def __contains__(self, port: str | ProtoPort[Any]) -> bool:
+    def __contains__(self, port: str | ProtoPort[Any] | BasePort) -> bool:
         """Check whether a port is in this port collection.
 
         A string is matched against the port names. A port is matched with
         `BasePort.__eq__` against the instance's ports.
         """
         if isinstance(port, ProtoPort):
-            return any(port.base == p.base for p in self.instance.ports)
+            port = port.base
+        if isinstance(port, BasePort):
+            return any(port == p.base for p in self.instance.ports)
         return any(_port.name == port for _port in self.instance.ports)
 
     def filter(

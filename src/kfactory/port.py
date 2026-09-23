@@ -554,12 +554,14 @@ class ProtoPort[T: (int, float)](ABC):
             return self._base == other._base
         return False
 
-    def is_coincident(self, other: ProtoPort[Any]) -> bool:
+    def is_coincident(self, other: ProtoPort[Any] | BasePort) -> bool:
         """Whether two ports denote one physical port, ignoring the name.
 
         See [`BasePort.is_coincident`][kfactory.port.BasePort.is_coincident].
         """
-        return self._base.is_coincident(other._base)
+        if isinstance(other, ProtoPort):
+            other = other.base
+        return self._base.is_coincident(other)
 
     @property
     def trans(self) -> kdb.Trans:
