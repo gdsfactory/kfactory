@@ -18,6 +18,7 @@ import json
 import os
 import socket
 import subprocess
+import sys
 from abc import ABC, abstractmethod
 from collections.abc import (
     Callable,
@@ -599,21 +600,21 @@ class TKCell(BaseKCell):
             and not self.kcl.layout.cell(value).is_library_cell()
             and not self.is_library_cell()
         ):
-            stack = inspect.stack()
-            module = inspect.getmodule(stack[3].frame)
+            frame = sys._getframe(3)
+            module_name = frame.f_globals.get("__name__")
             tkcells = [
                 self.kcl.tkcells[cell.cell_index()]
                 for cell in self.kcl.layout.cells(value)
                 if not cell.is_library_cell()
             ]
 
-            if module is not None and module.__name__ == "kfactory.layout":
-                frame_info = stack[5]
+            if module_name == "kfactory.layout":
+                f = sys._getframe(5).f_locals["f"]
                 logger.opt(depth=2).error(
                     "Name conflict in "
-                    f"{frame_info.frame.f_locals['f'].__code__.co_filename}::"
-                    f"{frame_info.frame.f_locals['f'].__name__} at line "
-                    f"{frame_info.frame.f_locals['f'].__code__.co_firstlineno}\n"
+                    f"{f.__code__.co_filename}::"
+                    f"{f.__name__} at line "
+                    f"{f.__code__.co_firstlineno}\n"
                     f"Renaming {self.name} (cell_index={self.kdb_cell.cell_index()}) to"
                     f" {value} would cause it to be named the same as:\n"
                     + "\n".join(
@@ -626,9 +627,9 @@ class TKCell(BaseKCell):
                 if config.debug_names:
                     raise DuplicateCellNameError(
                         "Name conflict in "
-                        f"{frame_info.frame.f_locals['f'].__code__.co_filename}::"
-                        f"{frame_info.frame.f_locals['f'].__name__} at line "
-                        f"{frame_info.frame.f_locals['f'].__code__.co_firstlineno}\n"
+                        f"{f.__code__.co_filename}::"
+                        f"{f.__name__} at line "
+                        f"{f.__code__.co_firstlineno}\n"
                         f"Renaming {self.name} (cell_index={self.kdb_cell.cell_index()}"
                         f") to {value} would cause it to be named the same as:\n"
                         + "\n".join(
@@ -640,20 +641,17 @@ class TKCell(BaseKCell):
                         )
                     )
             else:
-                frame_info = stack[3]
-                if module is not None:
-                    module_name = module.__name__
+                filename = frame.f_code.co_filename
+                function = frame.f_code.co_name
+                lineno = frame.f_lineno
+                if module_name is not None:
                     if module_name == "__main__":
-                        module_name = frame_info.filename
-                    function_name = (
-                        "::" + frame_info.function
-                        if frame_info.function != "<module>"
-                        else ""
-                    )
+                        module_name = filename
+                    function_name = "::" + function if function != "<module>" else ""
                     logger.opt(depth=3).error(
                         "Name conflict in "
                         f"{module_name}{function_name} at line "
-                        f"{frame_info.lineno}\n"
+                        f"{lineno}\n"
                         f"Renaming {self.name} (cell_index="
                         f"{self.kdb_cell.cell_index()}) to"
                         f" {value} would cause it to be named the same as:\n"
@@ -669,7 +667,7 @@ class TKCell(BaseKCell):
                         raise DuplicateCellNameError(
                             "Name conflict in "
                             f"{module_name}{function_name} at line "
-                            f"{frame_info.lineno}\n"
+                            f"{lineno}\n"
                             f"Renaming {self.name} (cell_index="
                             f"{self.kdb_cell.cell_index()}) to"
                             f" {value} would cause it to be named the same as:\n"
@@ -682,15 +680,11 @@ class TKCell(BaseKCell):
                             )
                         )
                 else:
-                    function_name = (
-                        "::" + frame_info.function
-                        if frame_info.function != "<module>"
-                        else ""
-                    )
+                    function_name = "::" + function if function != "<module>" else ""
                     logger.opt(depth=3).error(
                         "Name conflict in "
-                        f"{frame_info.filename}"
-                        f"{function_name} at line {frame_info.lineno}\n"
+                        f"{filename}"
+                        f"{function_name} at line {lineno}\n"
                         f"Renaming {self.name} (cell_index="
                         f"{self.kdb_cell.cell_index()}) to"
                         f" {value} would cause it to be named the same as:\n"
@@ -705,8 +699,8 @@ class TKCell(BaseKCell):
                     if config.debug_names:
                         raise DuplicateCellNameError(
                             "Name conflict in "
-                            f"{frame_info.filename}"
-                            f"{function_name} at line {frame_info.lineno}\n"
+                            f"{filename}"
+                            f"{function_name} at line {lineno}\n"
                             f"Renaming {self.name} (cell_index="
                             f"{self.kdb_cell.cell_index()}) to"
                             f" {value} would cause it to be named the same as:\n"
