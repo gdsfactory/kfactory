@@ -50,6 +50,10 @@ class DecoratorDict(UserDict[Hashable, Any]):
         return (DecoratorDict, (self.data,))
 
 
+_TO_HASHABLE = dict | list
+_FROM_HASHABLE = DecoratorDict | DecoratorList
+
+
 def clean_dict(d: dict[str, Any]) -> dict[str, Any]:
     """Cleans dictionary recursively."""
     return {
@@ -150,19 +154,18 @@ def to_hashable(
 ) -> DecoratorDict | DecoratorList:
     """Convert a `dict` to a `DecoratorDict`."""
     if isinstance(d, dict):
-        ud = DecoratorDict()
-        for item, value in sorted(d.items()):
-            if isinstance(value, dict | list):
-                value_: Any = to_hashable(value)
-            else:
-                value_ = value
-            ud[item] = value_
-        return ud
-    ul = DecoratorList([])
-    for _index, value in enumerate(d):
-        value_ = to_hashable(value) if isinstance(value, dict | list) else value
-        ul.append(value_)
-    return ul
+        return DecoratorDict(
+            {
+                item: to_hashable(value) if isinstance(value, _TO_HASHABLE) else value
+                for item, value in sorted(d.items())
+            }
+        )
+    return DecoratorList(
+        [
+            to_hashable(value) if isinstance(value, _TO_HASHABLE) else value
+            for value in d
+        ]
+    )
 
 
 @overload
@@ -186,13 +189,10 @@ def hashable_to_original(
             udl[item] = hashable_to_original(value)
         return udl.data
     if isinstance(udl, DecoratorList):
-        list_: list[Any] = []
-        for v in udl:
-            if isinstance(v, DecoratorDict | DecoratorList):
-                list_.append(hashable_to_original(v))
-            else:
-                list_.append(v)
-        return list_
+        return [
+            hashable_to_original(v) if isinstance(v, _FROM_HASHABLE) else v
+            for v in udl.data
+        ]
     return udl
 
 
