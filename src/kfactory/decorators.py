@@ -50,9 +50,8 @@ from .factory_metadata import (
 )
 from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
 from .serialization import (
-    DecoratorDict,
-    DecoratorList,
-    DecoratorTuple,
+    _FROM_HASHABLE,
+    _TO_HASHABLE,
     get_cell_name,
     get_function_name,
     hashable_to_original,
@@ -152,7 +151,7 @@ def _parse_params(
     del_params: list[str] = []
 
     for key, value in params.items():
-        if isinstance(value, dict | list | tuple):
+        if isinstance(value, _TO_HASHABLE):
             params[key] = to_hashable(value)
         elif isinstance(value, kdb.LayerInfo):
             params[key] = kcl.get_info(kcl.layer(value))
@@ -167,7 +166,7 @@ def _parse_params(
 
 def _params_to_original(params: dict[str, Any]) -> None:
     for key, value in params.items():
-        if isinstance(value, DecoratorDict | DecoratorList | DecoratorTuple):
+        if isinstance(value, _FROM_HASHABLE):
             params[key] = hashable_to_original(value)
 
 

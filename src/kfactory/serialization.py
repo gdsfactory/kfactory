@@ -148,7 +148,7 @@ def clean_value(
 
 
 @overload
-def to_hashable(d: dict[Hashable, Any]) -> DecoratorDict: ...
+def to_hashable(d: dict[Any, Any]) -> DecoratorDict: ...
 
 
 @overload
@@ -160,7 +160,7 @@ def to_hashable(d: tuple[Any, ...]) -> tuple[Any, ...]: ...
 
 
 def to_hashable(
-    d: dict[Hashable, Any] | list[Any] | tuple[Any, ...],
+    d: dict[Any, Any] | list[Any] | tuple[Any, ...],
 ) -> DecoratorDict | DecoratorList | tuple[Any, ...]:
     """Convert a `dict`/`list` to a `DecoratorDict`/`DecoratorList`.
 
@@ -197,7 +197,7 @@ def hashable_to_original(udl: DecoratorDict) -> dict[Hashable, Any]: ...
 
 
 @overload
-def hashable_to_original(udl: DecoratorList) -> list[Hashable]: ...
+def hashable_to_original(udl: DecoratorList) -> list[Any]: ...
 
 
 @overload
@@ -210,12 +210,13 @@ def hashable_to_original(udl: Any) -> Any: ...
 
 def hashable_to_original(
     udl: DecoratorDict | DecoratorList | DecoratorTuple | Any,
-) -> dict[str, Any] | list[Any] | tuple[Any, ...] | Any:
-    """Convert `DecoratorDict` to `dict`."""
+) -> dict[Hashable, Any] | list[Any] | tuple[Any, ...] | Any:
+    """Convert `DecoratorDict`/`DecoratorList`/`DecoratorTuple` back to originals."""
     if isinstance(udl, DecoratorDict):
-        for item, value in udl.items():
-            udl[item] = hashable_to_original(value)
-        return udl.data
+        return {
+            k: hashable_to_original(v) if isinstance(v, _FROM_HASHABLE) else v
+            for k, v in udl.data.items()
+        }
     if isinstance(udl, DecoratorList):
         return [
             hashable_to_original(v) if isinstance(v, _FROM_HASHABLE) else v

@@ -54,3 +54,20 @@ def test_cell_tuple_of_lists() -> None:
     assert received == [([1, 2], [3]), ([1, 2], [4])]
     assert type(received[0]) is tuple
     assert type(received[0][0]) is list
+
+
+def test_cell_mutated_dict_param_keeps_cache() -> None:
+    kcl = kf.KCLayout("test_cell_mutated_dict_param_keeps_cache")
+    calls = 0
+
+    @kcl.cell
+    def c(d: dict[str, Any]) -> kf.KCell:
+        nonlocal calls
+        calls += 1
+        d["seen"] = True
+        d["x"].append(2)
+        return kcl.kcell()
+
+    c1 = c(d={"x": [1]})
+    assert c(d={"x": [1]}) is c1
+    assert calls == 1
