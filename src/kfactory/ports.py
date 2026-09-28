@@ -869,7 +869,7 @@ class Ports(ProtoPorts[int], ICreatePort):
         self, rename_function: Callable[[Sequence[Port]], None] | None = None
     ) -> Self:
         """Get a copy of each port."""
-        bases = [b.__copy__() for b in self._bases]
+        bases = [b.model_copy() for b in self._bases]
         if rename_function is not None:
             rename_function([Port(base=b) for b in bases])
         return self.__class__(bases=bases, kcl=self.kcl)
@@ -998,7 +998,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
         self, rename_function: Callable[[Sequence[DPort]], None] | None = None
     ) -> Self:
         """Get a copy of each port."""
-        bases = [b.__copy__() for b in self._bases]
+        bases = [b.model_copy() for b in self._bases]
         if rename_function is not None:
             rename_function([DPort(base=b) for b in bases])
         return self.__class__(bases=bases, kcl=self.kcl)

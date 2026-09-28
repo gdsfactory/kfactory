@@ -199,7 +199,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
     ) -> BasePort:
         """Get a transformed copy of the BasePort."""
-        base = self.__copy__()
+        base = self.model_copy()
         if (
             base.trans is not None
             and isinstance(trans, kdb.Trans)
@@ -929,7 +929,7 @@ class Port(ProtoPort[int]):
             self._base = base
             return
         if port is not None:
-            self._base = port.base.__copy__()
+            self._base = port.base.model_copy()
             return
 
         if name is None:
@@ -1332,7 +1332,7 @@ class DPort(ProtoPort[float]):
             self._base = base
             return
         if port is not None:
-            self._base = port.base.__copy__()
+            self._base = port.base.model_copy()
             return
 
         if name is None:
