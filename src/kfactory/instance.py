@@ -496,7 +496,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
                     conn_trans = (
                         kdb.Trans.M90 if mirror ^ self.trans.mirror else kdb.Trans.R180
                     )
-                    op_trans = op.copy().trans
+                    op_trans = op.trans
                     op_trans.mirror = False
                     trans = op_trans * conn_trans * p.trans.inverted()
                 case False, False:
@@ -772,8 +772,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         self._info = None
         self.cell = cell
         self.trans = trans.dup() if trans is not None else kdb.DCplxTrans()
-        self.a = a
-        self.b = b
+        self.a = a.dup()
+        self.b = b.dup()
         self.na = na
         self.nb = nb
 

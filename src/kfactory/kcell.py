@@ -968,11 +968,11 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
 
     @property
     def boundary(self) -> kdb.DPolygon | None:
-        return self._base.boundary
+        return self._base.boundary.dup() if self._base.boundary is not None else None
 
     @boundary.setter
     def boundary(self, boundary: kdb.DPolygon | None) -> None:
-        self._base.boundary = boundary
+        self._base.boundary = boundary.dup() if boundary is not None else None
 
     def to_itype(self) -> KCell:
         """Convert the kcell to a dbu kcell."""
