@@ -245,7 +245,7 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
                         kdb.Trans.M90 if mirror ^ p.trans.mirror else kdb.Trans.R180
                     )
                     op = op.copy()
-                    op.trans.mirror = False
+                    op.mirror = False
                     trans = op.trans * conn_trans * p.trans.inverted()
                     self.transform(trans)
                 case False, False:

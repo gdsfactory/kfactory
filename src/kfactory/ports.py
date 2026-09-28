@@ -807,18 +807,15 @@ class Ports(ProtoPorts[int], ICreatePort):
         """
         if port.kcl == self.kcl:
             base = port.base.model_copy()
-            if not keep_mirror:
-                if base.trans is not None:
-                    base.trans.mirror = False
-                elif base.dcplx_trans is not None:
-                    base.dcplx_trans.mirror = False
             if name is not None:
                 base.name = name
+            port_ = Port(base=base)
+            if not keep_mirror:
+                port_.mirror = False
             self._bases.append(base)
             self._add_to_name_cache(base)
-            port_ = Port(base=base)
         else:
-            dcplx_trans = port.dcplx_trans.dup()
+            dcplx_trans = port.dcplx_trans
             if not keep_mirror:
                 dcplx_trans.mirror = False
             base = port.base.model_copy()
@@ -941,16 +938,13 @@ class DPorts(ProtoPorts[float], DCreatePort):
         """
         if port.kcl == self.kcl:
             base = port.base.model_copy()
-            if not keep_mirror:
-                if base.trans is not None:
-                    base.trans.mirror = False
-                elif base.dcplx_trans is not None:
-                    base.dcplx_trans.mirror = False
             if name is not None:
                 base.name = name
+            port_ = DPort(base=base)
+            if not keep_mirror:
+                port_.mirror = False
             self._bases.append(base)
             self._add_to_name_cache(base)
-            port_ = DPort(base=base)
         else:
             dcplx_trans = port.dcplx_trans
             if not keep_mirror:
