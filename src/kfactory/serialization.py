@@ -50,8 +50,14 @@ class DecoratorDict(UserDict[Hashable, Any]):
         return (DecoratorDict, (self.data,))
 
 
-_TO_HASHABLE = dict | list
-_FROM_HASHABLE = DecoratorDict | DecoratorList
+class DecoratorTuple(tuple[Any, ...]):
+    """Tuple whose unhashable elements were converted by `to_hashable`."""
+
+    __slots__ = ()
+
+
+_TO_HASHABLE = dict | list | tuple
+_FROM_HASHABLE = DecoratorDict | DecoratorList | DecoratorTuple
 
 
 def clean_dict(d: dict[str, Any]) -> dict[str, Any]:
@@ -149,10 +155,28 @@ def to_hashable(d: dict[Hashable, Any]) -> DecoratorDict: ...
 def to_hashable(d: list[Any]) -> DecoratorList: ...
 
 
+@overload
+def to_hashable(d: tuple[Any, ...]) -> tuple[Any, ...]: ...
+
+
 def to_hashable(
-    d: dict[Hashable, Any] | list[Any],
-) -> DecoratorDict | DecoratorList:
-    """Convert a `dict` to a `DecoratorDict`."""
+    d: dict[Hashable, Any] | list[Any] | tuple[Any, ...],
+) -> DecoratorDict | DecoratorList | tuple[Any, ...]:
+    """Convert a `dict`/`list` to a `DecoratorDict`/`DecoratorList`.
+
+    Tuples are returned as is if already hashable, otherwise as a `DecoratorTuple`.
+    """
+    if isinstance(d, tuple):
+        if type(d) is not tuple:
+            return d
+        try:
+            hash(d)
+        except TypeError:
+            return DecoratorTuple(
+                to_hashable(value) if isinstance(value, _TO_HASHABLE) else value
+                for value in d
+            )
+        return d
     if isinstance(d, dict):
         return DecoratorDict(
             {
@@ -177,12 +201,16 @@ def hashable_to_original(udl: DecoratorList) -> list[Hashable]: ...
 
 
 @overload
+def hashable_to_original(udl: DecoratorTuple) -> tuple[Any, ...]: ...
+
+
+@overload
 def hashable_to_original(udl: Any) -> Any: ...
 
 
 def hashable_to_original(
-    udl: DecoratorDict | DecoratorList | Any,
-) -> dict[str, Any] | list[Any] | Any:
+    udl: DecoratorDict | DecoratorList | DecoratorTuple | Any,
+) -> dict[str, Any] | list[Any] | tuple[Any, ...] | Any:
     """Convert `DecoratorDict` to `dict`."""
     if isinstance(udl, DecoratorDict):
         for item, value in udl.items():
@@ -193,6 +221,10 @@ def hashable_to_original(
             hashable_to_original(v) if isinstance(v, _FROM_HASHABLE) else v
             for v in udl.data
         ]
+    if isinstance(udl, DecoratorTuple):
+        return tuple(
+            hashable_to_original(v) if isinstance(v, _FROM_HASHABLE) else v for v in udl
+        )
     return udl
 
 
