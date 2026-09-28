@@ -286,9 +286,9 @@ def _check_instances(
 def _snap_ports(cell: ProtoTKCell[Any], kcl: KCLayout) -> None:
     for port in cell.to_itype().ports:
         if port.base.dcplx_trans:
-            dup = port.base.dcplx_trans.dup()
-            dup.disp = kcl.to_um(kcl.to_dbu(port.base.dcplx_trans.disp))
-            port.dcplx_trans = dup
+            dcplx_trans = port.dcplx_trans
+            dcplx_trans.disp = kcl.to_um(kcl.to_dbu(dcplx_trans.disp))
+            port.dcplx_trans = dcplx_trans
 
 
 def _check_ports(cell: ProtoTKCell[Any] | VKCell) -> None:

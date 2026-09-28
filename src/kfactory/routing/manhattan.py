@@ -147,8 +147,8 @@ def route_manhattan_180(
     Returns:
         route: Calculated route in points in dbu.
     """
-    t1 = port1.dup() if isinstance(port1, kdb.Trans) else port1.trans.dup()
-    t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans.dup()
+    t1 = port1.dup() if isinstance(port1, kdb.Trans) else port1.trans
+    t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans
 
     p = kdb.Point(0, 0)
 

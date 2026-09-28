@@ -771,7 +771,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         self._name = name
         self._info = None
         self.cell = cell
-        self.trans = trans or kdb.DCplxTrans()
+        self.trans = trans.dup() if trans is not None else kdb.DCplxTrans()
         self.a = a
         self.b = b
         self.na = na
@@ -791,11 +791,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
 
     @property
     def dcplx_trans(self) -> kdb.DCplxTrans:
-        return self.trans
+        return self.trans.dup()
 
     @dcplx_trans.setter
     def dcplx_trans(self, val: kdb.DCplxTrans) -> None:
-        self.trans = val
+        self.trans = val.dup()
 
     @property
     def cell_name(self) -> str | None:

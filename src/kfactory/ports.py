@@ -952,7 +952,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
             self._add_to_name_cache(base)
             port_ = DPort(base=base)
         else:
-            dcplx_trans = port.dcplx_trans.dup()
+            dcplx_trans = port.dcplx_trans
             if not keep_mirror:
                 dcplx_trans.mirror = False
             base = port.base.model_copy()
