@@ -116,7 +116,7 @@ from .utilities import (
 )
 
 if TYPE_CHECKING:
-    from types import ModuleType
+    from types import FrameType, ModuleType
 
     from kfnetlist import Net, Netlist
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
@@ -187,6 +187,28 @@ def _cell_detail(
             parts.append(f"parent(s): {parent_names}")
 
     return ", ".join(parts)
+
+
+def _rename_caller() -> tuple[FrameType, int]:
+    """Find the frame responsible for a cell rename.
+
+    Walks up from the caller's caller, skipping kfactory and pydantic frames,
+    until it reaches either the `@cell` wrapper or the first frame outside kfactory.
+
+    Returns:
+        The frame and its depth relative to the caller.
+    """
+    frame = sys._getframe(2)
+    depth = 1
+    while frame.f_back is not None:
+        module_name = frame.f_globals.get("__name__", "")
+        if module_name == "kfactory.decorators" and "f" in frame.f_locals:
+            break
+        if module_name.partition(".")[0] not in ("kfactory", "pydantic"):
+            break
+        frame = frame.f_back
+        depth += 1
+    return frame, depth
 
 
 def _check_duplicate_cell_names(
@@ -600,7 +622,7 @@ class TKCell(BaseKCell):
             and not self.kcl.layout.cell(value).is_library_cell()
             and not self.is_library_cell()
         ):
-            frame = sys._getframe(4)
+            frame, depth = _rename_caller()
             module_name = frame.f_globals.get("__name__")
             tkcells = [
                 self.kcl.tkcells[cell.cell_index()]
@@ -610,7 +632,7 @@ class TKCell(BaseKCell):
 
             if module_name == "kfactory.decorators":
                 f = frame.f_locals["f"]
-                logger.opt(depth=4).error(
+                logger.opt(depth=depth).error(
                     "Name conflict in "
                     f"{f.__code__.co_filename}::"
                     f"{f.__name__} at line "
@@ -648,7 +670,7 @@ class TKCell(BaseKCell):
                     if module_name == "__main__":
                         module_name = filename
                     function_name = "::" + function if function != "<module>" else ""
-                    logger.opt(depth=4).error(
+                    logger.opt(depth=depth).error(
                         "Name conflict in "
                         f"{module_name}{function_name} at line "
                         f"{lineno}\n"
@@ -681,7 +703,7 @@ class TKCell(BaseKCell):
                         )
                 else:
                     function_name = "::" + function if function != "<module>" else ""
-                    logger.opt(depth=4).error(
+                    logger.opt(depth=depth).error(
                         "Name conflict in "
                         f"{filename}"
                         f"{function_name} at line {lineno}\n"
