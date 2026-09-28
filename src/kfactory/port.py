@@ -278,57 +278,26 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         return kdb.DCplxTrans(self.trans.to_dtype(self.kcl.dbu))
 
     def is_coincident(self, other: BasePort) -> bool:
-        """Whether two handles denote one physical port, ignoring the name.
+        """Whether both ports are the same physical port, ignoring name and info.
 
-        Re-exporting an instance's port on a cell (`c.add_port(name=...,
-        port=inst.ports[...])`) produces a different `BasePort` with a different
-        name for what is physically the same port. This answers whether two
-        ports are that same port: same layout, main layer, width, port type and
-        placement. For asymmetric cross sections the main strip must also span
-        the same sides (`section_min`/`section_max`) once placed. The name,
-        `info` and the rest of the cross section are not compared.
-
-        Placement is compared as `get_dcplx_trans()`, so a port stored as a
-        `trans` and one stored as a `dcplx_trans` coincide when they are at the
-        same place. The mirror flag changes neither the position nor the
-        direction of the port. For symmetric cross sections it is ignored (and
-        `add_port` drops it by default). For asymmetric ones it swaps the sides
-        of the strip, so a mirrored port coincides with an unmirrored one whose
-        strip is reflected (`[-section_max, -section_min]`).
+        Compares the layout, port type, cross section and placement.
 
         Args:
             other: The port to compare against.
         """
-        if self is other:
-            return True
-
-        self_xs, other_xs = self.any_cross_section, other.any_cross_section
-
         if not (
             self.kcl is other.kcl
-            and self.is_symmetric() == other.is_symmetric()
-            and self_xs.main_layer.is_equivalent(other_xs.main_layer)
-            and self_xs.width == other_xs.width
             and self.port_type == other.port_type
+            and self.any_cross_section == other.any_cross_section
         ):
             return False
 
-        self_trans = self.get_dcplx_trans()
+        trans = self.get_dcplx_trans()
         other_trans = other.get_dcplx_trans()
-
-        # A mirror flips the strip [section_min, section_max] of an asymmetric
-        # cross section to [-section_max, -section_min].
-        if (
-            isinstance(self_xs, AsymmetricalCrossSection)
-            and isinstance(other_xs, AsymmetricalCrossSection)
-            and (-self_xs.section_max if self_trans.mirror else self_xs.section_min)
-            != (-other_xs.section_max if other_trans.mirror else other_xs.section_min)
-        ):
-            return False
-
-        self_trans.mirror = other_trans.mirror = False
-
-        return self_trans == other_trans
+        if self.is_symmetric():
+            trans.mirror = False
+            other_trans.mirror = False
+        return trans == other_trans
 
     def __eq__(self, other: object) -> bool:
         """Check if two ports are equal.

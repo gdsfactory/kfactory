@@ -724,18 +724,38 @@ def test_base_port_is_coincident_asymmetric(kcl: kf.KCLayout, layers: Layers) ->
     assert not asym.is_coincident(shifted)
     assert not shifted.is_coincident(asym)
 
-    # Mirrored, with the strip reflected back onto the same sides.
-    reflected = mirrored.__copy__()
-    reflected.asymmetric_cross_section = kcl.get_asymmetrical_cross_section(
-        kf.AsymmetricalCrossSection(layer=layers.WG, section_min=-1500, section_max=500)
-    )
-    assert asym.is_coincident(reflected)
-    assert reflected.is_coincident(asym)
-
     # Same main layer and width, but a symmetric cross section.
     sym = _xs_port(kcl, layers, trans=trans)
     assert not asym.is_coincident(sym)
     assert not sym.is_coincident(asym)
+
+
+def test_base_port_is_coincident_unregistered_cross_section(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    registered = _xs_port(kcl, layers, trans=kf.kdb.Trans.R0)
+    unregistered = registered.__copy__()
+    unregistered.cross_section = kf.SymmetricalCrossSection(
+        width=2000,
+        enclosure=kcl.get_enclosure(kf.LayerEnclosure(main_layer=layers.WG)),
+    )
+    assert unregistered.cross_section is not registered.cross_section
+    assert registered.is_coincident(unregistered)
+    assert unregistered.is_coincident(registered)
+
+
+def test_base_port_is_coincident_different_enclosure(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    bare = _xs_port(kcl, layers, trans=kf.kdb.Trans.R0)
+    clad = bare.__copy__()
+    clad.cross_section = kcl.get_symmetrical_cross_section(
+        CrossSectionSpecDict(
+            layer=layers.WG, width=2000, sections=[(layers.WGEX, 1000)]
+        )
+    )
+    assert not bare.is_coincident(clad)
+    assert not clad.is_coincident(bare)
 
 
 def test_base_port_eq_dcplx_trans_compares_placement(
