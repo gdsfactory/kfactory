@@ -27,11 +27,10 @@ def collect_instance_region(
     shape_it = cell.begin_shapes_rec_overlapping(layer, inst.ibbox(layer))
     shape_it.select_cells([inst.cell.cell_index()])
     shape_it.min_depth = 1
+    shape_it.shape_flags = kdb.Shapes.SRegions
     for _it in shape_it.each():
         if _it.path()[0].inst() == inst.instance:
-            poly = _it.shape().polygon
-            if poly is not None:
-                region.insert(poly.transformed(_it.trans()))
+            region.insert(_it.shape().polygon.transformed(_it.trans()))
     return region
 
 
