@@ -600,7 +600,7 @@ class TKCell(BaseKCell):
             and not self.kcl.layout.cell(value).is_library_cell()
             and not self.is_library_cell()
         ):
-            frame = sys._getframe(3)
+            frame = sys._getframe(4)
             module_name = frame.f_globals.get("__name__")
             tkcells = [
                 self.kcl.tkcells[cell.cell_index()]
@@ -608,9 +608,9 @@ class TKCell(BaseKCell):
                 if not cell.is_library_cell()
             ]
 
-            if module_name == "kfactory.layout":
-                f = sys._getframe(5).f_locals["f"]
-                logger.opt(depth=2).error(
+            if module_name == "kfactory.decorators":
+                f = frame.f_locals["f"]
+                logger.opt(depth=4).error(
                     "Name conflict in "
                     f"{f.__code__.co_filename}::"
                     f"{f.__name__} at line "
@@ -648,7 +648,7 @@ class TKCell(BaseKCell):
                     if module_name == "__main__":
                         module_name = filename
                     function_name = "::" + function if function != "<module>" else ""
-                    logger.opt(depth=3).error(
+                    logger.opt(depth=4).error(
                         "Name conflict in "
                         f"{module_name}{function_name} at line "
                         f"{lineno}\n"
@@ -681,7 +681,7 @@ class TKCell(BaseKCell):
                         )
                 else:
                     function_name = "::" + function if function != "<module>" else ""
-                    logger.opt(depth=3).error(
+                    logger.opt(depth=4).error(
                         "Name conflict in "
                         f"{filename}"
                         f"{function_name} at line {lineno}\n"
