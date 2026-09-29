@@ -18,6 +18,17 @@ from kfactory.exceptions import DuplicateCellNameError
 
 
 @pytest.fixture
+def kcl(kcl: kf.KCLayout) -> Iterator[kf.KCLayout]:
+    """Unregister the layout afterwards.
+
+    These tests leave duplicate cell names behind.
+    Using `show()` on the same worker would fail.
+    """
+    yield kcl
+    kcl.delete()
+
+
+@pytest.fixture
 def errors() -> Iterator[list[Any]]:
     records: list[Any] = []
     handler_id = logger.add(
