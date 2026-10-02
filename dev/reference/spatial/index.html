@@ -6056,20 +6056,18 @@
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">collect_instance_region</span><span class="p">(</span><span class="n">cell</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">inst</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">collect_instance_region</span><span class="p">(</span><span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Cell</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">inst</span><span class="p">:</span> <span class="n">ProtoTInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Collect the actual geometry region for one instance on one layer.</p>
+<p>Shapes without a polygon (e.g. texts) are skipped.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/spatial.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span>
 <span class="normal">20</span>
@@ -6079,16 +6077,27 @@
 <span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span>
-<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">collect_instance_region</span><span class="p">(</span>
-    <span class="n">cell</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">collect_instance_region</span><span class="p">(</span>
+    <span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Cell</span><span class="p">,</span>
     <span class="n">layer</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">inst</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">inst</span><span class="p">:</span> <span class="n">ProtoTInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Collect the actual geometry region for one instance on one layer."""</span>
+<span class="w">    </span><span class="sd">"""Collect the actual geometry region for one instance on one layer.</span>
+
+<span class="sd">    Shapes without a polygon (e.g. texts) are skipped.</span>
+<span class="sd">    """</span>
     <span class="n">region</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Region</span><span class="p">()</span>
-    <span class="n">shape_it</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">begin_shapes_rec_overlapping</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">inst</span><span class="o">.</span><span class="n">bbox</span><span class="p">(</span><span class="n">layer</span><span class="p">))</span>
+    <span class="n">shape_it</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">begin_shapes_rec_overlapping</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">inst</span><span class="o">.</span><span class="n">ibbox</span><span class="p">(</span><span class="n">layer</span><span class="p">))</span>
     <span class="n">shape_it</span><span class="o">.</span><span class="n">select_cells</span><span class="p">([</span><span class="n">inst</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()])</span>
     <span class="n">shape_it</span><span class="o">.</span><span class="n">min_depth</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">shape_it</span><span class="o">.</span><span class="n">shape_flags</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Shapes</span><span class="o">.</span><span class="n">SRegions</span>
     <span class="k">for</span> <span class="n">_it</span> <span class="ow">in</span> <span class="n">shape_it</span><span class="o">.</span><span class="n">each</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">_it</span><span class="o">.</span><span class="n">path</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">inst</span><span class="p">()</span> <span class="o">==</span> <span class="n">inst</span><span class="o">.</span><span class="n">instance</span><span class="p">:</span>
             <span class="n">region</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">_it</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span><span class="o">.</span><span class="n">polygon</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">_it</span><span class="o">.</span><span class="n">trans</span><span class="p">()))</span>
@@ -6117,14 +6126,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/spatial.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
 <span class="normal">38</span>
 <span class="normal">39</span>
 <span class="normal">40</span>
@@ -6135,7 +6137,14 @@
 <span class="normal">45</span>
 <span class="normal">46</span>
 <span class="normal">47</span>
-<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">iter_overlapping_bbox_pairs</span><span class="p">(</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">iter_overlapping_bbox_pairs</span><span class="p">(</span>
     <span class="n">boxes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">"""Yield index pairs whose bounding boxes overlap."""</span>
