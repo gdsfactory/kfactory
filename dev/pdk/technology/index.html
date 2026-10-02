@@ -72,7 +72,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -133,20 +133,30 @@
     
     
     
-    <input class="md-option" data-md-color-media="none" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
     
       <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
       </label>
     
   
     
     
     
-    <input class="md-option" data-md-color-media="none" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
-      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
       </label>
     
   
@@ -6189,7 +6199,7 @@ from it.</p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"PDK:   </span><span class="si">{</span><span class="n">pdk</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Stack: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">STACK</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2"> layers defined"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>PDK:   name='DEMO_TECH_PDK' layout=&lt;klayout.dbcore.Layout object at 0x7efca2ce0b00&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7efca2e316d0&gt; factories=&lt;kfactory.layout.Factories object at 0x7efca2e5b4d0&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7efca2e9d220&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7efcc256ee50&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7efca2cfd090&gt; info=Info() settings=KCellSettings(version='3.2.0', klayout_version='0.30.12', meta_format='v3') decorators=&lt;kfactory.decorators.Decorators object at 0x7efca2e5b890&gt; default_cell_output_type=&lt;class 'kfactory.kcell.KCell'&gt; default_vcell_output_type=&lt;class 'kfactory.kcell.VKCell'&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum 'LAYER'&gt;
+<div class="highlight"><pre><span></span><code>PDK:   name='DEMO_TECH_PDK' layout=&lt;klayout.dbcore.Layout object at 0x7fed2bce8b00&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7fed2be3d5e0&gt; factories=&lt;kfactory.layout.Factories object at 0x7fed2be674d0&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7fed2bca5220&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7fed4a36ee50&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7fed2bd0cc80&gt; info=Info() settings=KCellSettings(version='3.2.0', klayout_version='0.30.12', meta_format='v3') decorators=&lt;kfactory.decorators.Decorators object at 0x7fed2be67890&gt; default_cell_output_type=&lt;class 'kfactory.kcell.KCell'&gt; default_vcell_output_type=&lt;class 'kfactory.kcell.VKCell'&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum 'LAYER'&gt;
 Stack: ['wg', 'clad'] layers defined
 </code></pre></div>
 <h2 id="5-serialising-the-stack">5 · Serialising the stack</h2>
