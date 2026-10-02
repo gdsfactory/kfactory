@@ -233,11 +233,12 @@ def check_collisions(
                             )
                             shape_it.select_cells([insts[j].cell.cell_index()])
                             shape_it.min_depth = 1
+                            shape_it.shape_flags = kdb.Shapes.SRegions
                             for _it in shape_it.each():
                                 if _it.path()[0].inst() == insts[j].instance:
-                                    poly = _it.shape().polygon
-                                    if poly is not None:
-                                        reg.insert(poly.transformed(_it.trans()))
+                                    reg.insert(
+                                        shape_it.polygon.transformed(_it.trans())
+                                    )
 
                             error_region_instances.insert(reg & inst_shapes)
                 inst_region += inst_region_
