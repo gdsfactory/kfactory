@@ -870,6 +870,134 @@ def test_clean_points() -> None:
     )
 
 
+def test_clean_points_drops_the_point_after_a_corner() -> None:
+    """The point right after a compressed run is still on a straight line."""
+    assert kf.routing.manhattan.clean_points(
+        [
+            kf.kdb.Point(0, 0),
+            kf.kdb.Point(0, 1),
+            kf.kdb.Point(0, 2),
+            kf.kdb.Point(1, 2),
+            kf.kdb.Point(2, 2),
+            kf.kdb.Point(3, 2),
+        ]
+    ) == [kf.kdb.Point(0, 0), kf.kdb.Point(0, 2), kf.kdb.Point(3, 2)]
+
+    # A second corner: the whole run after it has to collapse too, not just its
+    # first point.
+    assert kf.routing.manhattan.clean_points(
+        [
+            kf.kdb.Point(0, 0),
+            kf.kdb.Point(1, 0),
+            kf.kdb.Point(2, 0),
+            kf.kdb.Point(2, 1),
+            kf.kdb.Point(2, 2),
+            kf.kdb.Point(3, 2),
+        ]
+    ) == [
+        kf.kdb.Point(0, 0),
+        kf.kdb.Point(2, 0),
+        kf.kdb.Point(2, 2),
+        kf.kdb.Point(3, 2),
+    ]
+
+
+def test_clean_points_keeps_a_staircase() -> None:
+    """Every point of a staircase is a corner, so nothing may be dropped."""
+    staircase = [
+        kf.kdb.Point(0, 0),
+        kf.kdb.Point(1, 0),
+        kf.kdb.Point(1, 1),
+        kf.kdb.Point(2, 1),
+        kf.kdb.Point(2, 2),
+        kf.kdb.Point(3, 2),
+    ]
+
+    assert kf.routing.manhattan.clean_points(list(staircase)) == staircase
+
+    # Corners are not always axis-aligned: both steps head right and up here, yet
+    # the slope changes, so the middle point stays.
+    bend = [kf.kdb.Point(0, 0), kf.kdb.Point(2, 1), kf.kdb.Point(6, 4)]
+
+    assert kf.routing.manhattan.clean_points(list(bend)) == bend
+
+    # Same slope, so that one really is a straight line.
+    assert kf.routing.manhattan.clean_points(
+        [kf.kdb.Point(0, 0), kf.kdb.Point(2, 1), kf.kdb.Point(6, 3)]
+    ) == [kf.kdb.Point(0, 0), kf.kdb.Point(6, 3)]
+
+
+def test_clean_points_keeps_a_reversal() -> None:
+    """A u-turn is a direction change, not a straight line."""
+    assert kf.routing.manhattan.clean_points(
+        [
+            kf.kdb.Point(0, 0),
+            kf.kdb.Point(1, 0),
+            kf.kdb.Point(2, 0),
+            kf.kdb.Point(1, 0),
+            kf.kdb.Point(0, 0),
+        ]
+    ) == [kf.kdb.Point(0, 0), kf.kdb.Point(2, 0), kf.kdb.Point(0, 0)]
+
+
+def test_clean_points_drops_duplicates() -> None:
+    origin = kf.kdb.Point(0, 0)
+    corner = kf.kdb.Point(5, 0)
+    end = kf.kdb.Point(5, 5)
+
+    # Leading, interior and trailing duplicates.
+    assert kf.routing.manhattan.clean_points([origin, origin, corner, end]) == [
+        origin,
+        corner,
+        end,
+    ]
+    assert kf.routing.manhattan.clean_points([origin, corner, corner, end]) == [
+        origin,
+        corner,
+        end,
+    ]
+    assert kf.routing.manhattan.clean_points([origin, corner, end, end]) == [
+        origin,
+        corner,
+        end,
+    ]
+    assert kf.routing.manhattan.clean_points([origin, origin, origin]) == [origin]
+
+    # Short inputs.
+    assert kf.routing.manhattan.clean_points([]) == []
+    assert kf.routing.manhattan.clean_points([origin]) == [origin]
+    assert kf.routing.manhattan.clean_points([origin, origin]) == [origin]
+    assert kf.routing.manhattan.clean_points([origin, corner]) == [origin, corner]
+
+
+def test_clean_points_does_not_modify_its_argument() -> None:
+    points = [
+        kf.kdb.Point(0, 0),
+        kf.kdb.Point(10, 0),
+        kf.kdb.Point(20, 0),
+        kf.kdb.Point(20, 10),
+    ]
+    unchanged = list(points)
+
+    cleaned = kf.routing.manhattan.clean_points(points)
+
+    assert cleaned == [kf.kdb.Point(0, 0), kf.kdb.Point(20, 0), kf.kdb.Point(20, 10)]
+    assert points == unchanged
+    assert cleaned is not points
+
+
+def test_clean_points_handles_dpoints() -> None:
+    assert kf.routing.manhattan.clean_points(
+        [
+            kf.kdb.DPoint(0.0, 0.0),
+            kf.kdb.DPoint(0.5, 0.0),
+            kf.kdb.DPoint(1.0, 0.0),
+            kf.kdb.DPoint(1.0, 0.5),
+            kf.kdb.DPoint(1.0, 1.0),
+        ]
+    ) == [kf.kdb.DPoint(0.0, 0.0), kf.kdb.DPoint(1.0, 0.0), kf.kdb.DPoint(1.0, 1.0)]
+
+
 def test_rf_bundle(
     layers: Layers,
     kcl: kf.KCLayout,
