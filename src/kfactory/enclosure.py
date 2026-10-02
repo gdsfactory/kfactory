@@ -928,7 +928,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         tile_size: float | None = None,
         n_pts: int = 64,
         n_threads: int | None = None,
-        carve_out_ports: Iterable[Port] = [],
+        carve_out_ports: Sequence[Port] = [],
     ) -> None:
         """Minkowski regions with tiling processor.
 
