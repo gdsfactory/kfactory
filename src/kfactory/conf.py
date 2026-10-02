@@ -44,7 +44,6 @@ DEFAULT_TRANS: dict[str, str | int | float | dict[str, str | int | float]] = {
     "ref": -2,
 }
 MIN_POINTS_FOR_SIMPLIFY = 3
-MIN_POINTS_FOR_CLEAN = 2
 MIN_POINTS_FOR_PLACEMENT = 2
 MIN_WAYPOINTS_FOR_ROUTING = 2
 NUM_PORTS_FOR_ROUTING = 2
