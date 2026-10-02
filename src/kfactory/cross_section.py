@@ -92,7 +92,7 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
     @property
     def bbox_sections(self) -> dict[kdb.LayerInfo, dbu]:
         """Bounding-box sections (owned by the enclosure)."""
-        return self.enclosure.bbox_sections
+        return self.enclosure.bbox_sections.copy()
 
     def auto_name(self) -> str:
         return f"{self.enclosure.name}_{self.width}"
@@ -138,7 +138,7 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
     def main_layer(self) -> kdb.LayerInfo:
         """Main Layer of the enclosure and cross section."""
         assert self.enclosure.main_layer is not None
-        return self.enclosure.main_layer
+        return self.enclosure.main_layer.dup()
 
     def is_symmetric(self) -> bool:
         """Whether this cross section is symmetric."""
@@ -331,7 +331,7 @@ class DCrossSectionLayer(BaseModel, arbitrary_types_allowed=True):
 
     def to_itype(self, kcl: KCLayout) -> CrossSectionLayer:
         return CrossSectionLayer(
-            layer=self.layer,
+            layer=self.layer.dup(),
             section_min=kcl.to_dbu(self.section_min),
             section_max=kcl.to_dbu(self.section_max),
         )
@@ -343,7 +343,7 @@ def _to_dsections(
     """Convert dbu strips to their um counterparts."""
     return tuple(
         DCrossSectionLayer(
-            layer=s.layer,
+            layer=s.layer.dup(),
             section_min=kcl.to_um(s.section_min),
             section_max=kcl.to_um(s.section_max),
         )
@@ -554,16 +554,16 @@ class AsymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=T
     @property
     def main_layer(self) -> kdb.LayerInfo:
         """Main layer of the cross section (parity with SymmetricalCrossSection)."""
-        return self.layer
+        return self.layer.dup()
 
     def to_dtype(self, kcl: KCLayout) -> DAsymmetricalCrossSection:
         return DAsymmetricalCrossSection(
-            layer=self.layer,
+            layer=self.layer.dup(),
             section_min=kcl.to_um(self.section_min),
             section_max=kcl.to_um(self.section_max),
             sections=tuple(
                 DCrossSectionLayer(
-                    layer=s.layer,
+                    layer=s.layer.dup(),
                     section_min=kcl.to_um(s.section_min),
                     section_max=kcl.to_um(s.section_max),
                 )
@@ -711,7 +711,7 @@ class DAsymmetricalCrossSection(BaseModel, arbitrary_types_allowed=True):
 
     def to_itype(self, kcl: KCLayout) -> AsymmetricalCrossSection:
         return AsymmetricalCrossSection(
-            layer=self.layer,
+            layer=self.layer.dup(),
             section_min=kcl.to_dbu(self.section_min),
             section_max=kcl.to_dbu(self.section_max),
             sections=tuple(s.to_itype(kcl) for s in self.sections),
@@ -838,11 +838,11 @@ class TAsymmetricCrossSection[T: (int, float)](ABC):
 
     @property
     def layer(self) -> kdb.LayerInfo:
-        return self._base.layer
+        return self._base.main_layer
 
     @property
     def main_layer(self) -> kdb.LayerInfo:
-        return self._base.layer
+        return self._base.main_layer
 
     def is_symmetric(self) -> bool:
         """Whether this cross section is symmetric."""
@@ -1598,7 +1598,7 @@ class CrossSection(TCrossSection[int]):
 
     @property
     def bbox_sections(self) -> dict[kdb.LayerInfo, int]:
-        return self._base.bbox_sections.copy()
+        return self._base.bbox_sections
 
     @property
     def width(self) -> int:
