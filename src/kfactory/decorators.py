@@ -307,11 +307,11 @@ def _check_ports(cell: ProtoTKCell[Any] | VKCell) -> None:
 
 def _check_pins(cell: ProtoTKCell[Any] | VKCell) -> None:
     pin_names: dict[str | None, int] = defaultdict(int)
+    cell_port_ids = {id(port.base) for port in cell.ports}
     for pin in cell.pins:
         pin_names[pin.name] += 1
         pin_ports = {id(port) for port in pin._base.ports}
-        pin_ports_in_cell = {id(port.base) for port in cell.ports} & pin_ports
-        if len(pin_ports_in_cell) != len(pin_ports):
+        if not pin_ports <= cell_port_ids:
             raise ValueError(
                 f"Attempted to create a pin {pin.name} with ports not belonging "
                 "to the cell. Please use ports that belong to the cell "
