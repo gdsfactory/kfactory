@@ -52,7 +52,9 @@ repos:
     hooks:
       - id: lychee
         args: ["--no-progress", "--config=.lychee.toml"]
-        exclude: '\.github/release-drafter\.yml|docs/overrides/.*|\.lychee\.toml|CHANGELOG\.md'
+        # uv.lock holds ~1400 hash-pinned package URLs that uv verifies itself;
+        # checking them just hammers the PyPI CDN.
+        exclude: 'uv\.lock|\.github/release-drafter\.yml|docs/overrides/.*|\.lychee\.toml|CHANGELOG\.md'
   - repo: https://github.com/PyCQA/bandit
     rev: 1.9.4
     hooks:
