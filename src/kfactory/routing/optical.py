@@ -242,6 +242,7 @@ def route_bundle(
     separation: dbu,
     straight_factory: StraightFactoryDBU,
     bend90_cell: KCell | tuple[KCell, KCell],
+    bend90_cells: Sequence[KCell] | None = None,
     taper_cell: KCell | None = None,
     min_straight_taper: dbu = 0,
     place_port_type: str = "optical",
@@ -277,6 +278,7 @@ def route_bundle(
     separation: um,
     straight_factory: StraightFactoryUM,
     bend90_cell: DKCell | tuple[DKCell, DKCell],
+    bend90_cells: Sequence[DKCell] | None = None,
     taper_cell: DKCell | None = None,
     min_straight_taper: um = 0,
     place_port_type: str = "optical",
@@ -311,6 +313,7 @@ def route_bundle(
     separation: dbu | um,
     straight_factory: StraightFactoryDBU | StraightFactoryUM,
     bend90_cell: KCell | DKCell | tuple[KCell, KCell] | tuple[DKCell, DKCell],
+    bend90_cells: Sequence[KCell] | Sequence[DKCell] | None = None,
     taper_cell: KCell | DKCell | None = None,
     min_straight_taper: dbu | float = 0,
     place_port_type: str = "optical",
@@ -449,20 +452,28 @@ def route_bundle(
         starts = []
     if bboxes is None:
         bboxes = []
-    bend90_cells = bend90_cell if isinstance(bend90_cell, tuple) else (bend90_cell,)
-    bend90_radius = get_radius(bend90_cells[0].ports.filter(port_type=place_port_type))
-    for bend in bend90_cells[1:]:
-        if get_radius(bend.ports.filter(port_type=place_port_type)) != bend90_radius:
-            raise ValueError("Route bends must have the same radius.")
+    bend90_cells_ = (
+        tuple(bend90_cells)
+        if bend90_cells is not None
+        else bend90_cell
+        if isinstance(bend90_cell, tuple)
+        else (bend90_cell,)
+    )
+    bend90_radii = [
+        get_radius(_bend90_geometry(bend, place_port_type)[:2])
+        for bend in bend90_cells_
+    ]
+    bend90_radius = max(bend90_radii)
+    if bend90_cells is None:
+        for bend_radius in bend90_radii[1:]:
+            if bend_radius != bend90_radius:
+                raise ValueError("Route bends must have the same radius.")
     start_ports_ = [p.base.model_copy() for p in start_ports]
     end_ports_ = [p.base.model_copy() for p in end_ports]
     if sbend_factory is None:
         placer: PlacerFunction = place_manhattan
         placer_kwargs: dict[str, Any] = {
             "straight_factory": straight_factory,
-            "bend90_cell": bend90_cell[0]
-            if isinstance(bend90_cell, tuple)
-            else bend90_cell,
             "taper_cell": taper_cell,
             "port_type": place_port_type,
             "min_straight_taper": min_straight_taper,
@@ -472,15 +483,13 @@ def route_bundle(
             "allow_type_mismatch": allow_type_mismatch,
             "purpose": purpose,
             "route_width": route_width,
+            "bend90_cell": bend90_cells_ if bend90_cells is not None else bend90_cell,
         }
     else:
         # Not a type error
         placer = place_manhattan_with_sbends
         placer_kwargs = {
             "straight_factory": straight_factory,
-            "bend90_cell": bend90_cell[0]
-            if isinstance(bend90_cell, tuple)
-            else bend90_cell,
             "taper_cell": taper_cell,
             "port_type": place_port_type,
             "min_straight_taper": min_straight_taper,
@@ -491,6 +500,7 @@ def route_bundle(
             "purpose": purpose,
             "route_width": route_width,
             "sbend_factory": sbend_factory,
+            "bend90_cell": bend90_cells_ if bend90_cells is not None else bend90_cell,
         }
     if isinstance(c, KCell):
         try:
@@ -619,6 +629,11 @@ def route_bundle(
         if isinstance(bend90_cell, tuple)
         else c.kcl[bend90_cell.cell_index()]
     )
+    bend90_cells_k = (
+        tuple(c.kcl[bend.cell_index()] for bend in bend90_cells)
+        if bend90_cells is not None
+        else None
+    )
     if taper_cell is not None:
         taper_cell = c.kcl[taper_cell.cell_index()]
     if min_straight_taper:
@@ -636,9 +651,7 @@ def route_bundle(
         placer = place_manhattan
         placer_kwargs = {
             "straight_factory": _straight_factory,
-            "bend90_cell": bend90_cell[0]
-            if isinstance(bend90_cell, tuple)
-            else bend90_cell,
+            "bend90_cell": bend90_cells_k if bend90_cells_k is not None else bend90_cell,
             "taper_cell": taper_cell,
             "port_type": place_port_type,
             "min_straight_taper": min_straight_taper,
@@ -666,9 +679,7 @@ def route_bundle(
         placer = place_manhattan_with_sbends
         placer_kwargs = {
             "straight_factory": _straight_factory,
-            "bend90_cell": bend90_cell[0]
-            if isinstance(bend90_cell, tuple)
-            else bend90_cell,
+            "bend90_cell": bend90_cells_k if bend90_cells_k is not None else bend90_cell,
             "taper_cell": taper_cell,
             "port_type": place_port_type,
             "min_straight_taper": min_straight_taper,
@@ -764,6 +775,8 @@ def _bend90_geometry(
 ) -> tuple[Port, Port, kdb.Trans]:
     """Return ordered bend ports and their tangent intersection in integer units."""
     ports = KCell(base=cell.base).ports.filter(port_type=port_type)
+    if len(ports) != NUM_PORTS_FOR_ROUTING:
+        ports = KCell(base=cell.base).ports
     if len(ports) != NUM_PORTS_FOR_ROUTING:
         raise AttributeError(f"{cell.name} should have 2 ports with {port_type=}.")
     p1, p2 = ports
@@ -1184,7 +1197,8 @@ def place_manhattan(
     pts: Sequence[kdb.Point],
     route_width: dbu | None = None,
     straight_factory: StraightFactoryDBU | None = None,
-    bend90_cell: ProtoTKCell[Any] | None = None,
+    bend90_cell: ProtoTKCell[Any] | Sequence[ProtoTKCell[Any]] | None = None,
+    bend90_cells: Sequence[ProtoTKCell[Any]] | None = None,
     taper_cell: ProtoTKCell[Any] | None = None,
     port_type: str = "optical",
     min_straight_taper: dbu = 0,
@@ -1207,6 +1221,17 @@ def place_manhattan(
         raise ValueError(
             f"Additional args and kwargs are not allowed for route_smart.{kwargs=}"
         )
+    bend90_cells_ = (
+        tuple(bend90_cells)
+        if bend90_cells is not None
+        else tuple(bend90_cell)
+        if isinstance(bend90_cell, Sequence)
+        else None
+    )
+    if bend90_cells_ is not None:
+        if len(bend90_cells_) == 0:
+            raise ValueError("bend90_cells needs to contain at least one bend cell.")
+        bend90_cell = bend90_cells_[0]
     if allow_width_mismatch is None:
         allow_width_mismatch = config.allow_width_mismatch
     if allow_layer_mismatch is None:
@@ -1242,13 +1267,18 @@ def place_manhattan(
     route_end_port.name = "route_end"
     route_end_port.angle = (route_end_port.angle + 2) % 4
 
-    b90p1, b90p2, b90c = _bend90_geometry(bend90_cell, port_type)
+    bend_cells = bend90_cells_ or (bend90_cell,)
+    bend_geometries = [_bend90_geometry(bend, port_type) for bend in bend_cells]
+    b90p1, b90p2, b90c = bend_geometries[0]
     # Symmetric placement historically follows the bend port's mirror flag.
     b90c.mirror = b90p1.mirror
     b90r = round(
         max(
-            (b90p1.trans.disp - b90c.disp).length(),
-            (b90p2.trans.disp - b90c.disp).length(),
+            max(
+                (bp1.trans.disp - bc.disp).length(),
+                (bp2.trans.disp - bc.disp).length(),
+            )
+            for bp1, bp2, bc in bend_geometries
         )
     )
     route = ManhattanRoute(
@@ -1341,6 +1371,10 @@ def place_manhattan(
     for i in range(1, len(pts) - 1):
         pt = pts[i]
         new_pt = pts[i + 1]
+        bend_index = min(i - 1, len(bend_cells) - 1)
+        bend90_cell_i = bend_cells[bend_index]
+        b90p1_i, b90p2_i, b90c_i = bend_geometries[bend_index]
+        b90c_i.mirror = b90p1_i.mirror
 
         if (pt.distance(old_pt) < b90r) and not allow_small_routes:
             raise ValueError(
@@ -1362,7 +1396,7 @@ def place_manhattan(
         vec = pt - old_pt
         vec_n = new_pt - pt
 
-        bend90 = c << bend90_cell
+        bend90 = c << bend90_cell_i
         bend90.purpose = purpose
         route.n_bend90 += 1
         mirror = (vec_angle(vec_n) - vec_angle(vec)) % 4 != ANGLE_270
@@ -1371,8 +1405,8 @@ def place_manhattan(
                 f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
             )
         ang = (vec_angle(vec) + 2) % 4
-        bend90.transform(kdb.Trans(ang, mirror, pt.x, pt.y) * b90c.inverted())
-        new_bend_port = bend90.ports[b90p1.name]
+        bend90.transform(kdb.Trans(ang, mirror, pt.x, pt.y) * b90c_i.inverted())
+        new_bend_port = bend90.ports[b90p1_i.name]
         length = int((new_bend_port.trans.disp - old_bend_port.trans.disp).length())
         if length > 0:
             p1_, _ = segment(old_bend_port, new_bend_port)
@@ -1380,8 +1414,8 @@ def place_manhattan(
                 route.start_port = p1_
         route.instances.append(bend90)
         old_pt = pt
-        old_bend_port = bend90.ports[b90p2.name]
-    length = int((bend90.ports[b90p2.name].trans.disp - p2.trans.disp).length())
+        old_bend_port = bend90.ports[b90p2_i.name]
+    length = int((bend90.ports[b90p2_i.name].trans.disp - p2.trans.disp).length())
     if length > 0:
         _, p2_ = segment(old_bend_port, p2)
         route.end_port = p2_.copy()
