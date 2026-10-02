@@ -16,3 +16,8 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
       - uses: pre-commit/action@v3.0.1
+        env:
+          # lychee falls back to the GitHub API for github.com links when the
+          # page itself fails (github.com often 429/5xxs requests from runners),
+          # but only if it has a token.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
