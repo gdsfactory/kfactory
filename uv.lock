@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.12"
 
 [[package]]
@@ -88,11 +88,11 @@ css = [
 
 [[package]]
 name = "cachetools"
-version = "7.1.8"
+version = "7.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4b/39/9a4689914dd907915cee74733b95888fc1d8a21aad47a24a0a2deec73ac4/cachetools-7.1.8.tar.gz", hash = "sha256:1221d547a0b24b7f26fa891d40d488b5258beab9aebd8ed68c729be3af849c43", size = 40909, upload-time = "2026-08-31T19:02:53.985Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/29/2c/3f18755527b03ca9ff6be724bd5370cb777c76a87f17301377cf04a4729b/cachetools-7.2.0.tar.gz", hash = "sha256:bcac1a1b8da6909994a2957238a57b8140dab7c5c5c69a43669654fe87a33c1d", size = 41129, upload-time = "2026-09-16T20:48:27.209Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d7/3d/9487690d0e937854db587205c66bab3c3cf88d9f00ed380b74cb88cc94ee/cachetools-7.1.8-py3-none-any.whl", hash = "sha256:a81e3844acaa7355b6567f97bd67a94a14ec3a9bc2cbbdae45b9592cc036775b", size = 16842, upload-time = "2026-08-31T19:02:52.554Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/bb/1c6e7a89b11da19f137e4ef5a5c5fe47a5bb686449ba343944ccf8fb34b2/cachetools-7.2.0-py3-none-any.whl", hash = "sha256:3045213f186b89fdd95d94441354c4bd87c570b7a38d8c3fd1d9dd37f6dc90d8", size = 16918, upload-time = "2026-09-16T20:48:25.575Z" },
 ]
 
 [[package]]
@@ -678,7 +678,7 @@ wheels = [
 
 [[package]]
 name = "ipykernel"
-version = "7.3.0"
+version = "7.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "appnope", marker = "sys_platform == 'darwin'" },
@@ -690,14 +690,13 @@ dependencies = [
     { name = "matplotlib-inline" },
     { name = "nest-asyncio2" },
     { name = "packaging" },
-    { name = "psutil" },
     { name = "pyzmq" },
     { name = "tornado" },
     { name = "traitlets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3d/c4/e4a38f579de4225a561305666f7541cdabb30075def2aa1ac17bd73c1fb5/ipykernel-7.3.0.tar.gz", hash = "sha256:9acaaaf97d16355166e4085afe9d225bfbdf2b7ef520f9df3be8f2b248275e09", size = 184899, upload-time = "2026-06-10T08:41:25.481Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7a/05/e5499c8b762387d83926bf0389e8fff888c9bf6e7af30566a8527bc12f4a/ipykernel-7.4.0.tar.gz", hash = "sha256:4330114d22b9b33575b2c7c68753fc8faabbbcfbc60b0cdff9f14dd4ce63742f", size = 192731, upload-time = "2026-09-29T16:33:11.468Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3d/02/77b271f5dc58bfbc0b577c877b2365d1ffea2afe66a80c13f2312820348c/ipykernel-7.3.0-py3-none-any.whl", hash = "sha256:897eb64da762549ef610698fca5e9675195ec6ac8ec7f19d81ce1ca20c876057", size = 120583, upload-time = "2026-06-10T08:41:23.648Z" },
+    { url = "https://files.pythonhosted.org/packages/a5/f8/8b5c10c7f36ab5a3b5c4703669e5b14e44e98782b58e535dd30670e8799a/ipykernel-7.4.0-py3-none-any.whl", hash = "sha256:a6757f790ddc5a6006b813d82da1a9dbb65b3a00f2b6607df776418c6566ec1c", size = 123184, upload-time = "2026-09-29T16:33:09.612Z" },
 ]
 
 [[package]]
@@ -974,13 +973,13 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aenum", specifier = ">=3.1.17,<4" },
-    { name = "cachetools", specifier = ">=7.1.8,<7.2" },
+    { name = "cachetools", specifier = ">=7.2,<7.3" },
     { name = "erdantic", marker = "extra == 'docs'", specifier = ">=1.2.1,<1.3" },
     { name = "griffe-inherited-docstrings", marker = "extra == 'docs'", specifier = ">=1.1.3,<1.2" },
     { name = "griffe-pydantic", marker = "extra == 'docs'", specifier = ">=1.3.1,<1.4" },
     { name = "griffe-warnings-deprecated", marker = "extra == 'docs'", specifier = ">=1.1.1,<1.2" },
     { name = "ipyevents", marker = "extra == 'ipy'", specifier = ">=2.0.4,<2.1" },
-    { name = "ipykernel", marker = "extra == 'notebooks'", specifier = ">=7.3,<7.4" },
+    { name = "ipykernel", marker = "extra == 'notebooks'", specifier = ">=7.4,<7.5" },
     { name = "ipython", marker = "extra == 'ipy'", specifier = ">=9.17.1,<9.18" },
     { name = "ipytree", marker = "extra == 'ipy'", specifier = ">=0.2.2,<0.3" },
     { name = "ipywidgets", marker = "extra == 'ipy'", specifier = ">=8.1.9,<8.2" },
@@ -999,7 +998,7 @@ requires-dist = [
     { name = "pydantic-extra-types", specifier = ">=2.11.1,<2.12" },
     { name = "pydantic-settings", specifier = ">=2.15,<3" },
     { name = "pygit2", specifier = ">=1.20.1,<2" },
-    { name = "pymdown-extensions", marker = "extra == 'docs'", specifier = ">=11.0.2,<11.1" },
+    { name = "pymdown-extensions", marker = "extra == 'docs'", specifier = ">=12.1,<12.2" },
     { name = "pytest", marker = "extra == 'ci'", specifier = ">=9.1.1,<9.2" },
     { name = "pytest-cov", marker = "extra == 'ci'", specifier = ">=7.1,<7.2" },
     { name = "pytest-datadir", marker = "extra == 'ci'", specifier = ">=1.8,<1.9" },
@@ -1011,24 +1010,24 @@ requires-dist = [
     { name = "requests", specifier = ">=2.34.2,<3" },
     { name = "ruamel-yaml", specifier = ">=0.19.1,<0.20" },
     { name = "ruamel-yaml-string", specifier = ">=0.1.1,<0.2" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = "~=0.16.7" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = "~=0.16.10" },
     { name = "rust-just", marker = "extra == 'dev'", specifier = "~=1.58.0" },
     { name = "scipy", specifier = ">=1.18.1,<2" },
-    { name = "scipy-stubs", marker = "extra == 'dev'", specifier = ">=1.18.1,<1.19" },
-    { name = "semver", specifier = ">=3.0.4,<4" },
+    { name = "scipy-stubs", marker = "extra == 'dev'", specifier = ">=1.18.1.1,<1.19" },
+    { name = "semver", specifier = ">=3.1,<4" },
     { name = "tbump", marker = "extra == 'dev'", specifier = ">=6.11,<6.12" },
     { name = "toolz", specifier = ">=1.1,<2" },
-    { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.80,<0.1" },
+    { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.84,<0.1" },
     { name = "typer", specifier = "~=0.27.2" },
     { name = "types-cachetools", marker = "extra == 'ci'", specifier = ">=7.0.0.20260713,<7.1" },
     { name = "types-cachetools", marker = "extra == 'dev'", specifier = ">=7.0.0.20260713,<7.1" },
-    { name = "types-docutils", marker = "extra == 'dev'", specifier = ">=0.23.0.20260911,<0.24" },
+    { name = "types-docutils", marker = "extra == 'dev'", specifier = ">=0.23.0.20260923,<0.24" },
     { name = "types-pygments", marker = "extra == 'dev'", specifier = ">=2.21.0.20260819,<2.22" },
     { name = "types-requests", marker = "extra == 'ci'", specifier = ">=2.33.0.20260906,<2.34" },
     { name = "types-requests", marker = "extra == 'dev'", specifier = ">=2.33.0.20260906,<2.34" },
     { name = "types-setuptools", marker = "extra == 'dev'", specifier = ">=84.0.0.20260812,<84.1" },
-    { name = "uv", marker = "extra == 'ci'", specifier = ">=0.12.13,<0.13" },
-    { name = "zensical", marker = "extra == 'docs'", specifier = ">=0.0.61,<0.1" },
+    { name = "uv", marker = "extra == 'ci'", specifier = ">=0.12.22,<0.13" },
+    { name = "zensical", marker = "extra == 'docs'", specifier = ">=0.0.67,<0.1" },
 ]
 provides-extras = ["ci", "dev", "docs", "ipy", "notebooks"]
 
@@ -1860,15 +1859,15 @@ wheels = [
 
 [[package]]
 name = "pymdown-extensions"
-version = "11.0.2"
+version = "12.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markdown" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ad/17/2db4b414de89659144488e0d9c6c0bf0c8395841dc12d81d0532cc6ef310/pymdown_extensions-11.0.2.tar.gz", hash = "sha256:9506fcbe66fa355a775b768084334238dd6805020ac4b92bea0c0dda6f8f223d", size = 855419, upload-time = "2026-08-22T19:28:47.236Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2a/94/858e0163cb4d83d6d8234018a01792c749a56daee41794cac7d6c46661e8/pymdown_extensions-12.1.tar.gz", hash = "sha256:fdb8f47f5d7fd069d10ef2a7d8908e613d7865ff0419d544a0ffd3984e884f11", size = 868245, upload-time = "2026-09-23T00:08:42Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a6/43/9f45ec4d14e596efc32c925a78104934790438b0c0628b70d741016734ad/pymdown_extensions-11.0.2-py3-none-any.whl", hash = "sha256:259910762019732caa1dfd76f3faa62c59f191d46573e80bcb1d13c0f675bbe5", size = 269929, upload-time = "2026-08-22T19:28:45.389Z" },
+    { url = "https://files.pythonhosted.org/packages/36/d1/98313da89960a604402266a115311b510254900ff1295ea426403f9423cc/pymdown_extensions-12.1-py3-none-any.whl", hash = "sha256:4a254b771acfcddc6c110a7f4590d818f1f849e2d5aacf69b4b07c8dd2a9700d", size = 277069, upload-time = "2026-09-23T00:08:40.069Z" },
 ]
 
 [[package]]
