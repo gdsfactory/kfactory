@@ -142,6 +142,31 @@ def test_keep_mirror(layers: Layers) -> None:
     assert c["o2"].trans.is_mirror() is True
 
 
+@pytest.mark.parametrize("dtype", [False, True], ids=["Ports", "DPorts"])
+@pytest.mark.parametrize("same_kcl", [True, False], ids=["same_kcl", "other_kcl"])
+def test_add_port_asymmetric_keeps_mirror(
+    layers: Layers, dtype: bool, same_kcl: bool
+) -> None:
+    src_kcl = kf.KCLayout(f"asym_keep_mirror_{dtype}_{same_kcl}", infos=Layers)
+    base = kf.port.BasePort(
+        name="o1",
+        kcl=src_kcl,
+        asymmetric_cross_section=src_kcl.get_asymmetrical_cross_section(
+            kf.AsymmetricalCrossSection(
+                layer=layers.WG, section_min=-500, section_max=1500
+            )
+        ),
+        port_type="optical",
+        trans=kf.kdb.Trans.M90,
+    )
+    kcl = src_kcl if same_kcl else kf.KCLayout(src_kcl.name + "_dst", infos=Layers)
+    c = kcl.dkcell() if dtype else kcl.kcell()
+
+    c.add_port(port=kf.Port(base=base), name="o1")
+
+    assert c.ports["o1"].trans.is_mirror() is True
+
+
 def test_addports_keep_mirror(layers: Layers) -> None:
     c = kf.KCell()
 
@@ -160,9 +185,7 @@ def test_addports_keep_mirror(layers: Layers) -> None:
 
     for i in range(4):
         t1 = c[f"mirr_{i}"].trans
-        t2 = c[f"nomirr_{i}"].trans
-
-        t2_mirr = t2.dup()
+        t2_mirr = c[f"nomirr_{i}"].trans
         t2_mirr.mirror = not t2_mirr.is_mirror()
 
         assert t1 == t2_mirr

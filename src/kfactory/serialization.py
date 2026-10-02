@@ -50,6 +50,16 @@ class DecoratorDict(UserDict[Hashable, Any]):
         return (DecoratorDict, (self.data,))
 
 
+class DecoratorTuple(tuple[Any, ...]):
+    """Tuple whose unhashable elements were converted by `to_hashable`."""
+
+    __slots__ = ()
+
+
+_TO_HASHABLE = dict | list | tuple
+_FROM_HASHABLE = DecoratorDict | DecoratorList | DecoratorTuple
+
+
 def clean_dict(d: dict[str, Any]) -> dict[str, Any]:
     """Cleans dictionary recursively."""
     return {
@@ -138,31 +148,48 @@ def clean_value(
 
 
 @overload
-def to_hashable(d: dict[Hashable, Any]) -> DecoratorDict: ...
+def to_hashable(d: dict[Any, Any]) -> DecoratorDict: ...
 
 
 @overload
 def to_hashable(d: list[Any]) -> DecoratorList: ...
 
 
+@overload
+def to_hashable(d: tuple[Any, ...]) -> tuple[Any, ...]: ...
+
+
 def to_hashable(
-    d: dict[Hashable, Any] | list[Any],
-) -> DecoratorDict | DecoratorList:
-    """Convert a `dict` to a `DecoratorDict`."""
+    d: dict[Any, Any] | list[Any] | tuple[Any, ...],
+) -> DecoratorDict | DecoratorList | tuple[Any, ...]:
+    """Convert a `dict`/`list` to a `DecoratorDict`/`DecoratorList`.
+
+    Tuples are returned as is if already hashable, otherwise as a `DecoratorTuple`.
+    """
+    if isinstance(d, tuple):
+        if type(d) is not tuple:
+            return d
+        try:
+            hash(d)
+        except TypeError:
+            return DecoratorTuple(
+                to_hashable(value) if isinstance(value, _TO_HASHABLE) else value
+                for value in d
+            )
+        return d
     if isinstance(d, dict):
-        ud = DecoratorDict()
-        for item, value in sorted(d.items()):
-            if isinstance(value, dict | list):
-                value_: Any = to_hashable(value)
-            else:
-                value_ = value
-            ud[item] = value_
-        return ud
-    ul = DecoratorList([])
-    for _index, value in enumerate(d):
-        value_ = to_hashable(value) if isinstance(value, dict | list) else value
-        ul.append(value_)
-    return ul
+        return DecoratorDict(
+            {
+                item: to_hashable(value) if isinstance(value, _TO_HASHABLE) else value
+                for item, value in sorted(d.items())
+            }
+        )
+    return DecoratorList(
+        [
+            to_hashable(value) if isinstance(value, _TO_HASHABLE) else value
+            for value in d
+        ]
+    )
 
 
 @overload
@@ -170,7 +197,11 @@ def hashable_to_original(udl: DecoratorDict) -> dict[Hashable, Any]: ...
 
 
 @overload
-def hashable_to_original(udl: DecoratorList) -> list[Hashable]: ...
+def hashable_to_original(udl: DecoratorList) -> list[Any]: ...
+
+
+@overload
+def hashable_to_original(udl: DecoratorTuple) -> tuple[Any, ...]: ...
 
 
 @overload
@@ -178,21 +209,23 @@ def hashable_to_original(udl: Any) -> Any: ...
 
 
 def hashable_to_original(
-    udl: DecoratorDict | DecoratorList | Any,
-) -> dict[str, Any] | list[Any] | Any:
-    """Convert `DecoratorDict` to `dict`."""
+    udl: DecoratorDict | DecoratorList | DecoratorTuple | Any,
+) -> dict[Hashable, Any] | list[Any] | tuple[Any, ...] | Any:
+    """Convert `DecoratorDict`/`DecoratorList`/`DecoratorTuple` back to originals."""
     if isinstance(udl, DecoratorDict):
-        for item, value in udl.items():
-            udl[item] = hashable_to_original(value)
-        return udl.data
+        return {
+            k: hashable_to_original(v) if isinstance(v, _FROM_HASHABLE) else v
+            for k, v in udl.data.items()
+        }
     if isinstance(udl, DecoratorList):
-        list_: list[Any] = []
-        for v in udl:
-            if isinstance(v, DecoratorDict | DecoratorList):
-                list_.append(hashable_to_original(v))
-            else:
-                list_.append(v)
-        return list_
+        return [
+            hashable_to_original(v) if isinstance(v, _FROM_HASHABLE) else v
+            for v in udl.data
+        ]
+    if isinstance(udl, DecoratorTuple):
+        return tuple(
+            hashable_to_original(v) if isinstance(v, _FROM_HASHABLE) else v for v in udl
+        )
     return udl
 
 
