@@ -33,7 +33,7 @@ def _make_router(
 
 def test_step_is_abstract() -> None:
     with pytest.raises(TypeError):
-        Step()  # type: ignore[abstract]
+        Step()  # ty: ignore[call-non-callable]
 
 
 def test_left_no_dist_executes() -> None:
