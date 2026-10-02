@@ -6903,11 +6903,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/ports.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">550</span>
-<span class="normal">551</span>
-<span class="normal">552</span>
-<span class="normal">553</span>
-<span class="normal">554</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">554</span>
 <span class="normal">555</span>
 <span class="normal">556</span>
 <span class="normal">557</span>
@@ -7129,7 +7125,11 @@
 <span class="normal">773</span>
 <span class="normal">774</span>
 <span class="normal">775</span>
-<span class="normal">776</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DCreatePort</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="normal">776</span>
+<span class="normal">777</span>
+<span class="normal">778</span>
+<span class="normal">779</span>
+<span class="normal">780</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DCreatePort</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Protocol for a create_port functionality"""</span>
 
     <span class="nd">@property</span>
@@ -7400,11 +7400,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">666</span>
-<span class="normal">667</span>
-<span class="normal">668</span>
-<span class="normal">669</span>
-<span class="normal">670</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">670</span>
 <span class="normal">671</span>
 <span class="normal">672</span>
 <span class="normal">673</span>
@@ -7501,7 +7497,11 @@
 <span class="normal">764</span>
 <span class="normal">765</span>
 <span class="normal">766</span>
-<span class="normal">767</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_port</span><span class="p">(</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_port</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -7647,7 +7647,15 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/ports.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 910</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 902</span>
+<span class="normal"> 903</span>
+<span class="normal"> 904</span>
+<span class="normal"> 905</span>
+<span class="normal"> 906</span>
+<span class="normal"> 907</span>
+<span class="normal"> 908</span>
+<span class="normal"> 909</span>
+<span class="normal"> 910</span>
 <span class="normal"> 911</span>
 <span class="normal"> 912</span>
 <span class="normal"> 913</span>
@@ -7757,25 +7765,7 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
 <span class="normal">1017</span>
 <span class="normal">1018</span>
 <span class="normal">1019</span>
-<span class="normal">1020</span>
-<span class="normal">1021</span>
-<span class="normal">1022</span>
-<span class="normal">1023</span>
-<span class="normal">1024</span>
-<span class="normal">1025</span>
-<span class="normal">1026</span>
-<span class="normal">1027</span>
-<span class="normal">1028</span>
-<span class="normal">1029</span>
-<span class="normal">1030</span>
-<span class="normal">1031</span>
-<span class="normal">1032</span>
-<span class="normal">1033</span>
-<span class="normal">1034</span>
-<span class="normal">1035</span>
-<span class="normal">1036</span>
-<span class="normal">1037</span>
-<span class="normal">1038</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DPorts</span><span class="p">(</span><span class="n">ProtoPorts</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">DCreatePort</span><span class="p">):</span>
+<span class="normal">1020</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DPorts</span><span class="p">(</span><span class="n">ProtoPorts</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">DCreatePort</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A collection of um ports.</span>
 
 <span class="sd">    It is not a traditional dictionary. Elements can be retrieved as in a traditional</span>
@@ -7802,39 +7792,29 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
 <span class="sd">            name: Overwrite the name of the port</span>
 <span class="sd">            keep_mirror: Keep the mirror flag from the original port if `True`,</span>
 <span class="sd">                else set [Port.trans.mirror][kfactory.port.ProtoPort.trans]</span>
-<span class="sd">                (or the complex equivalent) to `False`.</span>
+<span class="sd">                (or the complex equivalent) to `False`. Ports with an asymmetric</span>
+<span class="sd">                cross section always keep their mirror flag, as it determines</span>
+<span class="sd">                which side of the port the cross section lies on.</span>
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">kcl</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">:</span>
-            <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">base</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-            <span class="n">port_</span> <span class="o">=</span> <span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span><span class="p">:</span>
-                <span class="n">port_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">dcplx_trans</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span><span class="p">:</span>
-                <span class="n">dcplx_trans</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
-            <span class="n">base</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span>
-            <span class="n">base</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">base</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">port_</span> <span class="o">=</span> <span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">kcl</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">:</span>
             <span class="n">base</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span>
             <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
                 <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
                     <span class="n">port</span><span class="o">.</span><span class="n">symmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
                 <span class="p">)</span>
-                <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span>
                     <span class="n">port</span><span class="o">.</span><span class="n">asymmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
                 <span class="p">)</span>
-                <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">port_</span> <span class="o">=</span> <span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
-            <span class="n">port_</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">dcplx_trans</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port_</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">port_</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
+            <span class="n">port_</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">dcplx_trans</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span> <span class="ow">and</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
+            <span class="n">port_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">port_</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_all_named</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DPort</span><span class="p">]:</span>
@@ -7938,9 +7918,9 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">919</span>
-<span class="normal">920</span>
-<span class="normal">921</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">DPort</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">911</span>
+<span class="normal">912</span>
+<span class="normal">913</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">DPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Iterator, that allows for loops etc to directly access the object."""</span>
     <span class="k">yield from</span> <span class="p">(</span><span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -7967,9 +7947,9 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1036</span>
-<span class="normal">1037</span>
-<span class="normal">1038</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1018</span>
+<span class="normal">1019</span>
+<span class="normal">1020</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Representation of the Ports as strings."""</span>
     <span class="k">return</span> <span class="nb">repr</span><span class="p">([</span><span class="nb">repr</span><span class="p">(</span><span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">b</span><span class="p">))</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
@@ -8054,7 +8034,9 @@ else set <a class="autorefs autorefs-internal" title="trans
       property
       writable
   " href="../port/#kfactory.port.ProtoPort.trans">Port.trans.mirror</a>
-(or the complex equivalent) to <code>False</code>.</p>
+(or the complex equivalent) to <code>False</code>. Ports with an asymmetric
+cross section always keep their mirror flag, as it determines
+which side of the port the cross section lies on.</p>
               </div>
             </td>
             <td>
@@ -8067,7 +8049,15 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">923</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">915</span>
+<span class="normal">916</span>
+<span class="normal">917</span>
+<span class="normal">918</span>
+<span class="normal">919</span>
+<span class="normal">920</span>
+<span class="normal">921</span>
+<span class="normal">922</span>
+<span class="normal">923</span>
 <span class="normal">924</span>
 <span class="normal">925</span>
 <span class="normal">926</span>
@@ -8096,25 +8086,7 @@ else set <a class="autorefs autorefs-internal" title="trans
 <span class="normal">949</span>
 <span class="normal">950</span>
 <span class="normal">951</span>
-<span class="normal">952</span>
-<span class="normal">953</span>
-<span class="normal">954</span>
-<span class="normal">955</span>
-<span class="normal">956</span>
-<span class="normal">957</span>
-<span class="normal">958</span>
-<span class="normal">959</span>
-<span class="normal">960</span>
-<span class="normal">961</span>
-<span class="normal">962</span>
-<span class="normal">963</span>
-<span class="normal">964</span>
-<span class="normal">965</span>
-<span class="normal">966</span>
-<span class="normal">967</span>
-<span class="normal">968</span>
-<span class="normal">969</span>
-<span class="normal">970</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_port</span><span class="p">(</span>
+<span class="normal">952</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_port</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">port</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
@@ -8128,39 +8100,29 @@ else set <a class="autorefs autorefs-internal" title="trans
 <span class="sd">        name: Overwrite the name of the port</span>
 <span class="sd">        keep_mirror: Keep the mirror flag from the original port if `True`,</span>
 <span class="sd">            else set [Port.trans.mirror][kfactory.port.ProtoPort.trans]</span>
-<span class="sd">            (or the complex equivalent) to `False`.</span>
+<span class="sd">            (or the complex equivalent) to `False`. Ports with an asymmetric</span>
+<span class="sd">            cross section always keep their mirror flag, as it determines</span>
+<span class="sd">            which side of the port the cross section lies on.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">kcl</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">:</span>
-        <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">base</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="n">port_</span> <span class="o">=</span> <span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span><span class="p">:</span>
-            <span class="n">port_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">dcplx_trans</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span><span class="p">:</span>
-            <span class="n">dcplx_trans</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
-        <span class="n">base</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span>
-        <span class="n">base</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="n">port_</span> <span class="o">=</span> <span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">kcl</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">:</span>
         <span class="n">base</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span>
         <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
             <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
                 <span class="n">port</span><span class="o">.</span><span class="n">symmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
             <span class="p">)</span>
-            <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span>
                 <span class="n">port</span><span class="o">.</span><span class="n">asymmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
             <span class="p">)</span>
-            <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">port_</span> <span class="o">=</span> <span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
-        <span class="n">port_</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">dcplx_trans</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port_</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">port_</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
+        <span class="n">port_</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">dcplx_trans</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span> <span class="ow">and</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
+        <span class="n">port_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">port_</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -8186,14 +8148,14 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 997</span>
-<span class="normal"> 998</span>
-<span class="normal"> 999</span>
-<span class="normal">1000</span>
-<span class="normal">1001</span>
-<span class="normal">1002</span>
-<span class="normal">1003</span>
-<span class="normal">1004</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">979</span>
+<span class="normal">980</span>
+<span class="normal">981</span>
+<span class="normal">982</span>
+<span class="normal">983</span>
+<span class="normal">984</span>
+<span class="normal">985</span>
+<span class="normal">986</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">rename_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">DPort</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get a copy of each port."""</span>
@@ -8320,7 +8282,25 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1006</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 988</span>
+<span class="normal"> 989</span>
+<span class="normal"> 990</span>
+<span class="normal"> 991</span>
+<span class="normal"> 992</span>
+<span class="normal"> 993</span>
+<span class="normal"> 994</span>
+<span class="normal"> 995</span>
+<span class="normal"> 996</span>
+<span class="normal"> 997</span>
+<span class="normal"> 998</span>
+<span class="normal"> 999</span>
+<span class="normal">1000</span>
+<span class="normal">1001</span>
+<span class="normal">1002</span>
+<span class="normal">1003</span>
+<span class="normal">1004</span>
+<span class="normal">1005</span>
+<span class="normal">1006</span>
 <span class="normal">1007</span>
 <span class="normal">1008</span>
 <span class="normal">1009</span>
@@ -8330,25 +8310,7 @@ else set <a class="autorefs autorefs-internal" title="trans
 <span class="normal">1013</span>
 <span class="normal">1014</span>
 <span class="normal">1015</span>
-<span class="normal">1016</span>
-<span class="normal">1017</span>
-<span class="normal">1018</span>
-<span class="normal">1019</span>
-<span class="normal">1020</span>
-<span class="normal">1021</span>
-<span class="normal">1022</span>
-<span class="normal">1023</span>
-<span class="normal">1024</span>
-<span class="normal">1025</span>
-<span class="normal">1026</span>
-<span class="normal">1027</span>
-<span class="normal">1028</span>
-<span class="normal">1029</span>
-<span class="normal">1030</span>
-<span class="normal">1031</span>
-<span class="normal">1032</span>
-<span class="normal">1033</span>
-<span class="normal">1034</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">(</span>
+<span class="normal">1016</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">angle</span><span class="p">:</span> <span class="n">Angle</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">orientation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -8401,9 +8363,9 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">972</span>
-<span class="normal">973</span>
-<span class="normal">974</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_named</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DPort</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_named</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Get all ports in a dictionary with names as keys."""</span>
     <span class="k">return</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
@@ -8448,11 +8410,7 @@ else set <a class="autorefs autorefs-internal" title="trans
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/ports.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">320</span>
 <span class="normal">321</span>
 <span class="normal">322</span>
 <span class="normal">323</span>
@@ -8679,7 +8637,11 @@ else set <a class="autorefs autorefs-internal" title="trans
 <span class="normal">544</span>
 <span class="normal">545</span>
 <span class="normal">546</span>
-<span class="normal">547</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ICreatePort</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ICreatePort</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Protocol for a create_port functionality"""</span>
 
     <span class="nd">@property</span>
@@ -8955,11 +8917,7 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">442</span>
 <span class="normal">443</span>
 <span class="normal">444</span>
 <span class="normal">445</span>
@@ -9055,7 +9013,11 @@ else set <a class="autorefs autorefs-internal" title="trans
 <span class="normal">535</span>
 <span class="normal">536</span>
 <span class="normal">537</span>
-<span class="normal">538</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_port</span><span class="p">(</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_port</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -9200,11 +9162,7 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/ports.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">779</span>
-<span class="normal">780</span>
-<span class="normal">781</span>
-<span class="normal">782</span>
-<span class="normal">783</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">783</span>
 <span class="normal">784</span>
 <span class="normal">785</span>
 <span class="normal">786</span>
@@ -9320,15 +9278,7 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
 <span class="normal">896</span>
 <span class="normal">897</span>
 <span class="normal">898</span>
-<span class="normal">899</span>
-<span class="normal">900</span>
-<span class="normal">901</span>
-<span class="normal">902</span>
-<span class="normal">903</span>
-<span class="normal">904</span>
-<span class="normal">905</span>
-<span class="normal">906</span>
-<span class="normal">907</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Ports</span><span class="p">(</span><span class="n">ProtoPorts</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">ICreatePort</span><span class="p">):</span>
+<span class="normal">899</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Ports</span><span class="p">(</span><span class="n">ProtoPorts</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">ICreatePort</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A collection of dbu ports.</span>
 
 <span class="sd">    It is not a traditional dictionary. Elements can be retrieved as in a traditional</span>
@@ -9355,41 +9305,29 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
 <span class="sd">            name: Overwrite the name of the port</span>
 <span class="sd">            keep_mirror: Keep the mirror flag from the original port if `True`,</span>
 <span class="sd">                else set [Port.trans.mirror][kfactory.port.ProtoPort.trans]</span>
-<span class="sd">                (or the complex equivalent) to `False`.</span>
+<span class="sd">                (or the complex equivalent) to `False`. Ports with an asymmetric</span>
+<span class="sd">                cross section always keep their mirror flag, as it determines</span>
+<span class="sd">                which side of the port the cross section lies on.</span>
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">kcl</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">:</span>
-            <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">base</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-            <span class="n">port_</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span><span class="p">:</span>
-                <span class="n">port_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">dcplx_trans</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span><span class="p">:</span>
-                <span class="n">dcplx_trans</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
-            <span class="n">base</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span>
-            <span class="n">base</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">base</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">port_</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">kcl</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">:</span>
             <span class="n">base</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span>
             <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
                 <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
                     <span class="n">port</span><span class="o">.</span><span class="n">symmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
                 <span class="p">)</span>
-                <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span>
                     <span class="n">port</span><span class="o">.</span><span class="n">asymmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
                 <span class="p">)</span>
-                <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">base</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-            <span class="n">port_</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
-            <span class="n">port_</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">dcplx_trans</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port_</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">port_</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
+            <span class="n">port_</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">dcplx_trans</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span> <span class="ow">and</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
+            <span class="n">port_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">port_</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_all_named</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Port</span><span class="p">]:</span>
@@ -9491,9 +9429,9 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">788</span>
-<span class="normal">789</span>
-<span class="normal">790</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Port</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">792</span>
+<span class="normal">793</span>
+<span class="normal">794</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Port</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Iterator, that allows for loops etc to directly access the object."""</span>
     <span class="k">yield from</span> <span class="p">(</span><span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -9520,9 +9458,9 @@ dictionary. But to keep tabs on names etc, the ports are stored as a list</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">905</span>
-<span class="normal">906</span>
-<span class="normal">907</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">897</span>
+<span class="normal">898</span>
+<span class="normal">899</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Representation of the Ports as strings."""</span>
     <span class="k">return</span> <span class="nb">repr</span><span class="p">([</span><span class="nb">repr</span><span class="p">(</span><span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">b</span><span class="p">))</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
@@ -9607,7 +9545,9 @@ else set <a class="autorefs autorefs-internal" title="trans
       property
       writable
   " href="../port/#kfactory.port.ProtoPort.trans">Port.trans.mirror</a>
-(or the complex equivalent) to <code>False</code>.</p>
+(or the complex equivalent) to <code>False</code>. Ports with an asymmetric
+cross section always keep their mirror flag, as it determines
+which side of the port the cross section lies on.</p>
               </div>
             </td>
             <td>
@@ -9620,11 +9560,7 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">792</span>
-<span class="normal">793</span>
-<span class="normal">794</span>
-<span class="normal">795</span>
-<span class="normal">796</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">796</span>
 <span class="normal">797</span>
 <span class="normal">798</span>
 <span class="normal">799</span>
@@ -9661,15 +9597,7 @@ else set <a class="autorefs autorefs-internal" title="trans
 <span class="normal">830</span>
 <span class="normal">831</span>
 <span class="normal">832</span>
-<span class="normal">833</span>
-<span class="normal">834</span>
-<span class="normal">835</span>
-<span class="normal">836</span>
-<span class="normal">837</span>
-<span class="normal">838</span>
-<span class="normal">839</span>
-<span class="normal">840</span>
-<span class="normal">841</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_port</span><span class="p">(</span>
+<span class="normal">833</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_port</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">port</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
@@ -9683,41 +9611,29 @@ else set <a class="autorefs autorefs-internal" title="trans
 <span class="sd">        name: Overwrite the name of the port</span>
 <span class="sd">        keep_mirror: Keep the mirror flag from the original port if `True`,</span>
 <span class="sd">            else set [Port.trans.mirror][kfactory.port.ProtoPort.trans]</span>
-<span class="sd">            (or the complex equivalent) to `False`.</span>
+<span class="sd">            (or the complex equivalent) to `False`. Ports with an asymmetric</span>
+<span class="sd">            cross section always keep their mirror flag, as it determines</span>
+<span class="sd">            which side of the port the cross section lies on.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">kcl</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">:</span>
-        <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">base</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="n">port_</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span><span class="p">:</span>
-            <span class="n">port_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">dcplx_trans</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span><span class="p">:</span>
-            <span class="n">dcplx_trans</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
-        <span class="n">base</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span>
-        <span class="n">base</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="n">port_</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">kcl</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">:</span>
         <span class="n">base</span><span class="o">.</span><span class="n">kcl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span>
         <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
             <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span>
                 <span class="n">port</span><span class="o">.</span><span class="n">symmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
             <span class="p">)</span>
-            <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span>
                 <span class="n">port</span><span class="o">.</span><span class="n">asymmetric_cross_section</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
             <span class="p">)</span>
-            <span class="n">base</span><span class="o">.</span><span class="n">cross_section</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">base</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="n">port_</span> <span class="o">=</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
-        <span class="n">port_</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">dcplx_trans</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port_</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">port_</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
+        <span class="n">port_</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">dcplx_trans</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_mirror</span> <span class="ow">and</span> <span class="n">port</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">():</span>
+        <span class="n">port_</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_name_cache</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">port_</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -9743,14 +9659,14 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">868</span>
-<span class="normal">869</span>
-<span class="normal">870</span>
-<span class="normal">871</span>
-<span class="normal">872</span>
-<span class="normal">873</span>
-<span class="normal">874</span>
-<span class="normal">875</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">860</span>
+<span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span>
+<span class="normal">864</span>
+<span class="normal">865</span>
+<span class="normal">866</span>
+<span class="normal">867</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">rename_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Port</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get a copy of each port."""</span>
@@ -9877,7 +9793,15 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">877</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">869</span>
+<span class="normal">870</span>
+<span class="normal">871</span>
+<span class="normal">872</span>
+<span class="normal">873</span>
+<span class="normal">874</span>
+<span class="normal">875</span>
+<span class="normal">876</span>
+<span class="normal">877</span>
 <span class="normal">878</span>
 <span class="normal">879</span>
 <span class="normal">880</span>
@@ -9895,15 +9819,7 @@ else set <a class="autorefs autorefs-internal" title="trans
 <span class="normal">892</span>
 <span class="normal">893</span>
 <span class="normal">894</span>
-<span class="normal">895</span>
-<span class="normal">896</span>
-<span class="normal">897</span>
-<span class="normal">898</span>
-<span class="normal">899</span>
-<span class="normal">900</span>
-<span class="normal">901</span>
-<span class="normal">902</span>
-<span class="normal">903</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">(</span>
+<span class="normal">895</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">angle</span><span class="p">:</span> <span class="n">Angle</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">orientation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -9954,9 +9870,9 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">843</span>
-<span class="normal">844</span>
-<span class="normal">845</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_named</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Port</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">835</span>
+<span class="normal">836</span>
+<span class="normal">837</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_all_named</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Port</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Get all ports in a dictionary with names as keys."""</span>
     <span class="k">return</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
@@ -10244,7 +10160,11 @@ else set <a class="autorefs autorefs-internal" title="trans
 <span class="normal">310</span>
 <span class="normal">311</span>
 <span class="normal">312</span>
-<span class="normal">313</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ProtoPorts</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ProtoPorts</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Base class for kf.Ports, kf.DPorts."""</span>
 
     <span class="n">_kcl</span><span class="p">:</span> <span class="n">KCLayout</span>
@@ -10447,7 +10367,11 @@ else set <a class="autorefs autorefs-internal" title="trans
         <span class="o">...</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">BasePort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Check whether a port is in this port collection."""</span>
+<span class="w">        </span><span class="sd">"""Check whether a port is in this port collection.</span>
+
+<span class="sd">        A string is matched against the port names. A port is matched with</span>
+<span class="sd">        `BasePort.__eq__` against the collection's ports.</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">ProtoPort</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">BasePort</span><span class="p">):</span>
@@ -10567,6 +10491,8 @@ else set <a class="autorefs autorefs-internal" title="trans
     <div class="doc doc-contents ">
 
         <p>Check whether a port is in this port collection.</p>
+<p>A string is matched against the port names. A port is matched with
+<code>BasePort.__eq__</code> against the collection's ports.</p>
 
 
             <details class="mkdocstrings-source">
@@ -10581,8 +10507,16 @@ else set <a class="autorefs autorefs-internal" title="trans
 <span class="normal">279</span>
 <span class="normal">280</span>
 <span class="normal">281</span>
-<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">BasePort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Check whether a port is in this port collection."""</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">BasePort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Check whether a port is in this port collection.</span>
+
+<span class="sd">    A string is matched against the port names. A port is matched with</span>
+<span class="sd">    `BasePort.__eq__` against the collection's ports.</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">ProtoPort</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">BasePort</span><span class="p">):</span>
@@ -10616,13 +10550,13 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">294</span>
 <span class="normal">295</span>
-<span class="normal">296</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Support for `ports1 == ports2` comparisons."""</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">other</span><span class="p">)):</span>
@@ -10653,9 +10587,9 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Hash the ports."""</span>
     <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -11011,11 +10945,11 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Deletes all ports."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_bases</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -11289,11 +11223,11 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">pformat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"dbu"</span><span class="p">,</span> <span class="s2">"um"</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">pformat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"dbu"</span><span class="p">,</span> <span class="s2">"um"</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Pretty print ports."""</span>
     <span class="k">with</span> <span class="n">config</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">capture</span><span class="p">()</span> <span class="k">as</span> <span class="n">capture</span><span class="p">:</span>
         <span class="n">config</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">pprint_ports</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">))</span>
@@ -11322,12 +11256,12 @@ else set <a class="autorefs autorefs-internal" title="trans
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/ports.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">print</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">print</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"dbu"</span><span class="p">,</span> <span class="s2">"um"</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
