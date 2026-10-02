@@ -236,9 +236,7 @@ def check_collisions(
                             shape_it.shape_flags = kdb.Shapes.SRegions
                             for _it in shape_it.each():
                                 if _it.path()[0].inst() == insts[j].instance:
-                                    reg.insert(
-                                        shape_it.polygon.transformed(_it.trans())
-                                    )
+                                    reg.insert(_it.polygon.transformed(_it.trans()))
 
                             error_region_instances.insert(reg & inst_shapes)
                 inst_region += inst_region_
