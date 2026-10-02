@@ -9403,7 +9403,7 @@ the <code>instance.a</code> direction and <code>i_b</code> the <code>instance.b<
                     <span class="n">conn_trans</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">M90</span> <span class="k">if</span> <span class="n">mirror</span> <span class="o">^</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span> <span class="k">else</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R180</span>
                     <span class="p">)</span>
-                    <span class="n">op_trans</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">trans</span>
+                    <span class="n">op_trans</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">trans</span>
                     <span class="n">op_trans</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="n">trans</span> <span class="o">=</span> <span class="n">op_trans</span> <span class="o">*</span> <span class="n">conn_trans</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">inverted</span><span class="p">()</span>
                 <span class="k">case</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span>
@@ -10517,7 +10517,7 @@ instance will be mirrored and connected.</p>
                 <span class="n">conn_trans</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">M90</span> <span class="k">if</span> <span class="n">mirror</span> <span class="o">^</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">mirror</span> <span class="k">else</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R180</span>
                 <span class="p">)</span>
-                <span class="n">op_trans</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">trans</span>
+                <span class="n">op_trans</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">trans</span>
                 <span class="n">op_trans</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">trans</span> <span class="o">=</span> <span class="n">op_trans</span> <span class="o">*</span> <span class="n">conn_trans</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">inverted</span><span class="p">()</span>
             <span class="k">case</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span>
@@ -11221,9 +11221,9 @@ else pull the polygons. None will always flatten all levels.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cell</span> <span class="o">=</span> <span class="n">cell</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">trans</span> <span class="ow">or</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span> <span class="k">if</span> <span class="n">trans</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">na</span> <span class="o">=</span> <span class="n">na</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nb</span> <span class="o">=</span> <span class="n">nb</span>
 
@@ -11241,11 +11241,11 @@ else pull the polygons. None will always flatten all levels.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dcplx_trans</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
 
     <span class="nd">@dcplx_trans</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dcplx_trans</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cell_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>

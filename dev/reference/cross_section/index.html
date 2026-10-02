@@ -8330,16 +8330,16 @@ always grid-aligned regardless of width parity.</p>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">main_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Main layer of the cross section (parity with SymmetricalCrossSection)."""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DAsymmetricalCrossSection</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">DAsymmetricalCrossSection</span><span class="p">(</span>
-            <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span>
+            <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">dup</span><span class="p">(),</span>
             <span class="n">section_min</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="p">),</span>
             <span class="n">section_max</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="p">),</span>
             <span class="n">sections</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span>
                 <span class="n">DCrossSectionLayer</span><span class="p">(</span>
-                    <span class="n">layer</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span>
+                    <span class="n">layer</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">dup</span><span class="p">(),</span>
                     <span class="n">section_min</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">section_min</span><span class="p">),</span>
                     <span class="n">section_max</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">section_max</span><span class="p">),</span>
                 <span class="p">)</span>
@@ -9045,7 +9045,7 @@ normalized <code>sections</code>.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">bbox_sections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">bbox_sections</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">bbox_sections</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -10959,7 +10959,7 @@ inaccurate geometry. This method does not materialize instances.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsymmetricalCrossSection</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">AsymmetricalCrossSection</span><span class="p">(</span>
-            <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span>
+            <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">dup</span><span class="p">(),</span>
             <span class="n">section_min</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="p">),</span>
             <span class="n">section_max</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="p">),</span>
             <span class="n">sections</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">to_itype</span><span class="p">(</span><span class="n">kcl</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">),</span>
@@ -11974,7 +11974,7 @@ this resolves them against the core width and includes the main strip.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrossSectionLayer</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">CrossSectionLayer</span><span class="p">(</span>
-            <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span>
+            <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="o">.</span><span class="n">dup</span><span class="p">(),</span>
             <span class="n">section_min</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section_min</span><span class="p">),</span>
             <span class="n">section_max</span><span class="o">=</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section_max</span><span class="p">),</span>
         <span class="p">)</span>
@@ -12504,7 +12504,7 @@ this resolves them against the core width and includes the main strip.</p>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">bbox_sections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="n">dbu</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">"""Bounding-box sections (owned by the enclosure)."""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">bbox_sections</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">bbox_sections</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">auto_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s2">"</span>
@@ -12550,7 +12550,7 @@ this resolves them against the core width and includes the main strip.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">main_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Main Layer of the enclosure and cross section."""</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">main_layer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">main_layer</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enclosure</span><span class="o">.</span><span class="n">main_layer</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Whether this cross section is symmetric."""</span>
@@ -13166,11 +13166,11 @@ across units via <code>.base</code>.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">layer</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">main_layer</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">main_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">layer</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">main_layer</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_symmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Whether this cross section is symmetric."""</span>

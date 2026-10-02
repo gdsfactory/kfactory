@@ -8385,7 +8385,7 @@ must be set, mirroring the <code>trans</code> / <code>dcplx_trans</code> pattern
         <span class="n">post_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BasePort</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Get a transformed copy of the BasePort."""</span>
-        <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">base</span><span class="o">.</span><span class="n">trans</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trans</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">)</span>
@@ -8452,14 +8452,14 @@ must be set, mirroring the <code>trans</code> / <code>dcplx_trans</code> pattern
     <span class="k">def</span><span class="w"> </span><span class="nf">get_trans</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Get the transformation."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"Both trans and dcplx_trans are None"</span>
         <span class="k">return</span> <span class="n">kdb</span><span class="o">.</span><span class="n">ICplxTrans</span><span class="p">(</span><span class="n">trans</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="p">,</span> <span class="n">dbu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span><span class="o">.</span><span class="n">s_trans</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_dcplx_trans</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Get the complex transformation."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"Both trans and dcplx_trans are None"</span>
         <span class="k">return</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">))</span>
 
@@ -8783,7 +8783,7 @@ must be set, mirroring the <code>trans</code> / <code>dcplx_trans</code> pattern
 <span class="normal">278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dcplx_trans</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get the complex transformation."""</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
     <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"Both trans and dcplx_trans are None"</span>
     <span class="k">return</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
@@ -8818,7 +8818,7 @@ must be set, mirroring the <code>trans</code> / <code>dcplx_trans</code> pattern
 <span class="normal">271</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_trans</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get the transformation."""</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
     <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"Both trans and dcplx_trans are None"</span>
     <span class="k">return</span> <span class="n">kdb</span><span class="o">.</span><span class="n">ICplxTrans</span><span class="p">(</span><span class="n">trans</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="p">,</span> <span class="n">dbu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span><span class="o">.</span><span class="n">s_trans</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
@@ -9033,7 +9033,7 @@ must be set, mirroring the <code>trans</code> / <code>dcplx_trans</code> pattern
     <span class="n">post_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BasePort</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get a transformed copy of the BasePort."""</span>
-    <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">base</span><span class="o">.</span><span class="n">trans</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trans</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">)</span>
@@ -9168,13 +9168,13 @@ must be set, mirroring the <code>trans</code> / <code>dcplx_trans</code> pattern
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/port.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1577</span>
-<span class="normal">1578</span>
-<span class="normal">1579</span>
-<span class="normal">1580</span>
-<span class="normal">1581</span>
-<span class="normal">1582</span>
-<span class="normal">1583</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DIRECTION</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1572</span>
+<span class="normal">1573</span>
+<span class="normal">1574</span>
+<span class="normal">1575</span>
+<span class="normal">1576</span>
+<span class="normal">1577</span>
+<span class="normal">1578</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DIRECTION</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Alias for KLayout direction to compass directions."""</span>
 
     <span class="n">E</span> <span class="o">=</span> <span class="mi">0</span>
@@ -9412,7 +9412,12 @@ contain layer number and datatype</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/port.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1164</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1159</span>
+<span class="normal">1160</span>
+<span class="normal">1161</span>
+<span class="normal">1162</span>
+<span class="normal">1163</span>
+<span class="normal">1164</span>
 <span class="normal">1165</span>
 <span class="normal">1166</span>
 <span class="normal">1167</span>
@@ -9817,12 +9822,7 @@ contain layer number and datatype</p>
 <span class="normal">1566</span>
 <span class="normal">1567</span>
 <span class="normal">1568</span>
-<span class="normal">1569</span>
-<span class="normal">1570</span>
-<span class="normal">1571</span>
-<span class="normal">1572</span>
-<span class="normal">1573</span>
-<span class="normal">1574</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DPort</span><span class="p">(</span><span class="n">ProtoPort</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+<span class="normal">1569</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DPort</span><span class="p">(</span><span class="n">ProtoPort</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""A port is the photonics equivalent to a pin in electronics.</span>
 
 <span class="sd">    In addition to the location and layer</span>
@@ -9998,7 +9998,7 @@ contain layer number and datatype</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">base</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -10554,7 +10554,12 @@ transformation (set simple to <code>None</code> and the complex to the provided 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1314</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1309</span>
+<span class="normal">1310</span>
+<span class="normal">1311</span>
+<span class="normal">1312</span>
+<span class="normal">1313</span>
+<span class="normal">1314</span>
 <span class="normal">1315</span>
 <span class="normal">1316</span>
 <span class="normal">1317</span>
@@ -10656,12 +10661,7 @@ transformation (set simple to <code>None</code> and the complex to the provided 
 <span class="normal">1413</span>
 <span class="normal">1414</span>
 <span class="normal">1415</span>
-<span class="normal">1416</span>
-<span class="normal">1417</span>
-<span class="normal">1418</span>
-<span class="normal">1419</span>
-<span class="normal">1420</span>
-<span class="normal">1421</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">1416</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -10687,7 +10687,7 @@ transformation (set simple to <code>None</code> and the complex to the provided 
         <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">base</span>
         <span class="k">return</span>
     <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
         <span class="k">return</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -10866,7 +10866,12 @@ transformation (set simple to <code>None</code> and the complex to the provided 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1423</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1418</span>
+<span class="normal">1419</span>
+<span class="normal">1420</span>
+<span class="normal">1421</span>
+<span class="normal">1422</span>
+<span class="normal">1423</span>
 <span class="normal">1424</span>
 <span class="normal">1425</span>
 <span class="normal">1426</span>
@@ -10879,12 +10884,7 @@ transformation (set simple to <code>None</code> and the complex to the provided 
 <span class="normal">1433</span>
 <span class="normal">1434</span>
 <span class="normal">1435</span>
-<span class="normal">1436</span>
-<span class="normal">1437</span>
-<span class="normal">1438</span>
-<span class="normal">1439</span>
-<span class="normal">1440</span>
-<span class="normal">1441</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span>
+<span class="normal">1436</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
     <span class="n">post_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
@@ -11009,7 +11009,12 @@ facing angle=0°)</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1443</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1438</span>
+<span class="normal">1439</span>
+<span class="normal">1440</span>
+<span class="normal">1441</span>
+<span class="normal">1442</span>
+<span class="normal">1443</span>
 <span class="normal">1444</span>
 <span class="normal">1445</span>
 <span class="normal">1446</span>
@@ -11025,12 +11030,7 @@ facing angle=0°)</p>
 <span class="normal">1456</span>
 <span class="normal">1457</span>
 <span class="normal">1458</span>
-<span class="normal">1459</span>
-<span class="normal">1460</span>
-<span class="normal">1461</span>
-<span class="normal">1462</span>
-<span class="normal">1463</span>
-<span class="normal">1464</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy_polar</span><span class="p">(</span>
+<span class="normal">1459</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy_polar</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">d_orth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -11273,7 +11273,12 @@ contain layer number and datatype</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/port.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 761</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 756</span>
+<span class="normal"> 757</span>
+<span class="normal"> 758</span>
+<span class="normal"> 759</span>
+<span class="normal"> 760</span>
+<span class="normal"> 761</span>
 <span class="normal"> 762</span>
 <span class="normal"> 763</span>
 <span class="normal"> 764</span>
@@ -11668,12 +11673,7 @@ contain layer number and datatype</p>
 <span class="normal">1153</span>
 <span class="normal">1154</span>
 <span class="normal">1155</span>
-<span class="normal">1156</span>
-<span class="normal">1157</span>
-<span class="normal">1158</span>
-<span class="normal">1159</span>
-<span class="normal">1160</span>
-<span class="normal">1161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Port</span><span class="p">(</span><span class="n">ProtoPort</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="normal">1156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Port</span><span class="p">(</span><span class="n">ProtoPort</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""A port is the photonics equivalent to a pin in electronics.</span>
 
 <span class="sd">    In addition to the location and layer</span>
@@ -11849,7 +11849,7 @@ contain layer number and datatype</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">base</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -12346,7 +12346,12 @@ transformation (set simple to <code>None</code> and the complex to the provided 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 911</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 906</span>
+<span class="normal"> 907</span>
+<span class="normal"> 908</span>
+<span class="normal"> 909</span>
+<span class="normal"> 910</span>
+<span class="normal"> 911</span>
 <span class="normal"> 912</span>
 <span class="normal"> 913</span>
 <span class="normal"> 914</span>
@@ -12441,12 +12446,7 @@ transformation (set simple to <code>None</code> and the complex to the provided 
 <span class="normal">1003</span>
 <span class="normal">1004</span>
 <span class="normal">1005</span>
-<span class="normal">1006</span>
-<span class="normal">1007</span>
-<span class="normal">1008</span>
-<span class="normal">1009</span>
-<span class="normal">1010</span>
-<span class="normal">1011</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">1006</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -12472,7 +12472,7 @@ transformation (set simple to <code>None</code> and the complex to the provided 
         <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">base</span>
         <span class="k">return</span>
     <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
         <span class="k">return</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -12644,7 +12644,12 @@ transformation (set simple to <code>None</code> and the complex to the provided 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1013</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1008</span>
+<span class="normal">1009</span>
+<span class="normal">1010</span>
+<span class="normal">1011</span>
+<span class="normal">1012</span>
+<span class="normal">1013</span>
 <span class="normal">1014</span>
 <span class="normal">1015</span>
 <span class="normal">1016</span>
@@ -12657,12 +12662,7 @@ transformation (set simple to <code>None</code> and the complex to the provided 
 <span class="normal">1023</span>
 <span class="normal">1024</span>
 <span class="normal">1025</span>
-<span class="normal">1026</span>
-<span class="normal">1027</span>
-<span class="normal">1028</span>
-<span class="normal">1029</span>
-<span class="normal">1030</span>
-<span class="normal">1031</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span>
+<span class="normal">1026</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
     <span class="n">post_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
@@ -12810,7 +12810,12 @@ facing angle=0°)</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1033</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1028</span>
+<span class="normal">1029</span>
+<span class="normal">1030</span>
+<span class="normal">1031</span>
+<span class="normal">1032</span>
+<span class="normal">1033</span>
 <span class="normal">1034</span>
 <span class="normal">1035</span>
 <span class="normal">1036</span>
@@ -12823,12 +12828,7 @@ facing angle=0°)</p>
 <span class="normal">1043</span>
 <span class="normal">1044</span>
 <span class="normal">1045</span>
-<span class="normal">1046</span>
-<span class="normal">1047</span>
-<span class="normal">1048</span>
-<span class="normal">1049</span>
-<span class="normal">1050</span>
-<span class="normal">1051</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy_polar</span><span class="p">(</span>
+<span class="normal">1046</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy_polar</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d_orth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">mirror</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Port</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get a polar copy of the port.</span>
@@ -13370,12 +13370,7 @@ facing angle=0°)</p>
 <span class="normal">750</span>
 <span class="normal">751</span>
 <span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
-<span class="normal">755</span>
-<span class="normal">756</span>
-<span class="normal">757</span>
-<span class="normal">758</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ProtoPort</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">ABC</span><span class="p">):</span>
+<span class="normal">753</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ProtoPort</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Base class for kf.Port, kf.DPort."""</span>
 
     <span class="n">yaml_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"!Port"</span>
@@ -13531,10 +13526,7 @@ facing angle=0°)</p>
 <span class="sd">        If this is set with the setter, it will overwrite any transformation or</span>
 <span class="sd">        dcplx transformation</span>
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">trans</span>
-            <span class="ow">or</span> <span class="n">kdb</span><span class="o">.</span><span class="n">ICplxTrans</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">dcplx_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span><span class="o">.</span><span class="n">s_trans</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">get_trans</span><span class="p">()</span>
 
     <span class="nd">@trans</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">trans</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -13550,9 +13542,7 @@ facing angle=0°)</p>
 <span class="sd">        The setter will set a complex transformation and overwrite the internal</span>
 <span class="sd">        transformation (set simple to `None` and the complex to the provided value.</span>
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="ow">or</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">get_dcplx_trans</span><span class="p">()</span>
 
     <span class="nd">@dcplx_trans</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dcplx_trans</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -13562,7 +13552,7 @@ facing angle=0°)</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">ICplxTrans</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">dup</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span><span class="o">.</span><span class="n">s_trans</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">ICplxTrans</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">)</span><span class="o">.</span><span class="n">s_trans</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Port</span><span class="p">:</span>
@@ -13583,7 +13573,7 @@ facing angle=0°)</p>
 
     <span class="nd">@angle</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">dcplx_trans</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -14608,13 +14598,13 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">743</span>
-<span class="normal">744</span>
-<span class="normal">745</span>
-<span class="normal">746</span>
-<span class="normal">747</span>
-<span class="normal">748</span>
-<span class="normal">749</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""String representation of port."""</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">=}</span><span class="s2">"</span>
@@ -14649,14 +14639,14 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">598</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
 <span class="normal">599</span>
-<span class="normal">600</span>
-<span class="normal">601</span>
-<span class="normal">602</span>
-<span class="normal">603</span>
-<span class="normal">604</span>
-<span class="normal">605</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="normal">600</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
@@ -14717,9 +14707,9 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">739</span>
-<span class="normal">740</span>
-<span class="normal">741</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"dbu"</span><span class="p">,</span> <span class="s2">"um"</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"dbu"</span><span class="p">,</span> <span class="s2">"um"</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Print the port pretty."""</span>
     <span class="n">config</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">pprint_ports</span><span class="p">([</span><span class="bp">self</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="n">print_type</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
@@ -14746,9 +14736,9 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">548</span>
-<span class="normal">549</span>
-<span class="normal">550</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DPort</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DPort</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Convert the port to a um port."""</span>
     <span class="k">return</span> <span class="n">DPort</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -14775,9 +14765,9 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">544</span>
-<span class="normal">545</span>
-<span class="normal">546</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Port</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Port</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Convert the port to a dbu port."""</span>
     <span class="k">return</span> <span class="n">Port</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -14804,14 +14794,14 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">751</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
 <span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
-<span class="normal">755</span>
-<span class="normal">756</span>
-<span class="normal">757</span>
-<span class="normal">758</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span>
+<span class="normal">753</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
     <span class="n">post_trans</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DCplxTrans</span> <span class="o">=</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="o">.</span><span class="n">R0</span><span class="p">,</span>
@@ -14931,7 +14921,12 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1586</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1581</span>
+<span class="normal">1582</span>
+<span class="normal">1583</span>
+<span class="normal">1584</span>
+<span class="normal">1585</span>
+<span class="normal">1586</span>
 <span class="normal">1587</span>
 <span class="normal">1588</span>
 <span class="normal">1589</span>
@@ -14940,12 +14935,7 @@ dcplx transformation</p>
 <span class="normal">1592</span>
 <span class="normal">1593</span>
 <span class="normal">1594</span>
-<span class="normal">1595</span>
-<span class="normal">1596</span>
-<span class="normal">1597</span>
-<span class="normal">1598</span>
-<span class="normal">1599</span>
-<span class="normal">1600</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">autorename</span><span class="p">(</span>
+<span class="normal">1595</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">autorename</span><span class="p">(</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
@@ -15248,15 +15238,15 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1777</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1772</span>
+<span class="normal">1773</span>
+<span class="normal">1774</span>
+<span class="normal">1775</span>
+<span class="normal">1776</span>
+<span class="normal">1777</span>
 <span class="normal">1778</span>
 <span class="normal">1779</span>
-<span class="normal">1780</span>
-<span class="normal">1781</span>
-<span class="normal">1782</span>
-<span class="normal">1783</span>
-<span class="normal">1784</span>
-<span class="normal">1785</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_direction</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1780</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_direction</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">direction</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Filter iterable/sequence of ports by direction `DIRECTION`."""</span>
@@ -15289,15 +15279,15 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1810</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1805</span>
+<span class="normal">1806</span>
+<span class="normal">1807</span>
+<span class="normal">1808</span>
+<span class="normal">1809</span>
+<span class="normal">1810</span>
 <span class="normal">1811</span>
 <span class="normal">1812</span>
-<span class="normal">1813</span>
-<span class="normal">1814</span>
-<span class="normal">1815</span>
-<span class="normal">1816</span>
-<span class="normal">1817</span>
-<span class="normal">1818</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_layer</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1813</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_layer</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Filter iterable/sequence of ports by layer index / LayerEnum."""</span>
@@ -15330,15 +15320,15 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1821</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1816</span>
+<span class="normal">1817</span>
+<span class="normal">1818</span>
+<span class="normal">1819</span>
+<span class="normal">1820</span>
+<span class="normal">1821</span>
 <span class="normal">1822</span>
 <span class="normal">1823</span>
-<span class="normal">1824</span>
-<span class="normal">1825</span>
-<span class="normal">1826</span>
-<span class="normal">1827</span>
-<span class="normal">1828</span>
-<span class="normal">1829</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_layer_info</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1824</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_layer_info</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">layer_info</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Filter iterable/sequence of ports by kdb.LayerInfo."""</span>
@@ -15371,7 +15361,12 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1756</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1751</span>
+<span class="normal">1752</span>
+<span class="normal">1753</span>
+<span class="normal">1754</span>
+<span class="normal">1755</span>
+<span class="normal">1756</span>
 <span class="normal">1757</span>
 <span class="normal">1758</span>
 <span class="normal">1759</span>
@@ -15384,12 +15379,7 @@ dcplx transformation</p>
 <span class="normal">1766</span>
 <span class="normal">1767</span>
 <span class="normal">1768</span>
-<span class="normal">1769</span>
-<span class="normal">1770</span>
-<span class="normal">1771</span>
-<span class="normal">1772</span>
-<span class="normal">1773</span>
-<span class="normal">1774</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_layer_pt_reg</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1769</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_layer_pt_reg</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">layer_info</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -15432,15 +15422,15 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1788</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1783</span>
+<span class="normal">1784</span>
+<span class="normal">1785</span>
+<span class="normal">1786</span>
+<span class="normal">1787</span>
+<span class="normal">1788</span>
 <span class="normal">1789</span>
 <span class="normal">1790</span>
-<span class="normal">1791</span>
-<span class="normal">1792</span>
-<span class="normal">1793</span>
-<span class="normal">1794</span>
-<span class="normal">1795</span>
-<span class="normal">1796</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_orientation</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1791</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_orientation</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="nb">float</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Filter iterable/sequence of ports by direction `DIRECTION`."""</span>
@@ -15473,15 +15463,15 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1799</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1794</span>
+<span class="normal">1795</span>
+<span class="normal">1796</span>
+<span class="normal">1797</span>
+<span class="normal">1798</span>
+<span class="normal">1799</span>
 <span class="normal">1800</span>
 <span class="normal">1801</span>
-<span class="normal">1802</span>
-<span class="normal">1803</span>
-<span class="normal">1804</span>
-<span class="normal">1805</span>
-<span class="normal">1806</span>
-<span class="normal">1807</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_port_type</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1802</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_port_type</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">port_type</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Filter iterable/sequence of ports by port_type."""</span>
@@ -15514,16 +15504,16 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1832</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1827</span>
+<span class="normal">1828</span>
+<span class="normal">1829</span>
+<span class="normal">1830</span>
+<span class="normal">1831</span>
+<span class="normal">1832</span>
 <span class="normal">1833</span>
 <span class="normal">1834</span>
 <span class="normal">1835</span>
-<span class="normal">1836</span>
-<span class="normal">1837</span>
-<span class="normal">1838</span>
-<span class="normal">1839</span>
-<span class="normal">1840</span>
-<span class="normal">1841</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_regex</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1836</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filter_regex</span><span class="p">[</span><span class="n">TPort</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">TPort</span><span class="p">],</span> <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">filter</span><span class="p">[</span><span class="n">TPort</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Filter iterable/sequence of ports by port name."""</span>
@@ -15628,7 +15618,12 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1847</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1842</span>
+<span class="normal">1843</span>
+<span class="normal">1844</span>
+<span class="normal">1845</span>
+<span class="normal">1846</span>
+<span class="normal">1847</span>
 <span class="normal">1848</span>
 <span class="normal">1849</span>
 <span class="normal">1850</span>
@@ -15640,12 +15635,7 @@ dcplx transformation</p>
 <span class="normal">1856</span>
 <span class="normal">1857</span>
 <span class="normal">1858</span>
-<span class="normal">1859</span>
-<span class="normal">1860</span>
-<span class="normal">1861</span>
-<span class="normal">1862</span>
-<span class="normal">1863</span>
-<span class="normal">1864</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">port_polygon</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Polygon</span><span class="p">:</span>
+<span class="normal">1859</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">port_polygon</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Polygon</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Gets a polygon representation for a given port width."""</span>
     <span class="k">if</span> <span class="n">width</span> <span class="ow">in</span> <span class="n">polygon_dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">polygon_dict</span><span class="p">[</span><span class="n">width</span><span class="p">]</span>
@@ -15806,7 +15796,12 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1710</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1705</span>
+<span class="normal">1706</span>
+<span class="normal">1707</span>
+<span class="normal">1708</span>
+<span class="normal">1709</span>
+<span class="normal">1710</span>
 <span class="normal">1711</span>
 <span class="normal">1712</span>
 <span class="normal">1713</span>
@@ -15844,12 +15839,7 @@ dcplx transformation</p>
 <span class="normal">1745</span>
 <span class="normal">1746</span>
 <span class="normal">1747</span>
-<span class="normal">1748</span>
-<span class="normal">1749</span>
-<span class="normal">1750</span>
-<span class="normal">1751</span>
-<span class="normal">1752</span>
-<span class="normal">1753</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_by_direction</span><span class="p">(</span>
+<span class="normal">1748</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_by_direction</span><span class="p">(</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">layer_info</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -16036,7 +16026,12 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1603</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1598</span>
+<span class="normal">1599</span>
+<span class="normal">1600</span>
+<span class="normal">1601</span>
+<span class="normal">1602</span>
+<span class="normal">1603</span>
 <span class="normal">1604</span>
 <span class="normal">1605</span>
 <span class="normal">1606</span>
@@ -16084,12 +16079,7 @@ dcplx transformation</p>
 <span class="normal">1648</span>
 <span class="normal">1649</span>
 <span class="normal">1650</span>
-<span class="normal">1651</span>
-<span class="normal">1652</span>
-<span class="normal">1653</span>
-<span class="normal">1654</span>
-<span class="normal">1655</span>
-<span class="normal">1656</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_clockwise</span><span class="p">(</span>
+<span class="normal">1651</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_clockwise</span><span class="p">(</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">layer</span><span class="p">:</span> <span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">layer_info</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -16270,7 +16260,12 @@ dcplx transformation</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/port.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1659</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1654</span>
+<span class="normal">1655</span>
+<span class="normal">1656</span>
+<span class="normal">1657</span>
+<span class="normal">1658</span>
+<span class="normal">1659</span>
 <span class="normal">1660</span>
 <span class="normal">1661</span>
 <span class="normal">1662</span>
@@ -16313,12 +16308,7 @@ dcplx transformation</p>
 <span class="normal">1699</span>
 <span class="normal">1700</span>
 <span class="normal">1701</span>
-<span class="normal">1702</span>
-<span class="normal">1703</span>
-<span class="normal">1704</span>
-<span class="normal">1705</span>
-<span class="normal">1706</span>
-<span class="normal">1707</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_clockwise_multi</span><span class="p">(</span>
+<span class="normal">1702</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_clockwise_multi</span><span class="p">(</span>
     <span class="n">ports</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">layers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">LayerEnum</span> <span class="o">|</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

@@ -15194,11 +15194,11 @@ if <code>None</code> create an empty one.</p>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">boundary</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">boundary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="nd">@boundary</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">boundary</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPolygon</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">boundary</span> <span class="o">=</span> <span class="n">boundary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">boundary</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span> <span class="k">if</span> <span class="n">boundary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_itype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Convert the kcell to a dbu kcell."""</span>
@@ -16529,7 +16529,7 @@ if <code>None</code> create an empty one.</p>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">port</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span>
             <span class="n">port_filter</span><span class="p">,</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Ports</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">bases</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">bases</span><span class="p">))</span>
         <span class="p">):</span>
-            <span class="n">trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
+            <span class="n">trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">trans</span>
             <span class="n">trans</span><span class="o">.</span><span class="n">angle</span> <span class="o">%=</span> <span class="mi">2</span>
             <span class="n">trans</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">layer_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">get_info</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
@@ -16574,7 +16574,7 @@ if <code>None</code> create an empty one.</p>
                 <span class="n">port_filter</span><span class="p">,</span>
                 <span class="nb">enumerate</span><span class="p">(</span><span class="n">Ports</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">bases</span><span class="o">=</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">base</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inst</span><span class="o">.</span><span class="n">ports</span><span class="p">])),</span>
             <span class="p">):</span>
-                <span class="n">trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
+                <span class="n">trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">trans</span>
                 <span class="n">trans</span><span class="o">.</span><span class="n">angle</span> <span class="o">%=</span> <span class="mi">2</span>
                 <span class="n">trans</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">v</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">disp</span>
@@ -17551,7 +17551,7 @@ This can of course contain a filter and only rename some of the ports</p>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">port</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span>
         <span class="n">port_filter</span><span class="p">,</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Ports</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">bases</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">bases</span><span class="p">))</span>
     <span class="p">):</span>
-        <span class="n">trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
+        <span class="n">trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">trans</span>
         <span class="n">trans</span><span class="o">.</span><span class="n">angle</span> <span class="o">%=</span> <span class="mi">2</span>
         <span class="n">trans</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">layer_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">get_info</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span>
@@ -17596,7 +17596,7 @@ This can of course contain a filter and only rename some of the ports</p>
             <span class="n">port_filter</span><span class="p">,</span>
             <span class="nb">enumerate</span><span class="p">(</span><span class="n">Ports</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span> <span class="n">bases</span><span class="o">=</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">base</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">inst</span><span class="o">.</span><span class="n">ports</span><span class="p">])),</span>
         <span class="p">):</span>
-            <span class="n">trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">trans</span><span class="o">.</span><span class="n">dup</span><span class="p">()</span>
+            <span class="n">trans</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">trans</span>
             <span class="n">trans</span><span class="o">.</span><span class="n">angle</span> <span class="o">%=</span> <span class="mi">2</span>
             <span class="n">trans</span><span class="o">.</span><span class="n">mirror</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">trans</span><span class="o">.</span><span class="n">disp</span>
