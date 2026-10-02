@@ -82,16 +82,23 @@ theme:
   custom_dir: overrides
 
   palette:
-    # Palette toggle for dark mode
-    - scheme: slate
+    # Palette toggle for automatic mode (follow the OS setting)
+    - media: "(prefers-color-scheme)"
       toggle:
-        icon: material/brightness-4
+        icon: material/brightness-auto
         name: Switch to light mode
     # Palette toggle for light mode
-    - scheme: default
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
 
 # Multi-version docs via mike (zensical fork). The CI workflow deploys
 # `main` → dev alias and tagged releases → <version> + latest alias.
