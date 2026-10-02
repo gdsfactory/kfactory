@@ -820,12 +820,15 @@ class Ports(ProtoPorts[int], ICreatePort):
                     base.dcplx_trans.mirror = False
             if name is not None:
                 base.name = name
+            port_ = Port(base=base)
+            if not keep_mirror:
+                port_.mirror = False
             self._bases.append(base)
             self._add_to_name_cache(base)
-            port_ = Port(base=base)
         else:
-            dcplx_trans = port.dcplx_trans.dup()
+            dcplx_trans = port.dcplx_trans
             if not keep_mirror and port.is_symmetric():
+
                 dcplx_trans.mirror = False
             base = port.base.model_copy()
             base.trans = kdb.Trans.R0
@@ -878,7 +881,7 @@ class Ports(ProtoPorts[int], ICreatePort):
         self, rename_function: Callable[[Sequence[Port]], None] | None = None
     ) -> Self:
         """Get a copy of each port."""
-        bases = [b.__copy__() for b in self._bases]
+        bases = [b.model_copy() for b in self._bases]
         if rename_function is not None:
             rename_function([Port(base=b) for b in bases])
         return self.__class__(bases=bases, kcl=self.kcl)
@@ -956,12 +959,15 @@ class DPorts(ProtoPorts[float], DCreatePort):
                     base.dcplx_trans.mirror = False
             if name is not None:
                 base.name = name
+            port_ = DPort(base=base)
+            if not keep_mirror:
+                port_.mirror = False
             self._bases.append(base)
             self._add_to_name_cache(base)
-            port_ = DPort(base=base)
         else:
-            dcplx_trans = port.dcplx_trans.dup()
+            dcplx_trans = port.dcplx_trans
             if not keep_mirror and port.is_symmetric():
+
                 dcplx_trans.mirror = False
             base = port.base.model_copy()
             base.trans = kdb.Trans.R0
@@ -1012,7 +1018,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
         self, rename_function: Callable[[Sequence[DPort]], None] | None = None
     ) -> Self:
         """Get a copy of each port."""
-        bases = [b.__copy__() for b in self._bases]
+        bases = [b.model_copy() for b in self._bases]
         if rename_function is not None:
             rename_function([DPort(base=b) for b in bases])
         return self.__class__(bases=bases, kcl=self.kcl)

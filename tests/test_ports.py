@@ -185,9 +185,7 @@ def test_addports_keep_mirror(layers: Layers) -> None:
 
     for i in range(4):
         t1 = c[f"mirr_{i}"].trans
-        t2 = c[f"nomirr_{i}"].trans
-
-        t2_mirr = t2.dup()
+        t2_mirr = c[f"nomirr_{i}"].trans
         t2_mirr.mirror = not t2_mirr.is_mirror()
 
         assert t1 == t2_mirr

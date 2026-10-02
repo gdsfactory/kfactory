@@ -199,7 +199,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
     ) -> BasePort:
         """Get a transformed copy of the BasePort."""
-        base = self.__copy__()
+        base = self.model_copy()
         if (
             base.trans is not None
             and isinstance(trans, kdb.Trans)
@@ -266,14 +266,14 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     def get_trans(self) -> kdb.Trans:
         """Get the transformation."""
         if self.trans is not None:
-            return self.trans
+            return self.trans.dup()
         assert self.dcplx_trans is not None, "Both trans and dcplx_trans are None"
         return kdb.ICplxTrans(trans=self.dcplx_trans, dbu=self.kcl.dbu).s_trans()
 
     def get_dcplx_trans(self) -> kdb.DCplxTrans:
         """Get the complex transformation."""
         if self.dcplx_trans is not None:
-            return self.dcplx_trans
+            return self.dcplx_trans.dup()
         assert self.trans is not None, "Both trans and dcplx_trans are None"
         return kdb.DCplxTrans(self.trans.to_dtype(self.kcl.dbu))
 
@@ -539,10 +539,7 @@ class ProtoPort[T: (int, float)](ABC):
         If this is set with the setter, it will overwrite any transformation or
         dcplx transformation
         """
-        return (
-            self._base.trans
-            or kdb.ICplxTrans(self._base.dcplx_trans, self.kcl.layout.dbu).s_trans()
-        )
+        return self._base.get_trans()
 
     @trans.setter
     def trans(self, value: kdb.Trans) -> None:
@@ -558,9 +555,7 @@ class ProtoPort[T: (int, float)](ABC):
         The setter will set a complex transformation and overwrite the internal
         transformation (set simple to `None` and the complex to the provided value.
         """
-        return self._base.dcplx_trans or kdb.DCplxTrans(
-            self.trans.to_dtype(self.kcl.layout.dbu)
-        )
+        return self._base.get_dcplx_trans()
 
     @dcplx_trans.setter
     def dcplx_trans(self, value: kdb.DCplxTrans) -> None:
@@ -570,7 +565,7 @@ class ProtoPort[T: (int, float)](ABC):
             self._base.dcplx_trans = value.dup()
             self._base.trans = None
         else:
-            self._base.trans = kdb.ICplxTrans(value.dup(), self.kcl.dbu).s_trans()
+            self._base.trans = kdb.ICplxTrans(value, self.kcl.dbu).s_trans()
             self._base.dcplx_trans = None
 
     def to_itype(self) -> Port:
@@ -591,7 +586,7 @@ class ProtoPort[T: (int, float)](ABC):
 
     @angle.setter
     def angle(self, value: int) -> None:
-        self._base.trans = self.trans.dup()
+        self._base.trans = self.trans
         self._base.dcplx_trans = None
         self._base.trans.angle = value
 
@@ -966,7 +961,7 @@ class Port(ProtoPort[int]):
             self._base = base
             return
         if port is not None:
-            self._base = port.base.__copy__()
+            self._base = port.base.model_copy()
             return
 
         if name is None:
@@ -1369,7 +1364,7 @@ class DPort(ProtoPort[float]):
             self._base = base
             return
         if port is not None:
-            self._base = port.base.__copy__()
+            self._base = port.base.model_copy()
             return
 
         if name is None:

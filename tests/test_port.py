@@ -26,14 +26,14 @@ def get_ports() -> _PortsType:
         port_type="optical",
         trans=kf.kdb.Trans(0, 0),
     )
-    complex_base = base.__copy__()
+    complex_base = base.model_copy()
     complex_base.dcplx_trans = kf.kdb.DCplxTrans(1, rot=20, x=0, y=0)
     complex_base.trans = None
     return (
-        kf.port.DPort(base=base.__copy__()),
-        kf.port.Port(base=base.__copy__()),
-        kf.port.DPort(base=complex_base.__copy__()),
-        kf.port.Port(base=complex_base.__copy__()),
+        kf.port.DPort(base=base.model_copy()),
+        kf.port.Port(base=base.model_copy()),
+        kf.port.DPort(base=complex_base.model_copy()),
+        kf.port.Port(base=complex_base.model_copy()),
     )
 
 

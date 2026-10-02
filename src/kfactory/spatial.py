@@ -10,17 +10,24 @@ from . import kdb
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
 
+    from .instance import ProtoTInstance
+    from .kcell import ProtoTKCell
+
 
 def collect_instance_region(
-    cell: Any,
+    cell: ProtoTKCell[Any] | kdb.Cell,
     layer: int,
-    inst: Any,
+    inst: ProtoTInstance[Any],
 ) -> kdb.Region:
-    """Collect the actual geometry region for one instance on one layer."""
+    """Collect the actual geometry region for one instance on one layer.
+
+    Shapes without a polygon (e.g. texts) are skipped.
+    """
     region = kdb.Region()
-    shape_it = cell.begin_shapes_rec_overlapping(layer, inst.bbox(layer))
+    shape_it = cell.begin_shapes_rec_overlapping(layer, inst.ibbox(layer))
     shape_it.select_cells([inst.cell.cell_index()])
     shape_it.min_depth = 1
+    shape_it.shape_flags = kdb.Shapes.SRegions
     for _it in shape_it.each():
         if _it.path()[0].inst() == inst.instance:
             region.insert(_it.shape().polygon.transformed(_it.trans()))
