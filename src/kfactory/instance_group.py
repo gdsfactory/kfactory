@@ -218,9 +218,9 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
                         if mirror ^ p.dcplx_trans.mirror
                         else kdb.DCplxTrans.R180
                     )
-                    opt = op.dcplx_trans
-                    opt.mirror = False
-                    dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
+                    op_trans = op.dcplx_trans
+                    op_trans.mirror = False
+                    dcplx_trans = op_trans * dconn_trans * p.dcplx_trans.inverted()
                     self.transform(dcplx_trans)
                 case False, False:
                     self.transform(
@@ -244,9 +244,9 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
                     conn_trans = (
                         kdb.Trans.M90 if mirror ^ p.trans.mirror else kdb.Trans.R180
                     )
-                    op = op.copy()
-                    op.trans.mirror = False
-                    trans = op.trans * conn_trans * p.trans.inverted()
+                    op_trans = op.trans
+                    op_trans.mirror = False
+                    trans = op_trans * conn_trans * p.trans.inverted()
                     self.transform(trans)
                 case False, False:
                     self.transform(kdb.Trans(op.trans.disp - p.trans.disp))

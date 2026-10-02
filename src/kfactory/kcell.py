@@ -984,11 +984,11 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
 
     @property
     def boundary(self) -> kdb.DPolygon | None:
-        return self._base.boundary
+        return self._base.boundary.dup() if self._base.boundary is not None else None
 
     @boundary.setter
     def boundary(self, boundary: kdb.DPolygon | None) -> None:
-        self._base.boundary = boundary
+        self._base.boundary = boundary.dup() if boundary is not None else None
 
     def to_itype(self) -> KCell:
         """Convert the kcell to a dbu kcell."""
@@ -2319,7 +2319,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         for i, port in filter(
             port_filter, enumerate(Ports(kcl=self.kcl, bases=self.ports.bases))
         ):
-            trans = port.trans.dup()
+            trans = port.trans
             trans.angle %= 2
             trans.mirror = False
             layer_info = self.kcl.layout.get_info(port.layer)
@@ -2364,7 +2364,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 port_filter,
                 enumerate(Ports(kcl=self.kcl, bases=[p.base for p in inst.ports])),
             ):
-                trans = port.trans.dup()
+                trans = port.trans
                 trans.angle %= 2
                 trans.mirror = False
                 v = trans.disp
