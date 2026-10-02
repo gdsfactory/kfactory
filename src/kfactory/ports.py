@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, Protocol, Self, overlo
 
 from pydantic import ValidationError
 
-from . import kdb
 from .conf import config
 from .cross_section import (
     AsymmetricalCrossSection,
@@ -35,6 +34,7 @@ from .port import (
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
+    from . import kdb
     from .layer import LayerEnum
     from .layout import KCLayout
     from .typings import Angle, MetaData, TPort
@@ -270,7 +270,11 @@ class ProtoPorts[T: (int, float)](Protocol):
         ...
 
     def __contains__(self, port: str | ProtoPort[Any] | BasePort) -> bool:
-        """Check whether a port is in this port collection."""
+        """Check whether a port is in this port collection.
+
+        A string is matched against the port names. A port is matched with
+        `BasePort.__eq__` against the collection's ports.
+        """
         if isinstance(port, ProtoPort):
             return port.base in self._bases
         if isinstance(port, BasePort):
@@ -803,41 +807,29 @@ class Ports(ProtoPorts[int], ICreatePort):
             name: Overwrite the name of the port
             keep_mirror: Keep the mirror flag from the original port if `True`,
                 else set [Port.trans.mirror][kfactory.port.ProtoPort.trans]
-                (or the complex equivalent) to `False`.
+                (or the complex equivalent) to `False`. Ports with an asymmetric
+                cross section always keep their mirror flag, as it determines
+                which side of the port the cross section lies on.
         """
-        if port.kcl == self.kcl:
-            base = port.base.model_copy()
-            if name is not None:
-                base.name = name
-            port_ = Port(base=base)
-            if not keep_mirror:
-                port_.mirror = False
-            self._bases.append(base)
-            self._add_to_name_cache(base)
-        else:
-            dcplx_trans = port.dcplx_trans
-            if not keep_mirror:
-                dcplx_trans.mirror = False
-            base = port.base.model_copy()
-            base.trans = kdb.Trans.R0
-            base.dcplx_trans = None
+        base = port.base.model_copy()
+        if name is not None:
+            base.name = name
+        port_ = Port(base=base)
+        if port.kcl != self.kcl:
             base.kcl = self.kcl
             if port.is_symmetric():
                 base.cross_section = self.kcl.get_symmetrical_cross_section(
                     port.symmetric_cross_section.base.to_dtype(port.kcl)
                 )
-                base.asymmetric_cross_section = None
             else:
                 base.asymmetric_cross_section = self.kcl.get_asymmetrical_cross_section(
                     port.asymmetric_cross_section.base.to_dtype(port.kcl)
                 )
-                base.cross_section = None
-            if name is not None:
-                base.name = name
-            port_ = Port(base=base)
-            port_.dcplx_trans = dcplx_trans
-            self._bases.append(port_.base)
-            self._add_to_name_cache(port_.base)
+            port_.dcplx_trans = port.dcplx_trans
+        if not keep_mirror and port.is_symmetric():
+            port_.mirror = False
+        self._bases.append(base)
+        self._add_to_name_cache(base)
         return port_
 
     def get_all_named(self) -> Mapping[str, Port]:
@@ -934,39 +926,29 @@ class DPorts(ProtoPorts[float], DCreatePort):
             name: Overwrite the name of the port
             keep_mirror: Keep the mirror flag from the original port if `True`,
                 else set [Port.trans.mirror][kfactory.port.ProtoPort.trans]
-                (or the complex equivalent) to `False`.
+                (or the complex equivalent) to `False`. Ports with an asymmetric
+                cross section always keep their mirror flag, as it determines
+                which side of the port the cross section lies on.
         """
-        if port.kcl == self.kcl:
-            base = port.base.model_copy()
-            if name is not None:
-                base.name = name
-            port_ = DPort(base=base)
-            if not keep_mirror:
-                port_.mirror = False
-            self._bases.append(base)
-            self._add_to_name_cache(base)
-        else:
-            dcplx_trans = port.dcplx_trans
-            if not keep_mirror:
-                dcplx_trans.mirror = False
-            base = port.base.model_copy()
-            base.trans = kdb.Trans.R0
-            base.dcplx_trans = None
+        base = port.base.model_copy()
+        if name is not None:
+            base.name = name
+        port_ = DPort(base=base)
+        if port.kcl != self.kcl:
             base.kcl = self.kcl
             if port.is_symmetric():
                 base.cross_section = self.kcl.get_symmetrical_cross_section(
                     port.symmetric_cross_section.base.to_dtype(port.kcl)
                 )
-                base.asymmetric_cross_section = None
             else:
                 base.asymmetric_cross_section = self.kcl.get_asymmetrical_cross_section(
                     port.asymmetric_cross_section.base.to_dtype(port.kcl)
                 )
-                base.cross_section = None
-            port_ = DPort(base=base)
-            port_.dcplx_trans = dcplx_trans
-            self._bases.append(port_.base)
-            self._add_to_name_cache(port_.base)
+            port_.dcplx_trans = port.dcplx_trans
+        if not keep_mirror and port.is_symmetric():
+            port_.mirror = False
+        self._bases.append(base)
+        self._add_to_name_cache(base)
         return port_
 
     def get_all_named(self) -> Mapping[str, DPort]:
