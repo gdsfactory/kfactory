@@ -8,12 +8,24 @@ exclude = [
     # klayout.de is frequently slow enough to time out in CI (and 403s some
     # user agents), so don't check it at all. Covers the www. subdomain too.
     "https?://(www\\.)?klayout\\.de.*",
+    # GitHub's rendered /blob/ pages are rate limited far more aggressively than
+    # the rest of github.com (they start serving 503/429 after a handful of
+    # requests from one IP), and lychee can't fall back to the GitHub API for
+    # them: for a public repo, its API check rejects any URL with a path
+    # endpoint outright. So these are unverifiable either way.
+    "https?://github\\.com/[^/]+/[^/]+/blob/.*",
 ]
 
 include_mail = false
 cache = true
 max_concurrency = 32
 
-# Some hosts (e.g. klayout.de) return 403 to lychee's default user agent.
-# Pretend to be a browser. (lychee already uses GET by default.)
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+# Never persist transient server errors, so a single blip doesn't keep failing
+# for the lifetime of the cache entry.
+cache_exclude_status = "429..=599"
+
+# Give throttled or flaky hosts a few chances before declaring a link dead.
+# Note this only covers 429s, timeouts and transport errors -- lychee does not
+# retry a rejected 5xx status code.
+max_retries = 5
+retry_wait_time = 2
