@@ -976,10 +976,10 @@ def place_rf_rails(
     )
     route_start_port = p1.copy()
     route_start_port.name = "route_start"
-    route_start_port.trans.angle = (route_start_port.angle + 2) % 4
+    route_start_port.angle = (route_start_port.angle + 2) % 4
     route_end_port = p2.copy()
     route_end_port.name = "route_end"
-    route_end_port.trans.angle = (route_end_port.angle + 2) % 4
+    route_end_port.angle = (route_end_port.angle + 2) % 4
 
     old_pt = pts[0]
     old_bend_port = p1

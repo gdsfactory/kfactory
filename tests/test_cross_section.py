@@ -830,9 +830,9 @@ def test_asym_connect_check_ignores_input_mirror_flag_when_use_mirror_false() ->
     with pytest.raises(AsymmetricMirrorRequiredError):
         ia.connect("o1", ib, "o1", mirror=True, use_mirror=False)
 
-    ia.trans.mirror = False
+    ia.trans = kf.kdb.Trans.R0
 
-    # With existing mirror=True and mirror=False, effective is M90 — passes.
+    # With existing mirror=False and mirror=True, effective is M90 — passes.
     ia.connect("o1", ib, "o1", mirror=True, use_mirror=False)
 
 

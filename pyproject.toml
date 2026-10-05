@@ -1,10 +1,10 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = [ "build", "setuptools>=84", "setuptools-scm[toml]>=10.2.3" ]
+requires = [ "build", "setuptools>=84", "setuptools-scm[toml]>=10.3.4" ]
 
 [project]
 name = "kfactory"
-version = "3.2.0"
+version = "3.2.2"
 description = "KLayout API implementation of gdsfactory"
 readme = "README.md"
 authors = [ { name = "gdsfactory community", email = "contact@gdsfactory.com" } ]
@@ -18,7 +18,7 @@ classifiers = [
 ]
 dependencies = [
   "aenum>=3.1.17,<4",
-  "cachetools>=7.1.8,<7.2",
+  "cachetools>=7.2,<7.3",
   "kfnetlist>=0.3",
   "klayout>=0.30.12,<0.31",
   "loguru>=0.7.3,<0.8",
@@ -32,7 +32,7 @@ dependencies = [
   "ruamel-yaml>=0.19.1,<0.20",
   "ruamel-yaml-string>=0.1.1,<0.2",
   "scipy>=1.18.1,<2",
-  "semver>=3.0.4,<4",
+  "semver>=3.1,<4",
   "toolz>=1.1,<2",
   "typer~=0.27.2",
 ]
@@ -45,18 +45,18 @@ optional-dependencies.ci = [
   "pytest-xdist>=3.8,<3.9",
   "types-cachetools>=7.0.0.20260713,<7.1",
   "types-requests>=2.33.0.20260906,<2.34",
-  "uv>=0.12.13,<0.13",
+  "uv>=0.12.22,<0.13",
 ]
 optional-dependencies.dev = [
   "kfactory[ci]",
   "pre-commit>=4.6.2,<4.7",
-  "ruff~=0.16.7",
+  "ruff~=0.16.10",
   "rust-just~=1.58.0",
-  "scipy-stubs>=1.18.1,<1.19",
+  "scipy-stubs>=1.18.1.1,<1.19",
   "tbump>=6.11,<6.12",
-  "ty>=0.0.80,<0.1",
+  "ty>=0.0.84,<0.1",
   "types-cachetools>=7.0.0.20260713,<7.1",
-  "types-docutils>=0.23.0.20260911,<0.24",
+  "types-docutils>=0.23.0.20260923,<0.24",
   "types-pygments>=2.21.0.20260819,<2.22",
   "types-requests>=2.33.0.20260906,<2.34",
   "types-setuptools>=84.0.0.20260812,<84.1",
@@ -69,8 +69,8 @@ optional-dependencies.docs = [
   "kfactory[docs]",
   "kfactory[notebooks]",                     # transitively pulls in kfactory[ipy]
   "mkdocstrings[python]>=1.0.6,<1.1",
-  "pymdown-extensions>=11.0.2,<11.1",
-  "zensical>=0.0.61,<0.1",
+  "pymdown-extensions>=12.1,<12.2",
+  "zensical>=0.0.67,<0.1",
 ]
 optional-dependencies.ipy = [
   "ipyevents>=2.0.4,<2.1",
@@ -79,7 +79,7 @@ optional-dependencies.ipy = [
   "ipywidgets>=8.1.9,<8.2",
 ]
 optional-dependencies.notebooks = [
-  "ipykernel>=7.3,<7.4",
+  "ipykernel>=7.4,<7.5",
   "jupytext>=1.19.5,<1.20",
   # Notebook conversion needs the IPython display helpers
   # (`c.plot()` lazy-imports kfactory.widgets.interactive, which
@@ -204,7 +204,7 @@ git.message_template = "Bump to {new_version}"
 git.tag_template = "v{new_version}"
 # Uncomment this if your project is hosted on GitHub:
 # github_url = "https://github.com/<user or organization>/<project>/"
-version.current = "3.2.0"
+version.current = "3.2.2"
 # Example of a semver regexp.
 # Make sure this matches current_version before
 # using tbump

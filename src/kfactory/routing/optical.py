@@ -1022,7 +1022,7 @@ def _place_sbend(
     allow_type_mismatch: bool,
 ) -> tuple[Port, Port]:
     p1_ = p1.copy()
-    p1_.trans.mirror = False
+    p1_.mirror = False
     delta_p = p1_.trans.inverted() * p2.trans.disp.to_p()
 
     offset = abs(delta_p.y)
@@ -1043,7 +1043,7 @@ def _place_sbend(
     sp1, sp2 = sbend_group.ports[0], sbend_group.ports[1]
 
     sp1_ = sp1.copy_polar()
-    sp1_.trans.mirror = False
+    sp1_.mirror = False
     sbg_delta_p = sp1_.trans.inverted() * sp2.trans.disp.to_p()
     if delta_p.y == sbg_delta_p.y:
         sbend_group.connect(
@@ -1263,9 +1263,9 @@ def place_manhattan(
         )
         route_end_port.trans = route_end_port.trans
     route_start_port.name = "route_start"
-    route_start_port.trans.angle = (route_start_port.angle + 2) % 4
+    route_start_port.angle = (route_start_port.angle + 2) % 4
     route_end_port.name = "route_end"
-    route_end_port.trans.angle = (route_end_port.angle + 2) % 4
+    route_end_port.angle = (route_end_port.angle + 2) % 4
 
     bend_cells = bend90_cells_ or (bend90_cell,)
     bend_geometries = [_bend90_geometry(bend, port_type) for bend in bend_cells]
@@ -1481,10 +1481,10 @@ def place_manhattan_with_sbends(
         )
     route_start_port = p1.copy()
     route_start_port.name = "route_start"
-    route_start_port.trans.angle = (route_start_port.angle + 2) % 4
+    route_start_port.angle = (route_start_port.angle + 2) % 4
     route_end_port = p2.copy()
     route_end_port.name = "route_end"
-    route_end_port.trans.angle = (route_end_port.angle + 2) % 4
+    route_end_port.angle = (route_end_port.angle + 2) % 4
 
     b90p1, b90p2, b90c = _bend90_geometry(bend90_cell, port_type)
     # Symmetric placement historically follows the bend port's mirror flag.

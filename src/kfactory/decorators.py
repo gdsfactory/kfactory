@@ -50,8 +50,8 @@ from .factory_metadata import (
 )
 from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
 from .serialization import (
-    DecoratorDict,
-    DecoratorList,
+    _FROM_HASHABLE,
+    _TO_HASHABLE,
     get_cell_name,
     get_function_name,
     hashable_to_original,
@@ -151,7 +151,7 @@ def _parse_params(
     del_params: list[str] = []
 
     for key, value in params.items():
-        if isinstance(value, dict | list):
+        if isinstance(value, _TO_HASHABLE):
             params[key] = to_hashable(value)
         elif isinstance(value, kdb.LayerInfo):
             params[key] = kcl.get_info(kcl.layer(value))
@@ -166,7 +166,7 @@ def _parse_params(
 
 def _params_to_original(params: dict[str, Any]) -> None:
     for key, value in params.items():
-        if isinstance(value, DecoratorDict | DecoratorList):
+        if isinstance(value, _FROM_HASHABLE):
             params[key] = hashable_to_original(value)
 
 
@@ -286,9 +286,9 @@ def _check_instances(
 def _snap_ports(cell: ProtoTKCell[Any], kcl: KCLayout) -> None:
     for port in cell.to_itype().ports:
         if port.base.dcplx_trans:
-            dup = port.base.dcplx_trans.dup()
-            dup.disp = kcl.to_um(kcl.to_dbu(port.base.dcplx_trans.disp))
-            port.dcplx_trans = dup
+            dcplx_trans = port.dcplx_trans
+            dcplx_trans.disp = kcl.to_um(kcl.to_dbu(dcplx_trans.disp))
+            port.dcplx_trans = dcplx_trans
 
 
 def _check_ports(cell: ProtoTKCell[Any] | VKCell) -> None:
@@ -307,11 +307,11 @@ def _check_ports(cell: ProtoTKCell[Any] | VKCell) -> None:
 
 def _check_pins(cell: ProtoTKCell[Any] | VKCell) -> None:
     pin_names: dict[str | None, int] = defaultdict(int)
+    cell_port_ids = {id(port.base) for port in cell.ports}
     for pin in cell.pins:
         pin_names[pin.name] += 1
         pin_ports = {id(port) for port in pin._base.ports}
-        pin_ports_in_cell = {id(port.base) for port in cell.ports} & pin_ports
-        if len(pin_ports_in_cell) != len(pin_ports):
+        if not pin_ports <= cell_port_ids:
             raise ValueError(
                 f"Attempted to create a pin {pin.name} with ports not belonging "
                 "to the cell. Please use ports that belong to the cell "

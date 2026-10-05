@@ -460,3 +460,26 @@ def test_each_by_array_coord_array(kcl: kf.KCLayout, layers: Layers) -> None:
     # Should include all combinations
     keys = {(a, b) for a, b, _ in coords}
     assert keys == {(0, 0), (0, 1), (1, 0), (1, 1)}
+
+
+def test_pin_meta_data_maps_ports_by_identity(kcl: kf.KCLayout, layers: Layers) -> None:
+    xs = kf.SymmetricalCrossSection(
+        width=5000,
+        enclosure=kf.LayerEnclosure(main_layer=layers.METAL1, name="M1_PINX"),
+    )
+    c = kcl.kcell()
+    c.create_port(
+        name="e1", dcplx_trans=kf.kdb.DCplxTrans(1, 21, False, 0, 0), cross_section=xs
+    )
+    p2 = c.create_port(
+        name="e2", dcplx_trans=kf.kdb.DCplxTrans(1, 21, False, 5, 0), cross_section=xs
+    )
+    c.create_pin(name="pin1", ports=[p2])
+
+    c.set_meta_data()
+    assert c.kdb_cell.meta_info_value("kfactory:pins:0")["ports"] == [1]
+
+    c.ports = kf.Ports(kcl=kcl)
+    c.base.pins = []
+    c.get_meta_data()
+    assert [p.name for p in c.pins["pin1"].ports] == ["e2"]
