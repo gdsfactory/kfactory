@@ -2,7 +2,10 @@ from collections.abc import Callable
 from functools import partial
 from pathlib import Path
 
+import pytest
+
 import kfactory as kf
+from kfactory.exceptions import DuplicateCellNameError
 from tests.conftest import Layers
 
 
@@ -123,3 +126,147 @@ def test_vinst_copy() -> None:
 
     assert len(c2.vinsts) == 1
     assert c2.vinsts[0].cell is vk
+
+
+@pytest.mark.parametrize(("first_angle", "second_angle"), [(0, 0), (17, 17), (17, 23)])
+def test_virtual_name_collision(
+    kcl: kf.KCLayout, first_angle: float, second_angle: float
+) -> None:
+    layer = kcl.layer(1, 0)
+    a = kf.VKCell(kcl=kcl, name="dupe")
+    a.shapes(layer).insert(kf.kdb.DBox(0, 0, 10, 10))
+    b = kf.VKCell(kcl=kcl, name="dupe")
+    b.shapes(layer).insert(kf.kdb.DBox(0, 0, 30, 1))
+    top = kcl.kcell("top")
+    top.create_vinst(a).trans = kf.kdb.DCplxTrans(1, first_angle, False, 0, 0)
+    top.create_vinst(b).trans = kf.kdb.DCplxTrans(1, second_angle, False, 0, 0)
+
+    with pytest.raises(DuplicateCellNameError, match="different cell"):
+        top.insert_vinsts()
+
+    assert len(top.insts) == 1
+
+
+@pytest.mark.parametrize(("virtual", "angle"), [(True, 0), (True, 17), (False, 17)])
+def test_vinstance_existing_real_cell(
+    kcl: kf.KCLayout, angle: float, *, virtual: bool
+) -> None:
+    source = kcl.vkcell("source") if virtual else kcl.kcell("source")
+    trans = kf.kdb.DCplxTrans(1, angle, False, 0, 0)
+    name = "source" if angle == 0 else f"source_{trans.hash():x}"
+    existing = kcl.kcell(name)
+    layer = kcl.layer(1, 0)
+    existing.shapes(layer).insert(kf.kdb.Box(0, 0, 1000, 1000))
+    top = kcl.kcell("top")
+
+    with pytest.raises(DuplicateCellNameError, match="same source cell and transform"):
+        kf.VInstance(source, trans).insert_into(top)
+
+    assert len(top.insts) == 0
+    assert kf.kdb.Region(existing.shapes(layer)).area() == 1_000_000
+
+
+@pytest.mark.parametrize("virtual", [True, False])
+def test_vinstance_reuse_and_transforms(kcl: kf.KCLayout, *, virtual: bool) -> None:
+    source = kcl.vkcell("source") if virtual else kcl.kcell("source")
+    layer = kcl.layer(1, 0)
+    if isinstance(source, kf.VKCell):
+        source.shapes(layer).insert(kf.kdb.DBox(0, 0, 10, 10))
+        wrapper = kf.VKCell(base=source.base)
+    else:
+        source.shapes(layer).insert(kf.kdb.Box(0, 0, 10000, 10000))
+        wrapper = kf.KCell(base=source.base)
+    top = kcl.kcell("top")
+    indexes = []
+    for angle in (0, 17, 23):
+        trans = kf.kdb.DCplxTrans(1, angle, False, 0, 0)
+        first = kf.VInstance(source, trans).insert_into(top)
+        # Reuse also works across separate calls, parents, and wrappers.
+        other_top = kcl.kcell(f"top_{angle}")
+        second = kf.VInstance(wrapper, trans).insert_into(other_top)
+        assert first.cell.cell_index() == second.cell.cell_index()
+        assert kf.kdb.Region(first.cell.shapes(layer)).area() > 0
+        indexes.append(first.cell.cell_index())
+    assert len(set(indexes)) == 3
+
+
+def test_virtual_duplicate_has_distinct_identity(kcl: kf.KCLayout) -> None:
+    source = kcl.vkcell("source")
+    duplicate = source.dup(new_name="source")
+    top = kcl.kcell("top")
+    kf.VInstance(source).insert_into(top)
+    with pytest.raises(DuplicateCellNameError, match="different cell"):
+        kf.VInstance(duplicate).insert_into(top)
+
+
+def test_virtual_names_are_layout_local_and_cleared(kcl: kf.KCLayout) -> None:
+    for layout in (kcl, kf.KCLayout(f"{kcl.name}_other"), kcl):
+        source = layout.vkcell("source")
+        top = layout.kcell("top")
+        kf.VInstance(source).insert_into(top)
+        assert len(top.insts) == 1
+        layout.clear()
+
+
+def test_virtual_recreate_deleted_materialization(kcl: kf.KCLayout) -> None:
+    source = kcl.vkcell("source")
+    top = kcl.kcell("top")
+    inst = kf.VInstance(source).insert_into(top)
+    kcl.delete_cell(inst.cell)
+    inst = kf.VInstance(source).insert_into(top)
+    assert not inst.cell.kdb_cell._destroyed()
+    assert inst.cell.name == "source"
+
+
+@pytest.mark.parametrize("virtual", [True, False])
+def test_vinstance_transform_hash_collision(
+    kcl: kf.KCLayout, monkeypatch: pytest.MonkeyPatch, *, virtual: bool
+) -> None:
+    monkeypatch.setattr(kf.kdb.DCplxTrans, "hash", lambda self: 1)
+    source = kcl.vkcell("source") if virtual else kcl.kcell("source")
+    top = kcl.kcell("top")
+    kf.VInstance(source, kf.kdb.DCplxTrans(1, 17, False, 0, 0)).insert_into(top)
+    with pytest.raises(DuplicateCellNameError, match="same source cell and transform"):
+        kf.VInstance(source, kf.kdb.DCplxTrans(1, 23, False, 0, 0)).insert_into(top)
+    assert len(top.insts) == 1
+
+
+def test_virtual_collision_does_not_reserve_name(kcl: kf.KCLayout) -> None:
+    existing = kcl.kcell("source")
+    top = kcl.kcell("top")
+    with pytest.raises(DuplicateCellNameError):
+        kf.VInstance(kcl.vkcell("source")).insert_into(top)
+    kcl.delete_cell(existing)
+    kf.VInstance(kcl.vkcell("source")).insert_into(top)
+    assert len(top.insts) == 1
+
+
+def test_virtual_identity_survives_layout_clear(kcl: kf.KCLayout) -> None:
+    original = kcl.vkcell("source")
+    kf.VInstance(original).insert_into(kcl.kcell("top"))
+    kcl.clear()
+    replacement = kcl.vkcell("source")
+    top = kcl.kcell("top")
+    kf.VInstance(replacement).insert_into(top)
+    with pytest.raises(DuplicateCellNameError, match="different cell"):
+        kf.VInstance(original).insert_into(top)
+
+
+def test_virtual_identity_includes_source_layout(kcl: kf.KCLayout) -> None:
+    other = kf.KCLayout(f"{kcl.name}_other")
+    source = kcl.vkcell("source")
+    foreign = other.vkcell("source")
+    top = kcl.kcell("top")
+    kf.VInstance(source).insert_into(top)
+    with pytest.raises(DuplicateCellNameError, match="different cell"):
+        kf.VInstance(foreign).insert_into(top)
+
+
+def test_virtual_identity_distinct_from_real_index(kcl: kf.KCLayout) -> None:
+    real = kcl.kcell("source")
+    trans = kf.kdb.DCplxTrans(1, 17, False, 0, 0)
+    virtual = kcl.vkcell(f"source_{trans.hash():x}")
+    top = kcl.kcell("top")
+    kf.VInstance(real, trans).insert_into(top)
+    with pytest.raises(DuplicateCellNameError, match="same source cell and transform"):
+        kf.VInstance(virtual).insert_into(top)

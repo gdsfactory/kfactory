@@ -318,6 +318,12 @@ class KCLayout(
     info: Info = Field(default_factory=Info)
     settings: KCellSettings = Field(frozen=True)
     _future_cell_name: str | None = PrivateAttr(default=None)
+    # Never reset: virtual cells can outlive layout.clear().
+    _next_virtual_cell_id: int = PrivateAttr(default=0)
+    # Reserve the unsuffixed virtual name across all materialized transforms.
+    _virtual_cell_identities: dict[str, tuple[str, int]] = PrivateAttr(
+        default_factory=dict
+    )
     _metadata_registry: FactoryMetadataRegistry = PrivateAttr(
         default_factory=FactoryMetadataRegistry
     )
@@ -1935,6 +1941,7 @@ class KCLayout(
             c.locked = False
         self.layout.clear()
         self.tkcells = {}
+        self._virtual_cell_identities.clear()
 
         if keep_layers:
             with contextlib.suppress(AttributeError):
