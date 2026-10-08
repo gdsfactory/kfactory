@@ -21,7 +21,6 @@ from typing import (
     TypeAliasType,
     TypedDict,
     Unpack,
-    cast,
     final,
     get_origin,
     get_type_hints,
@@ -455,13 +454,9 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
         except Exception:
             hints = {}
         if type_hints_serializer is None:
-            # ``cast`` because ty cannot recognize a PEP-695 ``type`` alias used
-            # as a value (the ``CrossSectionSpec`` dict key) as assignable to
-            # ``TypeAliasType``, even though it is one at runtime.
-            type_hints_serializer = cast(
-                "dict[type | UnionType | TypeAliasType, Callable[[Any], Any]]",
-                {CrossSectionSpec: kcl_cross_section_serializer(kcl=kcl)},
-            )
+            type_hints_serializer = {
+                CrossSectionSpec: kcl_cross_section_serializer(kcl=kcl)
+            }
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -810,10 +805,9 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
         except Exception:
             hints = {}
         if type_hints_serializer is None:
-            type_hints_serializer = cast(
-                "dict[type | UnionType | TypeAliasType, Callable[[Any], Any]]",
-                {CrossSectionSpec: kcl_cross_section_serializer(kcl=kcl)},
-            )
+            type_hints_serializer = {
+                CrossSectionSpec: kcl_cross_section_serializer(kcl=kcl)
+            }
 
         @functools.wraps(f)
         def wrapper_autocell(
