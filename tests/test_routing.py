@@ -1656,3 +1656,37 @@ def test_route_bundle_multi_return_opposite(
         bboxes=[b1, b2],
     )[0]
     oas_regression(c)
+
+
+@pytest.mark.parametrize("mirror", [False, True])
+@pytest.mark.parametrize("rotation", [0, 1, 2, 3])
+@pytest.mark.parametrize("end_offset", [0, 1])
+def test_route_bundle_single_bend_exact_fit(
+    rotation: int,
+    mirror: bool,
+    end_offset: int,
+    bend90: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    optical_port: kf.Port,
+    kcl: kf.KCLayout,
+) -> None:
+    """One 90° bend whose start leg is exactly the bend radius needs no straight."""
+    radius = 10_000
+    t = kf.kdb.Trans(rotation, mirror, 0, 0)
+    c = kcl.kcell()
+    p1 = optical_port.copy(t * kf.kdb.Trans(2, False, radius, 0))
+    p2 = optical_port.copy(t * kf.kdb.Trans(3, False, 0, radius + end_offset))
+    route = kf.routing.optical.route_bundle(
+        c=c,
+        start_ports=[p1],
+        end_ports=[p2],
+        separation=5000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90,
+        on_collision=None,
+    )[0]
+    assert route.backbone == [
+        t * kf.kdb.Point(radius, 0),
+        t * kf.kdb.Point(0, 0),
+        t * kf.kdb.Point(0, radius + end_offset),
+    ]
