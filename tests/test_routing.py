@@ -1690,3 +1690,31 @@ def test_route_bundle_single_bend_exact_fit(
         t * kf.kdb.Point(0, 0),
         t * kf.kdb.Point(0, radius + end_offset),
     ]
+
+
+@pytest.mark.parametrize("mirror", [False, True])
+@pytest.mark.parametrize("rotation", [0, 1, 2, 3])
+def test_route_bundle_facing_closer_than_separation(
+    rotation: int,
+    mirror: bool,
+    bend90: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    optical_port: kf.Port,
+    kcl: kf.KCLayout,
+) -> None:
+    """Facing ports closer than the separation are connected by a straight."""
+    distance = 5000
+    t = kf.kdb.Trans(rotation, mirror, 0, 0)
+    c = kcl.kcell()
+    p1 = optical_port.copy(t * kf.kdb.Trans(0, False, 0, 0))
+    p2 = optical_port.copy(t * kf.kdb.Trans(2, False, distance, 0))
+    route = kf.routing.optical.route_bundle(
+        c=c,
+        start_ports=[p1],
+        end_ports=[p2],
+        separation=12_000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90,
+        on_collision=None,
+    )[0]
+    assert route.backbone == [t * kf.kdb.Point(0, 0), t * kf.kdb.Point(distance, 0)]

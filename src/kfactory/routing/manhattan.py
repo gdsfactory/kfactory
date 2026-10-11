@@ -2250,6 +2250,10 @@ def _route_to_side(
                     - (bbox.bottom - hw1 - separation)
                     - rs.router.bend90_radius
                 )
+        tv = rs.tv
+        if tv.y == 0 and rs.ta == ANGLE_180 and tv.x >= 0:
+            # don't overshoot the other side if it's straight ahead
+            s = min(s, tv.x)
         rs.straight(s)
         tv = rs.tv
         x = tv.x
