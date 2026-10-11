@@ -50,7 +50,7 @@ from .schematic import (
 )
 from .instances import Instances, DInstances, VInstances
 from .settings import KCellSettings, Info
-from .layout import Constants, KCLayout, cell, vcell, kcl, kcls
+from .layout import Constants, ExtrudeConfig, KCLayout, cell, vcell, kcl, kcls
 from .layer import LayerEnum, LayerInfos, LayerStack
 from .shapes import VShapes
 from .session_cache import save_session, load_session
@@ -122,6 +122,7 @@ __all__ = [
     "DPort",
     "DPorts",
     "DSchematic",
+    "ExtrudeConfig",
     "FactoryMetadata",
     "Info",
     "Instance",
