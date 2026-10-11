@@ -21,6 +21,7 @@ from typing import (
     Any,
     Concatenate,
     Literal,
+    Self,
     TypedDict,
     cast,
     get_type_hints,
@@ -35,6 +36,7 @@ from pydantic import (
     Field,
     PrivateAttr,
     field_validator,
+    model_validator,
 )
 
 from . import __version__, kdb
@@ -95,9 +97,11 @@ from .port import BasePort, ProtoPort, rename_clockwise_multi
 from .routing.generic import ManhattanRoute
 from .serialization import get_function_name
 from .settings import Info, KCellSettings
+from .typings import dbu  # noqa: TC001
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
+    from .cross_section import AnyCrossSectionInput
     from .ports import DPorts, Ports
     from .schematic import TSchematic
     from .typings import (
@@ -111,7 +115,15 @@ if TYPE_CHECKING:
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
 
-__all__ = ["KCLayout", "cell", "get_default_kcl", "kcl", "kcls", "vcell"]
+__all__ = [
+    "ExtrudeConfig",
+    "KCLayout",
+    "cell",
+    "get_default_kcl",
+    "kcl",
+    "kcls",
+    "vcell",
+]
 
 
 class Constants(BaseModel):
@@ -247,6 +259,53 @@ class Factories[F: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]](
         return {name: self._all[i] for name, i in self._by_name.items()}
 
 
+class ExtrudeConfig(BaseModel, frozen=True):
+    """Default extrusion settings of a cross section.
+
+    Registered per cross section with `KCLayout.set_extrude_config`. Per-strip
+    settings are keyed by the strip's index in the cross section's
+    `get_sections()` (main strip first).
+
+    Attributes:
+        ports: `(start_name, end_name, port_type)` per strip. `None` leaves the
+            port naming to the extruder's convention, `{}` creates no ports.
+        insets: `(start, end)` distances by which a strip is shortened at the
+            path ends [dbu].
+        simplify: Polygon simplification tolerance for all strips, or per
+            strip [dbu].
+        hidden: Strips that are not drawn.
+        add_bbox: Whether to draw the cross section's bbox sections.
+    """
+
+    ports: dict[int, tuple[str | None, str | None, str]] | None = None
+    insets: dict[int, tuple[dbu, dbu]] = Field(default_factory=dict)
+    simplify: dbu | dict[int, dbu] | None = None
+    hidden: frozenset[int] = frozenset()
+    add_bbox: bool = False
+
+    @model_validator(mode="after")
+    def _check_values(self) -> Self:
+        if any(i < 0 for i in self.section_indices()):
+            raise ValueError("Strip indices must be non-negative.")
+        if any(d < 0 for inset in self.insets.values() for d in inset):
+            raise ValueError("Insets must be non-negative.")
+        tolerances = (
+            self.simplify.values()
+            if isinstance(self.simplify, dict)
+            else [self.simplify or 0]
+        )
+        if any(t < 0 for t in tolerances):
+            raise ValueError("Simplify tolerances must be non-negative.")
+        return self
+
+    def section_indices(self) -> set[int]:
+        """Strip indices referenced by this config."""
+        indices = set(self.ports or {}) | set(self.insets) | self.hidden
+        if isinstance(self.simplify, dict):
+            indices |= set(self.simplify)
+        return indices
+
+
 class KCLayout(
     BaseModel, arbitrary_types_allowed=True, extra="allow", validate_assignment=True
 ):
@@ -262,6 +321,9 @@ class KCLayout(
         editable: Whether the layout should be opened in editable mode (default: True)
         rename_function: function that takes an iterable object of ports and renames
             them
+        extrude_configs: Default extrusion settings per cross section, keyed by
+            the cross section's `auto_name()`. Use `set_extrude_config` and
+            `get_extrude_config` to access them.
     """
 
     """Store layers, enclosures, cell functions, simulation_settings ...
@@ -290,6 +352,7 @@ class KCLayout(
     layout: kdb.Layout
     layer_enclosures: LayerEnclosureModel
     cross_sections: CrossSectionModel
+    extrude_configs: dict[str, ExtrudeConfig] = Field(default_factory=dict)
     enclosure: KCellEnclosure
     library: kdb.Library
 
@@ -2710,6 +2773,40 @@ class KCLayout(
             return self.get_asymmetrical_cross_section(cross_section)
         # spec dicts (CrossSectionSpec / DCrossSectionSpec) are always symmetric
         return self.get_symmetrical_cross_section(cross_section)
+
+    def set_extrude_config(
+        self, cross_section: str | AnyCrossSectionInput, config: ExtrudeConfig
+    ) -> None:
+        """Set the default extrusion settings of a cross section.
+
+        The cross section is registered if necessary. The config is stored under
+        the cross section's `auto_name()`, so it applies to the cross section
+        whether it is referenced by its name or by its structure.
+
+        Args:
+            cross_section: name or instance of the cross section.
+            config: extrusion settings. Replaces any existing config.
+
+        Raises:
+            ValueError: if the config references strips the cross section doesn't
+                have.
+        """
+        xs = self.get_base_cross_section(cross_section)
+        n_sections = len(xs.get_sections())
+        unknown = sorted(i for i in config.section_indices() if i >= n_sections)
+        if unknown:
+            raise ValueError(
+                f"Extrude config for cross section {xs.name!r} references strips "
+                f"{unknown}, but the cross section has {n_sections} strips."
+            )
+        self.extrude_configs[xs.auto_name()] = config
+
+    def get_extrude_config(
+        self, cross_section: str | AnyCrossSectionInput
+    ) -> ExtrudeConfig | None:
+        """Get the default extrusion settings of a cross section, if any."""
+        xs = self.get_base_cross_section(cross_section)
+        return self.extrude_configs.get(xs.auto_name())
 
     @overload
     def get_icross_section(
