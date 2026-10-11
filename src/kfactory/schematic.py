@@ -712,27 +712,23 @@ class Pin(BaseModel, extra="forbid"):
 
 
 class SchematicNet[T: (int, float)](BaseModel):
-    """Undirected association between two ports (refs or schematic ports).
+    """Undirected association between ports (refs or schematic ports).
 
-    The pair is stored in sorted order to ensure stable equality and hashing.
+    Subclasses may narrow `net`, e.g. to a sorted pair for stable equality and
+    hashing.
     """
 
-    net: tuple[PortRef | Port[T], PortRef | Port[T]]
+    net: tuple[PortRef | Port[T], ...]
 
 
 class RouteNet[T: (int, float)](SchematicNet[T]):
-    """Undirected association between two ports (refs or schematic ports).
-
-    The pair is stored in sorted order to ensure stable equality and hashing.
-    """
+    """Net of two or more ports (refs or schematic ports) belonging to a route."""
 
     route: str
-    net: tuple[PortRef, ...]
 
 
 class VirtualConnection[T: (int, float)](SchematicNet[T]):
     type: Literal["virtual"] = "virtual"
-    net: tuple[PortRef | Port[T], ...]
 
     @model_validator(mode="after")
     def _sort_data(self) -> Self:
@@ -1778,7 +1774,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     def add_route(
         self,
         name: str,
-        nets: Sequence[Sequence[PortRef]],
+        nets: Sequence[Sequence[PortRef | Port[T]]],
         routing_strategy: str,
         settings: dict[str, JSONSerializable],
     ) -> Route[T]:

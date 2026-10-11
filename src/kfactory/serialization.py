@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 class DecoratorList(UserList[Any]):
     """Hashable decorator for a list."""
 
-    def __hash__(self) -> int:
+    def __hash__(self) -> int:  # ty:ignore[invalid-attribute-override]
         """Hash the list."""
         return hash(tuple(self.data))
 
