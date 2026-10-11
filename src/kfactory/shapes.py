@@ -93,3 +93,8 @@ class VShapes:
     def size(self) -> int:
         """Emulate `[klayout.db.Shapes][klayout.db.Shapes]'s size'`."""
         return len(self._shapes)
+
+    def clear(self) -> None:
+        """Emulate `[klayout.db.Shapes][klayout.db.Shapes]'s clear'`."""
+        self._shapes.clear()
+        self._bbox = kdb.DBox()

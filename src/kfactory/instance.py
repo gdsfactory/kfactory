@@ -86,7 +86,7 @@ class ProtoInstance[T: (int, float)](GeometricObject[T]):
     ) -> ProtoPort[T]: ...
     @property
     @abstractmethod
-    def ports(self) -> ProtoInstancePorts[T, ProtoInstance[T]]: ...
+    def ports(self) -> ProtoInstancePorts[T, Any]: ...
 
     @property
     @abstractmethod
@@ -457,7 +457,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
                 case False, True:
                     dconn_trans = (
                         kdb.DCplxTrans.M90
-                        if mirror ^ self.dcplx_trans.mirror
+                        if mirror ^ self.dcplx_trans.mirror ^ p.dcplx_trans.mirror
                         else kdb.DCplxTrans.R180
                     )
                     op_dcplx_trans = op.dcplx_trans
@@ -494,7 +494,9 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
                     trans = op.trans * conn_trans * p.trans.inverted()
                 case False, True:
                     conn_trans = (
-                        kdb.Trans.M90 if mirror ^ self.trans.mirror else kdb.Trans.R180
+                        kdb.Trans.M90
+                        if mirror ^ self.trans.mirror ^ p.trans.mirror
+                        else kdb.Trans.R180
                     )
                     op_trans = op.trans
                     op_trans.mirror = False
@@ -1166,7 +1168,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             case False, True:
                 dconn_trans = (
                     kdb.DCplxTrans.M90
-                    if mirror ^ self.dcplx_trans.mirror
+                    if mirror ^ self.dcplx_trans.mirror ^ p.dcplx_trans.mirror
                     else kdb.DCplxTrans.R180
                 )
                 opt = op.dcplx_trans
