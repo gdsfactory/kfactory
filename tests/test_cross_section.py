@@ -782,6 +782,32 @@ def test_asym_waveguide_chain_o2_to_o1_with_mirror_true() -> None:
     assert not b.trans.mirror
 
 
+@pytest.mark.parametrize("angle", [0, 30])
+@pytest.mark.parametrize("virtual", [False, True])
+def test_asym_connect_moving_mirrored_port(
+    kcl: kf.KCLayout, angle: float, virtual: bool
+) -> None:
+    """o2 (M0) → o1 (R180) with the mirrored port moving needs no mirror.
+
+    Port mirror flags describe the profile; under `use_mirror=False` only
+    `mirror` (and the existing instance mirror) mirror the instance.
+    """
+    wg = _make_asym_wg(kcl, "wg")
+    parent = kf.VKCell(name="parent", kcl=kcl) if virtual else kcl.kcell("parent")
+    a = parent << wg
+    b = parent << wg
+    a.transform(kf.kdb.DCplxTrans(1, angle, False, 0, 0))
+
+    b.connect("o2", a, "o1")
+    expected = a.dcplx_trans * kf.kdb.DCplxTrans(-1, 0)
+    assert not b.dcplx_trans.is_mirror()
+    assert b.dcplx_trans.angle == pytest.approx(angle)
+    assert (b.dcplx_trans.disp - expected.disp).length() <= kcl.dbu
+
+    with pytest.raises(AsymmetricMirrorRequiredError):
+        b.connect("o2", a, "o1", mirror=True)
+
+
 def test_asym_waveguide_o1_to_o1_requires_one_mirror() -> None:
     """o1 (R180) ↔ o1 (R180) succeeds with `mirror=True` and result is mirrored."""
     kcl = kf.KCLayout("ASYM_WG_O1O1")
