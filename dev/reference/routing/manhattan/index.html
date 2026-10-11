@@ -8049,11 +8049,7 @@ dropping the middle points that are on a straight line as well as duplicates.</p
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/routing/manhattan.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2773</span>
-<span class="normal">2774</span>
-<span class="normal">2775</span>
-<span class="normal">2776</span>
-<span class="normal">2777</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2777</span>
 <span class="normal">2778</span>
 <span class="normal">2779</span>
 <span class="normal">2780</span>
@@ -8075,7 +8071,11 @@ dropping the middle points that are on a straight line as well as duplicates.</p
 <span class="normal">2796</span>
 <span class="normal">2797</span>
 <span class="normal">2798</span>
-<span class="normal">2799</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clean_points</span><span class="p">[</span><span class="n">TPoint</span><span class="p">:</span> <span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">)](</span>
+<span class="normal">2799</span>
+<span class="normal">2800</span>
+<span class="normal">2801</span>
+<span class="normal">2802</span>
+<span class="normal">2803</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clean_points</span><span class="p">[</span><span class="n">TPoint</span><span class="p">:</span> <span class="p">(</span><span class="n">kdb</span><span class="o">.</span><span class="n">Point</span><span class="p">,</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span><span class="p">)](</span>
     <span class="n">points</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">TPoint</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TPoint</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Remove useless points from a manhattan type of list.</span>
