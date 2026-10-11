@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.67">
+      <meta name="generator" content="zensical-0.0.69">
     
     
       
@@ -32,12 +32,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.4ae390e2.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.e15858d4.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.96d1a7e4.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.b27955a4.min.css">
       
       
 
@@ -77,14 +77,11 @@
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <label class="md-overlay" for="__drawer" aria-hidden="true"></label>
     <div data-md-component="skip">
-      
-        
-        <a href="#kfactory.schematic" class="md-skip">
-          Skip to content
-        </a>
-      
+      <a href="#__skip" class="md-skip">
+        Skip to content
+      </a>
     </div>
     <div data-md-component="announce">
       
@@ -7188,6 +7185,7 @@
 
               
               <article class="md-content__inner md-typeset">
+                <a id="__skip" tabindex="-1"></a>
                 
 
 
@@ -7198,7 +7196,7 @@
   
 
 
-  <h1 id="__skip">schematic</h1>
+  <h1>schematic</h1>
 
 <div class="doc doc-object doc-module">
 
@@ -7524,7 +7522,11 @@ Two <code>Port</code> objects (cell ports) cannot be connected directly.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/schematic.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">748</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">744</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
 <span class="normal">749</span>
 <span class="normal">750</span>
 <span class="normal">751</span>
@@ -7591,11 +7593,7 @@ Two <code>Port</code> objects (cell ports) cannot be connected directly.</p>
 <span class="normal">812</span>
 <span class="normal">813</span>
 <span class="normal">814</span>
-<span class="normal">815</span>
-<span class="normal">816</span>
-<span class="normal">817</span>
-<span class="normal">818</span>
-<span class="normal">819</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">SchematicNet</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+<span class="normal">815</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">SchematicNet</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Hard connection between two ports.</span>
 
 <span class="sd">    Enforced as {PortRef | PortArrayRef | Port} x {PortRef | PortArrayRef}.</span>
@@ -7706,7 +7704,11 @@ Two <code>Port</code> objects (cell ports) cannot be connected directly.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">788</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">784</span>
+<span class="normal">785</span>
+<span class="normal">786</span>
+<span class="normal">787</span>
+<span class="normal">788</span>
 <span class="normal">789</span>
 <span class="normal">790</span>
 <span class="normal">791</span>
@@ -7733,11 +7735,7 @@ Two <code>Port</code> objects (cell ports) cannot be connected directly.</p>
 <span class="normal">812</span>
 <span class="normal">813</span>
 <span class="normal">814</span>
-<span class="normal">815</span>
-<span class="normal">816</span>
-<span class="normal">817</span>
-<span class="normal">818</span>
-<span class="normal">819</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">815</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">from_list</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
@@ -7887,7 +7885,11 @@ with an lyrdb marker database. <code>None</code> silently ignores failures.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/schematic.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">822</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">818</span>
+<span class="normal">819</span>
+<span class="normal">820</span>
+<span class="normal">821</span>
+<span class="normal">822</span>
 <span class="normal">823</span>
 <span class="normal">824</span>
 <span class="normal">825</span>
@@ -7962,11 +7964,7 @@ with an lyrdb marker database. <code>None</code> silently ignores failures.</p>
 <span class="normal">894</span>
 <span class="normal">895</span>
 <span class="normal">896</span>
-<span class="normal">897</span>
-<span class="normal">898</span>
-<span class="normal">899</span>
-<span class="normal">900</span>
-<span class="normal">901</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Constraint</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="normal">897</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Constraint</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Base class for schematic constraints.</span>
 
 <span class="sd">    Constraints operate in two phases:</span>
@@ -8083,16 +8081,16 @@ with an lyrdb marker database. <code>None</code> silently ignores failures.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">863</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">859</span>
+<span class="normal">860</span>
+<span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span>
 <span class="normal">864</span>
 <span class="normal">865</span>
 <span class="normal">866</span>
 <span class="normal">867</span>
-<span class="normal">868</span>
-<span class="normal">869</span>
-<span class="normal">870</span>
-<span class="normal">871</span>
-<span class="normal">872</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="normal">868</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
@@ -8132,7 +8130,11 @@ such as <code>separation</code> and <code>bend90_radius</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">849</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span>
+<span class="normal">848</span>
+<span class="normal">849</span>
 <span class="normal">850</span>
 <span class="normal">851</span>
 <span class="normal">852</span>
@@ -8140,11 +8142,7 @@ such as <code>separation</code> and <code>bend90_radius</code>.</p>
 <span class="normal">854</span>
 <span class="normal">855</span>
 <span class="normal">856</span>
-<span class="normal">857</span>
-<span class="normal">858</span>
-<span class="normal">859</span>
-<span class="normal">860</span>
-<span class="normal">861</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="normal">857</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">enforce</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
@@ -8183,7 +8181,11 @@ constraint-specific visualisation.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">874</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">870</span>
+<span class="normal">871</span>
+<span class="normal">872</span>
+<span class="normal">873</span>
+<span class="normal">874</span>
 <span class="normal">875</span>
 <span class="normal">876</span>
 <span class="normal">877</span>
@@ -8206,11 +8208,7 @@ constraint-specific visualisation.</p>
 <span class="normal">894</span>
 <span class="normal">895</span>
 <span class="normal">896</span>
-<span class="normal">897</span>
-<span class="normal">898</span>
-<span class="normal">899</span>
-<span class="normal">900</span>
-<span class="normal">901</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lyrdb_markers</span><span class="p">(</span>
+<span class="normal">897</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lyrdb_markers</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
     <span class="n">schematic</span><span class="p">:</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
@@ -8400,7 +8398,11 @@ constraint-specific visualisation.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/schematic.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2523</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2519</span>
+<span class="normal">2520</span>
+<span class="normal">2521</span>
+<span class="normal">2522</span>
+<span class="normal">2523</span>
 <span class="normal">2524</span>
 <span class="normal">2525</span>
 <span class="normal">2526</span>
@@ -8409,11 +8411,7 @@ constraint-specific visualisation.</p>
 <span class="normal">2529</span>
 <span class="normal">2530</span>
 <span class="normal">2531</span>
-<span class="normal">2532</span>
-<span class="normal">2533</span>
-<span class="normal">2534</span>
-<span class="normal">2535</span>
-<span class="normal">2536</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DSchematic</span><span class="p">(</span><span class="n">TSchematic</span><span class="p">[</span><span class="n">um</span><span class="p">]):</span>
+<span class="normal">2532</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DSchematic</span><span class="p">(</span><span class="n">TSchematic</span><span class="p">[</span><span class="n">um</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Schematic with a base unit of um for placements."""</span>
 
     <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"um"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"um"</span>
@@ -8511,15 +8509,15 @@ constraint-specific visualisation.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2528</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2524</span>
+<span class="normal">2525</span>
+<span class="normal">2526</span>
+<span class="normal">2527</span>
+<span class="normal">2528</span>
 <span class="normal">2529</span>
 <span class="normal">2530</span>
 <span class="normal">2531</span>
-<span class="normal">2532</span>
-<span class="normal">2533</span>
-<span class="normal">2534</span>
-<span class="normal">2535</span>
-<span class="normal">2536</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">2532</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">from_pic_yml</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DSchematic</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Validate a pydantic model instance.</span>
 
@@ -8920,7 +8918,11 @@ are within <code>tolerance</code> of each other.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/schematic.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">904</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">900</span>
+<span class="normal">901</span>
+<span class="normal">902</span>
+<span class="normal">903</span>
+<span class="normal">904</span>
 <span class="normal">905</span>
 <span class="normal">906</span>
 <span class="normal">907</span>
@@ -9002,11 +9004,7 @@ are within <code>tolerance</code> of each other.</p>
 <span class="normal">983</span>
 <span class="normal">984</span>
 <span class="normal">985</span>
-<span class="normal">986</span>
-<span class="normal">987</span>
-<span class="normal">988</span>
-<span class="normal">989</span>
-<span class="normal">990</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PathLengthMatch</span><span class="p">(</span><span class="n">Constraint</span><span class="p">):</span>
+<span class="normal">986</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PathLengthMatch</span><span class="p">(</span><span class="n">Constraint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Constraint that equalises optical path lengths across a set of routes.</span>
 
 <span class="sd">    Uses the loop-based path-length matching already built into the optical</span>
@@ -9126,18 +9124,18 @@ are within <code>tolerance</code> of each other.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">949</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
 <span class="normal">950</span>
 <span class="normal">951</span>
 <span class="normal">952</span>
 <span class="normal">953</span>
 <span class="normal">954</span>
 <span class="normal">955</span>
-<span class="normal">956</span>
-<span class="normal">957</span>
-<span class="normal">958</span>
-<span class="normal">959</span>
-<span class="normal">960</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span>
+<span class="normal">956</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
     <span class="n">schematic</span><span class="p">:</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
@@ -9175,7 +9173,11 @@ such as <code>separation</code> and <code>bend90_radius</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">929</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">925</span>
+<span class="normal">926</span>
+<span class="normal">927</span>
+<span class="normal">928</span>
+<span class="normal">929</span>
 <span class="normal">930</span>
 <span class="normal">931</span>
 <span class="normal">932</span>
@@ -9189,11 +9191,7 @@ such as <code>separation</code> and <code>bend90_radius</code>.</p>
 <span class="normal">940</span>
 <span class="normal">941</span>
 <span class="normal">942</span>
-<span class="normal">943</span>
-<span class="normal">944</span>
-<span class="normal">945</span>
-<span class="normal">946</span>
-<span class="normal">947</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">enforce</span><span class="p">(</span>
+<span class="normal">943</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">enforce</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
     <span class="n">routers</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManhattanRouter</span><span class="p">],</span>
@@ -9238,7 +9236,11 @@ constraint-specific visualisation.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">962</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">958</span>
+<span class="normal">959</span>
+<span class="normal">960</span>
+<span class="normal">961</span>
+<span class="normal">962</span>
 <span class="normal">963</span>
 <span class="normal">964</span>
 <span class="normal">965</span>
@@ -9262,11 +9264,7 @@ constraint-specific visualisation.</p>
 <span class="normal">983</span>
 <span class="normal">984</span>
 <span class="normal">985</span>
-<span class="normal">986</span>
-<span class="normal">987</span>
-<span class="normal">988</span>
-<span class="normal">989</span>
-<span class="normal">990</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lyrdb_markers</span><span class="p">(</span>
+<span class="normal">986</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lyrdb_markers</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">c</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
     <span class="n">schematic</span><span class="p">:</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
@@ -11104,41 +11102,37 @@ instance ports via <code>PortRef</code>/<code>PortArrayRef</code>.</p>
       pydantic-model
    (kfactory.schematic.SchematicNet)" href="./#kfactory.schematic.SchematicNet">SchematicNet</a>[<span title="kfactory.schematic.RouteNet[T]">T</span>]</code></p>
 
-        <p>Undirected association between two ports (refs or schematic ports).</p>
-<p>The pair is stored in sorted order to ensure stable equality and hashing.</p>
+        <p>Net of two or more ports (refs or schematic ports) belonging to a route.</p>
 
     
 
         <p>Fields:</p>
         <ul>
             <li>
-              <code><span title="kfactory.schematic.RouteNet.route">route</span></code>
-                (<code><span title="str">str</span></code>)
+              <code><span title="kfactory.schematic.RouteNet.net">net</span></code>
+                (<code><span title="tuple">tuple</span>[<span title="kfnetlist.PortRef">PortRef</span> | <a class="autorefs autorefs-internal" title="Port
+
+
+  
+      pydantic-model
+   (kfactory.schematic.Port)" href="./#kfactory.schematic.Port">Port</a>[<span title="kfactory.schematic.SchematicNet[T]">T</span>], ...]</code>)
             </li>
             <li>
-              <code><span title="kfactory.schematic.RouteNet.net">net</span></code>
-                (<code><span title="tuple">tuple</span>[<span title="kfnetlist.PortRef">PortRef</span>, ...]</code>)
+              <code><span title="kfactory.schematic.RouteNet.route">route</span></code>
+                (<code><span title="str">str</span></code>)
             </li>
         </ul>
 
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/schematic.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">723</span>
-<span class="normal">724</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">724</span>
 <span class="normal">725</span>
 <span class="normal">726</span>
-<span class="normal">727</span>
-<span class="normal">728</span>
-<span class="normal">729</span>
-<span class="normal">730</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RouteNet</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">SchematicNet</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">"""Undirected association between two ports (refs or schematic ports).</span>
-
-<span class="sd">    The pair is stored in sorted order to ensure stable equality and hashing.</span>
-<span class="sd">    """</span>
+<span class="normal">727</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RouteNet</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">SchematicNet</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""Net of two or more ports (refs or schematic ports) belonging to a route."""</span>
 
     <span class="n">route</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">net</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">PortRef</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -11310,7 +11304,11 @@ instance ports via <code>PortRef</code>/<code>PortArrayRef</code>.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/schematic.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2507</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2503</span>
+<span class="normal">2504</span>
+<span class="normal">2505</span>
+<span class="normal">2506</span>
+<span class="normal">2507</span>
 <span class="normal">2508</span>
 <span class="normal">2509</span>
 <span class="normal">2510</span>
@@ -11319,11 +11317,7 @@ instance ports via <code>PortRef</code>/<code>PortArrayRef</code>.</p>
 <span class="normal">2513</span>
 <span class="normal">2514</span>
 <span class="normal">2515</span>
-<span class="normal">2516</span>
-<span class="normal">2517</span>
-<span class="normal">2518</span>
-<span class="normal">2519</span>
-<span class="normal">2520</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Schematic</span><span class="p">(</span><span class="n">TSchematic</span><span class="p">[</span><span class="n">dbu</span><span class="p">]):</span>
+<span class="normal">2516</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Schematic</span><span class="p">(</span><span class="n">TSchematic</span><span class="p">[</span><span class="n">dbu</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Schematic with a base unit of dbu for placements."""</span>
 
     <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"dbu"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"dbu"</span>
@@ -11421,15 +11415,15 @@ instance ports via <code>PortRef</code>/<code>PortArrayRef</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2512</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2508</span>
+<span class="normal">2509</span>
+<span class="normal">2510</span>
+<span class="normal">2511</span>
+<span class="normal">2512</span>
 <span class="normal">2513</span>
 <span class="normal">2514</span>
 <span class="normal">2515</span>
-<span class="normal">2516</span>
-<span class="normal">2517</span>
-<span class="normal">2518</span>
-<span class="normal">2519</span>
-<span class="normal">2520</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">2516</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">from_pic_yml</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schematic</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Validate a pydantic model instance.</span>
 
@@ -12236,8 +12230,9 @@ ports: Accessing <code>PortRef</code>/<code>PortArrayRef</code> resulting from t
             <p class="doc doc-class-bases">
               Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
-        <p>Undirected association between two ports (refs or schematic ports).</p>
-<p>The pair is stored in sorted order to ensure stable equality and hashing.</p>
+        <p>Undirected association between ports (refs or schematic ports).</p>
+<p>Subclasses may narrow <code>net</code>, e.g. to a sorted pair for stable equality and
+hashing.</p>
 
     
 
@@ -12250,12 +12245,7 @@ ports: Accessing <code>PortRef</code>/<code>PortArrayRef</code> resulting from t
 
   
       pydantic-model
-   (kfactory.schematic.Port)" href="./#kfactory.schematic.Port">Port</a>[<span title="kfactory.schematic.SchematicNet[T]">T</span>], <span title="kfnetlist.PortRef">PortRef</span> | <a class="autorefs autorefs-internal" title="Port
-
-
-  
-      pydantic-model
-   (kfactory.schematic.Port)" href="./#kfactory.schematic.Port">Port</a>[<span title="kfactory.schematic.SchematicNet[T]">T</span>]]</code>)
+   (kfactory.schematic.Port)" href="./#kfactory.schematic.Port">Port</a>[<span title="kfactory.schematic.SchematicNet[T]">T</span>], ...]</code>)
             </li>
         </ul>
 
@@ -12268,13 +12258,15 @@ ports: Accessing <code>PortRef</code>/<code>PortArrayRef</code> resulting from t
 <span class="normal">717</span>
 <span class="normal">718</span>
 <span class="normal">719</span>
-<span class="normal">720</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SchematicNet</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">BaseModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Undirected association between two ports (refs or schematic ports).</span>
+<span class="normal">720</span>
+<span class="normal">721</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SchematicNet</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Undirected association between ports (refs or schematic ports).</span>
 
-<span class="sd">    The pair is stored in sorted order to ensure stable equality and hashing.</span>
+<span class="sd">    Subclasses may narrow `net`, e.g. to a sorted pair for stable equality and</span>
+<span class="sd">    hashing.</span>
 <span class="sd">    """</span>
 
-    <span class="n">net</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span>
+    <span class="n">net</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -12609,7 +12601,11 @@ referencing and creation of the cell.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/schematic.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 993</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 989</span>
+<span class="normal"> 990</span>
+<span class="normal"> 991</span>
+<span class="normal"> 992</span>
+<span class="normal"> 993</span>
 <span class="normal"> 994</span>
 <span class="normal"> 995</span>
 <span class="normal"> 996</span>
@@ -13958,11 +13954,7 @@ referencing and creation of the cell.</p>
 <span class="normal">2339</span>
 <span class="normal">2340</span>
 <span class="normal">2341</span>
-<span class="normal">2342</span>
-<span class="normal">2343</span>
-<span class="normal">2344</span>
-<span class="normal">2345</span>
-<span class="normal">2346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TSchematic</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">"forbid"</span><span class="p">):</span>
+<span class="normal">2342</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TSchematic</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)](</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">"forbid"</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Schematic of a cell / component.</span>
 
 <span class="sd">    Attributes:</span>
@@ -14750,7 +14742,7 @@ referencing and creation of the cell.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_route</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">nets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">PortRef</span><span class="p">]],</span>
+        <span class="n">nets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">]]],</span>
         <span class="n">routing_strategy</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Route</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
@@ -15438,7 +15430,11 @@ the constraint already exist in the schematic.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1748</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1744</span>
+<span class="normal">1745</span>
+<span class="normal">1746</span>
+<span class="normal">1747</span>
+<span class="normal">1748</span>
 <span class="normal">1749</span>
 <span class="normal">1750</span>
 <span class="normal">1751</span>
@@ -15462,11 +15458,7 @@ the constraint already exist in the schematic.</p>
 <span class="normal">1769</span>
 <span class="normal">1770</span>
 <span class="normal">1771</span>
-<span class="normal">1772</span>
-<span class="normal">1773</span>
-<span class="normal">1774</span>
-<span class="normal">1775</span>
-<span class="normal">1776</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">:</span> <span class="n">Constraint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Constraint</span><span class="p">:</span>
+<span class="normal">1772</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">:</span> <span class="n">Constraint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Constraint</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Register a constraint on this schematic.</span>
 
 <span class="sd">    Validates that all ``route_names`` and ``instance_names`` referenced by</span>
@@ -15594,7 +15586,11 @@ the constraint already exist in the schematic.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1297</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1293</span>
+<span class="normal">1294</span>
+<span class="normal">1295</span>
+<span class="normal">1296</span>
+<span class="normal">1297</span>
 <span class="normal">1298</span>
 <span class="normal">1299</span>
 <span class="normal">1300</span>
@@ -15603,11 +15599,7 @@ the constraint already exist in the schematic.</p>
 <span class="normal">1303</span>
 <span class="normal">1304</span>
 <span class="normal">1305</span>
-<span class="normal">1306</span>
-<span class="normal">1307</span>
-<span class="normal">1308</span>
-<span class="normal">1309</span>
-<span class="normal">1310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">pin</span><span class="p">:</span> <span class="n">PinRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1306</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">pin</span><span class="p">:</span> <span class="n">PinRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Expose an existing instance pin as a schematic top-level pin.</span>
 
 <span class="sd">    Args:</span>
@@ -15715,7 +15707,11 @@ the constraint already exist in the schematic.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1102</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1098</span>
+<span class="normal">1099</span>
+<span class="normal">1100</span>
+<span class="normal">1101</span>
+<span class="normal">1102</span>
 <span class="normal">1103</span>
 <span class="normal">1104</span>
 <span class="normal">1105</span>
@@ -15727,11 +15723,7 @@ the constraint already exist in the schematic.</p>
 <span class="normal">1111</span>
 <span class="normal">1112</span>
 <span class="normal">1113</span>
-<span class="normal">1114</span>
-<span class="normal">1115</span>
-<span class="normal">1116</span>
-<span class="normal">1117</span>
-<span class="normal">1118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_port</span><span class="p">(</span>
+<span class="normal">1114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_port</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">PortArrayRef</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Expose an existing instance port as a schematic top-level port.</span>
@@ -15762,7 +15754,7 @@ the constraint already exist in the schematic.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add_route</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">PortRef</span><span class="p">]],</span> <span class="n">routing_strategy</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Route</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">add_route</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">]]],</span> <span class="n">routing_strategy</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Route</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -15802,7 +15794,12 @@ the constraint already exist in the schematic.</p>
                 <code>nets</code>
             </td>
             <td>
-                  <code><span title="collections.abc.Sequence">Sequence</span>[<span title="collections.abc.Sequence">Sequence</span>[<span title="kfnetlist.PortRef">PortRef</span>]]</code>
+                  <code><span title="collections.abc.Sequence">Sequence</span>[<span title="collections.abc.Sequence">Sequence</span>[<span title="kfnetlist.PortRef">PortRef</span> | <a class="autorefs autorefs-internal" title="Port
+
+
+  
+      pydantic-model
+   (kfactory.schematic.Port)" href="./#kfactory.schematic.Port">Port</a>[<span title="kfactory.schematic.TSchematic[T]">T</span>]]]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -15903,7 +15900,11 @@ that belong to the same net.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1778</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1774</span>
+<span class="normal">1775</span>
+<span class="normal">1776</span>
+<span class="normal">1777</span>
+<span class="normal">1778</span>
 <span class="normal">1779</span>
 <span class="normal">1780</span>
 <span class="normal">1781</span>
@@ -15937,14 +15938,10 @@ that belong to the same net.</p>
 <span class="normal">1809</span>
 <span class="normal">1810</span>
 <span class="normal">1811</span>
-<span class="normal">1812</span>
-<span class="normal">1813</span>
-<span class="normal">1814</span>
-<span class="normal">1815</span>
-<span class="normal">1816</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_route</span><span class="p">(</span>
+<span class="normal">1812</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_route</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">nets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">PortRef</span><span class="p">]],</span>
+    <span class="n">nets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">]]],</span>
     <span class="n">routing_strategy</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Route</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
@@ -16100,7 +16097,11 @@ that belong to the same net.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1856</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1852</span>
+<span class="normal">1853</span>
+<span class="normal">1854</span>
+<span class="normal">1855</span>
+<span class="normal">1856</span>
 <span class="normal">1857</span>
 <span class="normal">1858</span>
 <span class="normal">1859</span>
@@ -16380,11 +16381,7 @@ that belong to the same net.</p>
 <span class="normal">2133</span>
 <span class="normal">2134</span>
 <span class="normal">2135</span>
-<span class="normal">2136</span>
-<span class="normal">2137</span>
-<span class="normal">2138</span>
-<span class="normal">2139</span>
-<span class="normal">2140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">code_str</span><span class="p">(</span>
+<span class="normal">2136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">code_str</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">imports</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">_schematic_default_imports</span><span class="p">,</span>
     <span class="n">kfactory_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -16838,7 +16835,11 @@ not fully deterministic, therefore this is disabled by default.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1450</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1446</span>
+<span class="normal">1447</span>
+<span class="normal">1448</span>
+<span class="normal">1449</span>
+<span class="normal">1450</span>
 <span class="normal">1451</span>
 <span class="normal">1452</span>
 <span class="normal">1453</span>
@@ -17130,11 +17131,7 @@ not fully deterministic, therefore this is disabled by default.</p>
 <span class="normal">1739</span>
 <span class="normal">1740</span>
 <span class="normal">1741</span>
-<span class="normal">1742</span>
-<span class="normal">1743</span>
-<span class="normal">1744</span>
-<span class="normal">1745</span>
-<span class="normal">1746</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_cell</span><span class="p">(</span>
+<span class="normal">1742</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_cell</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">],</span>
     <span class="n">factories</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span>
@@ -17558,7 +17555,11 @@ not fully deterministic, therefore this is disabled by default.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1312</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1308</span>
+<span class="normal">1309</span>
+<span class="normal">1310</span>
+<span class="normal">1311</span>
+<span class="normal">1312</span>
 <span class="normal">1313</span>
 <span class="normal">1314</span>
 <span class="normal">1315</span>
@@ -17583,11 +17584,7 @@ not fully deterministic, therefore this is disabled by default.</p>
 <span class="normal">1334</span>
 <span class="normal">1335</span>
 <span class="normal">1336</span>
-<span class="normal">1337</span>
-<span class="normal">1338</span>
-<span class="normal">1339</span>
-<span class="normal">1340</span>
-<span class="normal">1341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_connection</span><span class="p">(</span>
+<span class="normal">1337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_connection</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">port1</span><span class="p">:</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">port2</span><span class="p">:</span> <span class="n">PortRef</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Connection</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Create and register a connection between two instance ports.</span>
@@ -17804,7 +17801,11 @@ with <code>inst.place(...)</code> afterwards.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1050</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1046</span>
+<span class="normal">1047</span>
+<span class="normal">1048</span>
+<span class="normal">1049</span>
+<span class="normal">1050</span>
 <span class="normal">1051</span>
 <span class="normal">1052</span>
 <span class="normal">1053</span>
@@ -17850,11 +17851,7 @@ with <code>inst.place(...)</code> afterwards.</p>
 <span class="normal">1093</span>
 <span class="normal">1094</span>
 <span class="normal">1095</span>
-<span class="normal">1096</span>
-<span class="normal">1097</span>
-<span class="normal">1098</span>
-<span class="normal">1099</span>
-<span class="normal">1100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_inst</span><span class="p">(</span>
+<span class="normal">1096</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_inst</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">component</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -18062,7 +18059,11 @@ empty, or any port name is not present in <code>self.ports</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1257</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1253</span>
+<span class="normal">1254</span>
+<span class="normal">1255</span>
+<span class="normal">1256</span>
+<span class="normal">1257</span>
 <span class="normal">1258</span>
 <span class="normal">1259</span>
 <span class="normal">1260</span>
@@ -18096,11 +18097,7 @@ empty, or any port name is not present in <code>self.ports</code>.</p>
 <span class="normal">1288</span>
 <span class="normal">1289</span>
 <span class="normal">1290</span>
-<span class="normal">1291</span>
-<span class="normal">1292</span>
-<span class="normal">1293</span>
-<span class="normal">1294</span>
-<span class="normal">1295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_pin</span><span class="p">(</span>
+<span class="normal">1291</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_pin</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -18191,7 +18188,11 @@ empty, or any port name is not present in <code>self.ports</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1120</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1116</span>
+<span class="normal">1117</span>
+<span class="normal">1118</span>
+<span class="normal">1119</span>
+<span class="normal">1120</span>
 <span class="normal">1121</span>
 <span class="normal">1122</span>
 <span class="normal">1123</span>
@@ -18212,11 +18213,7 @@ empty, or any port name is not present in <code>self.ports</code>.</p>
 <span class="normal">1138</span>
 <span class="normal">1139</span>
 <span class="normal">1140</span>
-<span class="normal">1141</span>
-<span class="normal">1142</span>
-<span class="normal">1143</span>
-<span class="normal">1144</span>
-<span class="normal">1145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_port</span><span class="p">(</span>
+<span class="normal">1141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_port</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -18320,7 +18317,11 @@ placements, etc.) are translated to the current schema.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2332</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2328</span>
+<span class="normal">2329</span>
+<span class="normal">2330</span>
+<span class="normal">2331</span>
+<span class="normal">2332</span>
 <span class="normal">2333</span>
 <span class="normal">2334</span>
 <span class="normal">2335</span>
@@ -18330,11 +18331,7 @@ placements, etc.) are translated to the current schema.</p>
 <span class="normal">2339</span>
 <span class="normal">2340</span>
 <span class="normal">2341</span>
-<span class="normal">2342</span>
-<span class="normal">2343</span>
-<span class="normal">2344</span>
-<span class="normal">2345</span>
-<span class="normal">2346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">2342</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">from_pic_yml</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TSchematic</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
@@ -18376,7 +18373,11 @@ netlist is sorted for stable output.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1343</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1339</span>
+<span class="normal">1340</span>
+<span class="normal">1341</span>
+<span class="normal">1342</span>
+<span class="normal">1343</span>
 <span class="normal">1344</span>
 <span class="normal">1345</span>
 <span class="normal">1346</span>
@@ -18464,11 +18465,7 @@ netlist is sorted for stable output.</p>
 <span class="normal">1428</span>
 <span class="normal">1429</span>
 <span class="normal">1430</span>
-<span class="normal">1431</span>
-<span class="normal">1432</span>
-<span class="normal">1433</span>
-<span class="normal">1434</span>
-<span class="normal">1435</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">netlist</span><span class="p">(</span>
+<span class="normal">1431</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">netlist</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">add_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">factories</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]]</span>
@@ -18592,7 +18589,11 @@ netlist is sorted for stable output.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1147</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1143</span>
+<span class="normal">1144</span>
+<span class="normal">1145</span>
+<span class="normal">1146</span>
+<span class="normal">1147</span>
 <span class="normal">1148</span>
 <span class="normal">1149</span>
 <span class="normal">1150</span>
@@ -18696,11 +18697,7 @@ netlist is sorted for stable output.</p>
 <span class="normal">1248</span>
 <span class="normal">1249</span>
 <span class="normal">1250</span>
-<span class="normal">1251</span>
-<span class="normal">1252</span>
-<span class="normal">1253</span>
-<span class="normal">1254</span>
-<span class="normal">1255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">place_port</span><span class="p">(</span>
+<span class="normal">1251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">place_port</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">cell</span><span class="p">:</span> <span class="n">KCell</span><span class="p">,</span>
@@ -18949,7 +18946,11 @@ netlist is sorted for stable output.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/schematic.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3077</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3073</span>
+<span class="normal">3074</span>
+<span class="normal">3075</span>
+<span class="normal">3076</span>
+<span class="normal">3077</span>
 <span class="normal">3078</span>
 <span class="normal">3079</span>
 <span class="normal">3080</span>
@@ -18968,11 +18969,7 @@ netlist is sorted for stable output.</p>
 <span class="normal">3093</span>
 <span class="normal">3094</span>
 <span class="normal">3095</span>
-<span class="normal">3096</span>
-<span class="normal">3097</span>
-<span class="normal">3098</span>
-<span class="normal">3099</span>
-<span class="normal">3100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_schematic</span><span class="p">(</span>
+<span class="normal">3096</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_schematic</span><span class="p">(</span>
     <span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"dbu"</span><span class="p">,</span> <span class="s2">"um"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"dbu"</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schematic</span> <span class="o">|</span> <span class="n">DSchematic</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Read a schematic from a YAML file.</span>
@@ -19057,7 +19054,8 @@ netlist is sorted for stable output.</p>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+      
+<div class="md-progress" data-md-component="progress" role="progressbar" aria-label="Loading"></div>
     
     
     
@@ -19072,7 +19070,7 @@ netlist is sorted for stable output.</p>
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky","navigation.instant","navigation.instant.progress","navigation.path","navigation.indexes"],"redirect":"../../redirect.json","search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.67a597eb.min.js"></script>
+      <script src="../../assets/javascripts/bundle.8b1c90bd.min.js"></script>
       
     
   </body>
