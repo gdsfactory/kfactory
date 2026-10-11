@@ -3759,22 +3759,26 @@ def show(
     if library_save_options is None:
         library_save_options = save_layout_options()
 
-    # Find the file that calls stack
-    try:
-        stk = inspect.getouterframes(inspect.currentframe())
-        frame = stk[2]
-        frame_filename_stem = Path(frame.filename).stem
+    # Find the file that calls stack (first frame outside of kfactory)
+    frame = inspect.currentframe()
+    while frame is not None and frame.f_globals.get("__name__", "").startswith(
+        "kfactory."
+    ):
+        frame = frame.f_back
+    if frame is not None:
+        code = frame.f_code
+        frame_filename_stem = Path(code.co_filename).stem
         if frame_filename_stem.startswith("<ipython-input"):  # IPython Case
             name = "ipython"
-        elif frame.function != "<module>":
-            name = clean_name(frame_filename_stem + "_" + frame.function)
+        elif code.co_name != "<module>":
+            name = clean_name(frame_filename_stem + "_" + code.co_name)
         else:
             name = clean_name(frame_filename_stem)
-    except Exception:
+    else:
         try:
             from __main__ import __file__ as mf
 
-            name = clean_name(mf)
+            name = clean_name(Path(mf).stem)
         except ImportError:
             name = "shell"
 
