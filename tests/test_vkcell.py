@@ -156,3 +156,18 @@ def test_vkcell_flatten_is_idempotent() -> None:
     parent.flatten()
 
     assert parent.shapes(layer).size() == 1
+
+
+def test_vshapes_clear() -> None:
+    c = kf.VKCell(name="test_vshapes_clear")
+    c.shapes(1).insert(kdb.DBox(0, 0, 10, 10))
+    c.shapes(1).insert(kdb.DBox(20, 20, 30, 30))
+    assert c.shapes(1).size() == 2
+
+    c.shapes(1).clear()
+    assert c.shapes(1).size() == 0
+    assert list(c.shapes(1)) == []
+    assert c.shapes(1).bbox().empty()
+
+    c.shapes(1).insert(kdb.DBox(5, 5, 6, 6))
+    assert c.shapes(1).bbox() == kdb.DBox(5, 5, 6, 6)
