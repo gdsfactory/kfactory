@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - main
-  pull_request:
+  # pull_request_target gets a writable token on PRs from forks too.
+  # Never check out or run PR code in this workflow.
+  pull_request_target:
     types: [edited, opened, reopened, synchronize, unlabeled, labeled]
 
 permissions:
@@ -12,21 +14,29 @@ permissions:
 
 jobs:
   update_release_draft:
-    if: github.event_name == 'push' || github.base_ref == 'main'
+    if: github.event_name == 'push'
     permissions:
       contents: write
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      # Drafts your next Release notes as Pull Requests are merged into "master"
+      # Drafts your next Release notes as Pull Requests are merged into "main"
       - uses: release-drafter/release-drafter@v7
         with:
           commitish: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  autolabel:
+    if: github.event_name == 'pull_request_target' && github.base_ref == 'main'
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter/autolabeler@v7
   require_label:
-    if: github.event.pull_request
-    needs: update_release_draft
+    # run after autolabel so its labels count, but don't skip if it failed
+    if: ${{ !cancelled() && github.event_name == 'pull_request_target' && github.base_ref == 'main' }}
+    needs: autolabel
     runs-on: ubuntu-latest
     permissions:
       issues: write

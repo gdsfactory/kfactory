@@ -2250,6 +2250,10 @@ def _route_to_side(
                     - (bbox.bottom - hw1 - separation)
                     - rs.router.bend90_radius
                 )
+        tv = rs.tv
+        if tv.y == 0 and rs.ta == ANGLE_180 and tv.x >= 0:
+            # don't overshoot the other side if it's straight ahead
+            s = min(s, tv.x)
         rs.straight(s)
         tv = rs.tv
         x = tv.x
@@ -2263,7 +2267,7 @@ def _route_to_side(
                         rs.straight(rs.router.bend90_radius + x)
                 case 0 if x > 0:
                     rs.straight(x)
-            if not (y == 0 and rs.ta == ANGLE_180 and x > 0):
+            if not (y == 0 and rs.ta == ANGLE_180 and x >= 0):
                 rs.left()
             bbox += rs.t * kdb.Point(0, -hw2)
         else:
@@ -2275,7 +2279,7 @@ def _route_to_side(
                         rs.straight(rs.router.bend90_radius + x)
                 case 0 if x > 0:
                     rs.straight(x)
-            if not (y == 0 and rs.ta == ANGLE_180 and x > 0):
+            if not (y == 0 and rs.ta == ANGLE_180 and x >= 0):
                 rs.right()
             bbox += rs.t * kdb.Point(0, hw2)
 
