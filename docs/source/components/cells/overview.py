@@ -17,21 +17,21 @@
 # %% [markdown]
 # # Components & Factories
 #
-# kfactory ships a library of **built-in photonic components** under `kf.cells` and the
-# **factories** that generate them under `kf.factories`.
+# kfactory ships a library of **built-in photonic components** under [`kf.cells`][kfactory.cells] and the
+# **factories** that generate them under [`kf.factories`][kfactory.factories].
 #
 # | Component | Cell function | Factory |
 # |---|---|---|
-# | Straight waveguide | `kf.cells.straight.straight` | `kf.factories.straight.straight_dbu_factory` |
-# | Euler bend | `kf.cells.euler.bend_euler` | `kf.factories.euler.bend_euler_factory` |
-# | Euler S-bend | `kf.cells.euler.bend_s_euler` | `kf.factories.euler.bend_s_euler_factory` |
-# | Circular bend | `kf.cells.circular.bend_circular` | `kf.factories.circular.bend_circular_factory` |
-# | Taper | `kf.cells.taper.taper` | `kf.factories.taper.taper_factory` |
-# | Bezier S-bend | `kf.cells.bezier.bend_s` | `kf.factories.bezier.bend_s_bezier_factory` |
+# | Straight waveguide | [`kf.cells.straight.straight`][kfactory.cells.straight.straight] | [`kf.factories.straight.straight_dbu_factory`][kfactory.factories.straight.straight_dbu_factory] |
+# | Euler bend | [`kf.cells.euler.bend_euler`][kfactory.cells.euler.bend_euler] | [`kf.factories.euler.bend_euler_factory`][kfactory.factories.euler.bend_euler_factory] |
+# | Euler S-bend | [`kf.cells.euler.bend_s_euler`][kfactory.cells.euler.bend_s_euler] | [`kf.factories.euler.bend_s_euler_factory`][kfactory.factories.euler.bend_s_euler_factory] |
+# | Circular bend | [`kf.cells.circular.bend_circular`][kfactory.cells.circular.bend_circular] | [`kf.factories.circular.bend_circular_factory`][kfactory.factories.circular.bend_circular_factory] |
+# | Taper | [`kf.cells.taper.taper`][kfactory.cells.taper.taper] | [`kf.factories.taper.taper_factory`][kfactory.factories.taper.taper_factory] |
+# | Bezier S-bend | [`kf.cells.bezier.bend_s`][kfactory.cells.bezier.bend_s] | [`kf.factories.bezier.bend_s_bezier_factory`][kfactory.factories.bezier.bend_s_bezier_factory] |
 #
 # ## Cells vs. Factories
 #
-# Every **cell function** under `kf.cells.*` uses the built-in demo `KCLayout` instance
+# Every **cell function** under `kf.cells.*` uses the built-in demo [`KCLayout`][kfactory.layout.KCLayout] instance
 # (`kf.cells.demo`). These are convenient for quick prototyping and learning.
 #
 # A **factory** is a function that *creates* a cell function bound to a specific
@@ -64,8 +64,8 @@ kf.kcl.infos = L
 # %% [markdown]
 # ## Straight waveguide
 #
-# `kf.cells.straight.straight` creates a rectangle of material with optional
-# slab/exclude layers defined by a `LayerEnclosure`.
+# [`kf.cells.straight.straight`][kfactory.cells.straight.straight] creates a rectangle of material with optional
+# slab/exclude layers defined by a [`LayerEnclosure`][kfactory.enclosure.LayerEnclosure].
 #
 # ```
 # ┌──────────────────────────────┐
@@ -80,7 +80,7 @@ kf.kcl.infos = L
 # ```
 #
 # Arguments are in **µm** (the `um` variant). All coordinates are converted to DBU
-# internally. There is also a `straight_dbu` function for DBU-native code.
+# internally. There is also a [`straight_dbu`][kfactory.cells.straight.straight_dbu] function for DBU-native code.
 
 # %%
 from kfactory.cells.straight import straight
@@ -92,7 +92,7 @@ wg.plot()
 # %% [markdown]
 # ### With cladding via LayerEnclosure
 #
-# Wrap the core with an oxide/slab layer using `LayerEnclosure`:
+# Wrap the core with an oxide/slab layer using [`LayerEnclosure`][kfactory.enclosure.LayerEnclosure]:
 
 # %%
 enc = kf.LayerEnclosure(
@@ -106,7 +106,8 @@ wg_clad.plot()
 # %% [markdown]
 # ### Using the factory directly
 #
-# For PDK work, bind a straight factory to your `KCLayout`:
+# For PDK work, bind [`straight_dbu_factory`][kfactory.factories.straight.straight_dbu_factory] to your
+# [`KCLayout`][kfactory.layout.KCLayout]:
 
 # %%
 from kfactory.factories.straight import straight_dbu_factory
@@ -162,7 +163,7 @@ sbend.plot()
 # %% [markdown]
 # ### Euler factory — PDK usage
 #
-# Bind an Euler factory to your layout to create bends that live in your PDK:
+# Bind [`bend_euler_factory`][kfactory.factories.euler.bend_euler_factory] to your layout to create bends that live in your PDK:
 
 # %%
 from kfactory.factories.euler import bend_euler_factory
@@ -255,7 +256,7 @@ bez.plot()
 # ## Building your own PDK components
 #
 # The factory pattern lets you create component functions that are:
-# 1. **Bound to your layout** — geometry lands in the right `KCLayout`.
+# 1. **Bound to your layout** — geometry lands in the right [`KCLayout`][kfactory.layout.KCLayout].
 # 2. **Cached automatically** — calling with the same params returns the same cell.
 # 3. **Named consistently** — cell names embed all parameters for traceability.
 #
@@ -309,7 +310,7 @@ wg_custom.plot()
 # %% [markdown]
 # ### Caching in action
 #
-# The `@kf.cell` decorator caches cells by their parameter signature. Calling the same
+# The [`@kf.cell`][kfactory.layout.cell] decorator caches cells by their parameter signature. Calling the same
 # function with the same arguments returns the *identical* cell object:
 
 # %%
@@ -337,7 +338,7 @@ print(f"wg_a is wg_c: {wg_a is wg_c}")  # False — different length
 #    o1 ───────┘                    └─────── o2
 # ```
 #
-# Use `<<` to place instances and `connect()` to snap their ports. Traverse
+# Use `<<` to place instances and [`connect()`][kfactory.instance.Instance.connect] to snap their ports. Traverse
 # the two top bends from `o2` to `o1` to turn back down toward the output.
 
 
