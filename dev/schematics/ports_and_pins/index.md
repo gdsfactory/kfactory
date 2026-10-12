@@ -86,7 +86,7 @@ print("cell ports:", [p.name for p in cell.ports])
 ```
 
 ```
-cell ports: ['right', 'left']
+cell ports: ['left', 'right']
 ```
 
 Inside the schematic, the entries are `PortRef` objects pointing at the underlying instance:

@@ -90,7 +90,7 @@ wg_clad.plot()
 
 ### Using the factory directly
 
-For PDK work, bind a straight factory to your `KCLayout`:
+For PDK work, bind `straight_dbu_factory` to your `KCLayout`:
 
 ```
 from kfactory.factories.straight import straight_dbu_factory
@@ -155,7 +155,7 @@ sbend.plot()
 
 ### Euler factory — PDK usage
 
-Bind an Euler factory to your layout to create bends that live in your PDK:
+Bind `bend_euler_factory` to your layout to create bends that live in your PDK:
 
 ```
 from kfactory.factories.euler import bend_euler_factory

@@ -6359,8 +6359,8 @@
 
 <p><a class="md-button" href="../overview/overview.ipynb"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"/></svg></span> Download notebook (.ipynb)</a></p>
 <h1 id="components-factories">Components &amp; Factories</h1>
-<p>kfactory ships a library of <strong>built-in photonic components</strong> under <code>kf.cells</code> and the
-<strong>factories</strong> that generate them under <code>kf.factories</code>.</p>
+<p>kfactory ships a library of <strong>built-in photonic components</strong> under <a class="autorefs autorefs-internal" title="cells" href="../../../reference/kfactory/cells/#kfactory.cells"><code>kf.cells</code></a> and the
+<strong>factories</strong> that generate them under <a class="autorefs autorefs-internal" title="factories" href="../../../reference/kfactory/factories/#kfactory.factories"><code>kf.factories</code></a>.</p>
 <table>
 <thead>
 <tr>
@@ -6372,38 +6372,63 @@
 <tbody>
 <tr>
 <td>Straight waveguide</td>
-<td><code>kf.cells.straight.straight</code></td>
-<td><code>kf.factories.straight.straight_dbu_factory</code></td>
+<td><a class="autorefs autorefs-internal" title="straight" href="../../../reference/kfactory/cells/straight/#kfactory.cells.straight.straight"><code>kf.cells.straight.straight</code></a></td>
+<td><a class="autorefs autorefs-internal" title="straight_dbu_factory" href="../../../reference/kfactory/factories/straight/#kfactory.factories.straight.straight_dbu_factory"><code>kf.factories.straight.straight_dbu_factory</code></a></td>
 </tr>
 <tr>
 <td>Euler bend</td>
-<td><code>kf.cells.euler.bend_euler</code></td>
-<td><code>kf.factories.euler.bend_euler_factory</code></td>
+<td><a class="autorefs autorefs-internal" title="bend_euler
+
+
+  
+      module-attribute
+  " href="../../../reference/kfactory/cells/euler/#kfactory.cells.euler.bend_euler"><code>kf.cells.euler.bend_euler</code></a></td>
+<td><a class="autorefs autorefs-internal" title="bend_euler_factory" href="../../../reference/kfactory/factories/euler/#kfactory.factories.euler.bend_euler_factory"><code>kf.factories.euler.bend_euler_factory</code></a></td>
 </tr>
 <tr>
 <td>Euler S-bend</td>
-<td><code>kf.cells.euler.bend_s_euler</code></td>
-<td><code>kf.factories.euler.bend_s_euler_factory</code></td>
+<td><a class="autorefs autorefs-internal" title="bend_s_euler
+
+
+  
+      module-attribute
+  " href="../../../reference/kfactory/cells/euler/#kfactory.cells.euler.bend_s_euler"><code>kf.cells.euler.bend_s_euler</code></a></td>
+<td><a class="autorefs autorefs-internal" title="bend_s_euler_factory" href="../../../reference/kfactory/factories/euler/#kfactory.factories.euler.bend_s_euler_factory"><code>kf.factories.euler.bend_s_euler_factory</code></a></td>
 </tr>
 <tr>
 <td>Circular bend</td>
-<td><code>kf.cells.circular.bend_circular</code></td>
-<td><code>kf.factories.circular.bend_circular_factory</code></td>
+<td><a class="autorefs autorefs-internal" title="bend_circular
+
+
+  
+      module-attribute
+  " href="../../../reference/kfactory/cells/circular/#kfactory.cells.circular.bend_circular"><code>kf.cells.circular.bend_circular</code></a></td>
+<td><a class="autorefs autorefs-internal" title="bend_circular_factory" href="../../../reference/kfactory/factories/circular/#kfactory.factories.circular.bend_circular_factory"><code>kf.factories.circular.bend_circular_factory</code></a></td>
 </tr>
 <tr>
 <td>Taper</td>
-<td><code>kf.cells.taper.taper</code></td>
-<td><code>kf.factories.taper.taper_factory</code></td>
+<td><a class="autorefs autorefs-internal" title="taper" href="../../../reference/kfactory/cells/taper/#kfactory.cells.taper.taper"><code>kf.cells.taper.taper</code></a></td>
+<td><a class="autorefs autorefs-internal" title="taper_factory" href="../../../reference/kfactory/factories/taper/#kfactory.factories.taper.taper_factory"><code>kf.factories.taper.taper_factory</code></a></td>
 </tr>
 <tr>
 <td>Bezier S-bend</td>
-<td><code>kf.cells.bezier.bend_s</code></td>
-<td><code>kf.factories.bezier.bend_s_bezier_factory</code></td>
+<td><a class="autorefs autorefs-internal" title="bend_s
+
+
+  
+      module-attribute
+  " href="../../../reference/kfactory/cells/bezier/#kfactory.cells.bezier.bend_s"><code>kf.cells.bezier.bend_s</code></a></td>
+<td><a class="autorefs autorefs-internal" title="bend_s_bezier_factory" href="../../../reference/kfactory/factories/bezier/#kfactory.factories.bezier.bend_s_bezier_factory"><code>kf.factories.bezier.bend_s_bezier_factory</code></a></td>
 </tr>
 </tbody>
 </table>
 <h2 id="cells-vs-factories">Cells vs. Factories</h2>
-<p>Every <strong>cell function</strong> under <code>kf.cells.*</code> uses the built-in demo <code>KCLayout</code> instance
+<p>Every <strong>cell function</strong> under <code>kf.cells.*</code> uses the built-in demo <a class="autorefs autorefs-internal" title="KCLayout
+
+
+  
+      pydantic-model
+  " href="../../../reference/kfactory/layout/#kfactory.layout.KCLayout"><code>KCLayout</code></a> instance
 (<code>kf.cells.demo</code>). These are convenient for quick prototyping and learning.</p>
 <p>A <strong>factory</strong> is a function that <em>creates</em> a cell function bound to a specific
 <code>KCLayout</code>. When you build your own PDK you call the factory once, passing your
@@ -6426,8 +6451,13 @@ layout, and get back a cell function that creates geometry in that layout:</p>
 <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">infos</span> <span class="o">=</span> <span class="n">L</span>
 </code></pre></div>
 <h2 id="straight-waveguide">Straight waveguide</h2>
-<p><code>kf.cells.straight.straight</code> creates a rectangle of material with optional
-slab/exclude layers defined by a <code>LayerEnclosure</code>.</p>
+<p><a class="autorefs autorefs-internal" title="straight" href="../../../reference/kfactory/cells/straight/#kfactory.cells.straight.straight"><code>kf.cells.straight.straight</code></a> creates a rectangle of material with optional
+slab/exclude layers defined by a <a class="autorefs autorefs-internal" title="LayerEnclosure
+
+
+  
+      pydantic-model
+  " href="../../../reference/kfactory/enclosure/#kfactory.enclosure.LayerEnclosure"><code>LayerEnclosure</code></a>.</p>
 <div class="highlight"><pre><span></span><code>┌──────────────────────────────┐
 │         Slab/Exclude         │
 ├──────────────────────────────┤
@@ -6439,7 +6469,12 @@ slab/exclude layers defined by a <code>LayerEnclosure</code>.</p>
 └──────────────────────────────┘
 </code></pre></div>
 <p>Arguments are in <strong>µm</strong> (the <code>um</code> variant). All coordinates are converted to DBU
-internally. There is also a <code>straight_dbu</code> function for DBU-native code.</p>
+internally. There is also a <a class="autorefs autorefs-internal" title="straight_dbu
+
+
+  
+      module-attribute
+  " href="../../../reference/kfactory/cells/straight/#kfactory.cells.straight.straight_dbu"><code>straight_dbu</code></a> function for DBU-native code.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.cells.straight</span><span class="w"> </span><span class="kn">import</span> <span class="n">straight</span>
 
 <span class="c1"># Simple straight — no cladding</span>
@@ -6450,7 +6485,12 @@ internally. There is also a <code>straight_dbu</code> function for DBU-native co
 </code></pre></div>
 <img alt="png" src="../overview/output_5_0.png" /></p>
 <h3 id="with-cladding-via-layerenclosure">With cladding via LayerEnclosure</h3>
-<p>Wrap the core with an oxide/slab layer using <code>LayerEnclosure</code>:</p>
+<p>Wrap the core with an oxide/slab layer using <a class="autorefs autorefs-internal" title="LayerEnclosure
+
+
+  
+      pydantic-model
+  " href="../../../reference/kfactory/enclosure/#kfactory.enclosure.LayerEnclosure"><code>LayerEnclosure</code></a>:</p>
 <div class="highlight"><pre><span></span><code><span class="n">enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span>
     <span class="n">dsections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">3</span><span class="p">)],</span>  <span class="c1"># 3 µm cladding on all sides</span>
     <span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>
@@ -6463,7 +6503,13 @@ internally. There is also a <code>straight_dbu</code> function for DBU-native co
 </code></pre></div>
 <img alt="png" src="../overview/output_7_0.png" /></p>
 <h3 id="using-the-factory-directly">Using the factory directly</h3>
-<p>For PDK work, bind a straight factory to your <code>KCLayout</code>:</p>
+<p>For PDK work, bind <a class="autorefs autorefs-internal" title="straight_dbu_factory" href="../../../reference/kfactory/factories/straight/#kfactory.factories.straight.straight_dbu_factory"><code>straight_dbu_factory</code></a> to your
+<a class="autorefs autorefs-internal" title="KCLayout
+
+
+  
+      pydantic-model
+  " href="../../../reference/kfactory/layout/#kfactory.layout.KCLayout"><code>KCLayout</code></a>:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.factories.straight</span><span class="w"> </span><span class="kn">import</span> <span class="n">straight_dbu_factory</span>
 
 <span class="n">my_straight</span> <span class="o">=</span> <span class="n">straight_dbu_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
@@ -6515,7 +6561,7 @@ two Euler quarter-circles joined at their inflection point.</p>
 </code></pre></div>
 <img alt="png" src="../overview/output_15_0.png" /></p>
 <h3 id="euler-factory-pdk-usage">Euler factory — PDK usage</h3>
-<p>Bind an Euler factory to your layout to create bends that live in your PDK:</p>
+<p>Bind <a class="autorefs autorefs-internal" title="bend_euler_factory" href="../../../reference/kfactory/factories/euler/#kfactory.factories.euler.bend_euler_factory"><code>bend_euler_factory</code></a> to your layout to create bends that live in your PDK:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.factories.euler</span><span class="w"> </span><span class="kn">import</span> <span class="n">bend_euler_factory</span>
 
 <span class="n">my_bend_euler</span> <span class="o">=</span> <span class="n">bend_euler_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">)</span>
@@ -6600,7 +6646,12 @@ offers more shape control than an Euler S-bend (via <code>t_start</code>/<code>t
 <img alt="png" src="../overview/output_27_0.png" /></p>
 <h2 id="building-your-own-pdk-components">Building your own PDK components</h2>
 <p>The factory pattern lets you create component functions that are:
-1. <strong>Bound to your layout</strong> — geometry lands in the right <code>KCLayout</code>.
+1. <strong>Bound to your layout</strong> — geometry lands in the right <a class="autorefs autorefs-internal" title="KCLayout
+
+
+  
+      pydantic-model
+  " href="../../../reference/kfactory/layout/#kfactory.layout.KCLayout"><code>KCLayout</code></a>.
 2. <strong>Cached automatically</strong> — calling with the same params returns the same cell.
 3. <strong>Named consistently</strong> — cell names embed all parameters for traceability.</p>
 <h3 id="example-custom-pdk-with-two-components">Example: custom PDK with two components</h3>
@@ -6655,7 +6706,12 @@ Ports: ['o1', 'o2']
 </code></pre></div>
 <img alt="png" src="../overview/output_29_1.png" /></p>
 <h3 id="caching-in-action">Caching in action</h3>
-<p>The <code>@kf.cell</code> decorator caches cells by their parameter signature. Calling the same
+<p>The <a class="autorefs autorefs-internal" title="cell
+
+
+  
+      module-attribute
+  " href="../../../reference/kfactory/layout/#kfactory.layout.cell"><code>@kf.cell</code></a> decorator caches cells by their parameter signature. Calling the same
 function with the same arguments returns the <em>identical</em> cell object:</p>
 <div class="highlight"><pre><span></span><code><span class="n">wg_a</span> <span class="o">=</span> <span class="n">my_waveguide</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
 <span class="n">wg_b</span> <span class="o">=</span> <span class="n">my_waveguide</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
@@ -6679,7 +6735,7 @@ All dimensions passed to the cell factories below are in <strong>µm</strong>.</
              │                    │
    o1 ───────┘                    └─────── o2
 </code></pre></div>
-<p>Use <code>&lt;&lt;</code> to place instances and <code>connect()</code> to snap their ports. Traverse
+<p>Use <code>&lt;&lt;</code> to place instances and <a class="autorefs autorefs-internal" title="connect" href="../../../reference/kfactory/instance/#kfactory.instance.ProtoTInstance.connect"><code>connect()</code></a> to snap their ports. Traverse
 the two top bends from <code>o2</code> to <code>o1</code> to turn back down toward the output.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mzi_arm</span><span class="p">(</span><span class="n">length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">,</span> <span class="n">delta_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
