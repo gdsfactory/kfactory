@@ -103,232 +103,238 @@
         <loc>https://gdsfactory.github.io/kfactory/dev/pdk/technology/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cells/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/SUMMARY/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cells/bezier/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cells/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cells/circular/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cells/_demopdk/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cells/euler/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cells/bezier/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cells/straight/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cells/circular/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cells/taper/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cells/euler/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cells/virtual/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cells/straight/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cells/virtual/circular/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cells/taper/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cells/virtual/euler/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cells/virtual/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cells/virtual/straight/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cells/virtual/circular/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/checks/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cells/virtual/euler/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cli/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cells/virtual/straight/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cli/build/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/checks/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/conf/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cli/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/cross_section/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cli/build/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/decorators/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/conf/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/enclosure/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/cross_section/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/exceptions/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/decorators/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factories/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/enclosure/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factories/bezier/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/exceptions/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factories/circular/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factories/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factories/euler/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factories/bezier/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factories/straight/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factories/circular/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factories/taper/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factories/euler/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factories/utils/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factories/straight/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factories/virtual/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factories/taper/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factories/virtual/circular/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factories/utils/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factories/virtual/euler/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factories/virtual/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factories/virtual/straight/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factories/virtual/circular/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/factory_metadata/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factories/virtual/euler/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/geometry/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factories/virtual/straight/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/grid/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/factory_metadata/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/instance/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/geometry/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/instance_group/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/grid/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/instance_pins/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/instance/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/instance_ports/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/instance_group/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/instances/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/instance_pins/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/kcell/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/instance_ports/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/layer/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/instances/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/layout/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kcell/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/merge/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/layer/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/packing/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/layout/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/pin/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/merge/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/pins/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/packing/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/placer/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/pin/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/port/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/pins/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/ports/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/placer/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/protocols/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/port/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/routing/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/ports/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/routing/aa/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/protocols/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/routing/aa/optical/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/routing/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/routing/electrical/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/routing/aa/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/routing/generic/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/routing/aa/optical/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/routing/length_functions/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/routing/electrical/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/routing/manhattan/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/routing/generic/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/routing/optical/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/routing/length_functions/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/routing/steps/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/routing/manhattan/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/routing/utils/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/routing/optical/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/schematic/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/routing/steps/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/serialization/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/routing/utils/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/session_cache/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/schematic/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/settings/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/serialization/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/shapes/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/session_cache/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/spatial/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/settings/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/technology/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/shapes/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/technology/layer_map/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/spatial/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/typings/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/technology/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/utilities/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/technology/layer_map/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/utils/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/typings/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/utils/difftest/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/utilities/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/utils/fill/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/utils/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/utils/simplify/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/utils/difftest/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/utils/violations/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/utils/fill/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/widgets/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/utils/simplify/</loc>
       </url>
       <url>
-        <loc>https://gdsfactory.github.io/kfactory/dev/reference/kfactory/widgets/interactive/</loc>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/utils/violations/</loc>
+      </url>
+      <url>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/widgets/</loc>
+      </url>
+      <url>
+        <loc>https://gdsfactory.github.io/kfactory/dev/reference/widgets/interactive/</loc>
       </url>
       <url>
         <loc>https://gdsfactory.github.io/kfactory/dev/routing/all_angle/</loc>
