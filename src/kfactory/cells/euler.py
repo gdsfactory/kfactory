@@ -19,4 +19,12 @@ __all__ = [
 
 
 bend_euler = bend_euler_factory(kcl=demo)
+"""Euler bend on the default KCLayout.
+
+Created by [`bend_euler_factory`][kfactory.factories.euler.bend_euler_factory].
+"""
 bend_s_euler = bend_s_euler_factory(kcl=demo)
+"""Euler S-bend on the default KCLayout.
+
+Created by [`bend_s_euler_factory`][kfactory.factories.euler.bend_s_euler_factory].
+"""

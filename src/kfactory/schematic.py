@@ -4,10 +4,10 @@ Caution is advised when using this, as the API might suddenly change.
 In order to fix bugs etc.
 
 Schematic (dbu based schematic) class diagram:
-![Schematic's class diagram](/kfactory/_static/schematic.svg)
+![Schematic's class diagram](../../_static/schematic.svg)
 
 DSchematic (um based schematic) class diagram:
-![DSchematic's class diagram](/kfactory/_static/dschematic.svg)
+![DSchematic's class diagram](../../_static/dschematic.svg)
 
 
 """

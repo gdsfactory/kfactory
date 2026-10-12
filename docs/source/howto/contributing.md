@@ -69,16 +69,18 @@ The build runs in two stages:
 
 1. **Pre-build** (`docs-build-source`): `docs/scripts/build_docs_source.py`
    converts every jupytext `.py` notebook under `docs/source/` to
-   executed `.md` + a downloadable `.ipynb`, and writes mkdocstrings
-   stub pages and a native literate-nav `SUMMARY.md` under
-   `docs/source-built/reference/`. Outputs go to
+   executed `.md` + a downloadable `.ipynb`. Outputs go to
    `docs/source-built/` (gitignored). Runs are cached by content hash
    in `docs/.build-cache/` — only changed notebooks re-execute.
 2. **Render**: zensical uses `docs/zensical.yml` to read `docs/source-built/`
-   and produces the final HTML and `objects.inv` in `docs/site/`.
+   and produces the final HTML, `objects.inv`, `llms.txt` and
+   `llms-full.txt` in `docs/site/`.
 
-API navigation is generated from the Python package tree; edit
-`gen_api_reference` in the pre-build script to change its structure.
+API reference pages and their navigation are generated from
+`src/kfactory/` by zensical's native `api-autonav` plugin, configured in
+`docs/zensical.yml`. When adding a subpackage, add it to the
+`module_options` regex there so its page shows only the package docstring.
+The build runs in strict mode, so broken links and anchors fail it.
 When moving documentation pages or renaming headings, add page or anchor
 mappings under `plugins.redirects.redirect_maps` in `docs/zensical.yml`
 to preserve existing links.

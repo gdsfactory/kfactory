@@ -26,7 +26,10 @@ from . import demo
 __all__ = ["taper", "taper_dbu"]
 
 taper_dbu = taper_factory(kcl=demo)
-"""Cross-section-first taper factory on the default KCLayout (length in dbu)."""
+"""Cross-section-first taper factory on the default KCLayout (length in dbu).
+
+Created by [`taper_factory`][kfactory.factories.taper.taper_factory].
+"""
 
 
 @overload
@@ -74,6 +77,8 @@ def taper(
     enclosure: LayerEnclosure | None = None,
 ) -> KCell:
     r"""Linear Taper [um].
+
+    Converts to dbu and calls [`taper_dbu`][kfactory.cells.taper.taper_dbu].
 
     Visualization::
 
