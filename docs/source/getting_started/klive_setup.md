@@ -11,10 +11,7 @@ click Install.
 
 The video below shows the process:
 
-<video controls muted playsinline preload="metadata" style="max-width: 100%">
-  <source src="../_static/klive.webm" type="video/webm">
-  <a href="../_static/klive.webm">Download the KLive installation video.</a>
-</video>
+![type:video](../_static/klive.webm){ playsinline preload=metadata }
 
 ## How klive works
 

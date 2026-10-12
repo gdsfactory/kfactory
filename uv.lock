@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.12"
 
 [[package]]
@@ -1027,7 +1027,7 @@ requires-dist = [
     { name = "types-requests", marker = "extra == 'dev'", specifier = ">=2.33.0.20260906,<2.34" },
     { name = "types-setuptools", marker = "extra == 'dev'", specifier = ">=84.0.0.20260812,<84.1" },
     { name = "uv", marker = "extra == 'ci'", specifier = ">=0.12.22,<0.13" },
-    { name = "zensical", marker = "extra == 'docs'", specifier = ">=0.0.67,<0.1" },
+    { name = "zensical", marker = "extra == 'docs'", specifier = ">=0.0.69,<0.1" },
 ]
 provides-extras = ["ci", "dev", "docs", "ipy", "notebooks"]
 

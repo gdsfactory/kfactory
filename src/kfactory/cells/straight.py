@@ -34,7 +34,10 @@ from . import demo
 __all__ = ["straight", "straight_dbu"]
 
 straight_dbu = straight_dbu_factory(kcl=demo)
-"""Cross-section-first straight factory on the default KCLayout (length in dbu)."""
+"""Cross-section-first straight factory on the default KCLayout (length in dbu).
+
+Created by [`straight_dbu_factory`][kfactory.factories.straight.straight_dbu_factory].
+"""
 
 
 @overload
@@ -69,6 +72,8 @@ def straight(
     enclosure: LayerEnclosure | None = None,
 ) -> KCell:
     """Straight waveguide in um.
+
+    Converts to dbu and calls [`straight_dbu`][kfactory.cells.straight.straight_dbu].
 
     Either pass a ``cross_section`` (name, spec, or instance) or the legacy
     ``width``/``layer``/``enclosure``.

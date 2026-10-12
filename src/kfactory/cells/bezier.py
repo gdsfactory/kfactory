@@ -7,3 +7,7 @@ __all__ = ["bend_s"]
 
 
 bend_s = bend_s_bezier_factory(kcl=demo)
+"""Bezier S-bend on the default KCLayout.
+
+Created by [`bend_s_bezier_factory`][kfactory.factories.bezier.bend_s_bezier_factory].
+"""

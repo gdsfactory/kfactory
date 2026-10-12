@@ -10,4 +10,7 @@ __all__ = ["bend_circular"]
 
 
 bend_circular = bend_circular_factory(kcl=demo)
-"""Circular bend on the default KCLayout."""
+"""Circular bend on the default KCLayout.
+
+Created by [`bend_circular_factory`][kfactory.factories.circular.bend_circular_factory].
+"""

@@ -70,7 +70,7 @@ optional-dependencies.docs = [
   "kfactory[notebooks]",                     # transitively pulls in kfactory[ipy]
   "mkdocstrings[python]>=1.0.6,<1.1",
   "pymdown-extensions>=12.1,<12.2",
-  "zensical>=0.0.67,<0.1",
+  "zensical>=0.0.69,<0.1",
 ]
 optional-dependencies.ipy = [
   "ipyevents>=2.0.4,<2.1",
