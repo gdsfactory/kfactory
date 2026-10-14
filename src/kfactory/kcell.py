@@ -3721,6 +3721,34 @@ def _klive_path(path: str | Path) -> str:
         return path
 
 
+def _check_klive_versions(
+    klive_version: str,
+    klayout_version: str,
+    python_klayout_version: str = _klayout_version,
+) -> None:
+    """Log if klive or the KLayout GUI it runs in is older than recommended."""
+    rec_klive_version = Version(major=0, minor=4, patch=1)
+    if Version.parse(klive_version).compare(rec_klive_version) < 0:
+        logger.warning(
+            f"klive is out of date. Installed:{klive_version}/"
+            "Recommended:"
+            f"{rec_klive_version}. Please "
+            "update it in KLayout"
+        )
+        return
+
+    gui_version = Version.parse(klayout_version)
+    min_rec_klayout = Version(major=0, minor=28, patch=13)
+    if gui_version.compare(Version.parse(python_klayout_version)) < 0:
+        log = logger.error if gui_version.compare(min_rec_klayout) < 0 else logger.debug
+        log(
+            f"KLayout GUI version ({klayout_version}) "
+            "is older than the Python version "
+            f"({python_klayout_version}). This may cause issues. Please "
+            "update the GUI to match or exceed the Python version."
+        )
+
+
 def show(
     layout: KCLayout | AnyKCell | Path | str,
     lyrdb: rdb.ReportDatabase | Path | str | None = None,
@@ -3935,38 +3963,7 @@ def show(
                                 version=jmsg["version"],
                                 file=jmsg["file"],
                             )
-                # check klive version
-                klive_version = Version.parse(jmsg["version"])
-                rec_klive_version = Version(major=0, minor=4, patch=1)
-                klive_ok = rec_klive_version.compare(klive_version) >= 0
-
-                if not klive_ok:
-                    logger.warning(
-                        f"klive is out of date. Installed:{jmsg['version']}/"
-                        "Recommended:"
-                        f"{rec_klive_version}. Please "
-                        "update it in KLayout"
-                    )
-                else:
-                    klayout_version = Version.parse(jmsg["klayout_version"])
-                    kfactory_version = Version.parse(_klayout_version)
-
-                    min_rec_klayout = Version(major=0, minor=28, patch=13)
-
-                    if kfactory_version.compare(min_rec_klayout) < 0:
-                        logger.error(
-                            f"KLayout GUI version ({jmsg['klayout_version']}) "
-                            "is older than the Python version "
-                            f"({_klayout_version}). This may cause issues. Please "
-                            "update the GUI to match or exceed the Python version."
-                        )
-                    elif kfactory_version.compare(klayout_version) < 0:
-                        logger.debug(
-                            f"KLayout GUI version ({jmsg['klayout_version']}) "
-                            "is older than the Python version "
-                            f"({_klayout_version}). This may cause issues. Please "
-                            "update the GUI to match or exceed the Python version."
-                        )
+                _check_klive_versions(jmsg["version"], jmsg["klayout_version"])
 
             except json.JSONDecodeError:
                 logger.info(f"Message from klive: {msg}")
