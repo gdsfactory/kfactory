@@ -105,7 +105,7 @@ def test_instance_port_name(layers: Layers, kcl: kf.KCLayout) -> None:
 
     assert (
         instance_port_name(inst, inst.ports[0])
-        == 'straight_CS028523d7_5000_L10000_0_0["o1"]'
+        == 'straight_CSsym_028523d7_5000_L10000_0_0["o1"]'
     )
 
 
