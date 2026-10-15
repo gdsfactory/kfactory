@@ -270,7 +270,8 @@ class ExtrudeConfig(BaseModel, frozen=True):
         ports: `(start_name, end_name, port_type)` per strip. `None` leaves the
             port naming to the extruder's convention, `{}` creates no ports.
         insets: `(start, end)` distances by which a strip is shortened at the
-            path ends [dbu].
+            path ends [dbu]. Negative values extend the strip along the end
+            tangents.
         simplify: Polygon simplification tolerance for all strips, or per
             strip [dbu].
         hidden: Strips that are not drawn.
@@ -287,8 +288,6 @@ class ExtrudeConfig(BaseModel, frozen=True):
     def _check_values(self) -> Self:
         if any(i < 0 for i in self.section_indices()):
             raise ValueError("Strip indices must be non-negative.")
-        if any(d < 0 for inset in self.insets.values() for d in inset):
-            raise ValueError("Insets must be non-negative.")
         tolerances = (
             self.simplify.values()
             if isinstance(self.simplify, dict)

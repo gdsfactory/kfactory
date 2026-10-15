@@ -61,7 +61,7 @@ def test_extrude_config_unnamed_then_named(
 
 def test_extrude_config_asymmetrical(kcl: kf.KCLayout) -> None:
     xs = _make_asym()
-    config = kf.ExtrudeConfig(insets={1: (0, 1000)})
+    config = kf.ExtrudeConfig(insets={0: (-500, 0), 1: (0, 1000)})
     kcl.set_extrude_config(xs, config)
 
     assert kcl.get_extrude_config(xs) is config
@@ -95,7 +95,6 @@ def test_extrude_config_unknown_strip(
     [
         {"ports": {-1: ("o1", "o2", "optical")}},
         {"hidden": frozenset({-1})},
-        {"insets": {0: (-1, 0)}},
         {"simplify": -1},
         {"simplify": {0: -1}},
     ],
