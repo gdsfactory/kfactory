@@ -10167,12 +10167,12 @@ if <code>None</code> create an empty one.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/kcell.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4045</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4042</span>
+<span class="normal">4043</span>
+<span class="normal">4044</span>
+<span class="normal">4045</span>
 <span class="normal">4046</span>
-<span class="normal">4047</span>
-<span class="normal">4048</span>
-<span class="normal">4049</span>
-<span class="normal">4050</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DKCells</span><span class="p">(</span><span class="n">ProtoCells</span><span class="p">[</span><span class="n">DKCell</span><span class="p">]):</span>
+<span class="normal">4047</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DKCells</span><span class="p">(</span><span class="n">ProtoCells</span><span class="p">[</span><span class="n">DKCell</span><span class="p">]):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DKCell</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">DKCell</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kcl</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
 
@@ -12989,12 +12989,12 @@ if <code>None</code> create an empty one.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/kcell.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4053</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4050</span>
+<span class="normal">4051</span>
+<span class="normal">4052</span>
+<span class="normal">4053</span>
 <span class="normal">4054</span>
-<span class="normal">4055</span>
-<span class="normal">4056</span>
-<span class="normal">4057</span>
-<span class="normal">4058</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCells</span><span class="p">(</span><span class="n">ProtoCells</span><span class="p">[</span><span class="n">KCell</span><span class="p">]):</span>
+<span class="normal">4055</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCells</span><span class="p">(</span><span class="n">ProtoCells</span><span class="p">[</span><span class="n">KCell</span><span class="p">]):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">KCell</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kcl</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
 
@@ -13093,7 +13093,10 @@ if <code>None</code> create an empty one.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/kcell.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3986</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3983</span>
+<span class="normal">3984</span>
+<span class="normal">3985</span>
+<span class="normal">3986</span>
 <span class="normal">3987</span>
 <span class="normal">3988</span>
 <span class="normal">3989</span>
@@ -13146,10 +13149,7 @@ if <code>None</code> create an empty one.</p>
 <span class="normal">4036</span>
 <span class="normal">4037</span>
 <span class="normal">4038</span>
-<span class="normal">4039</span>
-<span class="normal">4040</span>
-<span class="normal">4041</span>
-<span class="normal">4042</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ProtoCells</span><span class="p">(</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">KC_co</span><span class="p">],</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="normal">4039</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ProtoCells</span><span class="p">(</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">KC_co</span><span class="p">],</span> <span class="n">ABC</span><span class="p">):</span>
     <span class="n">_kcl</span><span class="p">:</span> <span class="n">KCLayout</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -13241,13 +13241,13 @@ if <code>None</code> create an empty one.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/kcell.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3995</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3992</span>
+<span class="normal">3993</span>
+<span class="normal">3994</span>
+<span class="normal">3995</span>
 <span class="normal">3996</span>
 <span class="normal">3997</span>
-<span class="normal">3998</span>
-<span class="normal">3999</span>
-<span class="normal">4000</span>
-<span class="normal">4001</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">3998</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Delete a cell by key (name or index)."""</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kcl</span><span class="o">.</span><span class="n">tkcells</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -26049,7 +26049,10 @@ The name will have <code>$1</code> as duplicate names are not allowed</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/kcell.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4061</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4058</span>
+<span class="normal">4059</span>
+<span class="normal">4060</span>
+<span class="normal">4061</span>
 <span class="normal">4062</span>
 <span class="normal">4063</span>
 <span class="normal">4064</span>
@@ -26066,10 +26069,7 @@ The name will have <code>$1</code> as duplicate names are not allowed</p>
 <span class="normal">4075</span>
 <span class="normal">4076</span>
 <span class="normal">4077</span>
-<span class="normal">4078</span>
-<span class="normal">4079</span>
-<span class="normal">4080</span>
-<span class="normal">4081</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_cells</span><span class="p">(</span>
+<span class="normal">4078</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_cells</span><span class="p">(</span>
     <span class="n">modules</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ModuleType</span><span class="p">],</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">KCell</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">"""Returns KCells (KCell functions) from a module or list of modules.</span>
@@ -26265,35 +26265,7 @@ and not the main KCLayout.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/kcell.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3724</span>
-<span class="normal">3725</span>
-<span class="normal">3726</span>
-<span class="normal">3727</span>
-<span class="normal">3728</span>
-<span class="normal">3729</span>
-<span class="normal">3730</span>
-<span class="normal">3731</span>
-<span class="normal">3732</span>
-<span class="normal">3733</span>
-<span class="normal">3734</span>
-<span class="normal">3735</span>
-<span class="normal">3736</span>
-<span class="normal">3737</span>
-<span class="normal">3738</span>
-<span class="normal">3739</span>
-<span class="normal">3740</span>
-<span class="normal">3741</span>
-<span class="normal">3742</span>
-<span class="normal">3743</span>
-<span class="normal">3744</span>
-<span class="normal">3745</span>
-<span class="normal">3746</span>
-<span class="normal">3747</span>
-<span class="normal">3748</span>
-<span class="normal">3749</span>
-<span class="normal">3750</span>
-<span class="normal">3751</span>
-<span class="normal">3752</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3752</span>
 <span class="normal">3753</span>
 <span class="normal">3754</span>
 <span class="normal">3755</span>
@@ -26521,10 +26493,7 @@ and not the main KCLayout.</p>
 <span class="normal">3977</span>
 <span class="normal">3978</span>
 <span class="normal">3979</span>
-<span class="normal">3980</span>
-<span class="normal">3981</span>
-<span class="normal">3982</span>
-<span class="normal">3983</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span>
+<span class="normal">3980</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span>
     <span class="n">layout</span><span class="p">:</span> <span class="n">KCLayout</span> <span class="o">|</span> <span class="n">AnyKCell</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">lyrdb</span><span class="p">:</span> <span class="n">rdb</span><span class="o">.</span><span class="n">ReportDatabase</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">l2n</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayoutToNetlist</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -26738,38 +26707,7 @@ and not the main KCLayout.</p>
                                 <span class="n">version</span><span class="o">=</span><span class="n">jmsg</span><span class="p">[</span><span class="s2">"version"</span><span class="p">],</span>
                                 <span class="n">file</span><span class="o">=</span><span class="n">jmsg</span><span class="p">[</span><span class="s2">"file"</span><span class="p">],</span>
                             <span class="p">)</span>
-                <span class="c1"># check klive version</span>
-                <span class="n">klive_version</span> <span class="o">=</span> <span class="n">Version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">jmsg</span><span class="p">[</span><span class="s2">"version"</span><span class="p">])</span>
-                <span class="n">rec_klive_version</span> <span class="o">=</span> <span class="n">Version</span><span class="p">(</span><span class="n">major</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minor</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">patch</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">klive_ok</span> <span class="o">=</span> <span class="n">rec_klive_version</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">klive_version</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span>
-
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">klive_ok</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">"klive is out of date. Installed:</span><span class="si">{</span><span class="n">jmsg</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span><span class="si">}</span><span class="s2">/"</span>
-                        <span class="s2">"Recommended:"</span>
-                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">rec_klive_version</span><span class="si">}</span><span class="s2">. Please "</span>
-                        <span class="s2">"update it in KLayout"</span>
-                    <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">klayout_version</span> <span class="o">=</span> <span class="n">Version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">jmsg</span><span class="p">[</span><span class="s2">"klayout_version"</span><span class="p">])</span>
-                    <span class="n">kfactory_version</span> <span class="o">=</span> <span class="n">Version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">_klayout_version</span><span class="p">)</span>
-
-                    <span class="n">min_rec_klayout</span> <span class="o">=</span> <span class="n">Version</span><span class="p">(</span><span class="n">major</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minor</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">patch</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
-
-                    <span class="k">if</span> <span class="n">kfactory_version</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">min_rec_klayout</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">"KLayout GUI version (</span><span class="si">{</span><span class="n">jmsg</span><span class="p">[</span><span class="s1">'klayout_version'</span><span class="p">]</span><span class="si">}</span><span class="s2">) "</span>
-                            <span class="s2">"is older than the Python version "</span>
-                            <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">_klayout_version</span><span class="si">}</span><span class="s2">). This may cause issues. Please "</span>
-                            <span class="s2">"update the GUI to match or exceed the Python version."</span>
-                        <span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">kfactory_version</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">klayout_version</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">"KLayout GUI version (</span><span class="si">{</span><span class="n">jmsg</span><span class="p">[</span><span class="s1">'klayout_version'</span><span class="p">]</span><span class="si">}</span><span class="s2">) "</span>
-                            <span class="s2">"is older than the Python version "</span>
-                            <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">_klayout_version</span><span class="si">}</span><span class="s2">). This may cause issues. Please "</span>
-                            <span class="s2">"update the GUI to match or exceed the Python version."</span>
-                        <span class="p">)</span>
+                <span class="n">_check_klive_versions</span><span class="p">(</span><span class="n">jmsg</span><span class="p">[</span><span class="s2">"version"</span><span class="p">],</span> <span class="n">jmsg</span><span class="p">[</span><span class="s2">"klayout_version"</span><span class="p">])</span>
 
             <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Message from klive: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>

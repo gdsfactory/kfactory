@@ -244,10 +244,6 @@ Top bbox: 78.0 µm × 10.0 µm
 
 ```
 
-```
-
-```
-
 ## Quick Reference
 
 ```
