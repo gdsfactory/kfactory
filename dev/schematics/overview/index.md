@@ -205,13 +205,13 @@ for cell_name, net in netlist.items():
   net[3]: ['s2.o2']
   ports: []
 
-=== straight_W500_L20000 ===
+=== bend90_W500_R10000 ===
   instances: []
   net[0]: ['<o1>']
   net[1]: ['<o2>']
   ports: ['o1', 'o2']
 
-=== bend90_W500_R10000 ===
+=== straight_W500_L20000 ===
   instances: []
   net[0]: ['<o1>']
   net[1]: ['<o2>']
@@ -284,7 +284,7 @@ Code(generated)
 ```
 
 ```
-[32m2026-10-15 16:12:26.377[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-15 16:21:35.135[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 

@@ -92,7 +92,7 @@ bend_um.plot()
 ```
 
 ```
-[32m2026-10-15 16:12:38.715[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 16:21:48.840[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_2 (cell_index=2) to bend_euler_CSsym_67c2bf20_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_67c2bf20_500_R10_A90_R150 (cell_index=0), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -225,7 +225,7 @@ c_two.plot()
 ```
 
 ```
-[32m2026-10-15 16:12:38.942[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 16:21:49.051[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_12 (cell_index=12) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=11), function_name=_bend_euler, basename=bend_euler[0m
 ```

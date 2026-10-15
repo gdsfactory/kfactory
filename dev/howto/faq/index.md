@@ -18,8 +18,8 @@ kfactory uses two coordinate systems in parallel:
 The two never mix automatically. Always convert explicitly:
 
 ```
-width_nm = kf.kcl.to_dbu(0.5)   # 0.5 µm → 500 DBU
-width_um = kf.kcl.to_um(500)    # 500 DBU → 0.5 µm
+width_nm = kf.kcl.to_dbu(0.5)  # 0.5 µm → 500 DBU
+width_um = kf.kcl.to_um(500)  # 500 DBU → 0.5 µm
 ```
 
 The integer `to_dbu` conversion **rounds** — widths that are not a multiple of 2 DBU are silently rounded. Design your grid in multiples of 2 DBU to avoid asymmetry.
@@ -84,13 +84,15 @@ Each `KCLayout` has its own layer-index table. A port or shape created under `kf
 **Fix**: always pass `kcl=pdk` when constructing `kf.Port` inside a PDK cell:
 
 ```
-c.add_port(port=kf.Port(
-    name="o1",
-    trans=kf.kdb.Trans(0, False, 0, 0),
-    width=500,
-    layer=pdk.find_layer(L.WG),
-    kcl=pdk,                      # <-- critical
-))
+c.add_port(
+    port=kf.Port(
+        name="o1",
+        trans=kf.kdb.Trans(0, False, 0, 0),
+        width=500,
+        layer=pdk.find_layer(L.WG),
+        kcl=pdk,  # <-- critical
+    )
+)
 ```
 
 ---
@@ -105,7 +107,7 @@ pdk = kf.KCLayout("my_pdk", infos=LAYER)
 
 # Wrong — setting after construction does not fully propagate
 pdk = kf.KCLayout("my_pdk")
-pdk.infos = LAYER()   # ← incomplete
+pdk.infos = LAYER()  # ← incomplete
 ```
 
 After construction `pdk.infos` holds the instance; the `infos=` constructor argument triggers internal layer registration that the post-hoc assignment skips.
@@ -155,7 +157,10 @@ Use `kf.routing.optical.get_radius(bend_cell.ports)` for the actual footprint ra
 
 ```
 bend90 = kf.factories.euler.bend_euler_factory(kcl=kf.kcl)(
-    width=0.5, radius=10, layer=L.WG, angle=90,
+    width=0.5,
+    radius=10,
+    layer=L.WG,
+    angle=90,
 )
 radius_dbu = kf.routing.optical.get_radius(bend90.ports)
 radius_um = bend90.kcl.to_um(radius_dbu)  # > 10 µm for euler bends
@@ -182,10 +187,12 @@ Collision detection calls `kdb.show_error()` which spawns a dialog in GUI mode. 
 
 ```
 kf.routing.optical.route_bundle(
-    c, start_ports, end_ports,
+    c,
+    start_ports,
+    end_ports,
     bend90_cell=bend90,
     straight_factory=sf,
-    on_collision=None,   # <-- suppress dialog
+    on_collision=None,  # <-- suppress dialog
 )
 ```
 
@@ -211,7 +218,7 @@ Use `apply_minkowski_y` which morphologically expands along the Y axis, followin
 
 ```
 enc = kf.LayerEnclosure(sections=[(L.WGCLAD, 2_000)])
-enc.apply_minkowski_y(c)   # call after shapes are drawn
+enc.apply_minkowski_y(c)  # call after shapes are drawn
 ```
 
 `apply_minkowski_tiled` (the default) works on the merged bounding region and can produce rectangular results for tapered shapes.
@@ -225,7 +232,7 @@ enc.apply_minkowski_y(c)   # call after shapes are drawn
 ```
 enc = kf.LayerEnclosure(
     dsections=[(L.WGCLAD, 0, 2.0)],
-    kcl=kf.kcl,          # <-- required for µm→DBU conversion
+    kcl=kf.kcl,  # <-- required for µm→DBU conversion
 )
 ```
 
@@ -246,7 +253,7 @@ enc = kf.LayerEnclosure(
 ```
 kf.packing.pack_kcells(
     cells,
-    spacing=kf.kcl.to_dbu(2),      # 2 µm → DBU
+    spacing=kf.kcl.to_dbu(2),  # 2 µm → DBU
     max_width=kf.kcl.to_dbu(500),
 )
 ```
@@ -258,7 +265,7 @@ kf.packing.pack_kcells(
 `dmove` unpacks its argument as a 2-tuple internally. Pass a plain Python tuple or a 2-element sequence, not a `kdb.DVector`:
 
 ```
-inst.dmove((dx, dy))              # correct
+inst.dmove((dx, dy))  # correct
 inst.dmove(kf.kdb.DVector(dx, dy))  # TypeError
 ```
 

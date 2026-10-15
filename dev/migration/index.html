@@ -6640,10 +6640,12 @@ parameters that were deprecated in 2.x have been removed:</p>
 <p><code>routing.optical.place90</code> has been removed. Use <code>place_manhattan</code> instead.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Before (2.x)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.routing.optical</span><span class="w"> </span><span class="kn">import</span> <span class="n">place90</span>
+
 <span class="n">place90</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">pts</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 
 <span class="c1"># After (3.0)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.routing.optical</span><span class="w"> </span><span class="kn">import</span> <span class="n">place_manhattan</span>
+
 <span class="n">place_manhattan</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">pts</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="default-connect-mirror-behavior">Default <code>connect()</code> mirror behavior</h4>
@@ -6669,8 +6671,10 @@ no longer exists. <code>kf.Netlist</code> is still re-exported for convenience.<
 
 <span class="c1"># After (3.0)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">kfnetlist</span><span class="w"> </span><span class="kn">import</span> <span class="n">Netlist</span>
+
 <span class="c1"># or</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
+
 <span class="n">kf</span><span class="o">.</span><span class="n">Netlist</span>
 </code></pre></div>
 <h4 id="removed-get_schematic">Removed <code>get_schematic</code></h4>
@@ -6678,10 +6682,12 @@ no longer exists. <code>kf.Netlist</code> is still re-exported for convenience.<
 directly instead.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Before (2.x)</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
+
 <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">get_schematic</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 
 <span class="c1"># After (3.0)</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
+
 <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="removed-schema-dschema-aliases">Removed <code>Schema</code> / <code>DSchema</code> Aliases</h4>
@@ -6689,11 +6695,13 @@ directly instead.</p>
 have been removed. They were deprecated in kfactory 2.0.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Before (2.x)</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
+
 <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schema</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
 <span class="n">dschematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">DSchema</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
 
 <span class="c1"># After (3.0)</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">kfactory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">kf</span>
+
 <span class="n">schematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">Schematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
 <span class="n">dschematic</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">DSchematic</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kcl</span><span class="p">)</span>
 </code></pre></div>
@@ -6736,9 +6744,10 @@ on the <code>KCLayout</code> instance. Registered strategies can then be referen
 
 <span class="n">kcl</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"MY_PDK"</span><span class="p">)</span>
 
+
 <span class="nd">@kcl</span><span class="o">.</span><span class="n">routing_strategy</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">route_bundle</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">start_ports</span><span class="p">,</span> <span class="n">end_ports</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">route_bundle</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">start_ports</span><span class="p">,</span> <span class="n">end_ports</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> <span class="o">...</span>
+
 
 <span class="c1"># Or register directly:</span>
 <span class="n">kcl</span><span class="o">.</span><span class="n">routing_strategies</span><span class="p">[</span><span class="s2">"my_custom_route"</span><span class="p">]</span> <span class="o">=</span> <span class="n">my_routing_function</span>

@@ -1802,7 +1802,7 @@ with tempfile.TemporaryDirectory() as tmp:
 
 ```
 written: 1194 bytes
-cells read back: [0, 1, 2]
+cells read back: [1, 0, 2]
 ```
 
 ## Key attributes at a glance
@@ -1934,7 +1934,7 @@ for name in L.model_fields:
   FLOORPLAN     layer=10  datatype=0
 
 
-/tmp/ipykernel_2732/971822332.py:1: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_2934/971822332.py:1: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in L.model_fields:
 ```
 
@@ -2076,7 +2076,7 @@ Layer palette:
   m2      z=1.2…1.70 µm  Al
 
 
-/tmp/ipykernel_2732/3302201102.py:18: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_2934/3302201102.py:18: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in pdk_layers.model_fields:
 ```
 
@@ -2505,7 +2505,7 @@ print("cell info:", dict(b_meta.info))
 ```
 
 ```
-[32m2026-10-15 16:12:46.260[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
+[32m2026-10-15 16:21:55.420[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
 Renaming Unnamed_8 (cell_index=8) to bend_s_bezier_CSsym_028523d7_500_H5_L20_NP99_TS0_TS1 would cause it to be named the same as:
  - bend_s_bezier_CSsym_028523d7_500_H5_L20_NP99_TS0_TS1 (cell_index=0), function_name=_bend_s_bezier, basename=bend_s_bezier[0m
 
@@ -4511,6 +4511,8 @@ parent_o1o1.plot()
 
 ```
 WITHOUT mirror=True, o1↔o1 raises:
+
+
   AsymmetricMirrorRequiredError: Cannot connect ports 'o1' and 'o1' carrying the same asymmetric cross section without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
 
 WITH mirror=True (one instance mirrored):
@@ -4741,7 +4743,7 @@ bend_pair_multi(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 16:12:37.217[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 16:21:46.768[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_4 (cell_index=4) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -4788,7 +4790,7 @@ single_bend_npts(radius=10, width=0.5, n_pts=8).plot()
 ```
 
 ```
-[32m2026-10-15 16:12:37.560[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 16:21:47.268[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_7 (cell_index=7) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler[0m
@@ -4806,7 +4808,7 @@ single_bend_npts(radius=10, width=0.5, n_pts=64).plot()
 ```
 
 ```
-[32m2026-10-15 16:12:37.589[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 16:21:47.339[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_10 (cell_index=10) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
@@ -4896,7 +4898,7 @@ vertical_straight_clad_x(length=20.0, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 16:12:37.708[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
+[32m2026-10-15 16:21:47.513[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
 Renaming Unnamed_16 (cell_index=16) to straight_CSsym_028523d7_500_L20000 would cause it to be named the same as:
  - straight_CSsym_028523d7_500_L20000 (cell_index=13), function_name=_straight, basename=straight[0m
 ```
@@ -4953,7 +4955,7 @@ bend_pair_diamond(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 16:12:37.736[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 16:21:47.547[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_19 (cell_index=19) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
@@ -5096,7 +5098,7 @@ bend_um.plot()
 ```
 
 ```
-[32m2026-10-15 16:12:38.715[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 16:21:48.840[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_2 (cell_index=2) to bend_euler_CSsym_67c2bf20_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_67c2bf20_500_R10_A90_R150 (cell_index=0), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -5229,7 +5231,7 @@ c_two.plot()
 ```
 
 ```
-[32m2026-10-15 16:12:38.942[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 16:21:49.051[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_12 (cell_index=12) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=11), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -8015,7 +8017,7 @@ print(f"WG layer index: {pdk.find_layer(L.WG)}")
 ```
 
 ```
-PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7fa80ac0d5b0> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fa80ad07980> factories=<kfactory.layout.Factories object at 0x7fa80adaf890> virtual_factories=<kfactory.layout.Factories object at 0x7fa80ade0d60> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fa829793d70> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fa80ac542d0> info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fa80adafb10> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
+PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7fbdc5ac49e0> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fbe1c9345f0> factories=<kfactory.layout.Factories object at 0x7fbdc5a3b750> virtual_factories=<kfactory.layout.Factories object at 0x7fbdc5a49940> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fbde93c0040> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fbdc5ad06e0> info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fbdc5a3b9d0> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
 dbu:  0.001 µm/DBU  (1 nm grid)
 WG layer index: WG
 ```
@@ -8621,7 +8623,7 @@ print(f"Stack: {list(STACK.layers.keys())} layers defined")
 ```
 
 ```
-PDK:   name='DEMO_TECH_PDK' layout=<klayout.dbcore.Layout object at 0x7fc819a65520> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fc819d23b60> factories=<kfactory.layout.Factories object at 0x7fc819c034d0> virtual_factories=<kfactory.layout.Factories object at 0x7fc819a31350> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fc83d3bc040> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fc819a9d2c0> info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fc819c03890> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
+PDK:   name='DEMO_TECH_PDK' layout=<klayout.dbcore.Layout object at 0x7fd208990b00> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fd208a565d0> factories=<kfactory.layout.Factories object at 0x7fd20890b390> virtual_factories=<kfactory.layout.Factories object at 0x7fd208915f30> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fd22bdbbd70> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fd2089a17c0> info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fd20890b750> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
 Stack: ['wg', 'clad'] layers defined
 ```
 
@@ -8787,7 +8789,7 @@ kf.kcl.get_icross_section(xs_wg1)
 ```
 
 ```
-<kfactory.cross_section.CrossSection at 0x7f34e2babd90>
+<kfactory.cross_section.CrossSection at 0x7fac1dbb7c50>
 ```
 
 ## The `cross` cell
@@ -9194,7 +9196,7 @@ c
 ```
 
 ```
-[32m2026-10-15 16:12:26.270[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
+[32m2026-10-15 16:21:34.601[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
 ```
 
 ```
@@ -9239,7 +9241,7 @@ Code(c.schematic.code_str())
 ```
 
 ```
-[32m2026-10-15 16:12:26.535[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-15 16:21:35.129[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -10469,7 +10471,7 @@ Placements:
   s1: {'mirror': False, 'x': 0, 'dx': 0, 'y': 0, 'dy': 0, 'orientation': 0.0, 'anchor': None}
 
 
-/home/runner/work/kfactory/kfactory/.venv/lib/python3.14/site-packages/pydantic/main.py:542: UserWarning: Pydantic serializer warnings:
+/home/runner/work/kfactory/kfactory/.venv/lib/python3.14/site-packages/pydantic/main.py:587: UserWarning: Pydantic serializer warnings:
   PydanticSerializationUnexpectedValue(Expected `RouteNet[Annotated[int, str]]` - serialized value may not be as expected [field_name='nets', input_value=Connection[TypeVar](net=(...tance='s1', port='o2'))), input_type=Connection[TypeVar]])
   PydanticSerializationUnexpectedValue(Expected `Connection[Annotated[int, str]]` - serialized value may not be as expected [field_name='nets', input_value=Connection[TypeVar](net=(...tance='s1', port='o2'))), input_type=Connection[TypeVar]])
   PydanticSerializationUnexpectedValue(Expected `VirtualConnection[Annotated[int, str]]` - serialized value may not be as expected [field_name='nets', input_value=Connection[TypeVar](net=(...tance='s1', port='o2'))), input_type=Connection[TypeVar]])
@@ -10897,13 +10899,13 @@ for cell_name, net in netlist.items():
   net[3]: ['s2.o2']
   ports: []
 
-=== straight_W500_L20000 ===
+=== bend90_W500_R10000 ===
   instances: []
   net[0]: ['<o1>']
   net[1]: ['<o2>']
   ports: ['o1', 'o2']
 
-=== bend90_W500_R10000 ===
+=== straight_W500_L20000 ===
   instances: []
   net[0]: ['<o1>']
   net[1]: ['<o2>']
@@ -10976,7 +10978,7 @@ Code(generated)
 ```
 
 ```
-[32m2026-10-15 16:12:26.377[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-15 16:21:35.135[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -11446,7 +11448,7 @@ c
 ```
 
 ```
-[32m2026-10-15 16:12:29.431[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
+[32m2026-10-15 16:21:38.365[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
 ```
 
 ```
@@ -11966,6 +11968,10 @@ top
 
 ```
 Top bbox: 78.0 µm × 10.0 µm
+```
+
+```
+
 ```
 
 ```
@@ -13165,8 +13171,8 @@ kfactory uses two coordinate systems in parallel:
 The two never mix automatically. Always convert explicitly:
 
 ```
-width_nm = kf.kcl.to_dbu(0.5)   # 0.5 µm → 500 DBU
-width_um = kf.kcl.to_um(500)    # 500 DBU → 0.5 µm
+width_nm = kf.kcl.to_dbu(0.5)  # 0.5 µm → 500 DBU
+width_um = kf.kcl.to_um(500)  # 500 DBU → 0.5 µm
 ```
 
 The integer `to_dbu` conversion **rounds** — widths that are not a multiple of 2 DBU are silently rounded. Design your grid in multiples of 2 DBU to avoid asymmetry.
@@ -13231,13 +13237,15 @@ Each `KCLayout` has its own layer-index table. A port or shape created under `kf
 **Fix**: always pass `kcl=pdk` when constructing `kf.Port` inside a PDK cell:
 
 ```
-c.add_port(port=kf.Port(
-    name="o1",
-    trans=kf.kdb.Trans(0, False, 0, 0),
-    width=500,
-    layer=pdk.find_layer(L.WG),
-    kcl=pdk,                      # <-- critical
-))
+c.add_port(
+    port=kf.Port(
+        name="o1",
+        trans=kf.kdb.Trans(0, False, 0, 0),
+        width=500,
+        layer=pdk.find_layer(L.WG),
+        kcl=pdk,  # <-- critical
+    )
+)
 ```
 
 ---
@@ -13252,7 +13260,7 @@ pdk = kf.KCLayout("my_pdk", infos=LAYER)
 
 # Wrong — setting after construction does not fully propagate
 pdk = kf.KCLayout("my_pdk")
-pdk.infos = LAYER()   # ← incomplete
+pdk.infos = LAYER()  # ← incomplete
 ```
 
 After construction `pdk.infos` holds the instance; the `infos=` constructor argument triggers internal layer registration that the post-hoc assignment skips.
@@ -13302,7 +13310,10 @@ Use `kf.routing.optical.get_radius(bend_cell.ports)` for the actual footprint ra
 
 ```
 bend90 = kf.factories.euler.bend_euler_factory(kcl=kf.kcl)(
-    width=0.5, radius=10, layer=L.WG, angle=90,
+    width=0.5,
+    radius=10,
+    layer=L.WG,
+    angle=90,
 )
 radius_dbu = kf.routing.optical.get_radius(bend90.ports)
 radius_um = bend90.kcl.to_um(radius_dbu)  # > 10 µm for euler bends
@@ -13329,10 +13340,12 @@ Collision detection calls `kdb.show_error()` which spawns a dialog in GUI mode. 
 
 ```
 kf.routing.optical.route_bundle(
-    c, start_ports, end_ports,
+    c,
+    start_ports,
+    end_ports,
     bend90_cell=bend90,
     straight_factory=sf,
-    on_collision=None,   # <-- suppress dialog
+    on_collision=None,  # <-- suppress dialog
 )
 ```
 
@@ -13358,7 +13371,7 @@ Use `apply_minkowski_y` which morphologically expands along the Y axis, followin
 
 ```
 enc = kf.LayerEnclosure(sections=[(L.WGCLAD, 2_000)])
-enc.apply_minkowski_y(c)   # call after shapes are drawn
+enc.apply_minkowski_y(c)  # call after shapes are drawn
 ```
 
 `apply_minkowski_tiled` (the default) works on the merged bounding region and can produce rectangular results for tapered shapes.
@@ -13372,7 +13385,7 @@ enc.apply_minkowski_y(c)   # call after shapes are drawn
 ```
 enc = kf.LayerEnclosure(
     dsections=[(L.WGCLAD, 0, 2.0)],
-    kcl=kf.kcl,          # <-- required for µm→DBU conversion
+    kcl=kf.kcl,  # <-- required for µm→DBU conversion
 )
 ```
 
@@ -13393,7 +13406,7 @@ enc = kf.LayerEnclosure(
 ```
 kf.packing.pack_kcells(
     cells,
-    spacing=kf.kcl.to_dbu(2),      # 2 µm → DBU
+    spacing=kf.kcl.to_dbu(2),  # 2 µm → DBU
     max_width=kf.kcl.to_dbu(500),
 )
 ```
@@ -13405,7 +13418,7 @@ kf.packing.pack_kcells(
 `dmove` unpacks its argument as a 2-tuple internally. Pass a plain Python tuple or a 2-element sequence, not a `kdb.DVector`:
 
 ```
-inst.dmove((dx, dy))              # correct
+inst.dmove((dx, dy))  # correct
 inst.dmove(kf.kdb.DVector(dx, dy))  # TypeError
 ```
 
@@ -13655,7 +13668,7 @@ print(f"factory bundle type: {type(factories)}")
 ```
 
 ```
-[32m2026-10-15 16:12:36.797[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
+[32m2026-10-15 16:21:46.573[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
 Renaming Unnamed_8 (cell_index=8) to straight_CSsym_028523d7_500_L10000 would cause it to be named the same as:
  - straight_CSsym_028523d7_500_L10000 (cell_index=1), function_name=_straight, basename=straight[0m
 
@@ -14018,18 +14031,22 @@ Cross-sections can be registered on a `KCLayout` and looked up by name, making t
 ```
 import kfactory as kf
 
+
 class LAYER(kf.LayerInfos):
     WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
     WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
 
+
 L = LAYER()
 kf.kcl.infos = L
 
-enc = kf.LayerEnclosure(sections=[(kf.kcl.find_layer(L.WGEX), 2000)],
-                         main_layer=kf.kcl.find_layer(L.WG))
-xs = kf.SymmetricalCrossSection(width=500, enclosure=enc,
-                                  layer=kf.kcl.find_layer(L.WG), name="xs_wg")
-kf.kcl.get_icross_section(xs)   # registers & returns the cross-section
+enc = kf.LayerEnclosure(
+    sections=[(kf.kcl.find_layer(L.WGEX), 2000)], main_layer=kf.kcl.find_layer(L.WG)
+)
+xs = kf.SymmetricalCrossSection(
+    width=500, enclosure=enc, layer=kf.kcl.find_layer(L.WG), name="xs_wg"
+)
+kf.kcl.get_icross_section(xs)  # registers & returns the cross-section
 
 # Later — retrieve by name (hashable, safe inside @kf.cell):
 xs_retrieved = kf.kcl.get_icross_section("xs_wg")
@@ -14377,10 +14394,12 @@ route_bundle(cell, start_ports, end_ports, separation=..., starts=100, ends=100,
 ```
 # Before (2.x)
 from kfactory.routing.optical import place90
+
 place90(cell, p1, p2, pts, ...)
 
 # After (3.0)
 from kfactory.routing.optical import place_manhattan
+
 place_manhattan(cell, p1, p2, pts, ...)
 ```
 
@@ -14410,8 +14429,10 @@ from kfactory.netlist import Netlist
 
 # After (3.0)
 from kfnetlist import Netlist
+
 # or
 import kfactory as kf
+
 kf.Netlist
 ```
 
@@ -14422,10 +14443,12 @@ The `get_schematic` helper has been removed from the public API. Construct a `Sc
 ```
 # Before (2.x)
 import kfactory as kf
+
 schematic = kf.get_schematic(...)
 
 # After (3.0)
 import kfactory as kf
+
 schematic = kf.Schematic(kcl=kcl)
 ```
 
@@ -14436,11 +14459,13 @@ The deprecated `Schema` and `DSchema` classes (aliases for `Schematic` and `DSch
 ```
 # Before (2.x)
 import kfactory as kf
+
 schematic = kf.Schema(kcl=kcl)
 dschematic = kf.DSchema(kcl=kcl)
 
 # After (3.0)
 import kfactory as kf
+
 schematic = kf.Schematic(kcl=kcl)
 dschematic = kf.DSchematic(kcl=kcl)
 ```
@@ -14491,9 +14516,10 @@ import kfactory as kf
 
 kcl = kf.KCLayout("MY_PDK")
 
+
 @kcl.routing_strategy
-def route_bundle(cell, start_ports, end_ports, **kwargs):
-    ...
+def route_bundle(cell, start_ports, end_ports, **kwargs): ...
+
 
 # Or register directly:
 kcl.routing_strategies["my_custom_route"] = my_routing_function

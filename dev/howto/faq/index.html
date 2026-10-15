@@ -6673,8 +6673,8 @@ For executable examples see <a href="../best_practices/">Best Practices</a>.</p>
 </tbody>
 </table>
 <p>The two never mix automatically.  Always convert explicitly:</p>
-<div class="highlight"><pre><span></span><code><span class="n">width_nm</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>   <span class="c1"># 0.5 µm → 500 DBU</span>
-<span class="n">width_um</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>    <span class="c1"># 500 DBU → 0.5 µm</span>
+<div class="highlight"><pre><span></span><code><span class="n">width_nm</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># 0.5 µm → 500 DBU</span>
+<span class="n">width_um</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>  <span class="c1"># 500 DBU → 0.5 µm</span>
 </code></pre></div>
 <p>The integer <code>to_dbu</code> conversion <strong>rounds</strong> — widths that are not a multiple of 2 DBU
 are silently rounded.  Design your grid in multiples of 2 DBU to avoid asymmetry.</p>
@@ -6742,13 +6742,15 @@ to the instance.</p>
 <p>Each <code>KCLayout</code> has its own layer-index table.  A port or shape created under <code>kf.kcl</code>
 carries layer index 0 for <code>WG</code>; a different <code>KCLayout</code> may map <code>WG</code> to index 5.</p>
 <p><strong>Fix</strong>: always pass <code>kcl=pdk</code> when constructing <code>kf.Port</code> inside a PDK cell:</p>
-<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
-    <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-    <span class="n">width</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-    <span class="n">layer</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">),</span>
-    <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>                      <span class="c1"># &lt;-- critical</span>
-<span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span>
+    <span class="n">port</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">Port</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"o1"</span><span class="p">,</span>
+        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+        <span class="n">layer</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">),</span>
+        <span class="n">kcl</span><span class="o">=</span><span class="n">pdk</span><span class="p">,</span>  <span class="c1"># &lt;-- critical</span>
+    <span class="p">)</span>
+<span class="p">)</span>
 </code></pre></div>
 <hr />
 <h3 id="kclayout-isnt-seeing-my-layers-even-though-i-set-kclinfos"><code>KCLayout</code> isn't seeing my layers even though I set <code>kcl.infos</code></h3>
@@ -6758,7 +6760,7 @@ carries layer index 0 for <code>WG</code>; a different <code>KCLayout</code> may
 
 <span class="c1"># Wrong — setting after construction does not fully propagate</span>
 <span class="n">pdk</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCLayout</span><span class="p">(</span><span class="s2">"my_pdk"</span><span class="p">)</span>
-<span class="n">pdk</span><span class="o">.</span><span class="n">infos</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>   <span class="c1"># ← incomplete</span>
+<span class="n">pdk</span><span class="o">.</span><span class="n">infos</span> <span class="o">=</span> <span class="n">LAYER</span><span class="p">()</span>  <span class="c1"># ← incomplete</span>
 </code></pre></div>
 <p>After construction <code>pdk.infos</code> holds the instance; the <code>infos=</code> constructor
 argument triggers internal layer registration that the post-hoc assignment skips.</p>
@@ -6815,7 +6817,10 @@ than the radius you passed to the factory.</p>
 radius <strong>in DBU</strong>. Convert to µm before passing it to a µm-based factory or
 comparing it with the nominal radius:</p>
 <div class="highlight"><pre><span></span><code><span class="n">bend90</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">factories</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">bend_euler_factory</span><span class="p">(</span><span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">)(</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
+    <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">radius_dbu</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">get_radius</span><span class="p">(</span><span class="n">bend90</span><span class="o">.</span><span class="n">ports</span><span class="p">)</span>
 <span class="n">radius_um</span> <span class="o">=</span> <span class="n">bend90</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_um</span><span class="p">(</span><span class="n">radius_dbu</span><span class="p">)</span>  <span class="c1"># &gt; 10 µm for euler bends</span>
@@ -6837,10 +6842,12 @@ bends before the matching section.</p>
 <p>Collision detection calls <code>kdb.show_error()</code> which spawns a dialog in GUI mode.
 Suppress it for CI / notebook execution:</p>
 <div class="highlight"><pre><span></span><code><span class="n">kf</span><span class="o">.</span><span class="n">routing</span><span class="o">.</span><span class="n">optical</span><span class="o">.</span><span class="n">route_bundle</span><span class="p">(</span>
-    <span class="n">c</span><span class="p">,</span> <span class="n">start_ports</span><span class="p">,</span> <span class="n">end_ports</span><span class="p">,</span>
+    <span class="n">c</span><span class="p">,</span>
+    <span class="n">start_ports</span><span class="p">,</span>
+    <span class="n">end_ports</span><span class="p">,</span>
     <span class="n">bend90_cell</span><span class="o">=</span><span class="n">bend90</span><span class="p">,</span>
     <span class="n">straight_factory</span><span class="o">=</span><span class="n">sf</span><span class="p">,</span>
-    <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>   <span class="c1"># &lt;-- suppress dialog</span>
+    <span class="n">on_collision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># &lt;-- suppress dialog</span>
 <span class="p">)</span>
 </code></pre></div>
 <hr />
@@ -6859,7 +6866,7 @@ and exit bends.  Space backbone waypoints further apart.</p>
 <p>Use <code>apply_minkowski_y</code> which morphologically expands along the Y axis, following
 non-rectangular outlines:</p>
 <div class="highlight"><pre><span></span><code><span class="n">enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span><span class="n">sections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">2_000</span><span class="p">)])</span>
-<span class="n">enc</span><span class="o">.</span><span class="n">apply_minkowski_y</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>   <span class="c1"># call after shapes are drawn</span>
+<span class="n">enc</span><span class="o">.</span><span class="n">apply_minkowski_y</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>  <span class="c1"># call after shapes are drawn</span>
 </code></pre></div>
 <p><code>apply_minkowski_tiled</code> (the default) works on the merged bounding region and
 can produce rectangular results for tapered shapes.</p>
@@ -6869,7 +6876,7 @@ can produce rectangular results for tapered shapes.</p>
 Pass <code>kcl=</code> at construction time:</p>
 <div class="highlight"><pre><span></span><code><span class="n">enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">LayerEnclosure</span><span class="p">(</span>
     <span class="n">dsections</span><span class="o">=</span><span class="p">[(</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)],</span>
-    <span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>          <span class="c1"># &lt;-- required for µm→DBU conversion</span>
+    <span class="n">kcl</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="p">,</span>  <span class="c1"># &lt;-- required for µm→DBU conversion</span>
 <span class="p">)</span>
 </code></pre></div>
 <hr />
@@ -6883,7 +6890,7 @@ called while the cell is unlocked, i.e., <strong>inside</strong> the <code>@kf.c
 <p><code>spacing</code>, <code>max_width</code>, and <code>max_height</code> are all in <strong>DBU</strong>, not µm.  Convert first:</p>
 <div class="highlight"><pre><span></span><code><span class="n">kf</span><span class="o">.</span><span class="n">packing</span><span class="o">.</span><span class="n">pack_kcells</span><span class="p">(</span>
     <span class="n">cells</span><span class="p">,</span>
-    <span class="n">spacing</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>      <span class="c1"># 2 µm → DBU</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>  <span class="c1"># 2 µm → DBU</span>
     <span class="n">max_width</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">to_dbu</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -6891,7 +6898,7 @@ called while the cell is unlocked, i.e., <strong>inside</strong> the <code>@kf.c
 <h3 id="instdmovex-y-works-but-instdmovekfkdbdvectorx-y-raises-typeerror"><code>inst.dmove((x, y))</code> works but <code>inst.dmove(kf.kdb.DVector(x, y))</code> raises <code>TypeError</code></h3>
 <p><code>dmove</code> unpacks its argument as a 2-tuple internally.  Pass a plain Python tuple
 or a 2-element sequence, not a <code>kdb.DVector</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="n">inst</span><span class="o">.</span><span class="n">dmove</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">))</span>              <span class="c1"># correct</span>
+<div class="highlight"><pre><span></span><code><span class="n">inst</span><span class="o">.</span><span class="n">dmove</span><span class="p">((</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">))</span>  <span class="c1"># correct</span>
 <span class="n">inst</span><span class="o">.</span><span class="n">dmove</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">DVector</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">))</span>  <span class="c1"># TypeError</span>
 </code></pre></div>
 <hr />
