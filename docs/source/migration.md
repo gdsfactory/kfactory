@@ -126,10 +126,12 @@ route_bundle(cell, start_ports, end_ports, separation=..., starts=100, ends=100,
 ```python
 # Before (2.x)
 from kfactory.routing.optical import place90
+
 place90(cell, p1, p2, pts, ...)
 
 # After (3.0)
 from kfactory.routing.optical import place_manhattan
+
 place_manhattan(cell, p1, p2, pts, ...)
 ```
 
@@ -164,8 +166,10 @@ from kfactory.netlist import Netlist
 
 # After (3.0)
 from kfnetlist import Netlist
+
 # or
 import kfactory as kf
+
 kf.Netlist
 ```
 
@@ -177,10 +181,12 @@ directly instead.
 ```python
 # Before (2.x)
 import kfactory as kf
+
 schematic = kf.get_schematic(...)
 
 # After (3.0)
 import kfactory as kf
+
 schematic = kf.Schematic(kcl=kcl)
 ```
 
@@ -192,11 +198,13 @@ have been removed. They were deprecated in kfactory 2.0.
 ```python
 # Before (2.x)
 import kfactory as kf
+
 schematic = kf.Schema(kcl=kcl)
 dschematic = kf.DSchema(kcl=kcl)
 
 # After (3.0)
 import kfactory as kf
+
 schematic = kf.Schematic(kcl=kcl)
 dschematic = kf.DSchematic(kcl=kcl)
 ```
@@ -253,9 +261,10 @@ import kfactory as kf
 
 kcl = kf.KCLayout("MY_PDK")
 
+
 @kcl.routing_strategy
-def route_bundle(cell, start_ports, end_ports, **kwargs):
-    ...
+def route_bundle(cell, start_ports, end_ports, **kwargs): ...
+
 
 # Or register directly:
 kcl.routing_strategies["my_custom_route"] = my_routing_function

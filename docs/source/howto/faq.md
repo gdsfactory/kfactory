@@ -19,8 +19,8 @@ kfactory uses two coordinate systems in parallel:
 The two never mix automatically.  Always convert explicitly:
 
 ```python
-width_nm = kf.kcl.to_dbu(0.5)   # 0.5 µm → 500 DBU
-width_um = kf.kcl.to_um(500)    # 500 DBU → 0.5 µm
+width_nm = kf.kcl.to_dbu(0.5)  # 0.5 µm → 500 DBU
+width_um = kf.kcl.to_um(500)  # 500 DBU → 0.5 µm
 ```
 
 The integer `to_dbu` conversion **rounds** — widths that are not a multiple of 2 DBU
@@ -89,13 +89,15 @@ carries layer index 0 for `WG`; a different `KCLayout` may map `WG` to index 5.
 **Fix**: always pass `kcl=pdk` when constructing `kf.Port` inside a PDK cell:
 
 ```python
-c.add_port(port=kf.Port(
-    name="o1",
-    trans=kf.kdb.Trans(0, False, 0, 0),
-    width=500,
-    layer=pdk.find_layer(L.WG),
-    kcl=pdk,                      # <-- critical
-))
+c.add_port(
+    port=kf.Port(
+        name="o1",
+        trans=kf.kdb.Trans(0, False, 0, 0),
+        width=500,
+        layer=pdk.find_layer(L.WG),
+        kcl=pdk,  # <-- critical
+    )
+)
 ```
 
 ---
@@ -110,7 +112,7 @@ pdk = kf.KCLayout("my_pdk", infos=LAYER)
 
 # Wrong — setting after construction does not fully propagate
 pdk = kf.KCLayout("my_pdk")
-pdk.infos = LAYER()   # ← incomplete
+pdk.infos = LAYER()  # ← incomplete
 ```
 
 After construction `pdk.infos` holds the instance; the `infos=` constructor
@@ -169,7 +171,10 @@ comparing it with the nominal radius:
 
 ```python
 bend90 = kf.factories.euler.bend_euler_factory(kcl=kf.kcl)(
-    width=0.5, radius=10, layer=L.WG, angle=90,
+    width=0.5,
+    radius=10,
+    layer=L.WG,
+    angle=90,
 )
 radius_dbu = kf.routing.optical.get_radius(bend90.ports)
 radius_um = bend90.kcl.to_um(radius_dbu)  # > 10 µm for euler bends
@@ -200,10 +205,12 @@ Suppress it for CI / notebook execution:
 
 ```python
 kf.routing.optical.route_bundle(
-    c, start_ports, end_ports,
+    c,
+    start_ports,
+    end_ports,
     bend90_cell=bend90,
     straight_factory=sf,
-    on_collision=None,   # <-- suppress dialog
+    on_collision=None,  # <-- suppress dialog
 )
 ```
 
@@ -234,7 +241,7 @@ non-rectangular outlines:
 
 ```python
 enc = kf.LayerEnclosure(sections=[(L.WGCLAD, 2_000)])
-enc.apply_minkowski_y(c)   # call after shapes are drawn
+enc.apply_minkowski_y(c)  # call after shapes are drawn
 ```
 
 `apply_minkowski_tiled` (the default) works on the merged bounding region and
@@ -250,7 +257,7 @@ Pass `kcl=` at construction time:
 ```python
 enc = kf.LayerEnclosure(
     dsections=[(L.WGCLAD, 0, 2.0)],
-    kcl=kf.kcl,          # <-- required for µm→DBU conversion
+    kcl=kf.kcl,  # <-- required for µm→DBU conversion
 )
 ```
 
@@ -273,7 +280,7 @@ called while the cell is unlocked, i.e., **inside** the `@kf.cell` function body
 ```python
 kf.packing.pack_kcells(
     cells,
-    spacing=kf.kcl.to_dbu(2),      # 2 µm → DBU
+    spacing=kf.kcl.to_dbu(2),  # 2 µm → DBU
     max_width=kf.kcl.to_dbu(500),
 )
 ```
@@ -286,7 +293,7 @@ kf.packing.pack_kcells(
 or a 2-element sequence, not a `kdb.DVector`:
 
 ```python
-inst.dmove((dx, dy))              # correct
+inst.dmove((dx, dy))  # correct
 inst.dmove(kf.kdb.DVector(dx, dy))  # TypeError
 ```
 
