@@ -57,7 +57,7 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
             f"ports={[p.name for p in self.ports]})"
         )
 
-    @property
+    @cached_property
     @abstractmethod
     def ports(self) -> ProtoPorts[T]:
         """Ports of the instance."""

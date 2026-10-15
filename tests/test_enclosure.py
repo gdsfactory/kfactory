@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import cast
 
 import pytest
 
@@ -214,9 +213,7 @@ def test_bbox_sections_spec_roundtrip(kcl: kf.KCLayout, layers: Layers) -> None:
         name="enc_spec_bbox",
     )
 
-    restored = kcl.get_enclosure(
-        cast("kf.enclosure.LayerEnclosureSpec", enc.model_dump())
-    )
+    restored = kcl.get_enclosure(enc.model_dump())
     assert restored.bbox_sections == {layers.FILL1: 2000}
     assert restored == enc
 
