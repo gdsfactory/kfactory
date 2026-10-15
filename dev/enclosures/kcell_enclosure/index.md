@@ -133,7 +133,7 @@ bend_pair_multi(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 05:47:53.416[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 06:17:13.201[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_4 (cell_index=4) to bend_euler_CS028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -180,7 +180,7 @@ single_bend_npts(radius=10, width=0.5, n_pts=8).plot()
 ```
 
 ```
-[32m2026-10-15 05:47:53.818[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 06:17:13.724[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_7 (cell_index=7) to bend_euler_CS028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler[0m
@@ -198,7 +198,7 @@ single_bend_npts(radius=10, width=0.5, n_pts=64).plot()
 ```
 
 ```
-[32m2026-10-15 05:47:53.888[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 06:17:13.793[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_10 (cell_index=10) to bend_euler_CS028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
@@ -288,7 +288,7 @@ vertical_straight_clad_x(length=20.0, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 05:47:54.085[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
+[32m2026-10-15 06:17:14.057[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
 Renaming Unnamed_16 (cell_index=16) to straight_CS028523d7_500_L20000 would cause it to be named the same as:
  - straight_CS028523d7_500_L20000 (cell_index=13), function_name=_straight, basename=straight[0m
 ```
@@ -345,7 +345,7 @@ bend_pair_diamond(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 05:47:54.133[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 06:17:14.114[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_19 (cell_index=19) to bend_euler_CS028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler

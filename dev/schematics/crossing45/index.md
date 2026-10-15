@@ -58,7 +58,7 @@ kf.kcl.get_icross_section(xs_wg1)
 ```
 
 ```
-<kfactory.cross_section.CrossSection at 0x7f8f7168bed0>
+<kfactory.cross_section.CrossSection at 0x7fdcf7243ed0>
 ```
 
 ## The `cross` cell
@@ -465,7 +465,7 @@ c
 ```
 
 ```
-[32m2026-10-15 05:47:41.545[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
+[32m2026-10-15 06:16:59.340[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
 ```
 
 ```
@@ -510,7 +510,7 @@ Code(c.schematic.code_str())
 ```
 
 ```
-[32m2026-10-15 05:47:42.170[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-15 06:16:59.713[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
