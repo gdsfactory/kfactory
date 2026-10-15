@@ -753,8 +753,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     cell: AnyKCell
     trans: kdb.DCplxTrans
     _info: Info | None
-    a: kdb.DVector
-    b: kdb.DVector
+    _a: kdb.DVector
+    _b: kdb.DVector
     na: int = 1
     nb: int = 1
 
@@ -774,10 +774,32 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         self._info = None
         self.cell = cell
         self.trans = trans.dup() if trans is not None else kdb.DCplxTrans()
-        self.a = a.dup()
-        self.b = b.dup()
+        self.a = a
+        self.b = b
         self.na = na
         self.nb = nb
+
+    @property
+    def a(self) -> kdb.DVector:
+        """Returns the displacement vector for the 'a' axis."""
+        return self._a
+
+    @a.setter
+    def a(self, vec: kdb.Vector | kdb.DVector) -> None:
+        self._a = (
+            vec.to_dtype(self.kcl.dbu) if isinstance(vec, kdb.Vector) else vec.dup()
+        )
+
+    @property
+    def b(self) -> kdb.DVector:
+        """Returns the displacement vector for the 'b' axis."""
+        return self._b
+
+    @b.setter
+    def b(self, vec: kdb.Vector | kdb.DVector) -> None:
+        self._b = (
+            vec.to_dtype(self.kcl.dbu) if isinstance(vec, kdb.Vector) else vec.dup()
+        )
 
     @property
     def name(self) -> str | None:
