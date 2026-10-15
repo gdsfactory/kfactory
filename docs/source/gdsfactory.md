@@ -173,18 +173,22 @@ Cross-sections can be registered on a `KCLayout` and looked up by name, making t
 ```python
 import kfactory as kf
 
+
 class LAYER(kf.LayerInfos):
     WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
     WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
 
+
 L = LAYER()
 kf.kcl.infos = L
 
-enc = kf.LayerEnclosure(sections=[(kf.kcl.find_layer(L.WGEX), 2000)],
-                         main_layer=kf.kcl.find_layer(L.WG))
-xs = kf.SymmetricalCrossSection(width=500, enclosure=enc,
-                                  layer=kf.kcl.find_layer(L.WG), name="xs_wg")
-kf.kcl.get_icross_section(xs)   # registers & returns the cross-section
+enc = kf.LayerEnclosure(
+    sections=[(kf.kcl.find_layer(L.WGEX), 2000)], main_layer=kf.kcl.find_layer(L.WG)
+)
+xs = kf.SymmetricalCrossSection(
+    width=500, enclosure=enc, layer=kf.kcl.find_layer(L.WG), name="xs_wg"
+)
+kf.kcl.get_icross_section(xs)  # registers & returns the cross-section
 
 # Later — retrieve by name (hashable, safe inside @kf.cell):
 xs_retrieved = kf.kcl.get_icross_section("xs_wg")
