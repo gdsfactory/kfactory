@@ -95,7 +95,7 @@ print("cell info:", dict(b_meta.info))
 ```
 
 ```
-[32m2026-10-15 05:27:39.864[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
+[32m2026-10-15 05:48:01.249[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
 Renaming Unnamed_8 (cell_index=8) to bend_s_bezier_CS028523d7_500_H5_L20_NP99_TS0_TS1 would cause it to be named the same as:
  - bend_s_bezier_CS028523d7_500_H5_L20_NP99_TS0_TS1 (cell_index=0), function_name=_bend_s_bezier, basename=bend_s_bezier[0m
 

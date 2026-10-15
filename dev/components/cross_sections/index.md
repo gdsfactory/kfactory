@@ -441,8 +441,6 @@ parent_o1o1.plot()
 
 ```
 WITHOUT mirror=True, o1↔o1 raises:
-
-
   AsymmetricMirrorRequiredError: Cannot connect ports 'o1' and 'o1' carrying the same asymmetric cross section without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
 
 WITH mirror=True (one instance mirrored):
@@ -486,6 +484,8 @@ except CrossSectionSymmetryMismatchError as e:
 
 ```
 Symmetric ↔ asymmetric connect raises:
+
+
   CrossSectionSymmetryMismatchError: Cross section symmetry mismatch between ports 'o1' (asymmetric) and 'o2' (symmetric). Symmetric and asymmetric cross sections cannot be connected.
 ```
 

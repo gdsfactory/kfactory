@@ -438,22 +438,6 @@ Parameters:
 
 Bases: `ProtoInstance[float]`, `UMGeometricObject`
 
-### a
-
-```
-a: DVector
-```
-
-Returns the displacement vector for the 'a' axis.
-
-### b
-
-```
-b: DVector
-```
-
-Returns the displacement vector for the 'b' axis.
-
 ### cell\_name
 
 ```

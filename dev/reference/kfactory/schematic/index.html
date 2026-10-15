@@ -13,12 +13,6 @@
         <link rel="canonical" href="https://gdsfactory.github.io/kfactory/dev/reference/kfactory/schematic/">
       
       
-        <link rel="describedby" href="../../../llms.txt">
-        
-          <link rel="alternate" type="text/markdown" href="./index.md">
-        
-      
-      
         <link rel="prev" href="../routing/utils/">
       
       
@@ -29,7 +23,7 @@
       
       
       <link rel="icon" href="../../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.70">
+      <meta name="generator" content="zensical-0.0.69">
     
     
       
@@ -40,12 +34,12 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.e442bf79.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/modern/main.e15858d4.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.b60ce83d.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/modern/palette.b27955a4.min.css">
       
       
 
@@ -7806,7 +7800,7 @@ Two <code>Port</code> objects (cell ports) cannot be connected directly.</p>
 <span class="sd">        TypeError: If connection attempts to join two `Port` objects.</span>
 <span class="sd">    """</span>
 
-    <span class="n">net</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">PortArrayRef</span> <span class="o">|</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">PortArrayRef</span> <span class="o">|</span> <span class="n">PortRef</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>  <span class="c1"># ty:ignore[invalid-mutable-override]</span>
+    <span class="n">net</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">PortArrayRef</span> <span class="o">|</span> <span class="n">PortRef</span> <span class="o">|</span> <span class="n">Port</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">PortArrayRef</span> <span class="o">|</span> <span class="n">PortRef</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
 
@@ -8621,7 +8615,7 @@ constraint-specific visualisation.</p>
 <span class="normal">2532</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DSchematic</span><span class="p">(</span><span class="n">TSchematic</span><span class="p">[</span><span class="n">um</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Schematic with a base unit of um for placements."""</span>
 
-    <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"um"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"um"</span>  <span class="c1"># ty:ignore[invalid-mutable-override]</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"um"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"um"</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_pic_yml</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DSchematic</span><span class="p">:</span>
@@ -11536,7 +11530,7 @@ instance ports via <code>PortRef</code>/<code>PortArrayRef</code>.</p>
 <span class="normal">2516</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Schematic</span><span class="p">(</span><span class="n">TSchematic</span><span class="p">[</span><span class="n">dbu</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Schematic with a base unit of dbu for placements."""</span>
 
-    <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"dbu"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"dbu"</span>  <span class="c1"># ty:ignore[invalid-mutable-override]</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"dbu"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"dbu"</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_pic_yml</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schematic</span><span class="p">:</span>
@@ -19303,10 +19297,10 @@ netlist is sorted for stable output.</p>
         
           
         
-      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tabs","navigation.tabs.sticky","navigation.instant","navigation.instant.progress","navigation.path","navigation.indexes","content.action.copy"],"redirect":"../../../redirect.json","search":"../../../assets/javascripts/workers/search.c47bb847.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tabs","navigation.tabs.sticky","navigation.instant","navigation.instant.progress","navigation.path","navigation.indexes","content.action.copy"],"redirect":"../../../redirect.json","search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.a2388154.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.8b1c90bd.min.js"></script>
       
         <script src="../../../_static/javascripts/width-toggle.js"></script>
       
