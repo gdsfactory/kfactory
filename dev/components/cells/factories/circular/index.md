@@ -26,7 +26,7 @@ bc90
 ```
 
 ```
-circular bend: bend_circular_CS028523d7_500_R10_A90_AS1
+circular bend: bend_circular_CSsym_028523d7_500_R10_A90_AS1
 footprint radius: 10.0 µm (== nominal)
 ```
 

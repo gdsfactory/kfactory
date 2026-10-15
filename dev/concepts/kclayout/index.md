@@ -241,7 +241,7 @@ with tempfile.TemporaryDirectory() as tmp:
 ```
 
 ```
-written: 1178 bytes
+written: 1194 bytes
 cells read back: [0, 1, 2]
 ```
 

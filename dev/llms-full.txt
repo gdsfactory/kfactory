@@ -977,7 +977,7 @@ with tempfile.TemporaryDirectory() as tmp:
 ```
 
 ```
-Wrote demo_geometry.gds (1012 bytes)
+Wrote demo_geometry.gds (1032 bytes)
 ```
 
 ## Summary
@@ -1801,7 +1801,7 @@ with tempfile.TemporaryDirectory() as tmp:
 ```
 
 ```
-written: 1178 bytes
+written: 1194 bytes
 cells read back: [0, 1, 2]
 ```
 
@@ -1934,7 +1934,7 @@ for name in L.model_fields:
   FLOORPLAN     layer=10  datatype=0
 
 
-/tmp/ipykernel_2955/971822332.py:1: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_2732/971822332.py:1: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in L.model_fields:
 ```
 
@@ -2076,7 +2076,7 @@ Layer palette:
   m2      z=1.2…1.70 µm  Al
 
 
-/tmp/ipykernel_2955/3302201102.py:18: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_2732/3302201102.py:18: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in pdk_layers.model_fields:
 ```
 
@@ -2437,7 +2437,7 @@ b
 ```
 
 ```
-S-bend: bend_s_bezier_CS028523d7_500_H5_L20_NP99_TS0_TS1
+S-bend: bend_s_bezier_CSsym_028523d7_500_H5_L20_NP99_TS0_TS1
 ```
 
 ```
@@ -2505,9 +2505,9 @@ print("cell info:", dict(b_meta.info))
 ```
 
 ```
-[32m2026-10-15 06:17:21.401[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
-Renaming Unnamed_8 (cell_index=8) to bend_s_bezier_CS028523d7_500_H5_L20_NP99_TS0_TS1 would cause it to be named the same as:
- - bend_s_bezier_CS028523d7_500_H5_L20_NP99_TS0_TS1 (cell_index=0), function_name=_bend_s_bezier, basename=bend_s_bezier[0m
+[32m2026-10-15 16:12:46.260[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
+Renaming Unnamed_8 (cell_index=8) to bend_s_bezier_CSsym_028523d7_500_H5_L20_NP99_TS0_TS1 would cause it to be named the same as:
+ - bend_s_bezier_CSsym_028523d7_500_H5_L20_NP99_TS0_TS1 (cell_index=0), function_name=_bend_s_bezier, basename=bend_s_bezier[0m
 
 
 cell info: {'pdk': 'FACTORIES_BEZIER_DEMO', 'component_type': 'bezier_sbend'}
@@ -2549,7 +2549,7 @@ bc90
 ```
 
 ```
-circular bend: bend_circular_CS028523d7_500_R10_A90_AS1
+circular bend: bend_circular_CSsym_028523d7_500_R10_A90_AS1
 footprint radius: 10.0 µm (== nominal)
 ```
 
@@ -2597,7 +2597,7 @@ b90
 ```
 
 ```
-90° euler bend: bend_euler_CS028523d7_500_R10_A90_R150
+90° euler bend: bend_euler_CSsym_028523d7_500_R10_A90_R150
 ```
 
 ```
@@ -2617,8 +2617,8 @@ b180
 ```
 
 ```
-45°  bend: bend_euler_CS028523d7_500_R10_A45_R150
-180° bend: bend_euler_CS028523d7_500_R10_A180_R150
+45°  bend: bend_euler_CSsym_028523d7_500_R10_A45_R150
+180° bend: bend_euler_CSsym_028523d7_500_R10_A180_R150
 ```
 
 ```
@@ -2651,7 +2651,7 @@ sbend
 ```
 
 ```
-S-bend: bend_s_euler_CS028523d7_500_O5_R10_R150
+S-bend: bend_s_euler_CSsym_028523d7_500_O5_R10_R150
 ```
 
 ```
@@ -2852,7 +2852,7 @@ tp
 ```
 
 ```
-taper: taper_CS028523d7_500_CS028523d7_2000_L20000
+taper: taper_CSsym_028523d7_500_CSsym_028523d7_2000_L20000
 ```
 
 ```
@@ -4741,9 +4741,9 @@ bend_pair_multi(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 06:17:13.201[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
-Renaming Unnamed_4 (cell_index=4) to bend_euler_CS028523d7_500_R10_A90_R150 would cause it to be named the same as:
- - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler[0m
+[32m2026-10-15 16:12:37.217[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+Renaming Unnamed_4 (cell_index=4) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
+ - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler[0m
 ```
 
 ```
@@ -4788,10 +4788,10 @@ single_bend_npts(radius=10, width=0.5, n_pts=8).plot()
 ```
 
 ```
-[32m2026-10-15 06:17:13.724[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
-Renaming Unnamed_7 (cell_index=7) to bend_euler_CS028523d7_500_R10_A90_R150 would cause it to be named the same as:
- - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
- - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler[0m
+[32m2026-10-15 16:12:37.560[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+Renaming Unnamed_7 (cell_index=7) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
+ - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
+ - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler[0m
 ```
 
 ```
@@ -4806,11 +4806,11 @@ single_bend_npts(radius=10, width=0.5, n_pts=64).plot()
 ```
 
 ```
-[32m2026-10-15 06:17:13.793[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
-Renaming Unnamed_10 (cell_index=10) to bend_euler_CS028523d7_500_R10_A90_R150 would cause it to be named the same as:
- - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
- - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
- - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=7), function_name=_bend_euler, basename=bend_euler[0m
+[32m2026-10-15 16:12:37.589[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+Renaming Unnamed_10 (cell_index=10) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
+ - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
+ - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
+ - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=7), function_name=_bend_euler, basename=bend_euler[0m
 ```
 
 ```
@@ -4896,9 +4896,9 @@ vertical_straight_clad_x(length=20.0, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 06:17:14.057[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
-Renaming Unnamed_16 (cell_index=16) to straight_CS028523d7_500_L20000 would cause it to be named the same as:
- - straight_CS028523d7_500_L20000 (cell_index=13), function_name=_straight, basename=straight[0m
+[32m2026-10-15 16:12:37.708[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
+Renaming Unnamed_16 (cell_index=16) to straight_CSsym_028523d7_500_L20000 would cause it to be named the same as:
+ - straight_CSsym_028523d7_500_L20000 (cell_index=13), function_name=_straight, basename=straight[0m
 ```
 
 ```
@@ -4953,12 +4953,12 @@ bend_pair_diamond(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 06:17:14.114[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
-Renaming Unnamed_19 (cell_index=19) to bend_euler_CS028523d7_500_R10_A90_R150 would cause it to be named the same as:
- - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
- - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
- - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=7), function_name=_bend_euler, basename=bend_euler
- - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=10), function_name=_bend_euler, basename=bend_euler[0m
+[32m2026-10-15 16:12:37.736[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+Renaming Unnamed_19 (cell_index=19) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
+ - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
+ - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
+ - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=7), function_name=_bend_euler, basename=bend_euler
+ - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=10), function_name=_bend_euler, basename=bend_euler[0m
 ```
 
 ```
@@ -5096,9 +5096,9 @@ bend_um.plot()
 ```
 
 ```
-[32m2026-10-15 06:17:13.586[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
-Renaming Unnamed_2 (cell_index=2) to bend_euler_CS67c2bf20_500_R10_A90_R150 would cause it to be named the same as:
- - bend_euler_CS67c2bf20_500_R10_A90_R150 (cell_index=0), function_name=_bend_euler, basename=bend_euler[0m
+[32m2026-10-15 16:12:38.715[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+Renaming Unnamed_2 (cell_index=2) to bend_euler_CSsym_67c2bf20_500_R10_A90_R150 would cause it to be named the same as:
+ - bend_euler_CSsym_67c2bf20_500_R10_A90_R150 (cell_index=0), function_name=_bend_euler, basename=bend_euler[0m
 ```
 
 ```
@@ -5229,9 +5229,9 @@ c_two.plot()
 ```
 
 ```
-[32m2026-10-15 06:17:13.817[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
-Renaming Unnamed_12 (cell_index=12) to bend_euler_CS028523d7_500_R10_A90_R150 would cause it to be named the same as:
- - bend_euler_CS028523d7_500_R10_A90_R150 (cell_index=11), function_name=_bend_euler, basename=bend_euler[0m
+[32m2026-10-15 16:12:38.942[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+Renaming Unnamed_12 (cell_index=12) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
+ - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=11), function_name=_bend_euler, basename=bend_euler[0m
 ```
 
 ```
@@ -8015,7 +8015,7 @@ print(f"WG layer index: {pdk.find_layer(L.WG)}")
 ```
 
 ```
-PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7f24b9019400> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7f24b9107980> factories=<kfactory.layout.Factories object at 0x7f24b91af9d0> virtual_factories=<kfactory.layout.Factories object at 0x7f24b91f0c30> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7f24d7b97e20> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7f24b9027d90> info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7f24b91afc50> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
+PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7fa80ac0d5b0> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fa80ad07980> factories=<kfactory.layout.Factories object at 0x7fa80adaf890> virtual_factories=<kfactory.layout.Factories object at 0x7fa80ade0d60> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fa829793d70> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fa80ac542d0> info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fa80adafb10> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
 dbu:  0.001 µm/DBU  (1 nm grid)
 WG layer index: WG
 ```
@@ -8112,7 +8112,7 @@ print(f"registered cross-sections: {list(pdk.cross_sections.cross_sections)}")
 ```
 
 ```
-registered cross-sections: ['67c2bf20_500', 'WG_500', '592829b8_700', 'WG_700_RIB']
+registered cross-sections: ['sym_67c2bf20_500', 'WG_500', 'sym_592829b8_700', 'WG_700_RIB']
 ```
 
 ## 5 · Factories
@@ -8176,9 +8176,9 @@ print(f"taper:     {tp}")
 ```
 
 ```
-straight:  KCell(name=straight_CSSTRIP_500_L20000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
-bend90:    KCell(name=bend_euler_CSSTRIP_500_R10_A90_R150, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
-taper:     KCell(name=taper_CSSTRIP_500_CSSTRIP_1000_L10000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
+straight:  KCell(name=straight_CSsym_STRIP_500_L20000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
+bend90:    KCell(name=bend_euler_CSsym_STRIP_500_R10_A90_R150, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
+taper:     KCell(name=taper_CSsym_STRIP_500_CSsym_STRIP_1000_L10000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
 ```
 
 ## 6 · Custom cells using PDK factories
@@ -8376,8 +8376,8 @@ with tempfile.TemporaryDirectory() as tmp:
 ```
 
 ```
-Written: my_pdk.gds  (12392 bytes)
-Top cells: ['straight_CSSTRIP_500_L20000', 'bend_euler_CSSTRIP_500_R10_A90_R150', 'taper_CSSTRIP_500_CSSTRIP_1000_L10000', 'splitter_arms_AL30']
+Written: my_pdk.gds  (12528 bytes)
+Top cells: ['straight_CSsym_STRIP_500_L20000', 'bend_euler_CSsym_STRIP_500_R10_A90_R150', 'taper_CSsym_STRIP_500_CSsym_STRIP_1000_L10000', 'splitter_arms_AL30']
 ```
 
 ## See Also
@@ -8621,7 +8621,7 @@ print(f"Stack: {list(STACK.layers.keys())} layers defined")
 ```
 
 ```
-PDK:   name='DEMO_TECH_PDK' layout=<klayout.dbcore.Layout object at 0x7fa301295520> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fa301353a70> factories=<kfactory.layout.Factories object at 0x7fa301227610> virtual_factories=<kfactory.layout.Factories object at 0x7fa301275220> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fa32097fe20> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fa3010c0cd0> info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fa3012279d0> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
+PDK:   name='DEMO_TECH_PDK' layout=<klayout.dbcore.Layout object at 0x7fc819a65520> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fc819d23b60> factories=<kfactory.layout.Factories object at 0x7fc819c034d0> virtual_factories=<kfactory.layout.Factories object at 0x7fc819a31350> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fc83d3bc040> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fc819a9d2c0> info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fc819c03890> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
 Stack: ['wg', 'clad'] layers defined
 ```
 
@@ -8787,7 +8787,7 @@ kf.kcl.get_icross_section(xs_wg1)
 ```
 
 ```
-<kfactory.cross_section.CrossSection at 0x7fdcf7243ed0>
+<kfactory.cross_section.CrossSection at 0x7f34e2babd90>
 ```
 
 ## The `cross` cell
@@ -9194,7 +9194,7 @@ c
 ```
 
 ```
-[32m2026-10-15 06:16:59.340[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
+[32m2026-10-15 16:12:26.270[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
 ```
 
 ```
@@ -9239,7 +9239,7 @@ Code(c.schematic.code_str())
 ```
 
 ```
-[32m2026-10-15 06:16:59.713[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-15 16:12:26.535[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -10976,7 +10976,7 @@ Code(generated)
 ```
 
 ```
-[32m2026-10-15 06:16:59.617[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-15 16:12:26.377[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -11446,7 +11446,7 @@ c
 ```
 
 ```
-[32m2026-10-15 06:17:02.827[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
+[32m2026-10-15 16:12:29.431[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
 ```
 
 ```
@@ -13655,9 +13655,9 @@ print(f"factory bundle type: {type(factories)}")
 ```
 
 ```
-[32m2026-10-15 06:17:12.194[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
-Renaming Unnamed_8 (cell_index=8) to straight_CS028523d7_500_L10000 would cause it to be named the same as:
- - straight_CS028523d7_500_L10000 (cell_index=1), function_name=_straight, basename=straight[0m
+[32m2026-10-15 16:12:36.797[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
+Renaming Unnamed_8 (cell_index=8) to straight_CSsym_028523d7_500_L10000 would cause it to be named the same as:
+ - straight_CSsym_028523d7_500_L10000 (cell_index=1), function_name=_straight, basename=straight[0m
 
 
 cell: my_component_W0p5_L10

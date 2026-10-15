@@ -32,7 +32,7 @@ b90
 ```
 
 ```
-90° euler bend: bend_euler_CS028523d7_500_R10_A90_R150
+90° euler bend: bend_euler_CSsym_028523d7_500_R10_A90_R150
 ```
 
 ```
@@ -52,8 +52,8 @@ b180
 ```
 
 ```
-45°  bend: bend_euler_CS028523d7_500_R10_A45_R150
-180° bend: bend_euler_CS028523d7_500_R10_A180_R150
+45°  bend: bend_euler_CSsym_028523d7_500_R10_A45_R150
+180° bend: bend_euler_CSsym_028523d7_500_R10_A180_R150
 ```
 
 ```
@@ -86,7 +86,7 @@ sbend
 ```
 
 ```
-S-bend: bend_s_euler_CS028523d7_500_O5_R10_R150
+S-bend: bend_s_euler_CSsym_028523d7_500_O5_R10_R150
 ```
 
 ```

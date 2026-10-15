@@ -6154,7 +6154,7 @@ entry in <code>kf.kcls</code>.</p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dbu:  </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">dbu</span><span class="si">}</span><span class="s2"> µm/DBU  (1 nm grid)"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"WG layer index: </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>PDK:  name='MY_PDK' layout=&lt;klayout.dbcore.Layout object at 0x7f24b9019400&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7f24b9107980&gt; factories=&lt;kfactory.layout.Factories object at 0x7f24b91af9d0&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7f24b91f0c30&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7f24d7b97e20&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7f24b9027d90&gt; info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=&lt;kfactory.decorators.Decorators object at 0x7f24b91afc50&gt; default_cell_output_type=&lt;class 'kfactory.kcell.KCell'&gt; default_vcell_output_type=&lt;class 'kfactory.kcell.VKCell'&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum 'LAYER'&gt;
+<div class="highlight"><pre><span></span><code>PDK:  name='MY_PDK' layout=&lt;klayout.dbcore.Layout object at 0x7fa80ac0d5b0&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7fa80ad07980&gt; factories=&lt;kfactory.layout.Factories object at 0x7fa80adaf890&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7fa80ade0d60&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7fa829793d70&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7fa80ac542d0&gt; info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=&lt;kfactory.decorators.Decorators object at 0x7fa80adafb10&gt; default_cell_output_type=&lt;class 'kfactory.kcell.KCell'&gt; default_vcell_output_type=&lt;class 'kfactory.kcell.VKCell'&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum 'LAYER'&gt;
 dbu:  0.001 µm/DBU  (1 nm grid)
 WG layer index: WG
 </code></pre></div>
@@ -6238,7 +6238,7 @@ radius (µm):    10.0
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"registered cross-sections: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">pdk</span><span class="o">.</span><span class="n">cross_sections</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>registered cross-sections: ['67c2bf20_500', 'WG_500', '592829b8_700', 'WG_700_RIB']
+<div class="highlight"><pre><span></span><code>registered cross-sections: ['sym_67c2bf20_500', 'WG_500', 'sym_592829b8_700', 'WG_700_RIB']
 </code></pre></div>
 <h2 id="5-factories">5 · Factories</h2>
 <p>A <strong>factory</strong> is a function that creates cells bound to a specific <code>KCLayout</code>.
@@ -6321,9 +6321,9 @@ factory caches the result — calling with the same parameters returns the same 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"bend90:    </span><span class="si">{</span><span class="n">bend</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"taper:     </span><span class="si">{</span><span class="n">tp</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>straight:  KCell(name=straight_CSSTRIP_500_L20000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
-bend90:    KCell(name=bend_euler_CSSTRIP_500_R10_A90_R150, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
-taper:     KCell(name=taper_CSSTRIP_500_CSSTRIP_1000_L10000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
+<div class="highlight"><pre><span></span><code>straight:  KCell(name=straight_CSsym_STRIP_500_L20000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
+bend90:    KCell(name=bend_euler_CSsym_STRIP_500_R10_A90_R150, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
+taper:     KCell(name=taper_CSsym_STRIP_500_CSsym_STRIP_1000_L10000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
 </code></pre></div>
 <h2 id="6-custom-cells-using-pdk-factories">6 · Custom cells using PDK factories</h2>
 <p>Build compound cells by combining the primitives.  The <code>@pdk.cell</code> decorator caches
@@ -6503,8 +6503,8 @@ All cells registered in <code>pdk</code> (including sub-cells) are written in on
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Written: </span><span class="si">{</span><span class="n">gds_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">  (</span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2"> bytes)"</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Top cells: </span><span class="si">{</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">pdk</span><span class="o">.</span><span class="n">top_kcells</span><span class="p">()]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Written: my_pdk.gds  (12392 bytes)
-Top cells: ['straight_CSSTRIP_500_L20000', 'bend_euler_CSSTRIP_500_R10_A90_R150', 'taper_CSSTRIP_500_CSSTRIP_1000_L10000', 'splitter_arms_AL30']
+<div class="highlight"><pre><span></span><code>Written: my_pdk.gds  (12528 bytes)
+Top cells: ['straight_CSsym_STRIP_500_L20000', 'bend_euler_CSsym_STRIP_500_R10_A90_R150', 'taper_CSsym_STRIP_500_CSsym_STRIP_1000_L10000', 'splitter_arms_AL30']
 </code></pre></div>
 <h2 id="see-also">See Also</h2>
 <table>

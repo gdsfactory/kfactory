@@ -283,7 +283,7 @@ with tempfile.TemporaryDirectory() as tmp:
 ```
 
 ```
-Wrote demo_geometry.gds (1012 bytes)
+Wrote demo_geometry.gds (1032 bytes)
 ```
 
 ## Summary

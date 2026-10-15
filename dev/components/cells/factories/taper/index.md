@@ -29,7 +29,7 @@ tp
 ```
 
 ```
-taper: taper_CS028523d7_500_CS028523d7_2000_L20000
+taper: taper_CSsym_028523d7_500_CSsym_028523d7_2000_L20000
 ```
 
 ```

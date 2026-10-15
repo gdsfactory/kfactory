@@ -51,7 +51,7 @@ print(f"WG layer index: {pdk.find_layer(L.WG)}")
 ```
 
 ```
-PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7f24b9019400> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7f24b9107980> factories=<kfactory.layout.Factories object at 0x7f24b91af9d0> virtual_factories=<kfactory.layout.Factories object at 0x7f24b91f0c30> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7f24d7b97e20> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7f24b9027d90> info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7f24b91afc50> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
+PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7fa80ac0d5b0> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fa80ad07980> factories=<kfactory.layout.Factories object at 0x7fa80adaf890> virtual_factories=<kfactory.layout.Factories object at 0x7fa80ade0d60> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fa829793d70> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fa80ac542d0> info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fa80adafb10> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
 dbu:  0.001 µm/DBU  (1 nm grid)
 WG layer index: WG
 ```
@@ -148,7 +148,7 @@ print(f"registered cross-sections: {list(pdk.cross_sections.cross_sections)}")
 ```
 
 ```
-registered cross-sections: ['67c2bf20_500', 'WG_500', '592829b8_700', 'WG_700_RIB']
+registered cross-sections: ['sym_67c2bf20_500', 'WG_500', 'sym_592829b8_700', 'WG_700_RIB']
 ```
 
 ## 5 · Factories
@@ -212,9 +212,9 @@ print(f"taper:     {tp}")
 ```
 
 ```
-straight:  KCell(name=straight_CSSTRIP_500_L20000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
-bend90:    KCell(name=bend_euler_CSSTRIP_500_R10_A90_R150, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
-taper:     KCell(name=taper_CSSTRIP_500_CSSTRIP_1000_L10000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
+straight:  KCell(name=straight_CSsym_STRIP_500_L20000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
+bend90:    KCell(name=bend_euler_CSsym_STRIP_500_R10_A90_R150, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
+taper:     KCell(name=taper_CSsym_STRIP_500_CSsym_STRIP_1000_L10000, ports=['o1', 'o2'], pins=[], instances=[], locked=True, kcl=MY_PDK)
 ```
 
 ## 6 · Custom cells using PDK factories
@@ -412,8 +412,8 @@ with tempfile.TemporaryDirectory() as tmp:
 ```
 
 ```
-Written: my_pdk.gds  (12392 bytes)
-Top cells: ['straight_CSSTRIP_500_L20000', 'bend_euler_CSSTRIP_500_R10_A90_R150', 'taper_CSSTRIP_500_CSSTRIP_1000_L10000', 'splitter_arms_AL30']
+Written: my_pdk.gds  (12528 bytes)
+Top cells: ['straight_CSsym_STRIP_500_L20000', 'bend_euler_CSsym_STRIP_500_R10_A90_R150', 'taper_CSsym_STRIP_500_CSsym_STRIP_1000_L10000', 'splitter_arms_AL30']
 ```
 
 ## See Also
