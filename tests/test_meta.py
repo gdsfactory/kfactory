@@ -170,7 +170,7 @@ def test_nometainfo_read(straight: kf.KCell) -> None:
         assert len(wg_read.ports) == 0
         assert len(straight.ports) == 2
         assert straight.settings.model_dump() == {
-            "cross_section": "f7fe636c_500",
+            "cross_section": "sym_f7fe636c_500",
             "length": 1000,
         }
         assert straight.function_name == "_straight"
