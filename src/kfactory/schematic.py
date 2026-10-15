@@ -751,7 +751,7 @@ class Connection[T: (int, float)](SchematicNet[T]):
         TypeError: If connection attempts to join two `Port` objects.
     """
 
-    net: tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef] = Field(
+    net: tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef] = Field(  # ty:ignore[invalid-mutable-override]
         frozen=True
     )
 
@@ -2503,7 +2503,7 @@ def _get_schematic() -> TSchematic[Any]:
 class Schematic(TSchematic[dbu]):
     """Schematic with a base unit of dbu for placements."""
 
-    unit: Literal["dbu"] = "dbu"
+    unit: Literal["dbu"] = "dbu"  # ty:ignore[invalid-mutable-override]
 
     @staticmethod
     def from_pic_yml(data: dict[str, Any], *, strict: bool | None = None) -> Schematic:
@@ -2519,7 +2519,7 @@ class Schematic(TSchematic[dbu]):
 class DSchematic(TSchematic[um]):
     """Schematic with a base unit of um for placements."""
 
-    unit: Literal["um"] = "um"
+    unit: Literal["um"] = "um"  # ty:ignore[invalid-mutable-override]
 
     @staticmethod
     def from_pic_yml(data: dict[str, Any], *, strict: bool | None = None) -> DSchematic:
