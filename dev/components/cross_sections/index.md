@@ -484,6 +484,8 @@ except CrossSectionSymmetryMismatchError as e:
 
 ```
 Symmetric ↔ asymmetric connect raises:
+
+
   CrossSectionSymmetryMismatchError: Cross section symmetry mismatch between ports 'o1' (asymmetric) and 'o2' (symmetric). Symmetric and asymmetric cross sections cannot be connected.
 ```
 
