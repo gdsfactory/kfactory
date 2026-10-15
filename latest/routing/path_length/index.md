@@ -492,8 +492,8 @@ The segment must be long enough to contain the loop. A segment shorter than `4 �
 
 | Topic | Where |
 | --- | --- |
-| Bundle routing that `kf.PathLengthMatch` plugs into | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/bundle/index.md>) |
-| Optical route options including waypoints and stubs | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
-| Routing overview and sub-module map | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Euler bend effective radius (affects loop spacing) | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) |
-| DBU vs µm (route.length is in µm) | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/dbu_vs_um/index.md>) |
+| Bundle routing that `kf.PathLengthMatch` plugs into | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>) |
+| Optical route options including waypoints and stubs | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Routing overview and sub-module map | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Euler bend effective radius (affects loop spacing) | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
+| DBU vs µm (route.length is in µm) | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |

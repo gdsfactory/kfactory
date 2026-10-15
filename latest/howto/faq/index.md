@@ -1,6 +1,6 @@
 # Frequently Asked Questions
 
-Common questions and "gotcha" moments collected from kfactory users. For executable examples see [Best Practices](<https://gdsfactory.github.io/kfactory/3.3.0/howto/best_practices/index.md>).
+Common questions and "gotcha" moments collected from kfactory users. For executable examples see [Best Practices](<https://gdsfactory.github.io/kfactory/3.4.0/howto/best_practices/index.md>).
 
 ---
 
@@ -299,7 +299,7 @@ Do **not** call `difftest()` in executable notebook pages — it will always fai
 
 | Topic | Where |
 | --- | --- |
-| Common pitfalls with code examples | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.3.0/howto/best_practices/index.md>) |
-| Common design patterns | [How-To: Patterns](<https://gdsfactory.github.io/kfactory/3.3.0/howto/patterns/index.md>) |
-| Contributing to kfactory | [How-To: Contributing](<https://gdsfactory.github.io/kfactory/3.3.0/howto/contributing/index.md>) |
-| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/dbu_vs_um/index.md>) |
+| Common pitfalls with code examples | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.4.0/howto/best_practices/index.md>) |
+| Common design patterns | [How-To: Patterns](<https://gdsfactory.github.io/kfactory/3.4.0/howto/patterns/index.md>) |
+| Contributing to kfactory | [How-To: Contributing](<https://gdsfactory.github.io/kfactory/3.4.0/howto/contributing/index.md>) |
+| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |

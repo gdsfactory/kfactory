@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.3.0/reference/kfactory/layout/">
+        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.4.0/reference/kfactory/layout/">
       
       
         <link rel="describedby" href="../../../llms.txt">
@@ -85,15 +85,15 @@
   <meta property="og:type" content="website" />
 <meta property="og:title" content="layout - KFactory" />
 <meta property="og:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.3.0/assets/images/social/reference/kfactory/layout.png" />
+<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/reference/kfactory/layout.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.3.0/reference/kfactory/layout/" />
+<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.4.0/reference/kfactory/layout/" />
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:title" content="layout - KFactory" />
 <meta property="twitter:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.3.0/assets/images/social/reference/kfactory/layout.png" />
+<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/reference/kfactory/layout.png" />
 </head>
   
   
@@ -7976,10 +7976,10 @@ specified in the constructor.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/layout.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Constants</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Constants</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Constant Model class."""</span>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -8178,11 +8178,7 @@ strip [dbu].</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/layout.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">266</span>
 <span class="normal">267</span>
 <span class="normal">268</span>
 <span class="normal">269</span>
@@ -8221,7 +8217,11 @@ strip [dbu].</p>
 <span class="normal">302</span>
 <span class="normal">303</span>
 <span class="normal">304</span>
-<span class="normal">305</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExtrudeConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExtrudeConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Default extrusion settings of a cross section.</span>
 
 <span class="sd">    Registered per cross section with `KCLayout.set_extrude_config`. Per-strip</span>
@@ -8299,12 +8299,12 @@ strip [dbu].</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">section_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">section_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Strip indices referenced by this config."""</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ports</span> <span class="ow">or</span> <span class="p">{})</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">insets</span><span class="p">)</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">hidden</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simplify</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -8351,11 +8351,7 @@ strip [dbu].</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/layout.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">144</span>
 <span class="normal">145</span>
 <span class="normal">146</span>
 <span class="normal">147</span>
@@ -8470,7 +8466,11 @@ strip [dbu].</p>
 <span class="normal">256</span>
 <span class="normal">257</span>
 <span class="normal">258</span>
-<span class="normal">259</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Factories</span><span class="p">[</span><span class="n">F</span><span class="p">:</span> <span class="n">WrappedKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">WrappedVKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]](</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Factories</span><span class="p">[</span><span class="n">F</span><span class="p">:</span> <span class="n">WrappedKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">WrappedVKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]](</span>
     <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">F</span><span class="p">]</span>
 <span class="p">):</span>
     <span class="n">_all</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">F</span><span class="p">]</span>
@@ -8650,9 +8650,9 @@ strip [dbu].</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lock</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lock</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Prevent further additions through `add`. This is irreversible."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_locked</span> <span class="o">=</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
@@ -8931,11 +8931,7 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/layout.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 308</span>
-<span class="normal"> 309</span>
-<span class="normal"> 310</span>
-<span class="normal"> 311</span>
-<span class="normal"> 312</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 312</span>
 <span class="normal"> 313</span>
 <span class="normal"> 314</span>
 <span class="normal"> 315</span>
@@ -11625,7 +11621,39 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
 <span class="normal">2999</span>
 <span class="normal">3000</span>
 <span class="normal">3001</span>
-<span class="normal">3002</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCLayout</span><span class="p">(</span>
+<span class="normal">3002</span>
+<span class="normal">3003</span>
+<span class="normal">3004</span>
+<span class="normal">3005</span>
+<span class="normal">3006</span>
+<span class="normal">3007</span>
+<span class="normal">3008</span>
+<span class="normal">3009</span>
+<span class="normal">3010</span>
+<span class="normal">3011</span>
+<span class="normal">3012</span>
+<span class="normal">3013</span>
+<span class="normal">3014</span>
+<span class="normal">3015</span>
+<span class="normal">3016</span>
+<span class="normal">3017</span>
+<span class="normal">3018</span>
+<span class="normal">3019</span>
+<span class="normal">3020</span>
+<span class="normal">3021</span>
+<span class="normal">3022</span>
+<span class="normal">3023</span>
+<span class="normal">3024</span>
+<span class="normal">3025</span>
+<span class="normal">3026</span>
+<span class="normal">3027</span>
+<span class="normal">3028</span>
+<span class="normal">3029</span>
+<span class="normal">3030</span>
+<span class="normal">3031</span>
+<span class="normal">3032</span>
+<span class="normal">3033</span>
+<span class="normal">3034</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">KCLayout</span><span class="p">(</span>
     <span class="n">BaseModel</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">"allow"</span><span class="p">,</span> <span class="n">validate_assignment</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Small extension to the klayout.db.Layout.</span>
@@ -13880,6 +13908,7 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
         <span class="n">convert_external_cells</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">autoformat_from_file_extension</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">deduplicate_cell_names</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">clear_existing_meta</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Write a GDS file into the existing Layout.</span>
 
@@ -13898,6 +13927,9 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
 <span class="sd">                default), raise</span>
 <span class="sd">                :class:`~kfactory.exceptions.DuplicateCellNameError` when</span>
 <span class="sd">                duplicates are detected.</span>
+<span class="sd">            clear_existing_meta: Remove the layout's existing meta info before</span>
+<span class="sd">                setting it, so the file only contains the current state of the</span>
+<span class="sd">                KCLayout. Only used if `set_meta_data` is True.</span>
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">save_layout_options</span><span class="p">()</span>
@@ -13905,6 +13937,8 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
             <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
         <span class="k">for</span> <span class="n">kc</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcells</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
             <span class="n">kc</span><span class="o">.</span><span class="n">insert_vinsts</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">set_meta_data</span> <span class="ow">and</span> <span class="n">clear_existing_meta</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">clear_meta_info</span><span class="p">()</span>
         <span class="k">match</span> <span class="p">(</span><span class="n">set_meta_data</span><span class="p">,</span> <span class="n">convert_external_cells</span><span class="p">):</span>
             <span class="k">case</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_meta_data</span><span class="p">()</span>
@@ -13945,11 +13979,14 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
         <span class="n">convert_external_cells</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">set_meta_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">deduplicate_cell_names</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">clear_existing_meta</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">options</span> <span class="o">=</span> <span class="n">save_layout_options</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">kc</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcells</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
             <span class="n">kc</span><span class="o">.</span><span class="n">insert_vinsts</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">set_meta_data</span> <span class="ow">and</span> <span class="n">clear_existing_meta</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">clear_meta_info</span><span class="p">()</span>
         <span class="k">match</span> <span class="p">(</span><span class="n">set_meta_data</span><span class="p">,</span> <span class="n">convert_external_cells</span><span class="p">):</span>
             <span class="k">case</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_meta_data</span><span class="p">()</span>
@@ -14076,11 +14113,13 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
         <span class="k">if</span> <span class="n">symmetrical</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">cross_section</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_sections</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_sections</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">[</span><span class="n">cross_section</span><span class="p">]</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">"No cross section named </span><span class="si">{</span><span class="n">cross_section</span><span class="si">!r}</span><span class="s2"> (symmetric or asymmetric)."</span>
-            <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">[</span><span class="n">cross_section</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"No cross section named </span><span class="si">{</span><span class="n">cross_section</span><span class="si">!r}</span><span class="s2"> "</span>
+                    <span class="s2">"(symmetric or asymmetric)."</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
             <span class="n">cross_section</span><span class="p">,</span>
             <span class="p">(</span>
@@ -14094,7 +14133,11 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_symmetrical_cross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">set_extrude_config</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ExtrudeConfig</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">ExtrudeConfig</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">on_conflict</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"replace"</span><span class="p">,</span> <span class="s2">"raise"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"replace"</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Set the default extrusion settings of a cross section.</span>
 
@@ -14104,11 +14147,17 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
 
 <span class="sd">        Args:</span>
 <span class="sd">            cross_section: name or instance of the cross section.</span>
-<span class="sd">            config: extrusion settings. Replaces any existing config.</span>
+<span class="sd">            config: extrusion settings.</span>
+<span class="sd">            on_conflict: what to do if the cross section already has a different</span>
+<span class="sd">                config. `"replace"` overwrites it, `"raise"` raises an</span>
+<span class="sd">                `ExtrudeConfigConflictError`. Setting an equal config is always</span>
+<span class="sd">                allowed.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: if the config references strips the cross section doesn't</span>
 <span class="sd">                have.</span>
+<span class="sd">            ExtrudeConfigConflictError: if `on_conflict="raise"` and the cross</span>
+<span class="sd">                section already has a different config.</span>
 <span class="sd">        """</span>
         <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_base_cross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
         <span class="n">n_sections</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">get_sections</span><span class="p">())</span>
@@ -14117,6 +14166,13 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">"Extrude config for cross section </span><span class="si">{</span><span class="n">xs</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> references strips "</span>
                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">unknown</span><span class="si">}</span><span class="s2">, but the cross section has </span><span class="si">{</span><span class="n">n_sections</span><span class="si">}</span><span class="s2"> strips."</span>
+            <span class="p">)</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrude_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">auto_name</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">on_conflict</span> <span class="o">==</span> <span class="s2">"raise"</span> <span class="ow">and</span> <span class="n">existing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">existing</span> <span class="o">!=</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExtrudeConfigConflictError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Cross section </span><span class="si">{</span><span class="n">xs</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> already has the extrude config "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">existing</span><span class="si">!r}</span><span class="s2">, cannot set </span><span class="si">{</span><span class="n">config</span><span class="si">!r}</span><span class="s2">. Cross sections with the "</span>
+                <span class="s2">"same geometry share one extrude config."</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extrude_configs</span><span class="p">[</span><span class="n">xs</span><span class="o">.</span><span class="n">auto_name</span><span class="p">()]</span> <span class="o">=</span> <span class="n">config</span>
 
@@ -14482,14 +14538,14 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1950</span>
-<span class="normal">1951</span>
-<span class="normal">1952</span>
-<span class="normal">1953</span>
-<span class="normal">1954</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1954</span>
 <span class="normal">1955</span>
 <span class="normal">1956</span>
-<span class="normal">1957</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="normal">1957</span>
+<span class="normal">1958</span>
+<span class="normal">1959</span>
+<span class="normal">1960</span>
+<span class="normal">1961</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""If KCLayout doesn't have an attribute, look in the KLayout Cell."""</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">model_fields</span>
@@ -14527,13 +14583,13 @@ the cross section's <code>auto_name()</code>. Use <code>set_extrude_config</code
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2218</span>
-<span class="normal">2219</span>
-<span class="normal">2220</span>
-<span class="normal">2221</span>
-<span class="normal">2222</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2222</span>
 <span class="normal">2223</span>
-<span class="normal">2224</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
+<span class="normal">2224</span>
+<span class="normal">2225</span>
+<span class="normal">2226</span>
+<span class="normal">2227</span>
+<span class="normal">2228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Retrieve a cell by name(str) or index(int).</span>
 
 <span class="sd">    Attrs:</span>
@@ -14806,11 +14862,7 @@ defined.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">409</span>
 <span class="normal">410</span>
 <span class="normal">411</span>
 <span class="normal">412</span>
@@ -14907,7 +14959,11 @@ defined.</p>
 <span class="normal">503</span>
 <span class="normal">504</span>
 <span class="normal">505</span>
-<span class="normal">506</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">layer_enclosures</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">LayerEnclosure</span><span class="p">]</span> <span class="o">|</span> <span class="n">LayerEnclosureModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -15036,11 +15092,7 @@ Layout object.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1959</span>
-<span class="normal">1960</span>
-<span class="normal">1961</span>
-<span class="normal">1962</span>
-<span class="normal">1963</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1963</span>
 <span class="normal">1964</span>
 <span class="normal">1965</span>
 <span class="normal">1966</span>
@@ -15056,7 +15108,11 @@ Layout object.</p>
 <span class="normal">1976</span>
 <span class="normal">1977</span>
 <span class="normal">1978</span>
-<span class="normal">1979</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1979</span>
+<span class="normal">1980</span>
+<span class="normal">1981</span>
+<span class="normal">1982</span>
+<span class="normal">1983</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Use a custom setter to automatically set attributes.</span>
 
 <span class="sd">    If the attribute is not in this object, set it on the</span>
@@ -15102,11 +15158,11 @@ Layout object.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2171</span>
-<span class="normal">2172</span>
-<span class="normal">2173</span>
-<span class="normal">2174</span>
-<span class="normal">2175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2175</span>
+<span class="normal">2176</span>
+<span class="normal">2177</span>
+<span class="normal">2178</span>
+<span class="normal">2179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Layout</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Assign a new Layout object to the KCLayout object."""</span>
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">thread_lock</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
@@ -15545,11 +15601,7 @@ exists.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1544</span>
-<span class="normal">1545</span>
-<span class="normal">1546</span>
-<span class="normal">1547</span>
-<span class="normal">1548</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1548</span>
 <span class="normal">1549</span>
 <span class="normal">1550</span>
 <span class="normal">1551</span>
@@ -15712,7 +15764,11 @@ exists.</p>
 <span class="normal">1708</span>
 <span class="normal">1709</span>
 <span class="normal">1710</span>
-<span class="normal">1711</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cell</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">1711</span>
+<span class="normal">1712</span>
+<span class="normal">1713</span>
+<span class="normal">1714</span>
+<span class="normal">1715</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cell</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">KC</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">/</span><span class="p">,</span>
@@ -15906,11 +15962,7 @@ exists.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1987</span>
-<span class="normal">1988</span>
-<span class="normal">1989</span>
-<span class="normal">1990</span>
-<span class="normal">1991</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1991</span>
 <span class="normal">1992</span>
 <span class="normal">1993</span>
 <span class="normal">1994</span>
@@ -15921,7 +15973,11 @@ exists.</p>
 <span class="normal">1999</span>
 <span class="normal">2000</span>
 <span class="normal">2001</span>
-<span class="normal">2002</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keep_layers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2002</span>
+<span class="normal">2003</span>
+<span class="normal">2004</span>
+<span class="normal">2005</span>
+<span class="normal">2006</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keep_layers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Clear the Layout.</span>
 
 <span class="sd">    If the layout is cleared, all the LayerEnums and</span>
@@ -15962,13 +16018,13 @@ exists.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2673</span>
-<span class="normal">2674</span>
-<span class="normal">2675</span>
-<span class="normal">2676</span>
-<span class="normal">2677</span>
-<span class="normal">2678</span>
-<span class="normal">2679</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2686</span>
+<span class="normal">2687</span>
+<span class="normal">2688</span>
+<span class="normal">2689</span>
+<span class="normal">2690</span>
+<span class="normal">2691</span>
+<span class="normal">2692</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Clears all cells in the Layout object."""</span>
     <span class="k">for</span> <span class="n">kc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kcells</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="n">kc</span><span class="o">.</span><span class="n">locked</span> <span class="o">=</span> <span class="kc">False</span>
@@ -16092,11 +16148,7 @@ increasing by the number of existing duplicates</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2038</span>
-<span class="normal">2039</span>
-<span class="normal">2040</span>
-<span class="normal">2041</span>
-<span class="normal">2042</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2042</span>
 <span class="normal">2043</span>
 <span class="normal">2044</span>
 <span class="normal">2045</span>
@@ -16123,7 +16175,11 @@ increasing by the number of existing duplicates</p>
 <span class="normal">2066</span>
 <span class="normal">2067</span>
 <span class="normal">2068</span>
-<span class="normal">2069</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_cell</span><span class="p">(</span>
+<span class="normal">2069</span>
+<span class="normal">2070</span>
+<span class="normal">2071</span>
+<span class="normal">2072</span>
+<span class="normal">2073</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_cell</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -16180,11 +16236,7 @@ increasing by the number of existing duplicates</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">747</span>
-<span class="normal">748</span>
-<span class="normal">749</span>
-<span class="normal">750</span>
-<span class="normal">751</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">751</span>
 <span class="normal">752</span>
 <span class="normal">753</span>
 <span class="normal">754</span>
@@ -16208,7 +16260,11 @@ increasing by the number of existing duplicates</p>
 <span class="normal">772</span>
 <span class="normal">773</span>
 <span class="normal">774</span>
-<span class="normal">775</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_layer_enclosure</span><span class="p">(</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span>
+<span class="normal">778</span>
+<span class="normal">779</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_layer_enclosure</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">sections</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span>
         <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
@@ -16313,11 +16369,7 @@ This makes sense if we assume the parents and their parents are cached.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2071</span>
-<span class="normal">2072</span>
-<span class="normal">2073</span>
-<span class="normal">2074</span>
-<span class="normal">2075</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2075</span>
 <span class="normal">2076</span>
 <span class="normal">2077</span>
 <span class="normal">2078</span>
@@ -16345,7 +16397,11 @@ This makes sense if we assume the parents and their parents are cached.</p>
 <span class="normal">2100</span>
 <span class="normal">2101</span>
 <span class="normal">2102</span>
-<span class="normal">2103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">delete_cell</span><span class="p">(</span>
+<span class="normal">2103</span>
+<span class="normal">2104</span>
+<span class="normal">2105</span>
+<span class="normal">2106</span>
+<span class="normal">2107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">delete_cell</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">cell</span><span class="p">:</span> <span class="n">AnyTKCell</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">delete_parents</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Delete a cell in the kcl object.</span>
@@ -16454,11 +16510,7 @@ This makes sense if we assume the parents and their parents are cached.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2105</span>
-<span class="normal">2106</span>
-<span class="normal">2107</span>
-<span class="normal">2108</span>
-<span class="normal">2109</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2109</span>
 <span class="normal">2110</span>
 <span class="normal">2111</span>
 <span class="normal">2112</span>
@@ -16480,7 +16532,11 @@ This makes sense if we assume the parents and their parents are cached.</p>
 <span class="normal">2128</span>
 <span class="normal">2129</span>
 <span class="normal">2130</span>
-<span class="normal">2131</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">delete_cell_rec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">delete_parents</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2131</span>
+<span class="normal">2132</span>
+<span class="normal">2133</span>
+<span class="normal">2134</span>
+<span class="normal">2135</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">delete_cell_rec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">delete_parents</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Deletes a KCell plus all subcells.</span>
 
 <span class="sd">    If `delete_parents` is false, the deletion might fail with a locked error from</span>
@@ -16583,11 +16639,7 @@ This makes sense if we assume the parents and their parents are cached.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2133</span>
-<span class="normal">2134</span>
-<span class="normal">2135</span>
-<span class="normal">2136</span>
-<span class="normal">2137</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2137</span>
 <span class="normal">2138</span>
 <span class="normal">2139</span>
 <span class="normal">2140</span>
@@ -16619,7 +16671,11 @@ This makes sense if we assume the parents and their parents are cached.</p>
 <span class="normal">2166</span>
 <span class="normal">2167</span>
 <span class="normal">2168</span>
-<span class="normal">2169</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">delete_cells</span><span class="p">(</span>
+<span class="normal">2169</span>
+<span class="normal">2170</span>
+<span class="normal">2171</span>
+<span class="normal">2172</span>
+<span class="normal">2173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">delete_cells</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">cell_index_list</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">delete_parents</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Delete a sequence of cell by indexes.</span>
@@ -16681,17 +16737,17 @@ This makes sense if we assume the parents and their parents are cached.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">587</span>
-<span class="normal">588</span>
-<span class="normal">589</span>
-<span class="normal">590</span>
-<span class="normal">591</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">591</span>
 <span class="normal">592</span>
 <span class="normal">593</span>
 <span class="normal">594</span>
 <span class="normal">595</span>
 <span class="normal">596</span>
-<span class="normal">597</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">device_type_for</span><span class="p">(</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">device_type_for</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">WrappedKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">WrappedVKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -16727,17 +16783,17 @@ This makes sense if we assume the parents and their parents are cached.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">624</span>
-<span class="normal">625</span>
-<span class="normal">626</span>
-<span class="normal">627</span>
-<span class="normal">628</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">628</span>
 <span class="normal">629</span>
 <span class="normal">630</span>
 <span class="normal">631</span>
 <span class="normal">632</span>
 <span class="normal">633</span>
-<span class="normal">634</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">display_for</span><span class="p">(</span>
+<span class="normal">634</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span>
+<span class="normal">638</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">display_for</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">WrappedKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">WrappedVKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -16773,9 +16829,9 @@ This makes sense if we assume the parents and their parents are cached.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1938</span>
-<span class="normal">1939</span>
-<span class="normal">1940</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dkcell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="n">DPorts</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DKCell</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1942</span>
+<span class="normal">1943</span>
+<span class="normal">1944</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dkcell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="n">DPorts</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DKCell</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Create a new cell based ont he pdk's layout object."""</span>
     <span class="k">return</span> <span class="n">DKCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">ports</span><span class="o">=</span><span class="n">ports</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -16862,11 +16918,7 @@ This makes sense if we assume the parents and their parents are cached.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2004</span>
-<span class="normal">2005</span>
-<span class="normal">2006</span>
-<span class="normal">2007</span>
-<span class="normal">2008</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2008</span>
 <span class="normal">2009</span>
 <span class="normal">2010</span>
 <span class="normal">2011</span>
@@ -16879,7 +16931,11 @@ This makes sense if we assume the parents and their parents are cached.</p>
 <span class="normal">2018</span>
 <span class="normal">2019</span>
 <span class="normal">2020</span>
-<span class="normal">2021</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_cells</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCLayout</span><span class="p">:</span>
+<span class="normal">2021</span>
+<span class="normal">2022</span>
+<span class="normal">2023</span>
+<span class="normal">2024</span>
+<span class="normal">2025</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_cells</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCLayout</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Create a duplication of the `~KCLayout` object.</span>
 
 <span class="sd">    Args:</span>
@@ -16934,11 +16990,7 @@ all three of layer, datatype, and name.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">831</span>
-<span class="normal">832</span>
-<span class="normal">833</span>
-<span class="normal">834</span>
-<span class="normal">835</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">835</span>
 <span class="normal">836</span>
 <span class="normal">837</span>
 <span class="normal">838</span>
@@ -16956,7 +17008,11 @@ all three of layer, datatype, and name.</p>
 <span class="normal">850</span>
 <span class="normal">851</span>
 <span class="normal">852</span>
-<span class="normal">853</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">find_layer</span><span class="p">(</span>
+<span class="normal">853</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span>
+<span class="normal">857</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">find_layer</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">,</span>
@@ -17086,39 +17142,7 @@ this layout.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2957</span>
-<span class="normal">2958</span>
-<span class="normal">2959</span>
-<span class="normal">2960</span>
-<span class="normal">2961</span>
-<span class="normal">2962</span>
-<span class="normal">2963</span>
-<span class="normal">2964</span>
-<span class="normal">2965</span>
-<span class="normal">2966</span>
-<span class="normal">2967</span>
-<span class="normal">2968</span>
-<span class="normal">2969</span>
-<span class="normal">2970</span>
-<span class="normal">2971</span>
-<span class="normal">2972</span>
-<span class="normal">2973</span>
-<span class="normal">2974</span>
-<span class="normal">2975</span>
-<span class="normal">2976</span>
-<span class="normal">2977</span>
-<span class="normal">2978</span>
-<span class="normal">2979</span>
-<span class="normal">2980</span>
-<span class="normal">2981</span>
-<span class="normal">2982</span>
-<span class="normal">2983</span>
-<span class="normal">2984</span>
-<span class="normal">2985</span>
-<span class="normal">2986</span>
-<span class="normal">2987</span>
-<span class="normal">2988</span>
-<span class="normal">2989</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2989</span>
 <span class="normal">2990</span>
 <span class="normal">2991</span>
 <span class="normal">2992</span>
@@ -17131,7 +17155,39 @@ this layout.</p>
 <span class="normal">2999</span>
 <span class="normal">3000</span>
 <span class="normal">3001</span>
-<span class="normal">3002</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generic_factory</span><span class="p">[</span><span class="n">F</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]](</span>
+<span class="normal">3002</span>
+<span class="normal">3003</span>
+<span class="normal">3004</span>
+<span class="normal">3005</span>
+<span class="normal">3006</span>
+<span class="normal">3007</span>
+<span class="normal">3008</span>
+<span class="normal">3009</span>
+<span class="normal">3010</span>
+<span class="normal">3011</span>
+<span class="normal">3012</span>
+<span class="normal">3013</span>
+<span class="normal">3014</span>
+<span class="normal">3015</span>
+<span class="normal">3016</span>
+<span class="normal">3017</span>
+<span class="normal">3018</span>
+<span class="normal">3019</span>
+<span class="normal">3020</span>
+<span class="normal">3021</span>
+<span class="normal">3022</span>
+<span class="normal">3023</span>
+<span class="normal">3024</span>
+<span class="normal">3025</span>
+<span class="normal">3026</span>
+<span class="normal">3027</span>
+<span class="normal">3028</span>
+<span class="normal">3029</span>
+<span class="normal">3030</span>
+<span class="normal">3031</span>
+<span class="normal">3032</span>
+<span class="normal">3033</span>
+<span class="normal">3034</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generic_factory</span><span class="p">[</span><span class="n">F</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]](</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">F</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
@@ -17202,17 +17258,17 @@ this layout.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2698</span>
-<span class="normal">2699</span>
-<span class="normal">2700</span>
-<span class="normal">2701</span>
-<span class="normal">2702</span>
-<span class="normal">2703</span>
-<span class="normal">2704</span>
-<span class="normal">2705</span>
-<span class="normal">2706</span>
-<span class="normal">2707</span>
-<span class="normal">2708</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_asymmetrical_cross_section</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2711</span>
+<span class="normal">2712</span>
+<span class="normal">2713</span>
+<span class="normal">2714</span>
+<span class="normal">2715</span>
+<span class="normal">2716</span>
+<span class="normal">2717</span>
+<span class="normal">2718</span>
+<span class="normal">2719</span>
+<span class="normal">2720</span>
+<span class="normal">2721</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_asymmetrical_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">AsymmetricalCrossSection</span>
@@ -17304,20 +17360,7 @@ raises if the resolved one is symmetric.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2739</span>
-<span class="normal">2740</span>
-<span class="normal">2741</span>
-<span class="normal">2742</span>
-<span class="normal">2743</span>
-<span class="normal">2744</span>
-<span class="normal">2745</span>
-<span class="normal">2746</span>
-<span class="normal">2747</span>
-<span class="normal">2748</span>
-<span class="normal">2749</span>
-<span class="normal">2750</span>
-<span class="normal">2751</span>
-<span class="normal">2752</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2752</span>
 <span class="normal">2753</span>
 <span class="normal">2754</span>
 <span class="normal">2755</span>
@@ -17339,7 +17382,22 @@ raises if the resolved one is symmetric.</p>
 <span class="normal">2771</span>
 <span class="normal">2772</span>
 <span class="normal">2773</span>
-<span class="normal">2774</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_base_cross_section</span><span class="p">(</span>
+<span class="normal">2774</span>
+<span class="normal">2775</span>
+<span class="normal">2776</span>
+<span class="normal">2777</span>
+<span class="normal">2778</span>
+<span class="normal">2779</span>
+<span class="normal">2780</span>
+<span class="normal">2781</span>
+<span class="normal">2782</span>
+<span class="normal">2783</span>
+<span class="normal">2784</span>
+<span class="normal">2785</span>
+<span class="normal">2786</span>
+<span class="normal">2787</span>
+<span class="normal">2788</span>
+<span class="normal">2789</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_base_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">symmetrical</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -17359,11 +17417,13 @@ raises if the resolved one is symmetric.</p>
     <span class="k">if</span> <span class="n">symmetrical</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cross_section</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">cross_section</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_sections</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_sections</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">[</span><span class="n">cross_section</span><span class="p">]</span>
-        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"No cross section named </span><span class="si">{</span><span class="n">cross_section</span><span class="si">!r}</span><span class="s2"> (symmetric or asymmetric)."</span>
-        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_sections</span><span class="p">[</span><span class="n">cross_section</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"No cross section named </span><span class="si">{</span><span class="n">cross_section</span><span class="si">!r}</span><span class="s2"> "</span>
+                <span class="s2">"(symmetric or asymmetric)."</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
         <span class="n">cross_section</span><span class="p">,</span>
         <span class="p">(</span>
@@ -17406,11 +17466,7 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2226</span>
-<span class="normal">2227</span>
-<span class="normal">2228</span>
-<span class="normal">2229</span>
-<span class="normal">2230</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2230</span>
 <span class="normal">2231</span>
 <span class="normal">2232</span>
 <span class="normal">2233</span>
@@ -17459,7 +17515,11 @@ cell_type: type of cell to return</p>
 <span class="normal">2276</span>
 <span class="normal">2277</span>
 <span class="normal">2278</span>
-<span class="normal">2279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_cell</span><span class="p">[</span><span class="n">KC</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
+<span class="normal">2279</span>
+<span class="normal">2280</span>
+<span class="normal">2281</span>
+<span class="normal">2282</span>
+<span class="normal">2283</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_cell</span><span class="p">[</span><span class="n">KC</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">]](</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">obj</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">cell_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">KC</span><span class="p">]</span> <span class="o">=</span> <span class="n">KCell</span><span class="p">,</span>  <span class="c1"># ty:ignore[invalid-parameter-default]</span>
@@ -17538,17 +17598,17 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2906</span>
-<span class="normal">2907</span>
-<span class="normal">2908</span>
-<span class="normal">2909</span>
-<span class="normal">2910</span>
-<span class="normal">2911</span>
-<span class="normal">2912</span>
-<span class="normal">2913</span>
-<span class="normal">2914</span>
-<span class="normal">2915</span>
-<span class="normal">2916</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dasymmetric_cross_section</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2938</span>
+<span class="normal">2939</span>
+<span class="normal">2940</span>
+<span class="normal">2941</span>
+<span class="normal">2942</span>
+<span class="normal">2943</span>
+<span class="normal">2944</span>
+<span class="normal">2945</span>
+<span class="normal">2946</span>
+<span class="normal">2947</span>
+<span class="normal">2948</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dasymmetric_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">AsymmetricalCrossSection</span>
@@ -17589,22 +17649,22 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2877</span>
-<span class="normal">2878</span>
-<span class="normal">2879</span>
-<span class="normal">2880</span>
-<span class="normal">2881</span>
-<span class="normal">2882</span>
-<span class="normal">2883</span>
-<span class="normal">2884</span>
-<span class="normal">2885</span>
-<span class="normal">2886</span>
-<span class="normal">2887</span>
-<span class="normal">2888</span>
-<span class="normal">2889</span>
-<span class="normal">2890</span>
-<span class="normal">2891</span>
-<span class="normal">2892</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dcross_section</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2909</span>
+<span class="normal">2910</span>
+<span class="normal">2911</span>
+<span class="normal">2912</span>
+<span class="normal">2913</span>
+<span class="normal">2914</span>
+<span class="normal">2915</span>
+<span class="normal">2916</span>
+<span class="normal">2917</span>
+<span class="normal">2918</span>
+<span class="normal">2919</span>
+<span class="normal">2920</span>
+<span class="normal">2921</span>
+<span class="normal">2922</span>
+<span class="normal">2923</span>
+<span class="normal">2924</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_dcross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">symmetrical</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DCrossSection</span> <span class="o">|</span> <span class="n">DAsymmetricCrossSection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get a um cross section wrapper (symmetric or asymmetric, see kwarg)."""</span>
@@ -17645,11 +17705,11 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2681</span>
-<span class="normal">2682</span>
-<span class="normal">2683</span>
-<span class="normal">2684</span>
-<span class="normal">2685</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_enclosure</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2694</span>
+<span class="normal">2695</span>
+<span class="normal">2696</span>
+<span class="normal">2697</span>
+<span class="normal">2698</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_enclosure</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">enclosure</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">LayerEnclosure</span> <span class="o">|</span> <span class="n">LayerEnclosureSpec</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LayerEnclosure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Gets a layer enclosure by name specification or the layerenclosure itself."""</span>
@@ -17679,12 +17739,12 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2803</span>
-<span class="normal">2804</span>
-<span class="normal">2805</span>
-<span class="normal">2806</span>
-<span class="normal">2807</span>
-<span class="normal">2808</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_extrude_config</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2835</span>
+<span class="normal">2836</span>
+<span class="normal">2837</span>
+<span class="normal">2838</span>
+<span class="normal">2839</span>
+<span class="normal">2840</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_extrude_config</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtrudeConfig</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get the default extrusion settings of a cross section, if any."""</span>
@@ -17715,17 +17775,17 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2894</span>
-<span class="normal">2895</span>
-<span class="normal">2896</span>
-<span class="normal">2897</span>
-<span class="normal">2898</span>
-<span class="normal">2899</span>
-<span class="normal">2900</span>
-<span class="normal">2901</span>
-<span class="normal">2902</span>
-<span class="normal">2903</span>
-<span class="normal">2904</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_iasymmetric_cross_section</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2926</span>
+<span class="normal">2927</span>
+<span class="normal">2928</span>
+<span class="normal">2929</span>
+<span class="normal">2930</span>
+<span class="normal">2931</span>
+<span class="normal">2932</span>
+<span class="normal">2933</span>
+<span class="normal">2934</span>
+<span class="normal">2935</span>
+<span class="normal">2936</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_iasymmetric_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">AsymmetricalCrossSection</span>
@@ -17766,22 +17826,22 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2835</span>
-<span class="normal">2836</span>
-<span class="normal">2837</span>
-<span class="normal">2838</span>
-<span class="normal">2839</span>
-<span class="normal">2840</span>
-<span class="normal">2841</span>
-<span class="normal">2842</span>
-<span class="normal">2843</span>
-<span class="normal">2844</span>
-<span class="normal">2845</span>
-<span class="normal">2846</span>
-<span class="normal">2847</span>
-<span class="normal">2848</span>
-<span class="normal">2849</span>
-<span class="normal">2850</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_icross_section</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2867</span>
+<span class="normal">2868</span>
+<span class="normal">2869</span>
+<span class="normal">2870</span>
+<span class="normal">2871</span>
+<span class="normal">2872</span>
+<span class="normal">2873</span>
+<span class="normal">2874</span>
+<span class="normal">2875</span>
+<span class="normal">2876</span>
+<span class="normal">2877</span>
+<span class="normal">2878</span>
+<span class="normal">2879</span>
+<span class="normal">2880</span>
+<span class="normal">2881</span>
+<span class="normal">2882</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_icross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">symmetrical</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CrossSection</span> <span class="o">|</span> <span class="n">AsymmetricCrossSection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get a dbu cross section wrapper (symmetric or asymmetric, see kwarg)."""</span>
@@ -17822,11 +17882,7 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2429</span>
-<span class="normal">2430</span>
-<span class="normal">2431</span>
-<span class="normal">2432</span>
-<span class="normal">2433</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2433</span>
 <span class="normal">2434</span>
 <span class="normal">2435</span>
 <span class="normal">2436</span>
@@ -17882,7 +17938,11 @@ cell_type: type of cell to return</p>
 <span class="normal">2486</span>
 <span class="normal">2487</span>
 <span class="normal">2488</span>
-<span class="normal">2489</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="normal">2489</span>
+<span class="normal">2490</span>
+<span class="normal">2491</span>
+<span class="normal">2492</span>
+<span class="normal">2493</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">"""Read KCLayout meta info from the KLayout object."""</span>
     <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -17968,16 +18028,16 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2687</span>
-<span class="normal">2688</span>
-<span class="normal">2689</span>
-<span class="normal">2690</span>
-<span class="normal">2691</span>
-<span class="normal">2692</span>
-<span class="normal">2693</span>
-<span class="normal">2694</span>
-<span class="normal">2695</span>
-<span class="normal">2696</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_symmetrical_cross_section</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2700</span>
+<span class="normal">2701</span>
+<span class="normal">2702</span>
+<span class="normal">2703</span>
+<span class="normal">2704</span>
+<span class="normal">2705</span>
+<span class="normal">2706</span>
+<span class="normal">2707</span>
+<span class="normal">2708</span>
+<span class="normal">2709</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_symmetrical_cross_section</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span>
     <span class="o">|</span> <span class="n">SymmetricalCrossSection</span>
@@ -18012,13 +18072,13 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">636</span>
-<span class="normal">637</span>
-<span class="normal">638</span>
-<span class="normal">639</span>
-<span class="normal">640</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">640</span>
 <span class="normal">641</span>
-<span class="normal">642</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">info_for</span><span class="p">(</span>
+<span class="normal">642</span>
+<span class="normal">643</span>
+<span class="normal">644</span>
+<span class="normal">645</span>
+<span class="normal">646</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">info_for</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">WrappedKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">WrappedVKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -18050,9 +18110,9 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1934</span>
-<span class="normal">1935</span>
-<span class="normal">1936</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">kcell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="n">Ports</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1938</span>
+<span class="normal">1939</span>
+<span class="normal">1940</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">kcell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ports</span><span class="p">:</span> <span class="n">Ports</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Create a new cell based ont he pdk's layout object."""</span>
     <span class="k">return</span> <span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">ports</span><span class="o">=</span><span class="n">ports</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -18080,11 +18140,11 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1981</span>
-<span class="normal">1982</span>
-<span class="normal">1983</span>
-<span class="normal">1984</span>
-<span class="normal">1985</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">layerenum_from_dict</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1985</span>
+<span class="normal">1986</span>
+<span class="normal">1987</span>
+<span class="normal">1988</span>
+<span class="normal">1989</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">layerenum_from_dict</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"LAYER"</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="n">LayerInfos</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">LayerEnum</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Create a new [LayerEnum][kfactory.kcell.LayerEnum] from this KCLayout."""</span>
@@ -18114,9 +18174,9 @@ cell_type: type of cell to return</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2023</span>
-<span class="normal">2024</span>
-<span class="normal">2025</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">layout_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Cell</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2027</span>
+<span class="normal">2028</span>
+<span class="normal">2029</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">layout_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Cell</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get a cell by name or index from the Layout object."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -18148,16 +18208,16 @@ of its pcell functions.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span>
-<span class="normal">545</span>
-<span class="normal">546</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">546</span>
 <span class="normal">547</span>
 <span class="normal">548</span>
 <span class="normal">549</span>
 <span class="normal">550</span>
-<span class="normal">551</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lock_factories</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lock_factories</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Prevent further factories (real and virtual) from being registered.</span>
 
 <span class="sd">    This is irreversible: once locked, a `KCLayout` will reject any new</span>
@@ -18196,11 +18256,7 @@ is being provided.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">553</span>
-<span class="normal">554</span>
-<span class="normal">555</span>
-<span class="normal">556</span>
-<span class="normal">557</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">557</span>
 <span class="normal">558</span>
 <span class="normal">559</span>
 <span class="normal">560</span>
@@ -18212,7 +18268,11 @@ is being provided.</p>
 <span class="normal">566</span>
 <span class="normal">567</span>
 <span class="normal">568</span>
-<span class="normal">569</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">metadata_for</span><span class="p">(</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">metadata_for</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">WrappedKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">WrappedVKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -18254,13 +18314,13 @@ is being provided.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">683</span>
-<span class="normal">684</span>
-<span class="normal">685</span>
-<span class="normal">686</span>
-<span class="normal">687</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">687</span>
 <span class="normal">688</span>
-<span class="normal">689</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">metadata_providers_for</span><span class="p">(</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">metadata_providers_for</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">factory</span><span class="p">:</span> <span class="n">WrappedKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">WrappedVKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_FactoryMetadataProviderRecord</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Return all metadata provider records registered for a factory."""</span>
@@ -18294,11 +18354,7 @@ is being provided.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">571</span>
-<span class="normal">572</span>
-<span class="normal">573</span>
-<span class="normal">574</span>
-<span class="normal">575</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">575</span>
 <span class="normal">576</span>
 <span class="normal">577</span>
 <span class="normal">578</span>
@@ -18308,7 +18364,11 @@ is being provided.</p>
 <span class="normal">582</span>
 <span class="normal">583</span>
 <span class="normal">584</span>
-<span class="normal">585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">model_for</span><span class="p">(</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">model_for</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">WrappedKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">WrappedVKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -18351,11 +18411,7 @@ cell factory's parameters.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">599</span>
-<span class="normal">600</span>
-<span class="normal">601</span>
-<span class="normal">602</span>
-<span class="normal">603</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">603</span>
 <span class="normal">604</span>
 <span class="normal">605</span>
 <span class="normal">606</span>
@@ -18366,7 +18422,11 @@ cell factory's parameters.</p>
 <span class="normal">611</span>
 <span class="normal">612</span>
 <span class="normal">613</span>
-<span class="normal">614</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">ports_for</span><span class="p">(</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">ports_for</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">WrappedKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">WrappedVKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -18531,11 +18591,7 @@ in their native KLayout formats.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2281</span>
-<span class="normal">2282</span>
-<span class="normal">2283</span>
-<span class="normal">2284</span>
-<span class="normal">2285</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2285</span>
 <span class="normal">2286</span>
 <span class="normal">2287</span>
 <span class="normal">2288</span>
@@ -18677,7 +18733,11 @@ in their native KLayout formats.</p>
 <span class="normal">2424</span>
 <span class="normal">2425</span>
 <span class="normal">2426</span>
-<span class="normal">2427</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
+<span class="normal">2427</span>
+<span class="normal">2428</span>
+<span class="normal">2429</span>
+<span class="normal">2430</span>
+<span class="normal">2431</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">options</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">LoadLayoutOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -18849,11 +18909,7 @@ in their native KLayout formats.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2177</span>
-<span class="normal">2178</span>
-<span class="normal">2179</span>
-<span class="normal">2180</span>
-<span class="normal">2181</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2181</span>
 <span class="normal">2182</span>
 <span class="normal">2183</span>
 <span class="normal">2184</span>
@@ -18871,7 +18927,11 @@ in their native KLayout formats.</p>
 <span class="normal">2196</span>
 <span class="normal">2197</span>
 <span class="normal">2198</span>
-<span class="normal">2199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rebuild</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2199</span>
+<span class="normal">2200</span>
+<span class="normal">2201</span>
+<span class="normal">2202</span>
+<span class="normal">2203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rebuild</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Rebuild cell tracking and remove destroyed cells from registered caches."""</span>
     <span class="n">kcells2delete</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">thread_lock</span><span class="p">:</span>
@@ -18967,11 +19027,7 @@ Doesn't allow name duplication.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2201</span>
-<span class="normal">2202</span>
-<span class="normal">2203</span>
-<span class="normal">2204</span>
-<span class="normal">2205</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2205</span>
 <span class="normal">2206</span>
 <span class="normal">2207</span>
 <span class="normal">2208</span>
@@ -18982,7 +19038,11 @@ Doesn't allow name duplication.</p>
 <span class="normal">2213</span>
 <span class="normal">2214</span>
 <span class="normal">2215</span>
-<span class="normal">2216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">register_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcell</span><span class="p">:</span> <span class="n">AnyTKCell</span><span class="p">,</span> <span class="n">allow_reregister</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2216</span>
+<span class="normal">2217</span>
+<span class="normal">2218</span>
+<span class="normal">2219</span>
+<span class="normal">2220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">register_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcell</span><span class="p">:</span> <span class="n">AnyTKCell</span><span class="p">,</span> <span class="n">allow_reregister</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Register an existing cell in the KCLayout object.</span>
 
 <span class="sd">    Args:</span>
@@ -19023,11 +19083,7 @@ Doesn't allow name duplication.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">644</span>
-<span class="normal">645</span>
-<span class="normal">646</span>
-<span class="normal">647</span>
-<span class="normal">648</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">648</span>
 <span class="normal">649</span>
 <span class="normal">650</span>
 <span class="normal">651</span>
@@ -19037,7 +19093,11 @@ Doesn't allow name duplication.</p>
 <span class="normal">655</span>
 <span class="normal">656</span>
 <span class="normal">657</span>
-<span class="normal">658</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">schematic_for</span><span class="p">(</span>
+<span class="normal">658</span>
+<span class="normal">659</span>
+<span class="normal">660</span>
+<span class="normal">661</span>
+<span class="normal">662</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">schematic_for</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">WrappedKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -19066,7 +19126,7 @@ Doesn't allow name duplication.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">set_extrude_config</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ExtrudeConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">set_extrude_config</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ExtrudeConfig</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">on_conflict</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'replace'</span><span class="p">,</span> <span class="s1">'raise'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'replace'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -19118,11 +19178,30 @@ whether it is referenced by its name or by its structure.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>extrusion settings. Replaces any existing config.</p>
+                <p>extrusion settings.</p>
               </div>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>on_conflict</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[&#39;replace&#39;, &#39;raise&#39;]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>what to do if the cross section already has a different
+config. <code>"replace"</code> overwrites it, <code>"raise"</code> raises an
+<code>ExtrudeConfigConflictError</code>. Setting an equal config is always
+allowed.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;replace&#39;</code>
             </td>
           </tr>
       </tbody>
@@ -19149,6 +19228,17 @@ have.</p>
               </div>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ExtrudeConfigConflictError (kfactory.exceptions.ExtrudeConfigConflictError)" href="../exceptions/#kfactory.exceptions.ExtrudeConfigConflictError">ExtrudeConfigConflictError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>if <code>on_conflict="raise"</code> and the cross
+section already has a different config.</p>
+              </div>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -19156,22 +19246,7 @@ have.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2776</span>
-<span class="normal">2777</span>
-<span class="normal">2778</span>
-<span class="normal">2779</span>
-<span class="normal">2780</span>
-<span class="normal">2781</span>
-<span class="normal">2782</span>
-<span class="normal">2783</span>
-<span class="normal">2784</span>
-<span class="normal">2785</span>
-<span class="normal">2786</span>
-<span class="normal">2787</span>
-<span class="normal">2788</span>
-<span class="normal">2789</span>
-<span class="normal">2790</span>
-<span class="normal">2791</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2791</span>
 <span class="normal">2792</span>
 <span class="normal">2793</span>
 <span class="normal">2794</span>
@@ -19181,8 +19256,44 @@ have.</p>
 <span class="normal">2798</span>
 <span class="normal">2799</span>
 <span class="normal">2800</span>
-<span class="normal">2801</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_extrude_config</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ExtrudeConfig</span>
+<span class="normal">2801</span>
+<span class="normal">2802</span>
+<span class="normal">2803</span>
+<span class="normal">2804</span>
+<span class="normal">2805</span>
+<span class="normal">2806</span>
+<span class="normal">2807</span>
+<span class="normal">2808</span>
+<span class="normal">2809</span>
+<span class="normal">2810</span>
+<span class="normal">2811</span>
+<span class="normal">2812</span>
+<span class="normal">2813</span>
+<span class="normal">2814</span>
+<span class="normal">2815</span>
+<span class="normal">2816</span>
+<span class="normal">2817</span>
+<span class="normal">2818</span>
+<span class="normal">2819</span>
+<span class="normal">2820</span>
+<span class="normal">2821</span>
+<span class="normal">2822</span>
+<span class="normal">2823</span>
+<span class="normal">2824</span>
+<span class="normal">2825</span>
+<span class="normal">2826</span>
+<span class="normal">2827</span>
+<span class="normal">2828</span>
+<span class="normal">2829</span>
+<span class="normal">2830</span>
+<span class="normal">2831</span>
+<span class="normal">2832</span>
+<span class="normal">2833</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_extrude_config</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">AnyCrossSectionInput</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">ExtrudeConfig</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">on_conflict</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"replace"</span><span class="p">,</span> <span class="s2">"raise"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"replace"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Set the default extrusion settings of a cross section.</span>
 
@@ -19192,11 +19303,17 @@ have.</p>
 
 <span class="sd">    Args:</span>
 <span class="sd">        cross_section: name or instance of the cross section.</span>
-<span class="sd">        config: extrusion settings. Replaces any existing config.</span>
+<span class="sd">        config: extrusion settings.</span>
+<span class="sd">        on_conflict: what to do if the cross section already has a different</span>
+<span class="sd">            config. `"replace"` overwrites it, `"raise"` raises an</span>
+<span class="sd">            `ExtrudeConfigConflictError`. Setting an equal config is always</span>
+<span class="sd">            allowed.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: if the config references strips the cross section doesn't</span>
 <span class="sd">            have.</span>
+<span class="sd">        ExtrudeConfigConflictError: if `on_conflict="raise"` and the cross</span>
+<span class="sd">            section already has a different config.</span>
 <span class="sd">    """</span>
     <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_base_cross_section</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span>
     <span class="n">n_sections</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">get_sections</span><span class="p">())</span>
@@ -19205,6 +19322,13 @@ have.</p>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">"Extrude config for cross section </span><span class="si">{</span><span class="n">xs</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> references strips "</span>
             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">unknown</span><span class="si">}</span><span class="s2">, but the cross section has </span><span class="si">{</span><span class="n">n_sections</span><span class="si">}</span><span class="s2"> strips."</span>
+        <span class="p">)</span>
+    <span class="n">existing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extrude_configs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">auto_name</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">on_conflict</span> <span class="o">==</span> <span class="s2">"raise"</span> <span class="ow">and</span> <span class="n">existing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">existing</span> <span class="o">!=</span> <span class="n">config</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExtrudeConfigConflictError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Cross section </span><span class="si">{</span><span class="n">xs</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> already has the extrude config "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">existing</span><span class="si">!r}</span><span class="s2">, cannot set </span><span class="si">{</span><span class="n">config</span><span class="si">!r}</span><span class="s2">. Cross sections with the "</span>
+            <span class="s2">"same geometry share one extrude config."</span>
         <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">extrude_configs</span><span class="p">[</span><span class="n">xs</span><span class="o">.</span><span class="n">auto_name</span><span class="p">()]</span> <span class="o">=</span> <span class="n">config</span>
 </code></pre></div></td></tr></table></div>
@@ -19232,9 +19356,9 @@ have.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1946</span>
-<span class="normal">1947</span>
-<span class="normal">1948</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_layers_from_infos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="n">LayerInfos</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">LayerEnum</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1950</span>
+<span class="normal">1951</span>
+<span class="normal">1952</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_layers_from_infos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="n">LayerInfos</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">LayerEnum</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Create a new LAYER enum based on the pdk's kcl."""</span>
     <span class="k">return</span> <span class="n">layerenum_from_dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="n">layers</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -19262,11 +19386,7 @@ have.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2491</span>
-<span class="normal">2492</span>
-<span class="normal">2493</span>
-<span class="normal">2494</span>
-<span class="normal">2495</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2495</span>
 <span class="normal">2496</span>
 <span class="normal">2497</span>
 <span class="normal">2498</span>
@@ -19324,7 +19444,11 @@ have.</p>
 <span class="normal">2550</span>
 <span class="normal">2551</span>
 <span class="normal">2552</span>
-<span class="normal">2553</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2553</span>
+<span class="normal">2554</span>
+<span class="normal">2555</span>
+<span class="normal">2556</span>
+<span class="normal">2557</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Set the info/settings of the KCLayout."""</span>
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">write_kfactory_settings</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">setting</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -19412,13 +19536,13 @@ have.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">616</span>
-<span class="normal">617</span>
-<span class="normal">618</span>
-<span class="normal">619</span>
-<span class="normal">620</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">620</span>
 <span class="normal">621</span>
-<span class="normal">622</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">tags_for</span><span class="p">(</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span>
+<span class="normal">625</span>
+<span class="normal">626</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">tags_for</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">WrappedKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">WrappedVKCellFunc</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">provider</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -19460,11 +19584,7 @@ have.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">927</span>
-<span class="normal">928</span>
-<span class="normal">929</span>
-<span class="normal">930</span>
-<span class="normal">931</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">931</span>
 <span class="normal">932</span>
 <span class="normal">933</span>
 <span class="normal">934</span>
@@ -19483,7 +19603,11 @@ have.</p>
 <span class="normal">947</span>
 <span class="normal">948</span>
 <span class="normal">949</span>
-<span class="normal">950</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_dbu</span><span class="p">(</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_dbu</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">other</span><span class="p">:</span> <span class="nb">float</span>
     <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">DPoint</span>
@@ -19542,11 +19666,7 @@ have.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">879</span>
-<span class="normal">880</span>
-<span class="normal">881</span>
-<span class="normal">882</span>
-<span class="normal">883</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">883</span>
 <span class="normal">884</span>
 <span class="normal">885</span>
 <span class="normal">886</span>
@@ -19565,7 +19685,11 @@ have.</p>
 <span class="normal">899</span>
 <span class="normal">900</span>
 <span class="normal">901</span>
-<span class="normal">902</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_um</span><span class="p">(</span>
+<span class="normal">902</span>
+<span class="normal">903</span>
+<span class="normal">904</span>
+<span class="normal">905</span>
+<span class="normal">906</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_um</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">other</span><span class="p">:</span> <span class="nb">int</span>
     <span class="o">|</span> <span class="n">kdb</span><span class="o">.</span><span class="n">Point</span>
@@ -19614,9 +19738,9 @@ have.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2669</span>
-<span class="normal">2670</span>
-<span class="normal">2671</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2682</span>
+<span class="normal">2683</span>
+<span class="normal">2684</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcell</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KCell</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the top KCell if there is a single one."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">top_cell</span><span class="p">()</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()]</span>
 </code></pre></div></td></tr></table></div>
@@ -19644,9 +19768,9 @@ have.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2665</span>
-<span class="normal">2666</span>
-<span class="normal">2667</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">KCell</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2678</span>
+<span class="normal">2679</span>
+<span class="normal">2680</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">top_kcells</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">KCell</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Return the top KCells."""</span>
     <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">tc</span><span class="o">.</span><span class="n">cell_index</span><span class="p">()]</span> <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_cells</span><span class="p">()]</span>
 </code></pre></div></td></tr></table></div>
@@ -19909,11 +20033,7 @@ name.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1808</span>
-<span class="normal">1809</span>
-<span class="normal">1810</span>
-<span class="normal">1811</span>
-<span class="normal">1812</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1812</span>
 <span class="normal">1813</span>
 <span class="normal">1814</span>
 <span class="normal">1815</span>
@@ -20033,7 +20153,11 @@ name.</p>
 <span class="normal">1929</span>
 <span class="normal">1930</span>
 <span class="normal">1931</span>
-<span class="normal">1932</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">vcell</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">VK</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">](</span>
+<span class="normal">1932</span>
+<span class="normal">1933</span>
+<span class="normal">1934</span>
+<span class="normal">1935</span>
+<span class="normal">1936</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">vcell</span><span class="p">[</span><span class="o">**</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">VK</span><span class="p">:</span> <span class="n">VKCell</span><span class="p">](</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">KCellParams</span><span class="p">,</span> <span class="n">VKCell</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">/</span><span class="p">,</span>
@@ -20183,9 +20307,9 @@ name.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1942</span>
-<span class="normal">1943</span>
-<span class="normal">1944</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">vkcell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VKCell</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1946</span>
+<span class="normal">1947</span>
+<span class="normal">1948</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">vkcell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VKCell</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Create a new cell based ont he pdk's layout object."""</span>
     <span class="k">return</span> <span class="n">VKCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">kcl</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -20202,7 +20326,7 @@ name.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">SaveLayoutOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_meta_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">convert_external_cells</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">autoformat_from_file_extension</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">deduplicate_cell_names</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">SaveLayoutOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_meta_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">convert_external_cells</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">autoformat_from_file_extension</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">deduplicate_cell_names</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">clear_existing_meta</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -20325,6 +20449,24 @@ duplicates are detected.</p>
                   <code>False</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>clear_existing_meta</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Remove the layout's existing meta info before
+setting it, so the file only contains the current state of the
+KCLayout. Only used if <code>set_meta_data</code> is True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -20393,11 +20535,7 @@ duplicates are detected.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2555</span>
-<span class="normal">2556</span>
-<span class="normal">2557</span>
-<span class="normal">2558</span>
-<span class="normal">2559</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2559</span>
 <span class="normal">2560</span>
 <span class="normal">2561</span>
 <span class="normal">2562</span>
@@ -20458,7 +20596,17 @@ duplicates are detected.</p>
 <span class="normal">2617</span>
 <span class="normal">2618</span>
 <span class="normal">2619</span>
-<span class="normal">2620</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
+<span class="normal">2620</span>
+<span class="normal">2621</span>
+<span class="normal">2622</span>
+<span class="normal">2623</span>
+<span class="normal">2624</span>
+<span class="normal">2625</span>
+<span class="normal">2626</span>
+<span class="normal">2627</span>
+<span class="normal">2628</span>
+<span class="normal">2629</span>
+<span class="normal">2630</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">options</span><span class="p">:</span> <span class="n">kdb</span><span class="o">.</span><span class="n">SaveLayoutOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -20466,6 +20614,7 @@ duplicates are detected.</p>
     <span class="n">convert_external_cells</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">autoformat_from_file_extension</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">deduplicate_cell_names</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">clear_existing_meta</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Write a GDS file into the existing Layout.</span>
 
@@ -20484,6 +20633,9 @@ duplicates are detected.</p>
 <span class="sd">            default), raise</span>
 <span class="sd">            :class:`~kfactory.exceptions.DuplicateCellNameError` when</span>
 <span class="sd">            duplicates are detected.</span>
+<span class="sd">        clear_existing_meta: Remove the layout's existing meta info before</span>
+<span class="sd">            setting it, so the file only contains the current state of the</span>
+<span class="sd">            KCLayout. Only used if `set_meta_data` is True.</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">options</span> <span class="o">=</span> <span class="n">save_layout_options</span><span class="p">()</span>
@@ -20491,6 +20643,8 @@ duplicates are detected.</p>
         <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
     <span class="k">for</span> <span class="n">kc</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kcells</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
         <span class="n">kc</span><span class="o">.</span><span class="n">insert_vinsts</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">set_meta_data</span> <span class="ow">and</span> <span class="n">clear_existing_meta</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">clear_meta_info</span><span class="p">()</span>
     <span class="k">match</span> <span class="p">(</span><span class="n">set_meta_data</span><span class="p">,</span> <span class="n">convert_external_cells</span><span class="p">):</span>
         <span class="k">case</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_meta_data</span><span class="p">()</span>
@@ -20558,9 +20712,9 @@ duplicates are detected.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/layout.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_default_kcl</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">KCLayout</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_default_kcl</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">KCLayout</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Utility function to get the default kcl object."""</span>
     <span class="k">return</span> <span class="n">kcl</span>
 </code></pre></div></td></tr></table></div>

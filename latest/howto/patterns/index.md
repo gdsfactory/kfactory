@@ -209,7 +209,7 @@ print(f"factory bundle type: {type(factories)}")
 ```
 
 ```
-[32m2026-10-15 16:47:41.496[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
+[32m2026-10-15 19:00:57.997[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
 Renaming Unnamed_8 (cell_index=8) to straight_CSsym_028523d7_500_L10000 would cause it to be named the same as:
  - straight_CSsym_028523d7_500_L10000 (cell_index=1), function_name=_straight, basename=straight[0m
 
@@ -395,7 +395,7 @@ bbox (µm): (0,-0.25;160,60.25)
 
 | Topic | Where |
 | --- | --- |
-| Common pitfalls to avoid | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.3.0/howto/best_practices/index.md>) |
-| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.3.0/howto/faq/index.md>) |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/pcells/index.md>) |
-| Routing overview | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
+| Common pitfalls to avoid | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.4.0/howto/best_practices/index.md>) |
+| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.4.0/howto/faq/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
+| Routing overview | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |

@@ -543,7 +543,7 @@ canvas bbox (µm): (-1,-0.25;10,0.25)
 
 | Topic | Where |
 | --- | --- |
-| Common patterns (positive guidance) | [How-To: Patterns](<https://gdsfactory.github.io/kfactory/3.3.0/howto/patterns/index.md>) |
-| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.3.0/howto/faq/index.md>) |
-| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/dbu_vs_um/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
+| Common patterns (positive guidance) | [How-To: Patterns](<https://gdsfactory.github.io/kfactory/3.4.0/howto/patterns/index.md>) |
+| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.4.0/howto/faq/index.md>) |
+| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |

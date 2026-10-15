@@ -228,7 +228,7 @@ print(f"Stack: {list(STACK.layers.keys())} layers defined")
 ```
 
 ```
-PDK:   name='DEMO_TECH_PDK' layout=<klayout.dbcore.Layout object at 0x7f5114d44b00> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7f5114e124e0> factories=<kfactory.layout.Factories object at 0x7f5114cbb390> virtual_factories=<kfactory.layout.Factories object at 0x7f5114cc5f30> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7f513c0b8040> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7f5114d4c870> info=Info() settings=KCellSettings(version='3.3.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7f5114cbb750> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
+PDK:   name='DEMO_TECH_PDK' layout=<klayout.dbcore.Layout object at 0x7ff7ffe88b90> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7ff7fff5a5d0> factories=<kfactory.layout.Factories object at 0x7ff7ffe03390> virtual_factories=<kfactory.layout.Factories object at 0x7ff7ffe11f30> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7ff81e9ac040> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7ff7ffe98500> info=Info() settings=KCellSettings(version='3.4.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7ff7ffe03750> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
 Stack: ['wg', 'clad'] layers defined
 ```
 
@@ -329,7 +329,7 @@ Keep `STACK` as a module-level constant in your PDK module alongside `pdk` and `
 
 | Topic | Where |
 | --- | --- |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
-| Layer definitions | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/layers/index.md>) |
-| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
-| KCLayout (owns the cell DB) | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kclayout/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| Layer definitions | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/layers/index.md>) |
+| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| KCLayout (owns the cell DB) | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kclayout/index.md>) |

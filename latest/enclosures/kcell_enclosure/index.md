@@ -13,7 +13,7 @@ This guarantees a continuous cladding across component joints — no gaps at the
 | `LayerEnclosure` | one component at a time | no — each component enclosed separately |
 | `KCellEnclosure` | entire assembled cell | yes — geometry merged first |
 
-The [Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) page introduces `LayerEnclosure` and shows a basic `KCellEnclosure` example. This page covers advanced usage: multiple enclosures, tiling parameters, and the directional Minkowski methods.
+The [Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) page introduces `LayerEnclosure` and shows a basic `KCellEnclosure` example. This page covers advanced usage: multiple enclosures, tiling parameters, and the directional Minkowski methods.
 
 ## Setup
 
@@ -133,7 +133,7 @@ bend_pair_multi(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 16:47:43.013[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 19:00:58.149[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_4 (cell_index=4) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -180,7 +180,7 @@ single_bend_npts(radius=10, width=0.5, n_pts=8).plot()
 ```
 
 ```
-[32m2026-10-15 16:47:43.416[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 19:00:58.564[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_7 (cell_index=7) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler[0m
@@ -198,7 +198,7 @@ single_bend_npts(radius=10, width=0.5, n_pts=64).plot()
 ```
 
 ```
-[32m2026-10-15 16:47:43.460[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 19:00:58.607[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_10 (cell_index=10) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
@@ -288,7 +288,7 @@ vertical_straight_clad_x(length=20.0, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 16:47:43.580[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
+[32m2026-10-15 19:00:58.717[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
 Renaming Unnamed_16 (cell_index=16) to straight_CSsym_028523d7_500_L20000 would cause it to be named the same as:
  - straight_CSsym_028523d7_500_L20000 (cell_index=13), function_name=_straight, basename=straight[0m
 ```
@@ -345,7 +345,7 @@ bend_pair_diamond(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 16:47:43.612[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 19:00:58.747[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_19 (cell_index=19) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
@@ -389,7 +389,7 @@ The WGCLAD corners are diamond-shaped (45° chamfers).
 
 | Topic | Where |
 | --- | --- |
-| Layer enclosures (single-layer) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) |
-| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
-| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/geometry/index.md>) |
-| Tile-based fill | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/fill/index.md>) |
+| Layer enclosures (single-layer) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) |
+| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/geometry/index.md>) |
+| Tile-based fill | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/fill/index.md>) |

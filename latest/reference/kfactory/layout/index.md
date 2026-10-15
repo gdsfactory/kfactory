@@ -816,7 +816,7 @@ Attach a schematic function to a cell factory after registration.
 ### set\_extrude\_config
 
 ```
-set_extrude_config(cross_section: str | AnyCrossSectionInput, config: ExtrudeConfig) -> None
+set_extrude_config(cross_section: str | AnyCrossSectionInput, config: ExtrudeConfig, *, on_conflict: Literal['replace', 'raise'] = 'replace') -> None
 ```
 
 Set the default extrusion settings of a cross section.
@@ -828,13 +828,15 @@ Parameters:
 | Name | Type | Description | Default |
 | --- | --- | --- | --- |
 | `cross_section` | `str \| AnyCrossSectionInput` | name or instance of the cross section. | *required* |
-| `config` | `ExtrudeConfig` | extrusion settings. Replaces any existing config. | *required* |
+| `config` | `ExtrudeConfig` | extrusion settings. | *required* |
+| `on_conflict` | `Literal['replace', 'raise']` | what to do if the cross section already has a different config. `"replace"` overwrites it, `"raise"` raises an `ExtrudeConfigConflictError`. Setting an equal config is always allowed. | `'replace'` |
 
 Raises:
 
 | Type | Description |
 | --- | --- |
 | `ValueError` | if the config references strips the cross section doesn't have. |
+| `ExtrudeConfigConflictError` | if `on_conflict="raise"` and the cross section already has a different config. |
 
 ### set\_layers\_from\_infos
 
@@ -1016,7 +1018,7 @@ Create a new cell based ont he pdk's layout object.
 ### write
 
 ```
-write(filename: str | Path, options: SaveLayoutOptions | None = None, set_meta_data: bool = True, convert_external_cells: bool = False, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False) -> None
+write(filename: str | Path, options: SaveLayoutOptions | None = None, set_meta_data: bool = True, convert_external_cells: bool = False, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False, clear_existing_meta: bool = True) -> None
 ```
 
 Write a GDS file into the existing Layout.
@@ -1031,6 +1033,7 @@ Parameters:
 | `convert_external_cells` | `bool` | Whether to make KCells not in this KCLayout to | `False` |
 | `autoformat_from_file_extension` | `bool` | Set the format of the output file automatically from the file extension of `filename`. This is necessary for the options. If not set, this will default to `GDSII`. | `True` |
 | `deduplicate_cell_names` | `bool` | If True, auto-rename duplicate cells with `$1`, `$2`, … suffixes before writing. If False (the default), raise :class:`~kfactory.exceptions.DuplicateCellNameError` when duplicates are detected. | `False` |
+| `clear_existing_meta` | `bool` | Remove the layout's existing meta info before setting it, so the file only contains the current state of the KCLayout. Only used if `set_meta_data` is True. | `True` |
 
 ## get\_default\_kcl
 

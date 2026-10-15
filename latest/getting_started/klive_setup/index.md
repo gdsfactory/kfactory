@@ -24,6 +24,6 @@ KLayout occasionally shows a "file changed on disk" dialog that can interfere wi
 
 | Topic | Where |
 | --- | --- |
-| Prerequisites (Python, KLayout) | [Getting Started: Prerequisites](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/prerequisites/index.md>) |
-| Installing kfactory | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/installation/index.md>) |
-| 5-minute quickstart | [Getting Started: Quickstart](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/quickstart/index.md>) |
+| Prerequisites (Python, KLayout) | [Getting Started: Prerequisites](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/prerequisites/index.md>) |
+| Installing kfactory | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/installation/index.md>) |
+| 5-minute quickstart | [Getting Started: Quickstart](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/quickstart/index.md>) |

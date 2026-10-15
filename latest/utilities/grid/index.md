@@ -213,6 +213,10 @@ grid_dbu bbox: 78.5 µm × 10.0 µm
 
 ```
 
+```
+
+```
+
 ## 8 · Placing the Grid in a Larger Layout
 
 The returned `InstanceGroup` can be used to move the whole block at once. Here we pack two sub-grids and place them side-by-side in a top-level cell.
@@ -273,7 +277,7 @@ inst.transform(kf.kdb.DCplxTrans(1, 0, False, x_um, y_um))
 
 | Topic | Where |
 | --- | --- |
-| Component packing (free placement) | [Utilities: Packing](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/packing/index.md>) |
-| Components overview &amp; gallery | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/overview/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
-| Instance placement | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/instances/index.md>) |
+| Component packing (free placement) | [Utilities: Packing](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/packing/index.md>) |
+| Components overview &amp; gallery | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/overview/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| Instance placement | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/instances/index.md>) |

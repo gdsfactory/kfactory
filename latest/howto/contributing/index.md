@@ -134,12 +134,12 @@ pyproject.toml         # package metadata + dependencies
 ## Getting help
 
 - Open a [GitHub issue](<https://github.com/gdsfactory/kfactory/issues>) for bugs or feature requests.
-- For usage questions, the [How-To Guides](<https://gdsfactory.github.io/kfactory/3.3.0/howto/best_practices/index.md>) and [FAQ](<https://gdsfactory.github.io/kfactory/3.3.0/howto/faq/index.md>) are a good starting point.
+- For usage questions, the [How-To Guides](<https://gdsfactory.github.io/kfactory/3.4.0/howto/best_practices/index.md>) and [FAQ](<https://gdsfactory.github.io/kfactory/3.4.0/howto/faq/index.md>) are a good starting point.
 
 ## See Also
 
 | Topic | Where |
 | --- | --- |
-| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.3.0/howto/faq/index.md>) |
-| Installation instructions | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/installation/index.md>) |
-| Common pitfalls to avoid | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.3.0/howto/best_practices/index.md>) |
+| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.4.0/howto/faq/index.md>) |
+| Installation instructions | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/installation/index.md>) |
+| Common pitfalls to avoid | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.4.0/howto/best_practices/index.md>) |

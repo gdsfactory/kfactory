@@ -1,6 +1,6 @@
 # Bundle Routing — Tutorial
 
-`route_bundle` routes *N* start ports to *N* end ports, maintaining spacing and avoiding obstacles. This page covers parameters that are not shown in the [Routing Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) or [Optical Routing Deep Dive](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>).
+`route_bundle` routes *N* start ports to *N* end ports, maintaining spacing and avoiding obstacles. This page covers parameters that are not shown in the [Routing Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) or [Optical Routing Deep Dive](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>).
 
 | Topic | API |
 | --- | --- |
@@ -452,17 +452,17 @@ bundle_type_mismatch().plot()
 | `allow_layer_mismatch` | `bool` | `None` | Skip layer equality check |
 | `allow_type_mismatch` | `bool` | `None` | Skip port\_type equality check |
 | `route_width` | DBU / `list[DBU]` | `None` | Override wire width per route |
-| `starts` / `ends` | DBU / steps | `None` | Entry/exit stub lengths (see [optical.py](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>)) |
-| `waypoints` | `Trans` / `list[Point]` | `None` | Force routes through a point (see [optical.py](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>)) |
-| `path_length_matching_config` | `PathLengthConfig` | `None` | Equal-length routing (see [optical.py](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>)) |
+| `starts` / `ends` | DBU / steps | `None` | Entry/exit stub lengths (see [optical.py](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>)) |
+| `waypoints` | `Trans` / `list[Point]` | `None` | Force routes through a point (see [optical.py](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>)) |
+| `path_length_matching_config` | `PathLengthConfig` | `None` | Equal-length routing (see [optical.py](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>)) |
 
 ## See Also
 
 | Topic | Where |
 | --- | --- |
-| Single-route optical options: waypoints, loopbacks, stubs | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
-| Electrical bundle routing | [Routing: Electrical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/electrical/index.md>) |
-| Equal path-length loops inside a bundle | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.3.0/routing/path_length/index.md>) |
-| Manhattan backbone that bundle routing uses internally | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.3.0/routing/manhattan/index.md>) |
-| Routing overview and sub-module map | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Port sorting and orientation | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
+| Single-route optical options: waypoints, loopbacks, stubs | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Electrical bundle routing | [Routing: Electrical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/electrical/index.md>) |
+| Equal path-length loops inside a bundle | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.4.0/routing/path_length/index.md>) |
+| Manhattan backbone that bundle routing uses internally | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.4.0/routing/manhattan/index.md>) |
+| Routing overview and sub-module map | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Port sorting and orientation | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |

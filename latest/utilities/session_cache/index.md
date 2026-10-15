@@ -242,5 +242,5 @@ shutil.rmtree(tmpdir, ignore_errors=True)
 
 | Topic | Where |
 | --- | --- |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
-| KCLayout (owns the cell DB) | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kclayout/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| KCLayout (owns the cell DB) | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kclayout/index.md>) |

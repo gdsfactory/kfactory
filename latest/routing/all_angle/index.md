@@ -285,8 +285,8 @@ c_real.plot()
 
 | Topic | Where |
 | --- | --- |
-| Manhattan (90°/180° bend) routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
-| Virtual cells used as intermediate routing containers | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/virtual/index.md>) |
-| Euler bend cells and `virtual_bend_euler_factory` | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) |
-| Routing overview and choosing an approach | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Port construction and `DCplxTrans` | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
+| Manhattan (90°/180° bend) routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Virtual cells used as intermediate routing containers | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/virtual/index.md>) |
+| Euler bend cells and `virtual_bend_euler_factory` | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
+| Routing overview and choosing an approach | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Port construction and `DCplxTrans` | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |

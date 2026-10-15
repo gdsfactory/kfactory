@@ -191,11 +191,11 @@ kf.kcl.get_icross_section(xs)  # registers & returns the cross-section
 xs_retrieved = kf.kcl.get_icross_section("xs_wg")
 ```
 
-See [Cross-Sections &amp; Enclosures](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) for a full walkthrough.
+See [Cross-Sections &amp; Enclosures](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) for a full walkthrough.
 
 Beyond cross-sections, kfactory provides a more generalised cladding system: enclosures are not limited to path-like backbones. LayerEnclosure can apply cladding/exclusion to arbitrary regions or entire layers, and KCellEnclosure can merge all sub-cell geometry before expanding — useful for complex multi-component assemblies.
 
-See [Layer Enclosures](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) and [KCell Enclosures](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/kcell_enclosure/index.md>) for details.
+See [Layer Enclosures](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) and [KCell Enclosures](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/kcell_enclosure/index.md>) for details.
 
 ## Routing
 
@@ -222,6 +222,6 @@ kfactory has comprehensive routing support across several sub-modules:
 >
 > **Effective bend radius**
 >
-> Euler bends extend slightly beyond their nominal radius. Always use `kf.routing.optical.get_radius(bend_cell.ports)` (not the nominal µm value) when passing `bend90_radius` to DBU-based routing functions; the result is in DBU. See [Euler Bends](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) for details.
+> Euler bends extend slightly beyond their nominal radius. Always use `kf.routing.optical.get_radius(bend_cell.ports)` (not the nominal µm value) when passing `bend90_radius` to DBU-based routing functions; the result is in DBU. See [Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) for details.
 
-See the [Routing](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) section for full examples.
+See the [Routing](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) section for full examples.

@@ -6,7 +6,7 @@ KFactory provides parametric cells with caching, optical and electrical routing,
 
 # Getting Started
 
-# KFactory 3.3.0
+# KFactory 3.4.0
 
 KFactory is a Python framework for photonic and electronic chip layout, built on [KLayout](<https://klayout.de>)'s C++ geometry engine. It provides parametric cells with caching, optical and electrical routing, enclosures via Minkowski sums, and schematic-driven design with LVS.
 
@@ -54,11 +54,11 @@ This installs the development environment and sets up pre-commit hooks.
 
 Full documentation is available at [gdsfactory.github.io/kfactory](<https://gdsfactory.github.io/kfactory>).
 
-Upgrading from an earlier version? See the [migration guide](<https://gdsfactory.github.io/kfactory/3.3.0/docs/source/migration/index.md>).
+Upgrading from an earlier version? See the [migration guide](<https://gdsfactory.github.io/kfactory/3.4.0/docs/source/migration/index.md>).
 
 ## License
 
-[MIT](<https://gdsfactory.github.io/kfactory/3.3.0/LICENSE>)
+[MIT](<https://gdsfactory.github.io/kfactory/3.4.0/LICENSE>)
 
 ---
 
@@ -171,9 +171,9 @@ If no errors appear, kfactory is installed correctly.
 
 ## Next steps
 
-- [5-Minute Quickstart](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/quickstart/index.md>) — build and connect your first components
-- [KLive Setup](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/klive_setup/index.md>) — stream layouts live into KLayout
-- [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kcell/index.md>) — deep dive into the central class
+- [5-Minute Quickstart](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/quickstart/index.md>) — build and connect your first components
+- [KLive Setup](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/klive_setup/index.md>) — stream layouts live into KLayout
+- [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) — deep dive into the central class
 
 # KLive Setup
 
@@ -201,9 +201,9 @@ KLayout occasionally shows a "file changed on disk" dialog that can interfere wi
 
 | Topic | Where |
 | --- | --- |
-| Prerequisites (Python, KLayout) | [Getting Started: Prerequisites](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/prerequisites/index.md>) |
-| Installing kfactory | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/installation/index.md>) |
-| 5-minute quickstart | [Getting Started: Quickstart](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/quickstart/index.md>) |
+| Prerequisites (Python, KLayout) | [Getting Started: Prerequisites](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/prerequisites/index.md>) |
+| Installing kfactory | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/installation/index.md>) |
+| 5-minute quickstart | [Getting Started: Quickstart](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/quickstart/index.md>) |
 
 # Prerequisites
 
@@ -233,15 +233,15 @@ Download: [klayout.de/build.html](<https://www.klayout.de/build.html>)
 
 [klive](<https://github.com/gdsfactory/klive>) is a KLayout plug-in that streams GDS files directly from Python into the running KLayout window. It is not required to run kfactory, but it makes the interactive design loop much faster.
 
-See [KLive Setup](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/klive_setup/index.md>) for installation instructions.
+See [KLive Setup](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/klive_setup/index.md>) for installation instructions.
 
 ## See Also
 
 | Topic | Where |
 | --- | --- |
-| Installing kfactory | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/installation/index.md>) |
-| KLive streaming setup | [Getting Started: KLive Setup](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/klive_setup/index.md>) |
-| 5-minute quickstart | [Getting Started: Quickstart](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/quickstart/index.md>) |
+| Installing kfactory | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/installation/index.md>) |
+| KLive streaming setup | [Getting Started: KLive Setup](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/klive_setup/index.md>) |
+| 5-minute quickstart | [Getting Started: Quickstart](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/quickstart/index.md>) |
 
 # 5-Minute Quickstart
 
@@ -416,7 +416,7 @@ Ports:
 
 ## 6\. Stream to KLayout (optional)
 
-If [klive](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/klive_setup/index.md>) is installed and KLayout is open, a single call pushes the GDS to the viewer:
+If [klive](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/klive_setup/index.md>) is installed and KLayout is open, a single call pushes the GDS to the viewer:
 
 ```
 kf.show(arm)
@@ -426,12 +426,12 @@ kf.show(arm)
 
 | Topic | Where |
 | --- | --- |
-| Cells in depth | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kcell/index.md>) |
-| Layers &amp; layer stacks | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/layers/index.md>) |
-| Port system | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
-| DBU vs µm coordinates | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/dbu_vs_um/index.md>) |
-| Optical routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
-| Enclosures / cladding | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) |
+| Cells in depth | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) |
+| Layers &amp; layer stacks | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/layers/index.md>) |
+| Port system | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
+| DBU vs µm coordinates | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
+| Optical routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Enclosures / cladding | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) |
 
 # Concepts
 
@@ -687,10 +687,10 @@ Port o1 dwidth: 0.5 µm
 
 | Topic | Where |
 | --- | --- |
-| KCell and DKCell side-by-side | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kcell/index.md>) |
-| Port width and position in DBU | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
-| Factory functions and their unit conventions | [Components: Factory Functions](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/overview/index.md>) |
-| FAQ — when to use DBU vs µm | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.3.0/howto/faq/index.md>) |
+| KCell and DKCell side-by-side | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) |
+| Port width and position in DBU | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
+| Factory functions and their unit conventions | [Components: Factory Functions](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
+| FAQ — when to use DBU vs µm | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.4.0/howto/faq/index.md>) |
 
 # Geometry
 
@@ -1002,9 +1002,9 @@ Wrote demo_geometry.gds (1032 bytes)
 
 | Topic | Where |
 | --- | --- |
-| DRC spacing fixes (Region-based) | [Utilities: DRC Fixing](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/drc_fix/index.md>) |
-| Auto-cladding via Minkowski sum | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) |
-| Fill tiling with Region exclusions | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/fill/index.md>) |
+| DRC spacing fixes (Region-based) | [Utilities: DRC Fixing](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/drc_fix/index.md>) |
+| Auto-cladding via Minkowski sum | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) |
+| Fill tiling with Region exclusions | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/fill/index.md>) |
 
 # Instances
 
@@ -1263,10 +1263,10 @@ angled
 
 | Topic | Where |
 | --- | --- |
-| Port system used by `connect()` | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
-| Routing between instance ports | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Assembling multi-cell components | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/overview/index.md>) |
-| Grid and tiling arrays of instances | [Utilities: Grid Layout](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/grid/index.md>) |
+| Port system used by `connect()` | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
+| Routing between instance ports | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Assembling multi-cell components | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/overview/index.md>) |
+| Grid and tiling arrays of instances | [Utilities: Grid Layout](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/grid/index.md>) |
 
 # KCell — the core building block
 
@@ -1552,11 +1552,11 @@ vpad
 
 | Topic | Where |
 | --- | --- |
-| Port system (position, direction, type) | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
-| Placing and connecting instances | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/instances/index.md>) |
-| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/dbu_vs_um/index.md>) |
-| PCells and caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/pcells/index.md>) |
-| Virtual cells for routing | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/virtual/index.md>) |
+| Port system (position, direction, type) | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
+| Placing and connecting instances | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/instances/index.md>) |
+| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
+| PCells and caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
+| Virtual cells for routing | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/virtual/index.md>) |
 
 # KCLayout — layout context and PDK
 
@@ -1823,9 +1823,9 @@ cells read back: [1, 0, 2]
 
 | Topic | Where |
 | --- | --- |
-| Building a full PDK with a custom KCLayout | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
-| Session save/load to speed up rebuilds | [Utilities: Session Cache](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/session_cache/index.md>) |
-| Layer definitions and LayerInfos | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/layers/index.md>) |
+| Building a full PDK with a custom KCLayout | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| Session save/load to speed up rebuilds | [Utilities: Session Cache](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/session_cache/index.md>) |
+| Layer definitions and LayerInfos | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/layers/index.md>) |
 
 # Layers
 
@@ -1934,7 +1934,7 @@ for name in L.model_fields:
   FLOORPLAN     layer=10  datatype=0
 
 
-/tmp/ipykernel_2742/971822332.py:1: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_2795/971822332.py:1: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in L.model_fields:
 ```
 
@@ -2076,7 +2076,7 @@ Layer palette:
   m2      z=1.2…1.70 µm  Al
 
 
-/tmp/ipykernel_2742/3302201102.py:18: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_2795/3302201102.py:18: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in pdk_layers.model_fields:
 ```
 
@@ -2084,10 +2084,10 @@ Layer palette:
 
 | Topic | Where |
 | --- | --- |
-| KCLayout — the layout registry that owns layers | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kclayout/index.md>) |
-| Cross-sections built on top of layers | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
-| LayerLevel and full 3-D stack in a PDK | [PDK: Technology &amp; Layer Stack](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/technology/index.md>) |
-| Assembling a full PDK with layers | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
+| KCLayout — the layout registry that owns layers | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kclayout/index.md>) |
+| Cross-sections built on top of layers | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| LayerLevel and full 3-D stack in a PDK | [PDK: Technology &amp; Layer Stack](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/technology/index.md>) |
+| Assembling a full PDK with layers | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
 
 # Ports
 
@@ -2401,10 +2401,10 @@ loop
 
 | Topic | Where |
 | --- | --- |
-| Placing and connecting instances with ports | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/instances/index.md>) |
-| Cross-sections (port width + enclosure spec) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
-| Optical routing between ports | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Port-based component assembly | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/overview/index.md>) |
+| Placing and connecting instances with ports | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/instances/index.md>) |
+| Cross-sections (port width + enclosure spec) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| Optical routing between ports | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Port-based component assembly | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/overview/index.md>) |
 
 # Components
 
@@ -2505,7 +2505,7 @@ print("cell info:", dict(b_meta.info))
 ```
 
 ```
-[32m2026-10-15 16:47:50.066[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
+[32m2026-10-15 19:01:04.847[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
 Renaming Unnamed_8 (cell_index=8) to bend_s_bezier_CSsym_028523d7_500_H5_L20_NP99_TS0_TS1 would cause it to be named the same as:
  - bend_s_bezier_CSsym_028523d7_500_H5_L20_NP99_TS0_TS1 (cell_index=0), function_name=_bend_s_bezier, basename=bend_s_bezier[0m
 
@@ -2517,9 +2517,9 @@ cell info: {'pdk': 'FACTORIES_BEZIER_DEMO', 'component_type': 'bezier_sbend'}
 
 | Topic | Where |
 | --- | --- |
-| Factory overview | [Factories: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/overview/index.md>) |
-| Euler S-bend (clothoid alternative) | [Factories: Euler](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) |
-| All-angle routing with S-bends | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/all_angle/index.md>) |
+| Factory overview | [Factories: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
+| Euler S-bend (clothoid alternative) | [Factories: Euler](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
+| All-angle routing with S-bends | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/all_angle/index.md>) |
 
 # Circular Bends
 
@@ -2662,7 +2662,7 @@ S-bend: bend_s_euler_CSsym_028523d7_500_O5_R10_R150
 
 | Topic | Where |
 | --- | --- |
-| Optical routing with euler bends | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
+| Optical routing with euler bends | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
 
 # Factory Functions
 
@@ -2677,11 +2677,11 @@ A **factory** in kfactory is a function that returns another function — a *cel
 
 | Factory | Module | Page |
 | --- | --- | --- |
-| `straight_dbu_factory` | `kf.factories.straight` | [Straight](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/straight/index.md>) |
-| `bend_euler_factory` / `bend_s_euler_factory` | `kf.factories.euler` | [Euler](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) |
-| `bend_circular_factory` | `kf.factories.circular` | [Circular](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/circular/index.md>) |
-| `bend_s_bezier_factory` | `kf.factories.bezier` | [Bezier](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/bezier/index.md>) |
-| `taper_factory` | `kf.factories.taper` | [Taper](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/taper/index.md>) |
+| `straight_dbu_factory` | `kf.factories.straight` | [Straight](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/straight/index.md>) |
+| `bend_euler_factory` / `bend_s_euler_factory` | `kf.factories.euler` | [Euler](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
+| `bend_circular_factory` | `kf.factories.circular` | [Circular](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/circular/index.md>) |
+| `bend_s_bezier_factory` | `kf.factories.bezier` | [Bezier](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/bezier/index.md>) |
+| `taper_factory` | `kf.factories.taper` | [Taper](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/taper/index.md>) |
 
 ## Factories and routing
 
@@ -2730,10 +2730,10 @@ __all__ = ["pdk", "straight", "bend_euler", "taper"]
 
 | Topic | Where |
 | --- | --- |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/pcells/index.md>) |
-| Cross-sections | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
-| Routing integration | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| PDK bundling pattern | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
+| Cross-sections | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| Routing integration | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| PDK bundling pattern | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
 
 # Straight Waveguide
 
@@ -2819,7 +2819,7 @@ wg_clad
 
 | Topic | Where |
 | --- | --- |
-| Cross-sections (alternative spec) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
+| Cross-sections (alternative spec) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
 
 # Taper
 
@@ -2863,7 +2863,7 @@ taper: taper_CSsym_028523d7_500_CSsym_028523d7_2000_L20000
 
 | Topic | Where |
 | --- | --- |
-| Cross-section based taper specification | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
+| Cross-section based taper specification | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
 
 # Components &amp; Factories
 
@@ -3279,15 +3279,15 @@ arm.plot()
 
 | Topic | Where |
 | --- | --- |
-| Straight waveguide deep-dive | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/straight/index.md>) |
-| Euler (clothoid) bends | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) |
-| Circular (constant-radius) bends | [Components: Circular Bends](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/circular/index.md>) |
-| Width tapers | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/taper/index.md>) |
-| Bezier S-bends | [Components: Bezier](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/bezier/index.md>) |
-| Virtual (non-physical) cells | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/virtual/index.md>) |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/pcells/index.md>) |
-| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/overview/index.md>) |
-| KCell / DKCell / VKCell | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kcell/index.md>) |
+| Straight waveguide deep-dive | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/straight/index.md>) |
+| Euler (clothoid) bends | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
+| Circular (constant-radius) bends | [Components: Circular Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/circular/index.md>) |
+| Width tapers | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/taper/index.md>) |
+| Bezier S-bends | [Components: Bezier](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/bezier/index.md>) |
+| Virtual (non-physical) cells | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/virtual/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
+| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
+| KCell / DKCell / VKCell | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) |
 
 # PCells
 
@@ -3709,11 +3709,11 @@ settings: KCellSettings(width=0.5, length=10)
 
 | Topic | Where |
 | --- | --- |
-| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/overview/index.md>) |
-| Virtual (non-physical) cells | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/virtual/index.md>) |
-| KCell / DKCell / VKCell basics | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kcell/index.md>) |
-| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/dbu_vs_um/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
+| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
+| Virtual (non-physical) cells | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/virtual/index.md>) |
+| KCell / DKCell / VKCell basics | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) |
+| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
 
 # Virtual PCells
 
@@ -3938,7 +3938,7 @@ s1 bbox : (0,-0.25;10,0.25) µm
 
 ## Virtual factories
 
-kfactory ships built-in virtual factories for straight waveguides and euler bends. These are the building blocks for all-angle routing (see [All-Angle Routing](<https://gdsfactory.github.io/kfactory/3.3.0/routing/all_angle/index.md>)).
+kfactory ships built-in virtual factories for straight waveguides and euler bends. These are the building blocks for all-angle routing (see [All-Angle Routing](<https://gdsfactory.github.io/kfactory/3.4.0/routing/all_angle/index.md>)).
 
 | Factory | Source module | Parameter units |
 | --- | --- | --- |
@@ -4063,10 +4063,10 @@ With `insert_into_flat` all geometry lands directly in `c_flat` — no child cel
 
 | Topic | Where |
 | --- | --- |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/pcells/index.md>) |
-| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/overview/index.md>) |
-| All-angle routing into VKCell | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/all_angle/index.md>) |
-| KCell / DKCell / VKCell basics | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kcell/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
+| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
+| All-angle routing into VKCell | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/all_angle/index.md>) |
+| KCell / DKCell / VKCell basics | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) |
 
 # Cross-Sections
 
@@ -4085,7 +4085,7 @@ Cross-sections are stored in the `KCLayout` registry so any part of a design can
 
 ## Relation to `LayerEnclosure`
 
-Under the hood a cross-section wraps a `LayerEnclosure`. The enclosure defines all the `sections`; the cross-section adds the core `width` and routing hints. See [Layer Enclosures](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) for the enclosure details.
+Under the hood a cross-section wraps a `LayerEnclosure`. The enclosure defines all the `sections`; the cross-section adds the core `width` and routing hints. See [Layer Enclosures](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) for the enclosure details.
 
 ## Three cross-section classes
 
@@ -4370,7 +4370,7 @@ def my_bend(cross_section: str = "WG_500") -> kf.KCell:
     ...
 ```
 
-See [Routing Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) for full routing examples.
+See [Routing Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) for full routing examples.
 
 ## 9 · Asymmetric cross sections
 
@@ -4600,11 +4600,11 @@ Padding and the optional `top`, `bottom`, `left`, and `right` overrides use the 
 
 | Topic | Where |
 | --- | --- |
-| Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) |
-| Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/kcell_enclosure/index.md>) |
-| Straight waveguide (uses xs) | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/straight/index.md>) |
-| Width tapers (uses xs) | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/taper/index.md>) |
-| Routing with cross-sections | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
+| Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) |
+| Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/kcell_enclosure/index.md>) |
+| Straight waveguide (uses xs) | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/straight/index.md>) |
+| Width tapers (uses xs) | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/taper/index.md>) |
+| Routing with cross-sections | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
 
 # KCell Enclosure
 
@@ -4621,7 +4621,7 @@ This guarantees a continuous cladding across component joints — no gaps at the
 | `LayerEnclosure` | one component at a time | no — each component enclosed separately |
 | `KCellEnclosure` | entire assembled cell | yes — geometry merged first |
 
-The [Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) page introduces `LayerEnclosure` and shows a basic `KCellEnclosure` example. This page covers advanced usage: multiple enclosures, tiling parameters, and the directional Minkowski methods.
+The [Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) page introduces `LayerEnclosure` and shows a basic `KCellEnclosure` example. This page covers advanced usage: multiple enclosures, tiling parameters, and the directional Minkowski methods.
 
 ## Setup
 
@@ -4741,7 +4741,7 @@ bend_pair_multi(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 16:47:43.013[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 19:00:58.149[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_4 (cell_index=4) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -4788,7 +4788,7 @@ single_bend_npts(radius=10, width=0.5, n_pts=8).plot()
 ```
 
 ```
-[32m2026-10-15 16:47:43.416[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 19:00:58.564[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_7 (cell_index=7) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler[0m
@@ -4806,7 +4806,7 @@ single_bend_npts(radius=10, width=0.5, n_pts=64).plot()
 ```
 
 ```
-[32m2026-10-15 16:47:43.460[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 19:00:58.607[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_10 (cell_index=10) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
@@ -4896,7 +4896,7 @@ vertical_straight_clad_x(length=20.0, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 16:47:43.580[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
+[32m2026-10-15 19:00:58.717[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
 Renaming Unnamed_16 (cell_index=16) to straight_CSsym_028523d7_500_L20000 would cause it to be named the same as:
  - straight_CSsym_028523d7_500_L20000 (cell_index=13), function_name=_straight, basename=straight[0m
 ```
@@ -4953,7 +4953,7 @@ bend_pair_diamond(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 16:47:43.612[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 19:00:58.747[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_19 (cell_index=19) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
@@ -4997,10 +4997,10 @@ The WGCLAD corners are diamond-shaped (45° chamfers).
 
 | Topic | Where |
 | --- | --- |
-| Layer enclosures (single-layer) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) |
-| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
-| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/geometry/index.md>) |
-| Tile-based fill | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/fill/index.md>) |
+| Layer enclosures (single-layer) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) |
+| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/geometry/index.md>) |
+| Tile-based fill | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/fill/index.md>) |
 
 # Layer Enclosures
 
@@ -5096,7 +5096,7 @@ bend_um.plot()
 ```
 
 ```
-[32m2026-10-15 16:47:42.880[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 19:00:59.645[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_2 (cell_index=2) to bend_euler_CSsym_67c2bf20_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_67c2bf20_500_R10_A90_R150 (cell_index=0), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -5229,7 +5229,7 @@ c_two.plot()
 ```
 
 ```
-[32m2026-10-15 16:47:43.083[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-15 19:00:59.845[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_12 (cell_index=12) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=11), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -5284,10 +5284,10 @@ The typical PDK workflow is: 1. Define a `LayerEnclosure` for each waveguide typ
 
 | Topic | Where |
 | --- | --- |
-| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
-| Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/kcell_enclosure/index.md>) |
-| Straight waveguide (uses enclosure) | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/straight/index.md>) |
-| Width tapers (uses enclosure) | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/taper/index.md>) |
+| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/kcell_enclosure/index.md>) |
+| Straight waveguide (uses enclosure) | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/straight/index.md>) |
+| Width tapers (uses enclosure) | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/taper/index.md>) |
 
 # Routing
 
@@ -5578,15 +5578,15 @@ c_real.plot()
 
 | Topic | Where |
 | --- | --- |
-| Manhattan (90°/180° bend) routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
-| Virtual cells used as intermediate routing containers | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/virtual/index.md>) |
-| Euler bend cells and `virtual_bend_euler_factory` | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) |
-| Routing overview and choosing an approach | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Port construction and `DCplxTrans` | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
+| Manhattan (90°/180° bend) routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Virtual cells used as intermediate routing containers | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/virtual/index.md>) |
+| Euler bend cells and `virtual_bend_euler_factory` | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
+| Routing overview and choosing an approach | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Port construction and `DCplxTrans` | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
 
 # Bundle Routing — Tutorial
 
-`route_bundle` routes *N* start ports to *N* end ports, maintaining spacing and avoiding obstacles. This page covers parameters that are not shown in the [Routing Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) or [Optical Routing Deep Dive](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>).
+`route_bundle` routes *N* start ports to *N* end ports, maintaining spacing and avoiding obstacles. This page covers parameters that are not shown in the [Routing Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) or [Optical Routing Deep Dive](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>).
 
 | Topic | API |
 | --- | --- |
@@ -6038,24 +6038,24 @@ bundle_type_mismatch().plot()
 | `allow_layer_mismatch` | `bool` | `None` | Skip layer equality check |
 | `allow_type_mismatch` | `bool` | `None` | Skip port\_type equality check |
 | `route_width` | DBU / `list[DBU]` | `None` | Override wire width per route |
-| `starts` / `ends` | DBU / steps | `None` | Entry/exit stub lengths (see [optical.py](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>)) |
-| `waypoints` | `Trans` / `list[Point]` | `None` | Force routes through a point (see [optical.py](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>)) |
-| `path_length_matching_config` | `PathLengthConfig` | `None` | Equal-length routing (see [optical.py](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>)) |
+| `starts` / `ends` | DBU / steps | `None` | Entry/exit stub lengths (see [optical.py](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>)) |
+| `waypoints` | `Trans` / `list[Point]` | `None` | Force routes through a point (see [optical.py](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>)) |
+| `path_length_matching_config` | `PathLengthConfig` | `None` | Equal-length routing (see [optical.py](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>)) |
 
 ## See Also
 
 | Topic | Where |
 | --- | --- |
-| Single-route optical options: waypoints, loopbacks, stubs | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
-| Electrical bundle routing | [Routing: Electrical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/electrical/index.md>) |
-| Equal path-length loops inside a bundle | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.3.0/routing/path_length/index.md>) |
-| Manhattan backbone that bundle routing uses internally | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.3.0/routing/manhattan/index.md>) |
-| Routing overview and sub-module map | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Port sorting and orientation | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
+| Single-route optical options: waypoints, loopbacks, stubs | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Electrical bundle routing | [Routing: Electrical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/electrical/index.md>) |
+| Equal path-length loops inside a bundle | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.4.0/routing/path_length/index.md>) |
+| Manhattan backbone that bundle routing uses internally | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.4.0/routing/manhattan/index.md>) |
+| Routing overview and sub-module map | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Port sorting and orientation | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
 
 # Electrical Routing — Deep Dive
 
-This page covers electrical (metal-wire) routing in kfactory. For a quick intro see [Routing Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>).
+This page covers electrical (metal-wire) routing in kfactory. For a quick intro see [Routing Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>).
 
 Electrical routes are plain **Manhattan wires** — no bend cells, no radii. The router places a filled rectangular path along the backbone and supports all the same waypoint / stub / obstacle-avoidance features as optical routing.
 
@@ -6402,12 +6402,12 @@ All coordinates in `KCell`-based APIs are in **DBU** (1 nm = 1 DBU with default 
 
 | Topic | Where |
 | --- | --- |
-| Routing overview (optical + electrical entry point) | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Bundle routing details: sort, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/bundle/index.md>) |
-| Optical waveguide routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
-| Layer definitions and metal layers | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/layers/index.md>) |
-| Cross-sections for wire geometry | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
-| Port construction and connection | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
+| Routing overview (optical + electrical entry point) | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Bundle routing details: sort, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>) |
+| Optical waveguide routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Layer definitions and metal layers | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/layers/index.md>) |
+| Cross-sections for wire geometry | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| Port construction and connection | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
 
 # Manhattan Routing Primitives
 
@@ -6742,15 +6742,15 @@ Num instances:  4
 
 | Topic | Where |
 | --- | --- |
-| High-level optical routing (`route_bundle`, loopbacks) | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
-| Bundle routing built on top of manhattan | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/bundle/index.md>) |
-| Euler bend cells and effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) |
-| Port direction conventions (angle 0/1/2/3) | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
-| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/dbu_vs_um/index.md>) |
+| High-level optical routing (`route_bundle`, loopbacks) | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Bundle routing built on top of manhattan | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>) |
+| Euler bend cells and effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
+| Port direction conventions (angle 0/1/2/3) | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
+| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
 
 # Optical Routing — Deep Dive
 
-This page covers advanced optical routing features. For a quick intro see [Routing Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>).
+This page covers advanced optical routing features. For a quick intro see [Routing Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>).
 
 | Topic | API |
 | --- | --- |
@@ -7146,13 +7146,13 @@ All coordinates passed to `KCell`-based APIs are in **DBU** (1 nm = 1 DBU with d
 
 | Topic | Where |
 | --- | --- |
-| Routing overview (optical + electrical entry point) | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Bundle routing details: sort, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/bundle/index.md>) |
-| Equal path-length loops | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.3.0/routing/path_length/index.md>) |
-| Low-level backbone + Steps API | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.3.0/routing/manhattan/index.md>) |
-| All-angle (non-manhattan) routing | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/all_angle/index.md>) |
-| Euler bend effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) |
-| Port construction and connection | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
+| Routing overview (optical + electrical entry point) | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Bundle routing details: sort, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>) |
+| Equal path-length loops | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.4.0/routing/path_length/index.md>) |
+| Low-level backbone + Steps API | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.4.0/routing/manhattan/index.md>) |
+| All-angle (non-manhattan) routing | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/all_angle/index.md>) |
+| Euler bend effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
+| Port construction and connection | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
 
 # Routing Overview
 
@@ -7443,7 +7443,7 @@ ce
 | Route *N* optical waveguides | `kf.routing.optical.route_bundle(c, starts, ends, sep, straight_factory=..., bend90_cell=...)` |
 | Route *N* metal wires | `kf.routing.electrical.route_bundle(c, starts, ends, sep, place_layer=...)` |
 | Avoid obstacles | add `bboxes=[kdb.Box(...)]` to `route_bundle` |
-| U-turn loopback (with GCs) | see [Routing: Optical § 4](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
+| U-turn loopback (with GCs) | see [Routing: Optical § 4](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
 
 All coordinates in `KCell`-based APIs are in **DBU** (1 nm = 1 DBU with default `dbu = 0.001`). Use `kf.kcl.to_dbu(x_um)` to convert from µm. For a purely µm-native workflow use `DKCell` / `DPort` variants instead.
 
@@ -7451,14 +7451,14 @@ All coordinates in `KCell`-based APIs are in **DBU** (1 nm = 1 DBU with default 
 
 | Topic | Where |
 | --- | --- |
-| Optical route options: waypoints, path-length matching, loopbacks | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
-| Electrical (metal wire) routing | [Routing: Electrical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/electrical/index.md>) |
-| Manhattan backbone algorithm and Steps API | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.3.0/routing/manhattan/index.md>) |
-| All-angle (diagonal) routing | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/all_angle/index.md>) |
-| Bundle routing: sort, separation, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/bundle/index.md>) |
-| Equal path-length routing | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.3.0/routing/path_length/index.md>) |
-| Euler bend cells and effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) |
-| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/dbu_vs_um/index.md>) |
+| Optical route options: waypoints, path-length matching, loopbacks | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Electrical (metal wire) routing | [Routing: Electrical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/electrical/index.md>) |
+| Manhattan backbone algorithm and Steps API | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.4.0/routing/manhattan/index.md>) |
+| All-angle (diagonal) routing | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/all_angle/index.md>) |
+| Bundle routing: sort, separation, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>) |
+| Equal path-length routing | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.4.0/routing/path_length/index.md>) |
+| Euler bend cells and effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
+| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
 
 # Path-Length Matching
 
@@ -7954,11 +7954,11 @@ The segment must be long enough to contain the loop. A segment shorter than `4 �
 
 | Topic | Where |
 | --- | --- |
-| Bundle routing that `kf.PathLengthMatch` plugs into | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/bundle/index.md>) |
-| Optical route options including waypoints and stubs | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
-| Routing overview and sub-module map | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Euler bend effective radius (affects loop spacing) | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) |
-| DBU vs µm (route.length is in µm) | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/dbu_vs_um/index.md>) |
+| Bundle routing that `kf.PathLengthMatch` plugs into | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>) |
+| Optical route options including waypoints and stubs | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Routing overview and sub-module map | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Euler bend effective radius (affects loop spacing) | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
+| DBU vs µm (route.length is in µm) | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
 
 # PDK &amp; Schematics
 
@@ -7975,7 +7975,7 @@ A minimal PDK has four ingredients:
 | `LayerEnclosure` | Cladding/slab geometry rules around waveguide cores |
 | Factories | Functions that stamp cells into the layout (straight, bend, taper, …) |
 
-The section on [KCLayout](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kclayout/index.md>) covers the layout object in depth. The section on [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) covers cross-section registration. This page shows how to wire everything together into a single reusable module.
+The section on [KCLayout](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kclayout/index.md>) covers the layout object in depth. The section on [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) covers cross-section registration. This page shows how to wire everything together into a single reusable module.
 
 ## 1 · Layers
 
@@ -8015,7 +8015,7 @@ print(f"WG layer index: {pdk.find_layer(L.WG)}")
 ```
 
 ```
-PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7f356255c9e0> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7f356262e3f0> factories=<kfactory.layout.Factories object at 0x7f35624d3750> virtual_factories=<kfactory.layout.Factories object at 0x7f35624dd940> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7f35883d0040> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7f356256c6e0> info=Info() settings=KCellSettings(version='3.3.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7f35624d39d0> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
+PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7fe4f5d90a70> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fe544d8c5f0> factories=<kfactory.layout.Factories object at 0x7fe4f5d0b750> virtual_factories=<kfactory.layout.Factories object at 0x7fe4f5d19940> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fe51c1c0040> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fe4f5da8370> info=Info() settings=KCellSettings(version='3.4.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fe4f5d0b9d0> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
 dbu:  0.001 µm/DBU  (1 nm grid)
 WG layer index: WG
 ```
@@ -8384,12 +8384,12 @@ Top cells: ['straight_CSsym_STRIP_500_L20000', 'bend_euler_CSsym_STRIP_500_R10_A
 
 | Topic | Where |
 | --- | --- |
-| Layer stacks &amp; technology data | [PDK: Technology](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/technology/index.md>) |
-| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
-| Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/pcells/index.md>) |
-| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/overview/index.md>) |
-| Session caching (fast reload) | [Utilities: Session Cache](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/session_cache/index.md>) |
+| Layer stacks &amp; technology data | [PDK: Technology](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/technology/index.md>) |
+| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
+| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
+| Session caching (fast reload) | [Utilities: Session Cache](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/session_cache/index.md>) |
 
 # Technology &amp; Layer Stack
 
@@ -8621,7 +8621,7 @@ print(f"Stack: {list(STACK.layers.keys())} layers defined")
 ```
 
 ```
-PDK:   name='DEMO_TECH_PDK' layout=<klayout.dbcore.Layout object at 0x7f5114d44b00> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7f5114e124e0> factories=<kfactory.layout.Factories object at 0x7f5114cbb390> virtual_factories=<kfactory.layout.Factories object at 0x7f5114cc5f30> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7f513c0b8040> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7f5114d4c870> info=Info() settings=KCellSettings(version='3.3.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7f5114cbb750> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
+PDK:   name='DEMO_TECH_PDK' layout=<klayout.dbcore.Layout object at 0x7ff7ffe88b90> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7ff7fff5a5d0> factories=<kfactory.layout.Factories object at 0x7ff7ffe03390> virtual_factories=<kfactory.layout.Factories object at 0x7ff7ffe11f30> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7ff81e9ac040> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7ff7ffe98500> info=Info() settings=KCellSettings(version='3.4.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7ff7ffe03750> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
 Stack: ['wg', 'clad'] layers defined
 ```
 
@@ -8722,10 +8722,10 @@ Keep `STACK` as a module-level constant in your PDK module alongside `pdk` and `
 
 | Topic | Where |
 | --- | --- |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
-| Layer definitions | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/layers/index.md>) |
-| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
-| KCLayout (owns the cell DB) | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kclayout/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| Layer definitions | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/layers/index.md>) |
+| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| KCLayout (owns the cell DB) | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kclayout/index.md>) |
 
 # 45° Crossing with Virtual Cells
 
@@ -8787,7 +8787,7 @@ kf.kcl.get_icross_section(xs_wg1)
 ```
 
 ```
-<kfactory.cross_section.CrossSection at 0x7f6067c2bc50>
+<kfactory.cross_section.CrossSection at 0x7f14110abc50>
 ```
 
 ## The `cross` cell
@@ -9194,7 +9194,7 @@ c
 ```
 
 ```
-[32m2026-10-15 16:47:31.501[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
+[32m2026-10-15 19:00:47.852[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
 ```
 
 ```
@@ -9239,7 +9239,7 @@ Code(c.schematic.code_str())
 ```
 
 ```
-[32m2026-10-15 16:47:31.777[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-15 19:00:48.182[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -10266,10 +10266,10 @@ This example combined several advanced kfactory features:
 
 | Topic | Where |
 | --- | --- |
-| Schematic basics (placement, connect, LVS) | [Schematics: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/overview/index.md>) |
-| Netlist data model &amp; serialization | [Schematics: Netlist](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/netlist/index.md>) |
-| Virtual cells in detail | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/virtual/index.md>) |
-| Cross-sections &amp; enclosures | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
+| Schematic basics (placement, connect, LVS) | [Schematics: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/overview/index.md>) |
+| Netlist data model &amp; serialization | [Schematics: Netlist](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/netlist/index.md>) |
+| Virtual cells in detail | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/virtual/index.md>) |
+| Cross-sections &amp; enclosures | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
 
 # Netlist &amp; Schematic I/O
 
@@ -10280,7 +10280,7 @@ This page dives into the **Netlist data model** — the representation that kfac
 - Compare netlists and sort them for stable equality checks
 - Dump a netlist directly to JSON via `Netlist.to_json`
 
-For the schematic-first design workflow itself (placement, `connect`, LVS basics) see the [Schematic-Driven Design](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/overview/index.md>) page.
+For the schematic-first design workflow itself (placement, `connect`, LVS basics) see the [Schematic-Driven Design](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/overview/index.md>) page.
 
 ```
 import json
@@ -10686,9 +10686,9 @@ Nets:
 
 | Topic | Where |
 | --- | --- |
-| Schematic placement &amp; connections | [Schematics: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/overview/index.md>) |
-| 45° crossing with virtual cells | [Schematics: 45° Crossing](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/crossing45/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
+| Schematic placement &amp; connections | [Schematics: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/overview/index.md>) |
+| 45° crossing with virtual cells | [Schematics: 45° Crossing](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/crossing45/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
 
 # Schematic-Driven Design
 
@@ -10897,13 +10897,13 @@ for cell_name, net in netlist.items():
   net[3]: ['s2.o2']
   ports: []
 
-=== bend90_W500_R10000 ===
+=== straight_W500_L20000 ===
   instances: []
   net[0]: ['<o1>']
   net[1]: ['<o2>']
   ports: ['o1', 'o2']
 
-=== straight_W500_L20000 ===
+=== bend90_W500_R10000 ===
   instances: []
   net[0]: ['<o1>']
   net[1]: ['<o2>']
@@ -10976,7 +10976,7 @@ Code(generated)
 ```
 
 ```
-[32m2026-10-15 16:47:31.607[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-15 19:00:48.354[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -11043,10 +11043,10 @@ The generated code is a regular `@kcl.schematic_cell`-decorated function — you
 
 | Topic | Where |
 | --- | --- |
-| Netlist data model | [Schematics: Netlist](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/netlist/index.md>) |
-| 45° crossing with virtual cells | [Schematics: 45° Crossing](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/crossing45/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/pcells/index.md>) |
+| Netlist data model | [Schematics: Netlist](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/netlist/index.md>) |
+| 45° crossing with virtual cells | [Schematics: 45° Crossing](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/crossing45/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
 
 # Schematic Ports &amp; Pins
 
@@ -11057,7 +11057,7 @@ A schematic exposes connectivity to the outside world through two complementary 
 
 This tutorial covers both APIs end-to-end: how to expose ports at the schematic level, how to pin them together, how the schematic stores everything as Pydantic data, and how the YAML round-trip works.
 
-For schematic basics (instances, placements, connections) see [Schematic-Driven Design](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/overview/index.md>).
+For schematic basics (instances, placements, connections) see [Schematic-Driven Design](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/overview/index.md>).
 
 ```
 import kfactory as kf
@@ -11136,7 +11136,7 @@ print("cell ports:", [p.name for p in cell.ports])
 ```
 
 ```
-cell ports: ['right', 'left']
+cell ports: ['left', 'right']
 ```
 
 Inside the schematic, the entries are `PortRef` objects pointing at the underlying instance:
@@ -11183,7 +11183,7 @@ def fanout_port() -> kf.Schematic:
 
 > [!NOTE]
 >
-> `create_port` requires a registered cross-section. The example above assumes a `WG_500` cross-section was registered on the PDK; in this notebook we don't instantiate `fanout_port()` because the PDK has no cross-section table — it's here for API illustration only. See the [PDK page](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) for setting up cross-sections.
+> `create_port` requires a registered cross-section. The example above assumes a `WG_500` cross-section was registered on the PDK; in this notebook we don't instantiate `fanout_port()` because the PDK has no cross-section table — it's here for API illustration only. See the [PDK page](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) for setting up cross-sections.
 
 ## Part 2 — Pins
 
@@ -11446,7 +11446,7 @@ c
 ```
 
 ```
-[32m2026-10-15 16:47:34.342[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
+[32m2026-10-15 19:00:51.202[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
 ```
 
 ```
@@ -11505,9 +11505,9 @@ Thread count defaults to `kf.config.n_threads` (≈ logical CPU count). Override
 
 | Topic | Where |
 | --- | --- |
-| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/geometry/index.md>) |
-| Tile-based fill | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/fill/index.md>) |
-| Cell-level enclosures | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/kcell_enclosure/index.md>) |
+| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/geometry/index.md>) |
+| Tile-based fill | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/fill/index.md>) |
+| Cell-level enclosures | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/kcell_enclosure/index.md>) |
 
 # Fill Utilities
 
@@ -11721,10 +11721,10 @@ kf.fill.fill_tiled(
 
 | Topic | Where |
 | --- | --- |
-| DRC violation fixing | [Utilities: DRC Fix](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/drc_fix/index.md>) |
-| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/geometry/index.md>) |
-| Cell-level enclosures | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/kcell_enclosure/index.md>) |
-| Array / grid layout | [Utilities: Grid](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/grid/index.md>) |
+| DRC violation fixing | [Utilities: DRC Fix](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/drc_fix/index.md>) |
+| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/geometry/index.md>) |
+| Cell-level enclosures | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/kcell_enclosure/index.md>) |
+| Array / grid layout | [Utilities: Grid](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/grid/index.md>) |
 
 # Grid Layout
 
@@ -11941,6 +11941,10 @@ grid_dbu bbox: 78.5 µm × 10.0 µm
 
 ```
 
+```
+
+```
+
 ## 8 · Placing the Grid in a Larger Layout
 
 The returned `InstanceGroup` can be used to move the whole block at once. Here we pack two sub-grids and place them side-by-side in a top-level cell.
@@ -12001,10 +12005,10 @@ inst.transform(kf.kdb.DCplxTrans(1, 0, False, x_um, y_um))
 
 | Topic | Where |
 | --- | --- |
-| Component packing (free placement) | [Utilities: Packing](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/packing/index.md>) |
-| Components overview &amp; gallery | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/overview/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
-| Instance placement | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/instances/index.md>) |
+| Component packing (free placement) | [Utilities: Packing](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/packing/index.md>) |
+| Components overview &amp; gallery | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/overview/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| Instance placement | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/instances/index.md>) |
 
 # Packing Utilities
 
@@ -12197,10 +12201,10 @@ ig = kf.packing.pack_instances(
 
 | Topic | Where |
 | --- | --- |
-| Array / grid layout | [Utilities: Grid](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/grid/index.md>) |
-| Components overview &amp; gallery | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/overview/index.md>) |
-| Instance placement | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/instances/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
+| Array / grid layout | [Utilities: Grid](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/grid/index.md>) |
+| Components overview &amp; gallery | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/overview/index.md>) |
+| Instance placement | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/instances/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
 
 # Session Cache
 
@@ -12446,8 +12450,8 @@ shutil.rmtree(tmpdir, ignore_errors=True)
 
 | Topic | Where |
 | --- | --- |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
-| KCLayout (owns the cell DB) | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kclayout/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| KCLayout (owns the cell DB) | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kclayout/index.md>) |
 
 # Best Practices &amp; Common Pitfalls
 
@@ -12994,10 +12998,10 @@ canvas bbox (µm): (-1,-0.25;10,0.25)
 
 | Topic | Where |
 | --- | --- |
-| Common patterns (positive guidance) | [How-To: Patterns](<https://gdsfactory.github.io/kfactory/3.3.0/howto/patterns/index.md>) |
-| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.3.0/howto/faq/index.md>) |
-| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/dbu_vs_um/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
+| Common patterns (positive guidance) | [How-To: Patterns](<https://gdsfactory.github.io/kfactory/3.4.0/howto/patterns/index.md>) |
+| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.4.0/howto/faq/index.md>) |
+| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
 
 # Contributing to kfactory
 
@@ -13135,19 +13139,19 @@ pyproject.toml         # package metadata + dependencies
 ## Getting help
 
 - Open a [GitHub issue](<https://github.com/gdsfactory/kfactory/issues>) for bugs or feature requests.
-- For usage questions, the [How-To Guides](<https://gdsfactory.github.io/kfactory/3.3.0/howto/best_practices/index.md>) and [FAQ](<https://gdsfactory.github.io/kfactory/3.3.0/howto/faq/index.md>) are a good starting point.
+- For usage questions, the [How-To Guides](<https://gdsfactory.github.io/kfactory/3.4.0/howto/best_practices/index.md>) and [FAQ](<https://gdsfactory.github.io/kfactory/3.4.0/howto/faq/index.md>) are a good starting point.
 
 ## See Also
 
 | Topic | Where |
 | --- | --- |
-| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.3.0/howto/faq/index.md>) |
-| Installation instructions | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/installation/index.md>) |
-| Common pitfalls to avoid | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.3.0/howto/best_practices/index.md>) |
+| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.4.0/howto/faq/index.md>) |
+| Installation instructions | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/installation/index.md>) |
+| Common pitfalls to avoid | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.4.0/howto/best_practices/index.md>) |
 
 # Frequently Asked Questions
 
-Common questions and "gotcha" moments collected from kfactory users. For executable examples see [Best Practices](<https://gdsfactory.github.io/kfactory/3.3.0/howto/best_practices/index.md>).
+Common questions and "gotcha" moments collected from kfactory users. For executable examples see [Best Practices](<https://gdsfactory.github.io/kfactory/3.4.0/howto/best_practices/index.md>).
 
 ---
 
@@ -13446,10 +13450,10 @@ Do **not** call `difftest()` in executable notebook pages — it will always fai
 
 | Topic | Where |
 | --- | --- |
-| Common pitfalls with code examples | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.3.0/howto/best_practices/index.md>) |
-| Common design patterns | [How-To: Patterns](<https://gdsfactory.github.io/kfactory/3.3.0/howto/patterns/index.md>) |
-| Contributing to kfactory | [How-To: Contributing](<https://gdsfactory.github.io/kfactory/3.3.0/howto/contributing/index.md>) |
-| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/dbu_vs_um/index.md>) |
+| Common pitfalls with code examples | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.4.0/howto/best_practices/index.md>) |
+| Common design patterns | [How-To: Patterns](<https://gdsfactory.github.io/kfactory/3.4.0/howto/patterns/index.md>) |
+| Contributing to kfactory | [How-To: Contributing](<https://gdsfactory.github.io/kfactory/3.4.0/howto/contributing/index.md>) |
+| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
 
 # Common Design Patterns
 
@@ -13662,7 +13666,7 @@ print(f"factory bundle type: {type(factories)}")
 ```
 
 ```
-[32m2026-10-15 16:47:41.496[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
+[32m2026-10-15 19:00:57.997[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
 Renaming Unnamed_8 (cell_index=8) to straight_CSsym_028523d7_500_L10000 would cause it to be named the same as:
  - straight_CSsym_028523d7_500_L10000 (cell_index=1), function_name=_straight, basename=straight[0m
 
@@ -13848,10 +13852,10 @@ bbox (µm): (0,-0.25;160,60.25)
 
 | Topic | Where |
 | --- | --- |
-| Common pitfalls to avoid | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.3.0/howto/best_practices/index.md>) |
-| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.3.0/howto/faq/index.md>) |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/pcells/index.md>) |
-| Routing overview | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
+| Common pitfalls to avoid | [How-To: Best Practices](<https://gdsfactory.github.io/kfactory/3.4.0/howto/best_practices/index.md>) |
+| Frequently asked questions | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.4.0/howto/faq/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
+| Routing overview | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
 
 # Coming from gdsfactory
 
@@ -14046,11 +14050,11 @@ kf.kcl.get_icross_section(xs)  # registers & returns the cross-section
 xs_retrieved = kf.kcl.get_icross_section("xs_wg")
 ```
 
-See [Cross-Sections &amp; Enclosures](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) for a full walkthrough.
+See [Cross-Sections &amp; Enclosures](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) for a full walkthrough.
 
 Beyond cross-sections, kfactory provides a more generalised cladding system: enclosures are not limited to path-like backbones. LayerEnclosure can apply cladding/exclusion to arbitrary regions or entire layers, and KCellEnclosure can merge all sub-cell geometry before expanding — useful for complex multi-component assemblies.
 
-See [Layer Enclosures](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) and [KCell Enclosures](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/kcell_enclosure/index.md>) for details.
+See [Layer Enclosures](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) and [KCell Enclosures](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/kcell_enclosure/index.md>) for details.
 
 ## Routing
 
@@ -14077,9 +14081,9 @@ kfactory has comprehensive routing support across several sub-modules:
 >
 > **Effective bend radius**
 >
-> Euler bends extend slightly beyond their nominal radius. Always use `kf.routing.optical.get_radius(bend_cell.ports)` (not the nominal µm value) when passing `bend90_radius` to DBU-based routing functions; the result is in DBU. See [Euler Bends](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/euler/index.md>) for details.
+> Euler bends extend slightly beyond their nominal radius. Always use `kf.routing.optical.get_radius(bend_cell.ports)` (not the nominal µm value) when passing `bend90_radius` to DBU-based routing functions; the result is in DBU. See [Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) for details.
 
-See the [Routing](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) section for full examples.
+See the [Routing](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) section for full examples.
 
 # Config
 
@@ -14277,9 +14281,9 @@ Similar to the log level this may also be configured through dotenv or an env va
 
 #### New Features
 
-- **Routing constraints &amp; path-length matching** — the new `PathLengthMatch` constraint API enables length-matched bundle routing directly. See [Path-Length Matching](<https://gdsfactory.github.io/kfactory/3.3.0/routing/path_length/index.md>).
-- **Asymmetrical cross-sections** — `AsymmetricCrossSection` allows non-symmetric waveguide profiles. See [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>).
-- **Netlist extraction as a separate package** — netlist generation now lives in [kfnetlist](<https://github.com/gdsfactory/kfnetlist>), a standalone package that is pulled in as a dependency. See [Netlist &amp; I/O](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/netlist/index.md>).
+- **Routing constraints &amp; path-length matching** — the new `PathLengthMatch` constraint API enables length-matched bundle routing directly. See [Path-Length Matching](<https://gdsfactory.github.io/kfactory/3.4.0/routing/path_length/index.md>).
+- **Asymmetrical cross-sections** — `AsymmetricCrossSection` allows non-symmetric waveguide profiles. See [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>).
+- **Netlist extraction as a separate package** — netlist generation now lives in [kfnetlist](<https://github.com/gdsfactory/kfnetlist>), a standalone package that is pulled in as a dependency. See [Netlist &amp; I/O](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/netlist/index.md>).
 - **Factory metadata** — the new `FactoryMetadata` / `PortSpec` API captures structured metadata (including port specs) for factories.
 - **Connectivity checks module** — connectivity checking now lives in its own `kfactory.checks` module.
 
@@ -14289,8 +14293,8 @@ Similar to the log level this may also be configured through dotenv or an env va
 
 #### Improved Features
 
-- **Schematics** — tighter pin integration, virtual schematic connections, and the `@kcl.routing_strategy` registry for schematic-driven routing. See [Schematics Overview](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/overview/index.md>).
-- **Bundle routing** — expanded documentation and tutorial. See [Bundle Routing Tutorial](<https://gdsfactory.github.io/kfactory/3.3.0/routing/bundle/index.md>).
+- **Schematics** — tighter pin integration, virtual schematic connections, and the `@kcl.routing_strategy` registry for schematic-driven routing. See [Schematics Overview](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/overview/index.md>).
+- **Bundle routing** — expanded documentation and tutorial. See [Bundle Routing Tutorial](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>).
 
 #### Infrastructure
 
@@ -15279,6 +15283,16 @@ Fields:
 
 - `cross_sections` (`dict[str, SymmetricalCrossSection | AsymmetricalCrossSection]`)
 - `kcl` (`KCLayout`)
+
+### \_\_getitem\_\_
+
+```
+__getitem__(name: str) -> SymmetricalCrossSection | AsymmetricalCrossSection
+```
+
+Get a cross section by name.
+
+Auto names of symmetric cross sections from before the `sym_` prefix (e.g. referenced by ports in older GDS files) resolve as well.
 
 ## DAsymmetricCrossSection
 
@@ -16683,6 +16697,14 @@ Bases: `RuntimeError`
 Raised when writing a layout with multiple cells sharing the same name.
 
 GDS/OASIS formats require unique cell names. This error provides details about which names are duplicated and which cells are involved.
+
+## ExtrudeConfigConflictError
+
+Bases: `ValueError`
+
+Raised when a cross section already has a different extrude config.
+
+Extrude configs are keyed by the cross section's structural signature, so cross sections with the same geometry share one config.
 
 ## FactoriesLockedError
 
@@ -20658,7 +20680,7 @@ Transforms the instance or cell with the transformation given.
 ### write
 
 ```
-write(filename: str | Path, save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False) -> None
+write(filename: str | Path, save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False, clear_existing_meta: bool = True) -> None
 ```
 
 Write a KCell to a GDS.
@@ -20674,7 +20696,7 @@ Parameters:
 ### write\_bytes
 
 ```
-write_bytes(save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, deduplicate_cell_names: bool = False) -> bytes
+write_bytes(save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, deduplicate_cell_names: bool = False, clear_existing_meta: bool = True) -> bytes
 ```
 
 Write a KCell to a binary format as oasis.
@@ -20885,7 +20907,7 @@ Will create a temporary file of the gds and load it in KLayout via klive
 ### write
 
 ```
-write(filename: str | Path, save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False) -> None
+write(filename: str | Path, save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False, clear_existing_meta: bool = True) -> None
 ```
 
 Write a KCell to a GDS.
@@ -21957,7 +21979,7 @@ Attach a schematic function to a cell factory after registration.
 ### set\_extrude\_config
 
 ```
-set_extrude_config(cross_section: str | AnyCrossSectionInput, config: ExtrudeConfig) -> None
+set_extrude_config(cross_section: str | AnyCrossSectionInput, config: ExtrudeConfig, *, on_conflict: Literal['replace', 'raise'] = 'replace') -> None
 ```
 
 Set the default extrusion settings of a cross section.
@@ -21969,13 +21991,15 @@ Parameters:
 | Name | Type | Description | Default |
 | --- | --- | --- | --- |
 | `cross_section` | `str \| AnyCrossSectionInput` | name or instance of the cross section. | *required* |
-| `config` | `ExtrudeConfig` | extrusion settings. Replaces any existing config. | *required* |
+| `config` | `ExtrudeConfig` | extrusion settings. | *required* |
+| `on_conflict` | `Literal['replace', 'raise']` | what to do if the cross section already has a different config. `"replace"` overwrites it, `"raise"` raises an `ExtrudeConfigConflictError`. Setting an equal config is always allowed. | `'replace'` |
 
 Raises:
 
 | Type | Description |
 | --- | --- |
 | `ValueError` | if the config references strips the cross section doesn't have. |
+| `ExtrudeConfigConflictError` | if `on_conflict="raise"` and the cross section already has a different config. |
 
 ### set\_layers\_from\_infos
 
@@ -22157,7 +22181,7 @@ Create a new cell based ont he pdk's layout object.
 ### write
 
 ```
-write(filename: str | Path, options: SaveLayoutOptions | None = None, set_meta_data: bool = True, convert_external_cells: bool = False, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False) -> None
+write(filename: str | Path, options: SaveLayoutOptions | None = None, set_meta_data: bool = True, convert_external_cells: bool = False, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False, clear_existing_meta: bool = True) -> None
 ```
 
 Write a GDS file into the existing Layout.
@@ -22172,6 +22196,7 @@ Parameters:
 | `convert_external_cells` | `bool` | Whether to make KCells not in this KCLayout to | `False` |
 | `autoformat_from_file_extension` | `bool` | Set the format of the output file automatically from the file extension of `filename`. This is necessary for the options. If not set, this will default to `GDSII`. | `True` |
 | `deduplicate_cell_names` | `bool` | If True, auto-rename duplicate cells with `$1`, `$2`, … suffixes before writing. If False (the default), raise :class:`~kfactory.exceptions.DuplicateCellNameError` when duplicates are detected. | `False` |
+| `clear_existing_meta` | `bool` | Remove the layout's existing meta info before setting it, so the file only contains the current state of the KCLayout. Only used if `set_meta_data` is True. | `True` |
 
 ## get\_default\_kcl
 

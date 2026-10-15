@@ -255,7 +255,7 @@ angled
 
 | Topic | Where |
 | --- | --- |
-| Port system used by `connect()` | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
-| Routing between instance ports | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Assembling multi-cell components | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/overview/index.md>) |
-| Grid and tiling arrays of instances | [Utilities: Grid Layout](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/grid/index.md>) |
+| Port system used by `connect()` | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
+| Routing between instance ports | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Assembling multi-cell components | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/overview/index.md>) |
+| Grid and tiling arrays of instances | [Utilities: Grid Layout](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/grid/index.md>) |

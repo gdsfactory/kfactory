@@ -1,0 +1,88 @@
+# Layer display styles applied to every rendered notebook PNG.
+#
+# Format follows kfactory.technology.layer_map.LypModel:
+#   layers: list of {name, layer: [number, datatype], fill_color, frame_color,
+#                    dither_pattern, line_style, ...}
+#
+# Used by docs/scripts/build_docs_source.py — converted to a .lyp at build
+# time and applied via kfactory.utilities.as_png_data.
+#
+# Documented layer convention (kept consistent across all notebooks):
+#   ( 1, 0) WG               waveguide core
+#   ( 2, 0) WGCLAD / WGEX    cladding / exclusion (and WG_FIXED in drc_fix demo)
+#   ( 3, 0) SLAB             slab (rib process)
+#   ( 4, 0) NPP / CLAD       doping / additional cladding
+#   ( 5, 0) DEEPOX           deep oxide
+#   (10, 0) FLOORPLAN        die outline / keep-out
+#   (11, 0) METAL1
+#   (12, 0) METAL2
+#   (20, 0) METAL            generic metal
+#   (20, 1) METALEX          metal exclusion / keep-out
+#   (99, 0) FLOORPLAN        alternative die-outline convention
+layers:
+  - name: WG
+    layer: [1, 0]
+    fill_color: "#00C000"
+    frame_color: "#008000"
+    dither_pattern: dotted
+    line_style: solid
+  - name: WGCLAD
+    layer: [2, 0]
+    fill_color: "#000000"
+    frame_color: "#808080"
+    dither_pattern: hollow
+    line_style: dotted
+  - name: SLAB
+    layer: [3, 0]
+    fill_color: "#909090"
+    frame_color: "#606060"
+    dither_pattern: lightly left-hatched
+    line_style: solid
+  - name: NPP
+    layer: [4, 0]
+    fill_color: "#A0A0E0"
+    frame_color: "#5050B0"
+    dither_pattern: coarsely dotted
+    line_style: solid
+  - name: DEEPOX
+    layer: [5, 0]
+    fill_color: "#705030"
+    frame_color: "#503010"
+    dither_pattern: hollow
+    line_style: dashed
+  - name: FLOORPLAN
+    layer: [10, 0]
+    fill_color: "#4040FF"
+    frame_color: "#2020A0"
+    dither_pattern: left-hatched
+    line_style: solid
+  - name: METAL1
+    layer: [11, 0]
+    fill_color: "#FFA500"
+    frame_color: "#B07000"
+    dither_pattern: solid
+    line_style: solid
+  - name: METAL2
+    layer: [12, 0]
+    fill_color: "#FF6020"
+    frame_color: "#B04000"
+    dither_pattern: solid
+    line_style: solid
+  - name: METAL
+    layer: [20, 0]
+    fill_color: "#FFA500"
+    frame_color: "#B07000"
+    dither_pattern: solid
+    line_style: solid
+  - name: METALEX
+    layer: [20, 1]
+    fill_color: "#000000"
+    frame_color: "#B07000"
+    dither_pattern: hollow
+    line_style: dotted
+  - name: FLOORPLAN_ALT
+    layer: [99, 0]
+    fill_color: "#4040FF"
+    frame_color: "#2020A0"
+    dither_pattern: left-hatched
+    line_style: solid

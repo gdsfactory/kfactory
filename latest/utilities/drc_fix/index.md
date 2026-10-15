@@ -108,7 +108,7 @@ c
 ```
 
 ```
-[32m2026-10-15 16:47:34.342[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
+[32m2026-10-15 19:00:51.202[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
 ```
 
 ```
@@ -167,6 +167,6 @@ Thread count defaults to `kf.config.n_threads` (≈ logical CPU count). Override
 
 | Topic | Where |
 | --- | --- |
-| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/geometry/index.md>) |
-| Tile-based fill | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/fill/index.md>) |
-| Cell-level enclosures | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/kcell_enclosure/index.md>) |
+| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/geometry/index.md>) |
+| Tile-based fill | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/fill/index.md>) |
+| Cell-level enclosures | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/kcell_enclosure/index.md>) |

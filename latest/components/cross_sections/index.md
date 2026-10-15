@@ -15,7 +15,7 @@ Cross-sections are stored in the `KCLayout` registry so any part of a design can
 
 ## Relation to `LayerEnclosure`
 
-Under the hood a cross-section wraps a `LayerEnclosure`. The enclosure defines all the `sections`; the cross-section adds the core `width` and routing hints. See [Layer Enclosures](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) for the enclosure details.
+Under the hood a cross-section wraps a `LayerEnclosure`. The enclosure defines all the `sections`; the cross-section adds the core `width` and routing hints. See [Layer Enclosures](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) for the enclosure details.
 
 ## Three cross-section classes
 
@@ -300,7 +300,7 @@ def my_bend(cross_section: str = "WG_500") -> kf.KCell:
     ...
 ```
 
-See [Routing Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) for full routing examples.
+See [Routing Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) for full routing examples.
 
 ## 9 · Asymmetric cross sections
 
@@ -530,8 +530,8 @@ Padding and the optional `top`, `bottom`, `left`, and `right` overrides use the 
 
 | Topic | Where |
 | --- | --- |
-| Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/layer_enclosure/index.md>) |
-| Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/kcell_enclosure/index.md>) |
-| Straight waveguide (uses xs) | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/straight/index.md>) |
-| Width tapers (uses xs) | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/taper/index.md>) |
-| Routing with cross-sections | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
+| Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) |
+| Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/kcell_enclosure/index.md>) |
+| Straight waveguide (uses xs) | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/straight/index.md>) |
+| Width tapers (uses xs) | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/taper/index.md>) |
+| Routing with cross-sections | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |

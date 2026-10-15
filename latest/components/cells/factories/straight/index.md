@@ -82,4 +82,4 @@ wg_clad
 
 | Topic | Where |
 | --- | --- |
-| Cross-sections (alternative spec) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
+| Cross-sections (alternative spec) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |

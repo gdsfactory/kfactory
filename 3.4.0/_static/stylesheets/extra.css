@@ -1,0 +1,99 @@
+/* Full browser width by default; the header toggle (width-toggle.js) sets
+   data-kf-width="narrow" to restore the theme's 61rem cap. */
+html:not([data-kf-width="narrow"]) .md-grid {
+  max-width: initial;
+}
+
+.kf-width-toggle {
+  background: none;
+  border: 0;
+}
+/* Icon shows the action: collapse while full width, expand while narrow. */
+html[data-kf-width="narrow"] .kf-width-toggle__collapse,
+html:not([data-kf-width="narrow"]) .kf-width-toggle__expand {
+  display: none;
+}
+/* Below this width the sidebars collapse and the cap barely matters. */
+@media screen and (max-width: 76.234375em) {
+  .kf-width-toggle {
+    display: none;
+  }
+}
+
+/* Sidebar entries stay on one line; the sidebar scrolls sideways instead.
+   Links grow with their text so hover/active highlights cover it. Only
+   where the sidebars sit beside the content (the left nav is a drawer
+   below 76.25em, the right TOC a popup below 60em). */
+@media screen and (min-width: 60em) {
+  .md-sidebar--secondary .md-sidebar__scrollwrap {
+    overflow-x: auto;
+  }
+  .md-sidebar--secondary .md-nav__link .md-ellipsis {
+    white-space: nowrap;
+  }
+  .md-sidebar--secondary .md-nav__item > .md-nav__link {
+    width: max-content;
+    min-width: calc(100% - 0.4rem);
+  }
+}
+@media screen and (min-width: 76.25em) {
+  .md-sidebar--primary .md-sidebar__scrollwrap {
+    overflow-x: auto;
+  }
+  .md-sidebar--primary .md-nav__link .md-ellipsis {
+    white-space: nowrap;
+  }
+  .md-sidebar--primary .md-nav__item > .md-nav__link {
+    width: max-content;
+    min-width: calc(100% - 0.4rem);
+  }
+  /* Wider TOC in full-width mode only; narrow keeps the theme's 12.1rem. */
+  html:not([data-kf-width="narrow"]) .md-sidebar--secondary {
+    width: 16rem;
+  }
+}
+
+/* Compact sidebars on API reference pages (marker set in main.html); the
+   theme's link padding makes the long module tree hard to scan. */
+body:has([data-kf-api]) .md-sidebar .md-nav__link:not(.md-nav__container) {
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+}
+body:has([data-kf-api]) .md-sidebar .md-nav__list {
+  gap: 0.05rem;
+}
+/* Nested TOC lists (methods under a class) get an extra .2rem on top. */
+body:has([data-kf-api]) .md-nav--secondary .md-nav {
+  margin-top: 0.05rem;
+}
+/* The expand arrow is taller than a text row; without its padding,
+   expandable rows match the height of the other rows. */
+body:has([data-kf-api]) .md-nav--primary .md-nav__container > label.md-nav__link {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Sidebar entries with a symbol badge switch to the code font at .95em,
+   which reads larger than the text-font entries. Match inline code size.
+   TOC entries wrap the name in an extra .md-typeset span sized .7rem. */
+.md-sidebar .md-ellipsis:has(.doc-symbol) {
+  font-size: 0.85em;
+}
+.md-sidebar .md-ellipsis:has(.doc-symbol) > .md-typeset {
+  font-size: inherit;
+}
+
+/* Zensical abbreviates mkdocstrings symbol badges in the sidebars to a
+   single letter (c/f/m/a). Use the same labels as the page body. */
+.md-sidebar code.doc-symbol-attribute::after {
+  content: "attr";
+}
+.md-sidebar code.doc-symbol-class::after {
+  content: "class";
+}
+.md-sidebar code.doc-symbol-function::after {
+  content: "func";
+}
+.md-sidebar code.doc-symbol-method::after {
+  content: "meth";
+}

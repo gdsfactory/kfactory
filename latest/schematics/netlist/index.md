@@ -7,7 +7,7 @@ This page dives into the **Netlist data model** — the representation that kfac
 - Compare netlists and sort them for stable equality checks
 - Dump a netlist directly to JSON via `Netlist.to_json`
 
-For the schematic-first design workflow itself (placement, `connect`, LVS basics) see the [Schematic-Driven Design](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/overview/index.md>) page.
+For the schematic-first design workflow itself (placement, `connect`, LVS basics) see the [Schematic-Driven Design](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/overview/index.md>) page.
 
 ```
 import json
@@ -413,6 +413,6 @@ Nets:
 
 | Topic | Where |
 | --- | --- |
-| Schematic placement &amp; connections | [Schematics: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/overview/index.md>) |
-| 45° crossing with virtual cells | [Schematics: 45° Crossing](<https://gdsfactory.github.io/kfactory/3.3.0/schematics/crossing45/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/index.md>) |
+| Schematic placement &amp; connections | [Schematics: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/overview/index.md>) |
+| 45° crossing with virtual cells | [Schematics: 45° Crossing](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/crossing45/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |

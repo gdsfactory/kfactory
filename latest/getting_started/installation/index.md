@@ -43,6 +43,6 @@ If no errors appear, kfactory is installed correctly.
 
 ## Next steps
 
-- [5-Minute Quickstart](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/quickstart/index.md>) — build and connect your first components
-- [KLive Setup](<https://gdsfactory.github.io/kfactory/3.3.0/getting_started/klive_setup/index.md>) — stream layouts live into KLayout
-- [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kcell/index.md>) — deep dive into the central class
+- [5-Minute Quickstart](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/quickstart/index.md>) — build and connect your first components
+- [KLive Setup](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/klive_setup/index.md>) — stream layouts live into KLayout
+- [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) — deep dive into the central class

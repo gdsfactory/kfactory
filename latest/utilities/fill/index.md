@@ -210,7 +210,7 @@ kf.fill.fill_tiled(
 
 | Topic | Where |
 | --- | --- |
-| DRC violation fixing | [Utilities: DRC Fix](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/drc_fix/index.md>) |
-| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/geometry/index.md>) |
-| Cell-level enclosures | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.3.0/enclosures/kcell_enclosure/index.md>) |
-| Array / grid layout | [Utilities: Grid](<https://gdsfactory.github.io/kfactory/3.3.0/utilities/grid/index.md>) |
+| DRC violation fixing | [Utilities: DRC Fix](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/drc_fix/index.md>) |
+| Boolean / region operations | [Core Concepts: Geometry](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/geometry/index.md>) |
+| Cell-level enclosures | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/kcell_enclosure/index.md>) |
+| Array / grid layout | [Utilities: Grid](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/grid/index.md>) |

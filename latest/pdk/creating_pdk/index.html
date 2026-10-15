@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/">
+        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/">
       
       
         <link rel="describedby" href="../../llms.txt">
@@ -85,15 +85,15 @@
   <meta property="og:type" content="website" />
 <meta property="og:title" content="Creating a PDK - KFactory" />
 <meta property="og:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.3.0/assets/images/social/pdk/creating_pdk.png" />
+<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/pdk/creating_pdk.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.3.0/pdk/creating_pdk/" />
+<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/" />
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:title" content="Creating a PDK - KFactory" />
 <meta property="twitter:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.3.0/assets/images/social/pdk/creating_pdk.png" />
+<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/pdk/creating_pdk.png" />
 </head>
   
   
@@ -6154,7 +6154,7 @@ entry in <code>kf.kcls</code>.</p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dbu:  </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">dbu</span><span class="si">}</span><span class="s2"> µm/DBU  (1 nm grid)"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"WG layer index: </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>PDK:  name='MY_PDK' layout=&lt;klayout.dbcore.Layout object at 0x7f356255c9e0&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7f356262e3f0&gt; factories=&lt;kfactory.layout.Factories object at 0x7f35624d3750&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7f35624dd940&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7f35883d0040&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7f356256c6e0&gt; info=Info() settings=KCellSettings(version='3.3.0', klayout_version='0.30.12', meta_format='v3') decorators=&lt;kfactory.decorators.Decorators object at 0x7f35624d39d0&gt; default_cell_output_type=&lt;class 'kfactory.kcell.KCell'&gt; default_vcell_output_type=&lt;class 'kfactory.kcell.VKCell'&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum 'LAYER'&gt;
+<div class="highlight"><pre><span></span><code>PDK:  name='MY_PDK' layout=&lt;klayout.dbcore.Layout object at 0x7fe4f5d90a70&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7fe544d8c5f0&gt; factories=&lt;kfactory.layout.Factories object at 0x7fe4f5d0b750&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7fe4f5d19940&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7fe51c1c0040&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7fe4f5da8370&gt; info=Info() settings=KCellSettings(version='3.4.0', klayout_version='0.30.12', meta_format='v3') decorators=&lt;kfactory.decorators.Decorators object at 0x7fe4f5d0b9d0&gt; default_cell_output_type=&lt;class 'kfactory.kcell.KCell'&gt; default_vcell_output_type=&lt;class 'kfactory.kcell.VKCell'&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum 'LAYER'&gt;
 dbu:  0.001 µm/DBU  (1 nm grid)
 WG layer index: WG
 </code></pre></div>

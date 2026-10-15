@@ -221,7 +221,7 @@ s1 bbox : (0,-0.25;10,0.25) µm
 
 ## Virtual factories
 
-kfactory ships built-in virtual factories for straight waveguides and euler bends. These are the building blocks for all-angle routing (see [All-Angle Routing](<https://gdsfactory.github.io/kfactory/3.3.0/routing/all_angle/index.md>)).
+kfactory ships built-in virtual factories for straight waveguides and euler bends. These are the building blocks for all-angle routing (see [All-Angle Routing](<https://gdsfactory.github.io/kfactory/3.4.0/routing/all_angle/index.md>)).
 
 | Factory | Source module | Parameter units |
 | --- | --- | --- |
@@ -346,7 +346,7 @@ With `insert_into_flat` all geometry lands directly in `c_flat` — no child cel
 
 | Topic | Where |
 | --- | --- |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/pcells/index.md>) |
-| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.3.0/components/cells/factories/overview/index.md>) |
-| All-angle routing into VKCell | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/all_angle/index.md>) |
-| KCell / DKCell / VKCell basics | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/kcell/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
+| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
+| All-angle routing into VKCell | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/all_angle/index.md>) |
+| KCell / DKCell / VKCell basics | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) |

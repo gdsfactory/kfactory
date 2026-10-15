@@ -1,6 +1,6 @@
 # Electrical Routing — Deep Dive
 
-This page covers electrical (metal-wire) routing in kfactory. For a quick intro see [Routing Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>).
+This page covers electrical (metal-wire) routing in kfactory. For a quick intro see [Routing Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>).
 
 Electrical routes are plain **Manhattan wires** — no bend cells, no radii. The router places a filled rectangular path along the backbone and supports all the same waypoint / stub / obstacle-avoidance features as optical routing.
 
@@ -347,9 +347,9 @@ All coordinates in `KCell`-based APIs are in **DBU** (1 nm = 1 DBU with default 
 
 | Topic | Where |
 | --- | --- |
-| Routing overview (optical + electrical entry point) | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.3.0/routing/overview/index.md>) |
-| Bundle routing details: sort, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.3.0/routing/bundle/index.md>) |
-| Optical waveguide routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.3.0/routing/optical/index.md>) |
-| Layer definitions and metal layers | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/layers/index.md>) |
-| Cross-sections for wire geometry | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.3.0/components/cross_sections/index.md>) |
-| Port construction and connection | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.3.0/concepts/ports/index.md>) |
+| Routing overview (optical + electrical entry point) | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
+| Bundle routing details: sort, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>) |
+| Optical waveguide routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Layer definitions and metal layers | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/layers/index.md>) |
+| Cross-sections for wire geometry | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| Port construction and connection | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
