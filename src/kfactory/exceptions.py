@@ -15,6 +15,7 @@ __all__ = [
     "CrossSectionNamingConflictError",
     "CrossSectionSymmetryMismatchError",
     "DuplicateCellNameError",
+    "ExtrudeConfigConflictError",
     "FactoriesLockedError",
     "InvalidLayerError",
     "LockedError",
@@ -53,6 +54,14 @@ class CrossSectionNamingConflictError(ValueError):
     structural signature. A given signature may have at most one *named* canonical
     entry; attempting to register a second, differently-named entry for the same
     signature (or to reuse a name for a different signature) raises this error.
+    """
+
+
+class ExtrudeConfigConflictError(ValueError):
+    """Raised when a cross section already has a different extrude config.
+
+    Extrude configs are keyed by the cross section's structural signature, so
+    cross sections with the same geometry share one config.
     """
 
 

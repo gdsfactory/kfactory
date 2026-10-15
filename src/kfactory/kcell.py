@@ -376,6 +376,7 @@ class ProtoKCell[T: (int, float), TB: BaseKCell](GeometricObject[T], ABC):
         set_meta_data: bool = ...,
         autoformat_from_file_extension: bool = ...,
         deduplicate_cell_names: bool = ...,
+        clear_existing_meta: bool = ...,
     ) -> None: ...
 
     @property
@@ -1432,6 +1433,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         set_meta_data: bool = True,
         autoformat_from_file_extension: bool = True,
         deduplicate_cell_names: bool = False,
+        clear_existing_meta: bool = True,
     ) -> None:
         """Write a KCell to a GDS.
 
@@ -1446,6 +1448,8 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         if save_options is None:
             save_options = save_layout_options()
         self.insert_vinsts()
+        if set_meta_data and clear_existing_meta:
+            self.kcl.layout.clear_meta_info()
         match set_meta_data, convert_external_cells:
             case True, True:
                 self.kcl.set_meta_data()
@@ -1490,6 +1494,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
         deduplicate_cell_names: bool = False,
+        clear_existing_meta: bool = True,
     ) -> bytes:
         """Write a KCell to a binary format as oasis.
 
@@ -1504,6 +1509,8 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         if save_options is None:
             save_options = save_layout_options()
         self.insert_vinsts()
+        if set_meta_data and clear_existing_meta:
+            self.kcl.layout.clear_meta_info()
         match set_meta_data, convert_external_cells:
             case True, True:
                 self.kcl.set_meta_data()
@@ -3628,6 +3635,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         set_meta_data: bool = True,
         autoformat_from_file_extension: bool = True,
         deduplicate_cell_names: bool = False,
+        clear_existing_meta: bool = True,
     ) -> None:
         """Write a KCell to a GDS.
 
@@ -3648,6 +3656,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             save_options=save_options,
             convert_external_cells=convert_external_cells,
             set_meta_data=set_meta_data,
+            clear_existing_meta=clear_existing_meta,
             autoformat_from_file_extension=autoformat_from_file_extension,
             deduplicate_cell_names=deduplicate_cell_names,
         )

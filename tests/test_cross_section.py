@@ -1331,3 +1331,30 @@ def test_symmetric_wrapper_radius_from_um(kcl: kf.KCLayout) -> None:
     )
     assert unset.base.radius is None
     assert unset.base.radius_min is None
+
+
+def test_symmetric_legacy_auto_name_is_unnamed(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    enc = kcl.get_enclosure(sym_enc("wgenc"))
+    legacy = kf.SymmetricalCrossSection(
+        width=1000, enclosure=enc, name=f"{enc.name}_1000"
+    )
+    assert not legacy.is_named
+    assert legacy.name == legacy.auto_name()
+    kcl.get_symmetrical_cross_section(legacy)
+    named = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc, name="wg")
+    )
+    assert named.name == "wg"
+
+
+def test_symmetric_legacy_auto_name_lookup(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    enc = kcl.get_enclosure(sym_enc("wgenc"))
+    xs = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=enc)
+    )
+    assert kcl.get_base_cross_section(f"{enc.name}_1000") is xs
+    assert kcl.get_symmetrical_cross_section(f"{enc.name}_1000") is xs

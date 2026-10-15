@@ -116,9 +116,12 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
     def _set_name(cls, data: Any) -> Any:
         if not isinstance(data, dict):
             return data
-        data["name"] = data.get("name") or _sym_auto_name(
-            data["enclosure"], data["width"]
-        )
+        name = data.get("name")
+        # Names from before the `sym_` prefix (e.g. read from older GDS files)
+        # are auto names as well, not explicit ones.
+        if not name or name == f"{data['enclosure'].name}_{data['width']}":
+            name = _sym_auto_name(data["enclosure"], data["width"])
+        data["name"] = name
         return data
 
     @model_validator(mode="after")
@@ -1858,6 +1861,13 @@ class CrossSectionModel(BaseModel):
     def __getitem__(
         self, name: str
     ) -> SymmetricalCrossSection | AsymmetricalCrossSection:
+        """Get a cross section by name.
+
+        Auto names of symmetric cross sections from before the `sym_` prefix
+        (e.g. referenced by ports in older GDS files) resolve as well.
+        """
+        if name not in self.cross_sections and f"sym_{name}" in self.cross_sections:
+            return self.cross_sections[f"sym_{name}"]
         return self.cross_sections[name]
 
     def get_asymmetrical_cross_section(
@@ -1865,7 +1875,7 @@ class CrossSectionModel(BaseModel):
         cross_section: str | AsymmetricalCrossSection | DAsymmetricalCrossSection,
     ) -> AsymmetricalCrossSection:
         if isinstance(cross_section, str):
-            xs = self.cross_sections[cross_section]
+            xs = self[cross_section]
             if not isinstance(xs, AsymmetricalCrossSection):
                 raise TypeError(
                     f"Cross section {cross_section!r} is symmetric; use "
@@ -1925,7 +1935,7 @@ class CrossSectionModel(BaseModel):
         | DCrossSection,
     ) -> SymmetricalCrossSection:
         if isinstance(cross_section, str):
-            xs = self.cross_sections[cross_section]
+            xs = self[cross_section]
             if not isinstance(xs, SymmetricalCrossSection):
                 raise TypeError(
                     f"Cross section {cross_section!r} is asymmetric; use "

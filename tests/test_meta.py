@@ -1,6 +1,9 @@
 """Tests for read and write of metadata."""
 
+from collections.abc import Callable
 from tempfile import NamedTemporaryFile
+
+import pytest
 
 import kfactory as kf
 from tests.conftest import Layers
@@ -195,3 +198,35 @@ def test_info_dump(kcl: kf.KCLayout) -> None:
         wg_read.get_meta_data()
         assert wg_read.info == c.info
         assert wg_read.info["d"] == {"a": 1, "b": 2}
+
+
+def _layout_meta_names(data: bytes) -> list[str]:
+    layout = kf.kdb.Layout()
+    layout.read_bytes(data, kf.kdb.LoadLayoutOptions())
+    return [m.name for m in layout.each_meta_info()]
+
+
+@pytest.mark.parametrize("clear_existing_meta", [True, False])
+def test_write_clear_existing_meta(
+    kcl: kf.KCLayout,
+    sym_enc: Callable[..., kf.LayerEnclosure],
+    clear_existing_meta: bool,
+) -> None:
+    """Layout meta info left from before isn't written by default."""
+    xs = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=sym_enc("wgenc"), name="wg")
+    )
+    c = kcl.kcell("meta_cell")
+    c.info["kept"] = 2
+    stale = f"kfactory:cross_section:{xs.name}"
+    assert stale in _layout_meta_names(kcl.write_bytes())
+    # e.g. left over from reading a file
+    kcl.layout.add_meta_info(kf.kdb.LayoutMetaInfo("foreign", 3, None, True))
+    kcl.cross_sections.cross_sections.clear()
+    kcl.layer_enclosures.root.clear()
+
+    names = _layout_meta_names(kcl.write_bytes(clear_existing_meta=clear_existing_meta))
+
+    assert (stale in names) is not clear_existing_meta
+    assert ("foreign" in names) is not clear_existing_meta
+    assert c.kdb_cell.meta_info_value("kfactory:info") == {"kept": 2}
