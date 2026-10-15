@@ -13,6 +13,12 @@
         <link rel="canonical" href="https://gdsfactory.github.io/kfactory/dev/pdk/creating_pdk/">
       
       
+        <link rel="describedby" href="../../llms.txt">
+        
+          <link rel="alternate" type="text/markdown" href="./index.md">
+        
+      
+      
         <link rel="prev" href="../../routing/path_length/">
       
       
@@ -23,7 +29,7 @@
       
       
       <link rel="icon" href="../../_static/logo.svg">
-      <meta name="generator" content="zensical-0.0.69">
+      <meta name="generator" content="zensical-0.0.70">
     
     
       
@@ -34,12 +40,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.e15858d4.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.e442bf79.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.b27955a4.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.b60ce83d.min.css">
       
       
 
@@ -6148,7 +6154,7 @@ entry in <code>kf.kcls</code>.</p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dbu:  </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">dbu</span><span class="si">}</span><span class="s2"> µm/DBU  (1 nm grid)"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"WG layer index: </span><span class="si">{</span><span class="n">pdk</span><span class="o">.</span><span class="n">find_layer</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>PDK:  name='MY_PDK' layout=&lt;klayout.dbcore.Layout object at 0x7feab1d48b00&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7feb00c906e0&gt; factories=&lt;kfactory.layout.Factories object at 0x7feab1ebbb10&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7feab1cfcb00&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7fead816c7d0&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7feab1d51400&gt; info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=&lt;kfactory.decorators.Decorators object at 0x7feab1ebbd90&gt; default_cell_output_type=&lt;class 'kfactory.kcell.KCell'&gt; default_vcell_output_type=&lt;class 'kfactory.kcell.VKCell'&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum 'LAYER'&gt;
+<div class="highlight"><pre><span></span><code>PDK:  name='MY_PDK' layout=&lt;klayout.dbcore.Layout object at 0x7f1b15c11400&gt; layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=&lt;klayout.dbcore.Library object at 0x7f1b15cff980&gt; factories=&lt;kfactory.layout.Factories object at 0x7f1b15da79d0&gt; virtual_factories=&lt;kfactory.layout.Factories object at 0x7f1b15de8c30&gt; generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=&lt;function rename_clockwise_multi at 0x7f1b3c08fc10&gt; thread_lock=&lt;unlocked _thread.RLock object owner=0 count=0 at 0x7f1b15c1fca0&gt; info=Info() settings=KCellSettings(version='3.2.2', klayout_version='0.30.12', meta_format='v3') decorators=&lt;kfactory.decorators.Decorators object at 0x7f1b15da7c50&gt; default_cell_output_type=&lt;class 'kfactory.kcell.KCell'&gt; default_vcell_output_type=&lt;class 'kfactory.kcell.VKCell'&gt; connectivity=[] routing_strategies={} technology_file=None layers=&lt;aenum 'LAYER'&gt;
 dbu:  0.001 µm/DBU  (1 nm grid)
 WG layer index: WG
 </code></pre></div>
@@ -6596,10 +6602,10 @@ Top cells: ['straight_CSSTRIP_500_L20000', 'bend_euler_CSSTRIP_500_R10_A90_R150'
         
           
         
-      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky","navigation.instant","navigation.instant.progress","navigation.path","navigation.indexes","content.action.copy"],"redirect":"../../redirect.json","search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.tabs","navigation.tabs.sticky","navigation.instant","navigation.instant.progress","navigation.path","navigation.indexes","content.action.copy"],"redirect":"../../redirect.json","search":"../../assets/javascripts/workers/search.c47bb847.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"latest","provider":"mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.8b1c90bd.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a2388154.min.js"></script>
       
         <script src="../../_static/javascripts/width-toggle.js"></script>
       

@@ -36,6 +36,44 @@ Config:
 
 - `arbitrary_types_allowed`: `True`
 
+## ExtrudeConfig
+
+Bases: `BaseModel`
+
+Default extrusion settings of a cross section.
+
+Registered per cross section with `KCLayout.set_extrude_config`. Per-strip settings are keyed by the strip's index in the cross section's `get_sections()` (main strip first).
+
+Attributes:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `ports` | `dict[int, tuple[str \| None, str \| None, str]] \| None` | `(start_name, end_name, port_type)` per strip. `None` leaves the port naming to the extruder's convention, `{}` creates no ports. |
+| `insets` | `dict[int, tuple[dbu, dbu]]` | `(start, end)` distances by which a strip is shortened at the path ends \[dbu\]. Negative values extend the strip along the end tangents. |
+| `simplify` | `dbu \| dict[int, dbu] \| None` | Polygon simplification tolerance for all strips, or per strip \[dbu\]. |
+| `hidden` | `frozenset[int]` | Strips that are not drawn. |
+| `add_bbox` | `bool` | Whether to draw the cross section's bbox sections. |
+
+Fields:
+
+- `ports` (`dict[int, tuple[str | None, str | None, str]] | None`)
+- `insets` (`dict[int, tuple[dbu, dbu]]`)
+- `simplify` (`dbu | dict[int, dbu] | None`)
+- `hidden` (`frozenset[int]`)
+- `add_bbox` (`bool`)
+
+Validators:
+
+- `_check_values`
+
+### section\_indices
+
+```
+section_indices() -> set[int]
+```
+
+Strip indices referenced by this config.
+
 ## Factories
 
 Bases: `Mapping[str, F]`
@@ -72,6 +110,7 @@ Attributes:
 | --- | --- | --- |
 | `editable` |  | Whether the layout should be opened in editable mode (default: True) |
 | `rename_function` | `Callable[..., None]` | function that takes an iterable object of ports and renames them |
+| `extrude_configs` | `dict[str, ExtrudeConfig]` | Default extrusion settings per cross section, keyed by the cross section's `auto_name()`. Use `set_extrude_config` and `get_extrude_config` to access them. |
 
 Fields:
 
@@ -79,6 +118,7 @@ Fields:
 - `layout` (`Layout`)
 - `layer_enclosures` (`LayerEnclosureModel`)
 - `cross_sections` (`CrossSectionModel`)
+- `extrude_configs` (`dict[str, ExtrudeConfig]`)
 - `enclosure` (`KCellEnclosure`)
 - `library` (`Library`)
 - `factories` (`Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]]`)
@@ -585,6 +625,14 @@ get_enclosure(enclosure: str | LayerEnclosure | LayerEnclosureSpec) -> LayerEncl
 
 Gets a layer enclosure by name specification or the layerenclosure itself.
 
+### get\_extrude\_config
+
+```
+get_extrude_config(cross_section: str | AnyCrossSectionInput) -> ExtrudeConfig | None
+```
+
+Get the default extrusion settings of a cross section, if any.
+
 ### get\_iasymmetric\_cross\_section
 
 ```
@@ -764,6 +812,29 @@ schematic_for(target: str | WrappedKCellFunc[Any, Any], provider: Callable[..., 
 ```
 
 Attach a schematic function to a cell factory after registration.
+
+### set\_extrude\_config
+
+```
+set_extrude_config(cross_section: str | AnyCrossSectionInput, config: ExtrudeConfig) -> None
+```
+
+Set the default extrusion settings of a cross section.
+
+The cross section is registered if necessary. The config is stored under the cross section's `auto_name()`, so it applies to the cross section whether it is referenced by its name or by its structure.
+
+Parameters:
+
+| Name | Type | Description | Default |
+| --- | --- | --- | --- |
+| `cross_section` | `str \| AnyCrossSectionInput` | name or instance of the cross section. | *required* |
+| `config` | `ExtrudeConfig` | extrusion settings. Replaces any existing config. | *required* |
+
+Raises:
+
+| Type | Description |
+| --- | --- |
+| `ValueError` | if the config references strips the cross section doesn't have. |
 
 ### set\_layers\_from\_infos
 
