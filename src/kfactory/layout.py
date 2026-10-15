@@ -70,7 +70,11 @@ from .enclosure import (
     LayerEnclosureModel,
     LayerEnclosureSpec,
 )
-from .exceptions import FactoriesLockedError, MergeError
+from .exceptions import (
+    ExtrudeConfigConflictError,
+    FactoriesLockedError,
+    MergeError,
+)
 from .factory_metadata import (
     FactoryMetadataProviderKind,
     FactoryMetadataRegistry,
@@ -2560,6 +2564,7 @@ class KCLayout(
         convert_external_cells: bool = False,
         autoformat_from_file_extension: bool = True,
         deduplicate_cell_names: bool = False,
+        clear_existing_meta: bool = True,
     ) -> None:
         """Write a GDS file into the existing Layout.
 
@@ -2578,6 +2583,9 @@ class KCLayout(
                 default), raise
                 :class:`~kfactory.exceptions.DuplicateCellNameError` when
                 duplicates are detected.
+            clear_existing_meta: Remove the layout's existing meta info before
+                setting it, so the file only contains the current state of the
+                KCLayout. Only used if `set_meta_data` is True.
         """
         if options is None:
             options = save_layout_options()
@@ -2585,6 +2593,8 @@ class KCLayout(
             filename = str(filename.resolve())
         for kc in list(self.kcells.values()):
             kc.insert_vinsts()
+        if set_meta_data and clear_existing_meta:
+            self.layout.clear_meta_info()
         match (set_meta_data, convert_external_cells):
             case (True, True):
                 self.set_meta_data()
@@ -2625,11 +2635,14 @@ class KCLayout(
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
         deduplicate_cell_names: bool = False,
+        clear_existing_meta: bool = True,
     ) -> bytes:
         if options is None:
             options = save_layout_options()
         for kc in list(self.kcells.values()):
             kc.insert_vinsts()
+        if set_meta_data and clear_existing_meta:
+            self.layout.clear_meta_info()
         match (set_meta_data, convert_external_cells):
             case (True, True):
                 self.set_meta_data()
@@ -2756,11 +2769,13 @@ class KCLayout(
         if symmetrical is False:
             return self.get_asymmetrical_cross_section(cross_section)
         if isinstance(cross_section, str):
-            if cross_section in self.cross_sections.cross_sections:
-                return self.cross_sections.cross_sections[cross_section]
-            raise KeyError(
-                f"No cross section named {cross_section!r} (symmetric or asymmetric)."
-            )
+            try:
+                return self.cross_sections[cross_section]
+            except KeyError:
+                raise KeyError(
+                    f"No cross section named {cross_section!r} "
+                    "(symmetric or asymmetric)."
+                ) from None
         if isinstance(
             cross_section,
             (
@@ -2774,7 +2789,11 @@ class KCLayout(
         return self.get_symmetrical_cross_section(cross_section)
 
     def set_extrude_config(
-        self, cross_section: str | AnyCrossSectionInput, config: ExtrudeConfig
+        self,
+        cross_section: str | AnyCrossSectionInput,
+        config: ExtrudeConfig,
+        *,
+        on_conflict: Literal["replace", "raise"] = "replace",
     ) -> None:
         """Set the default extrusion settings of a cross section.
 
@@ -2784,11 +2803,17 @@ class KCLayout(
 
         Args:
             cross_section: name or instance of the cross section.
-            config: extrusion settings. Replaces any existing config.
+            config: extrusion settings.
+            on_conflict: what to do if the cross section already has a different
+                config. `"replace"` overwrites it, `"raise"` raises an
+                `ExtrudeConfigConflictError`. Setting an equal config is always
+                allowed.
 
         Raises:
             ValueError: if the config references strips the cross section doesn't
                 have.
+            ExtrudeConfigConflictError: if `on_conflict="raise"` and the cross
+                section already has a different config.
         """
         xs = self.get_base_cross_section(cross_section)
         n_sections = len(xs.get_sections())
@@ -2797,6 +2822,13 @@ class KCLayout(
             raise ValueError(
                 f"Extrude config for cross section {xs.name!r} references strips "
                 f"{unknown}, but the cross section has {n_sections} strips."
+            )
+        existing = self.extrude_configs.get(xs.auto_name())
+        if on_conflict == "raise" and existing is not None and existing != config:
+            raise ExtrudeConfigConflictError(
+                f"Cross section {xs.name!r} already has the extrude config "
+                f"{existing!r}, cannot set {config!r}. Cross sections with the "
+                "same geometry share one extrude config."
             )
         self.extrude_configs[xs.auto_name()] = config
 

@@ -4,6 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 import kfactory as kf
+from kfactory.exceptions import ExtrudeConfigConflictError
 
 
 def _make_asym() -> kf.AsymmetricalCrossSection:
@@ -112,3 +113,34 @@ def test_extrude_config_section_indices() -> None:
         hidden=frozenset({4}),
     )
     assert config.section_indices() == {0, 2, 3, 4}
+
+
+def test_extrude_config_conflict_raises(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    xs = kf.SymmetricalCrossSection(width=1000, enclosure=sym_enc())
+    config = kf.ExtrudeConfig(ports={})
+    kcl.set_extrude_config(xs, config, on_conflict="raise")
+    with pytest.raises(ExtrudeConfigConflictError):
+        kcl.set_extrude_config(xs, kf.ExtrudeConfig(add_bbox=True), on_conflict="raise")
+    assert kcl.get_extrude_config(xs) is config
+
+
+def test_extrude_config_conflict_equal(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    xs = kf.SymmetricalCrossSection(width=1000, enclosure=sym_enc())
+    kcl.set_extrude_config(xs, kf.ExtrudeConfig(insets={0: (10, 10)}))
+    equal = kf.ExtrudeConfig(insets={0: (10, 10)})
+    kcl.set_extrude_config(xs, equal, on_conflict="raise")
+    assert kcl.get_extrude_config(xs) == equal
+
+
+def test_extrude_config_conflict_named_shares_config(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    unnamed = kf.SymmetricalCrossSection(width=1000, enclosure=sym_enc())
+    kcl.set_extrude_config(unnamed, kf.ExtrudeConfig(ports={}))
+    named = kf.SymmetricalCrossSection(width=1000, enclosure=sym_enc(), name="wg")
+    with pytest.raises(ExtrudeConfigConflictError):
+        kcl.set_extrude_config(named, kf.ExtrudeConfig(), on_conflict="raise")
