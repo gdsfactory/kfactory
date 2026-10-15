@@ -84,7 +84,7 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
         super().__init__(
             width=width,
             enclosure=enclosure,
-            name=name or f"{enclosure.name}_{width}",
+            name=name or f"sym_{enclosure.name}_{width}",
             radius=radius,
             radius_min=radius_min,
         )
