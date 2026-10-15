@@ -38,6 +38,14 @@ Raised when writing a layout with multiple cells sharing the same name.
 
 GDS/OASIS formats require unique cell names. This error provides details about which names are duplicated and which cells are involved.
 
+## ExtrudeConfigConflictError
+
+Bases: `ValueError`
+
+Raised when a cross section already has a different extrude config.
+
+Extrude configs are keyed by the cross section's structural signature, so cross sections with the same geometry share one config.
+
 ## FactoriesLockedError
 
 Bases: `RuntimeError`

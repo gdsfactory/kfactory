@@ -205,6 +205,16 @@ Fields:
 - `cross_sections` (`dict[str, SymmetricalCrossSection | AsymmetricalCrossSection]`)
 - `kcl` (`KCLayout`)
 
+### \_\_getitem\_\_
+
+```
+__getitem__(name: str) -> SymmetricalCrossSection | AsymmetricalCrossSection
+```
+
+Get a cross section by name.
+
+Auto names of symmetric cross sections from before the `sym_` prefix (e.g. referenced by ports in older GDS files) resolve as well.
+
 ## DAsymmetricCrossSection
 
 Bases: `TAsymmetricCrossSection[float]`

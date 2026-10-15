@@ -851,7 +851,7 @@ Transforms the instance or cell with the transformation given.
 ### write
 
 ```
-write(filename: str | Path, save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False) -> None
+write(filename: str | Path, save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False, clear_existing_meta: bool = True) -> None
 ```
 
 Write a KCell to a GDS.
@@ -867,7 +867,7 @@ Parameters:
 ### write\_bytes
 
 ```
-write_bytes(save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, deduplicate_cell_names: bool = False) -> bytes
+write_bytes(save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, deduplicate_cell_names: bool = False, clear_existing_meta: bool = True) -> bytes
 ```
 
 Write a KCell to a binary format as oasis.
@@ -1078,7 +1078,7 @@ Will create a temporary file of the gds and load it in KLayout via klive
 ### write
 
 ```
-write(filename: str | Path, save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False) -> None
+write(filename: str | Path, save_options: SaveLayoutOptions | None = None, convert_external_cells: bool = False, set_meta_data: bool = True, autoformat_from_file_extension: bool = True, deduplicate_cell_names: bool = False, clear_existing_meta: bool = True) -> None
 ```
 
 Write a KCell to a GDS.
