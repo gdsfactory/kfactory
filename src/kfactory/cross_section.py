@@ -60,6 +60,11 @@ type CrossSectionSpec = (
 )
 
 
+def _sym_auto_name(enclosure: LayerEnclosure, width: int) -> str:
+    """Deterministic structural name for a symmetric cross section."""
+    return f"sym_{enclosure.name}_{width}"
+
+
 class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=True):
     """CrossSection which is symmetrical to its main_layer/width."""
 
@@ -84,7 +89,7 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
         super().__init__(
             width=width,
             enclosure=enclosure,
-            name=name or f"{enclosure.name}_{width}",
+            name=name or _sym_auto_name(enclosure, width),
             radius=radius,
             radius_min=radius_min,
         )
@@ -95,7 +100,7 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
         return self.enclosure.bbox_sections.copy()
 
     def auto_name(self) -> str:
-        return f"{self.enclosure.name}_{self.width}"
+        return _sym_auto_name(self.enclosure, self.width)
 
     @property
     def is_named(self) -> bool:
@@ -111,7 +116,9 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
     def _set_name(cls, data: Any) -> Any:
         if not isinstance(data, dict):
             return data
-        data["name"] = data.get("name") or f"{data['enclosure'].name}_{data['width']}"
+        data["name"] = data.get("name") or _sym_auto_name(
+            data["enclosure"], data["width"]
+        )
         return data
 
     @model_validator(mode="after")
