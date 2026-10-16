@@ -1,4 +1,4 @@
-# KFactory 3.4.0
+# KFactory 3.5.0
 
 KFactory is a Python framework for photonic and electronic chip layout, built on [KLayout](<https://klayout.de>)'s C++ geometry engine. It provides parametric cells with caching, optical and electrical routing, enclosures via Minkowski sums, and schematic-driven design with LVS.
 
