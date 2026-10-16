@@ -7,10 +7,13 @@ import pytest
 
 import kfactory as kf
 from kfactory.exceptions import (
+    AsymmetricCoreMismatchError,
     AsymmetricMirrorRequiredError,
+    CrossSectionMismatchError,
     CrossSectionNamingConflictError,
     CrossSectionSymmetryMismatchError,
 )
+from tests.conftest import Layers
 
 
 def test_icross_section_creation(kcl: kf.KCLayout) -> None:
@@ -380,9 +383,39 @@ def test_connect_symmetric_vs_asymmetric_raises() -> None:
 
     with pytest.raises(CrossSectionSymmetryMismatchError):
         ia.connect("o1", ib, "o1")
-    # not bypassable by allow_width_mismatch
+    # not bypassable by allow_width_mismatch, the widths match
     with pytest.raises(CrossSectionSymmetryMismatchError):
         ia.connect("o1", ib, "o1", allow_width_mismatch=True)
+    ia.connect("o1", ib, "o1", allow_cross_section_mismatch=True)
+
+
+@pytest.mark.parametrize(
+    ("layer", "width", "kwargs"),
+    [
+        ("METAL1", 500, {"allow_layer_mismatch": True}),
+        ("WG", 600, {"allow_width_mismatch": True}),
+    ],
+)
+def test_connect_cross_section_checks_skipped_on_allowed_mismatch(
+    kcl: kf.KCLayout,
+    layers: Layers,
+    layer: str,
+    width: int,
+    kwargs: dict[str, bool],
+) -> None:
+    """Allowed layer/width mismatches imply cross section mismatches."""
+    layer_info = getattr(layers, layer)
+    asym = _asym_port_cell(kcl, layers, "asym", -250, 250)
+    sym = kcl.kcell("sym")
+    sym.create_port(
+        name="o1", trans=kf.kdb.Trans.R0, width=width, layer_info=layer_info
+    )
+    offset = _asym_port_cell(kcl, layers, "offset", -100, width - 100, layer=layer_info)
+    parent = kcl.kcell("parent")
+    ia = parent << asym
+
+    ia.connect("o1", parent << sym, "o1", **kwargs)
+    ia.connect("o1", parent << offset, "o1", mirror=True, **kwargs)
 
 
 def test_create_port_with_asymmetric_cross_section() -> None:
@@ -736,6 +769,11 @@ def test_connect_asym_to_asym_requires_mirror_when_misaligned() -> None:
     ib = parent << b
     with pytest.raises(AsymmetricMirrorRequiredError):
         ia.connect("o1", ib, "o1")
+    # the layer flag doesn't cover cross sections
+    with pytest.raises(AsymmetricMirrorRequiredError):
+        ia.connect("o1", ib, "o1", allow_layer_mismatch=True)
+    ia.connect("o1", ib, "o1", allow_cross_section_mismatch=True)
+    assert not ia.trans.mirror
     # mirror=True succeeds and produces M90 trans
     ia.connect("o1", ib, "o1", mirror=True)
     assert ia.trans.mirror
@@ -860,6 +898,142 @@ def test_asym_connect_check_ignores_input_mirror_flag_when_use_mirror_false() ->
 
     # With existing mirror=False and mirror=True, effective is M90 — passes.
     ia.connect("o1", ib, "o1", mirror=True, use_mirror=False)
+
+
+def _asym_port_cell(
+    kcl: kf.KCLayout,
+    layers: Layers,
+    name: str,
+    section_min: int,
+    section_max: int,
+    layer: kf.kdb.LayerInfo | None = None,
+    sections: tuple[kf.CrossSectionLayer, ...] = (),
+) -> kf.KCell:
+    """Cell with a single R0 port `o1` carrying an asymmetric cross section."""
+    acs = kcl.get_asymmetrical_cross_section(
+        kf.AsymmetricalCrossSection(
+            layer=layer or layers.WG,
+            section_min=section_min,
+            section_max=section_max,
+            sections=sections,
+        )
+    )
+    c = kcl.kcell(name)
+    c.create_port(name="o1", trans=kf.kdb.Trans.R0, cross_section=acs)
+    return c
+
+
+@pytest.mark.parametrize("virtual", [False, True])
+def test_asym_connect_core_mismatch(
+    kcl: kf.KCLayout, layers: Layers, virtual: bool
+) -> None:
+    """Same width and layer, but the cores are offset against each other."""
+    a = _asym_port_cell(kcl, layers, "a", -250, 250)
+    b = _asym_port_cell(kcl, layers, "b", -100, 400)
+    parent = kf.VKCell(name="parent", kcl=kcl) if virtual else kcl.kcell("parent")
+    ia = parent << a
+    ib = parent << b
+
+    with pytest.raises(CrossSectionMismatchError):
+        ia.connect("o1", ib, "o1", mirror=True)
+    with pytest.raises(AsymmetricCoreMismatchError):
+        ia.connect("o1", ib, "o1", mirror=True, allow_cross_section_mismatch=True)
+
+
+@pytest.mark.parametrize("virtual", [False, True])
+def test_asym_connect_same_core_different_sections(
+    kcl: kf.KCLayout, layers: Layers, virtual: bool
+) -> None:
+    """Different cross sections with the same core only connect with the flag."""
+    a = _asym_port_cell(kcl, layers, "a", -250, 250)
+    b = _asym_port_cell(
+        kcl,
+        layers,
+        "b",
+        -250,
+        250,
+        sections=(
+            kf.CrossSectionLayer(
+                layer=layers.WGCLAD, section_min=-250, section_max=2000
+            ),
+        ),
+    )
+    parent = kf.VKCell(name="parent", kcl=kcl) if virtual else kcl.kcell("parent")
+    ia = parent << a
+    ib = parent << b
+
+    with pytest.raises(CrossSectionMismatchError):
+        ia.connect("o1", ib, "o1", mirror=True)
+    ia.connect("o1", ib, "o1", mirror=True, allow_cross_section_mismatch=True)
+
+
+def test_asym_connect_core_check_skipped_on_width_mismatch(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    """Allowed width mismatches don't additionally raise a cross section mismatch."""
+    a = _asym_port_cell(kcl, layers, "a", -250, 250)
+    b = _asym_port_cell(kcl, layers, "b", -250, 350)
+    parent = kcl.kcell("parent")
+    ia = parent << a
+    ib = parent << b
+
+    ia.connect("o1", ib, "o1", mirror=True, allow_width_mismatch=True)
+
+
+def test_instance_group_connect_cross_section_checks(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    a = _asym_port_cell(kcl, layers, "a", -200, 300)
+    b = _asym_port_cell(kcl, layers, "b", -100, 400)
+    sym = kcl.kcell("sym")
+    sym.create_port(name="o1", trans=kf.kdb.Trans.R0, width=500, layer_info=layers.WG)
+    parent = kcl.kcell("parent")
+    ia = parent << a
+    ia2 = parent << a
+    ib = parent << b
+    isym = parent << sym
+
+    g = kf.InstanceGroup(insts=[ia])
+    g.add_port(port=ia.ports["o1"], name="g", keep_mirror=True)
+
+    with pytest.raises(CrossSectionSymmetryMismatchError):
+        g.connect("g", isym, "o1")
+    g.connect("g", isym, "o1", allow_cross_section_mismatch=True)
+
+    with pytest.raises(AsymmetricMirrorRequiredError):
+        g.connect("g", ia2, "o1")
+    g.connect("g", ia2, "o1", mirror=True)
+
+    with pytest.raises(CrossSectionMismatchError):
+        g.connect("g", ib, "o1", mirror=True)
+    with pytest.raises(AsymmetricCoreMismatchError):
+        g.connect("g", ib, "o1", mirror=True, allow_cross_section_mismatch=True)
+
+
+def test_port_mismatch_check_cross_section(kcl: kf.KCLayout, layers: Layers) -> None:
+    """Same width and layer, but one port has a cladding and the other one not."""
+    xs = kcl.get_icross_section(
+        kf.cross_section.CrossSectionSpecDict(
+            sections=[(layers.WGCLAD, 2000)], layer=layers.WG, width=500
+        )
+    )
+    a = kcl.kcell("a")
+    a.create_port(name="o1", trans=kf.kdb.Trans.R0, cross_section=xs)
+    b = kcl.kcell("b")
+    b.create_port(name="o1", trans=kf.kdb.Trans.R180, width=500, layer_info=layers.WG)
+    parent = kcl.kcell("parent")
+    parent << a
+    parent << b
+
+    db = kf.checks.port_mismatch_check(parent, recursive=False)
+    assert db.category_by_path("WG.CrossSectionMismatch") is None
+
+    db = kf.checks.port_mismatch_check(
+        parent, recursive=False, check_cross_section=True
+    )
+    cat = db.category_by_path("WG.CrossSectionMismatch")
+    assert cat is not None
+    assert cat.num_items() == 1
 
 
 # --- Named/unnamed canonicalization ---------------------------------------

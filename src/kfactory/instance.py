@@ -15,7 +15,9 @@ import klayout.db as kdb
 
 from .conf import PROPID, config, logger
 from .exceptions import (
+    AsymmetricCoreMismatchError,
     AsymmetricMirrorRequiredError,
+    CrossSectionMismatchError,
     CrossSectionSymmetryMismatchError,
     PortLayerMismatchError,
     PortTypeMismatchError,
@@ -46,6 +48,55 @@ if TYPE_CHECKING:
     from .layout import KCLayout
 
 __all__ = ["DInstance", "Instance", "ProtoInstance", "ProtoTInstance", "VInstance"]
+
+
+def _check_cross_sections(
+    p: ProtoPort[Any], op: ProtoPort[Any], allow_cross_section_mismatch: bool
+) -> None:
+    """Check the cross sections of two ports with the same width and main layer.
+
+    A cross section determines the main layer and the core width, so ports that
+    differ in either necessarily differ in their cross sections too. Such
+    mismatches are governed by `allow_layer_mismatch`/`allow_width_mismatch`
+    only, so this must only be called for ports matching in both.
+
+    Asymmetric cross sections must be identical. With
+    `allow_cross_section_mismatch` only their core offsets must match.
+    """
+    xs = p.base.asymmetric_cross_section
+    oxs = op.base.asymmetric_cross_section
+    if allow_cross_section_mismatch:
+        if (
+            xs is not None
+            and oxs is not None
+            and (xs.section_min, xs.section_max) != (oxs.section_min, oxs.section_max)
+        ):
+            raise AsymmetricCoreMismatchError(p, op)
+        return
+    if p.base.is_symmetric() != op.base.is_symmetric():
+        raise CrossSectionSymmetryMismatchError(p, op)
+    if xs is not None and xs != oxs:
+        raise CrossSectionMismatchError(p, op)
+
+
+def _check_asymmetric_orientation(
+    p: ProtoPort[Any], op: ProtoPort[Any], p_mirror: bool
+) -> None:
+    """Check that two connected identical asymmetric profiles aren't flipped.
+
+    Port mirror flags describe the profile orientation, so the world mirror
+    flags of the two ports must differ.
+
+    Args:
+        p: The port that was moved, in any frame.
+        op: The port it was connected to, in world coordinates.
+        p_mirror: The world mirror flag of `p` after the connection.
+    """
+    if (
+        p.base.asymmetric_cross_section is not None
+        and p_mirror == op.dcplx_trans.mirror
+    ):
+        raise AsymmetricMirrorRequiredError(p, op)
 
 
 class ProtoInstance[T: (int, float)](GeometricObject[T]):
@@ -334,6 +385,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
         allow_width_mismatch: bool | None = None,
         allow_layer_mismatch: bool | None = None,
         allow_type_mismatch: bool | None = None,
+        allow_cross_section_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> Self: ...
@@ -349,6 +401,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
         allow_width_mismatch: bool | None = None,
         allow_layer_mismatch: bool | None = None,
         allow_type_mismatch: bool | None = None,
+        allow_cross_section_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> Self: ...
@@ -364,6 +417,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
         allow_width_mismatch: bool | None = None,
         allow_layer_mismatch: bool | None = None,
         allow_type_mismatch: bool | None = None,
+        allow_cross_section_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> Self: ...
@@ -378,6 +432,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
         allow_width_mismatch: bool | None = None,
         allow_layer_mismatch: bool | None = None,
         allow_type_mismatch: bool | None = None,
+        allow_cross_section_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> Self:
@@ -398,6 +453,10 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
             allow_width_mismatch: Skip width check between the ports if set.
             allow_layer_mismatch: Skip layer check between the ports if set.
             allow_type_mismatch: Skip port_type check between the ports if set.
+            allow_cross_section_mismatch: Only compare the core offsets of
+                asymmetric cross sections if set, instead of requiring identical
+                cross sections (and matching profile orientation). These checks
+                only apply to ports with the same width and layer.
             use_mirror: If False mirror flag does not get applied from the connection.
             use_angle: If False the angle does not get applied from the connection.
         """
@@ -407,6 +466,8 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
             allow_layer_mismatch = config.allow_layer_mismatch
         if allow_type_mismatch is None:
             allow_type_mismatch = config.allow_type_mismatch
+        if allow_cross_section_mismatch is None:
+            allow_cross_section_mismatch = config.allow_cross_section_mismatch
         if use_mirror is None:
             use_mirror = config.connect_use_mirror
         if use_angle is None:
@@ -430,23 +491,15 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
         assert isinstance(p, Port)
         assert isinstance(op, Port)
 
-        if p.base.is_symmetric() != op.base.is_symmetric():
-            raise CrossSectionSymmetryMismatchError(p, op)
+        check_xs = p.width == op.width and p.layer == op.layer
+        if check_xs:
+            _check_cross_sections(p, op, allow_cross_section_mismatch)
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
             raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatchError(self, other, p, op)
-        # For two ports carrying the same asymmetric cross section, the
-        # profile asymmetry must align in world coordinates after the
-        # connection — i.e. both ports' world "right" direction must match.
-        # This depends on the actual resulting inst.trans (not just the
-        # `mirror` flag), so compute the would-be world trans of p and verify.
-        same_asym = (
-            p.base.asymmetric_cross_section is not None
-            and p.base.asymmetric_cross_section == op.base.asymmetric_cross_section
-        )
         if p.base.dcplx_trans or op.base.dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
             match (use_mirror, use_angle):
@@ -476,17 +529,6 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
                 case _:
                     raise NotImplementedError("This shouldn't happen")
             self._instance.dcplx_trans = dcplx_trans
-            if same_asym:
-                try:
-                    p_ = self[p.name]
-                except Exception:
-                    logger.warning(
-                        f"Couldn't find port {p.name!r} in instance, skipping asymmetry"
-                        " compatibility check."
-                    )
-                else:
-                    if not p_.mirror != op.mirror:
-                        raise AsymmetricMirrorRequiredError(p, op)
         else:
             conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
             match (use_mirror, use_angle):
@@ -509,18 +551,11 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
                     raise NotImplementedError("This shouldn't happen")
 
             self._instance.trans = trans
-            if same_asym:
-                try:
-                    p_ = self[p.name]
-                except Exception:
-                    logger.warning(
-                        f"Couldn't find port {p.name!r} in instance, skipping asymmetry"
-                        " compatibility check."
-                    )
-                else:
-                    if not p_.mirror != op.mirror:
-                        raise AsymmetricMirrorRequiredError(p, op)
 
+        if check_xs and not allow_cross_section_mismatch:
+            _check_asymmetric_orientation(
+                p, op, self.dcplx_trans.mirror ^ p.dcplx_trans.mirror
+            )
         return self
 
     def __repr__(self) -> str:
@@ -1076,6 +1111,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         allow_width_mismatch: bool | None = None,
         allow_layer_mismatch: bool | None = None,
         allow_type_mismatch: bool | None = None,
+        allow_cross_section_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> Self: ...
@@ -1091,6 +1127,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         allow_width_mismatch: bool | None = None,
         allow_layer_mismatch: bool | None = None,
         allow_type_mismatch: bool | None = None,
+        allow_cross_section_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> Self: ...
@@ -1106,6 +1143,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         allow_width_mismatch: bool | None = None,
         allow_layer_mismatch: bool | None = None,
         allow_type_mismatch: bool | None = None,
+        allow_cross_section_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> Self: ...
@@ -1120,6 +1158,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         allow_width_mismatch: bool | None = None,
         allow_layer_mismatch: bool | None = None,
         allow_type_mismatch: bool | None = None,
+        allow_cross_section_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> Self:
@@ -1140,6 +1179,10 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             allow_width_mismatch: Skip width check between the ports if set.
             allow_layer_mismatch: Skip layer check between the ports if set.
             allow_type_mismatch: Skip port_type check between the ports if set.
+            allow_cross_section_mismatch: Only compare the core offsets of
+                asymmetric cross sections if set, instead of requiring identical
+                cross sections (and matching profile orientation). These checks
+                only apply to ports with the same width and layer.
             use_mirror: If False mirror flag does not get applied from the connection.
             use_angle: If False the angle does not get applied from the connection.
         """
@@ -1149,6 +1192,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             allow_width_mismatch = config.allow_width_mismatch
         if allow_type_mismatch is None:
             allow_type_mismatch = config.allow_type_mismatch
+        if allow_cross_section_mismatch is None:
+            allow_cross_section_mismatch = config.allow_cross_section_mismatch
         if use_mirror is None:
             use_mirror = config.connect_use_mirror
         if use_angle is None:
@@ -1171,18 +1216,15 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         assert isinstance(p, Port)
         assert isinstance(op, Port)
 
-        if p.base.is_symmetric() != op.base.is_symmetric():
-            raise CrossSectionSymmetryMismatchError(p, op)
+        check_xs = p.width == op.width and p.layer == op.layer
+        if check_xs:
+            _check_cross_sections(p, op, allow_cross_section_mismatch)
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
             raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatchError(self, other, p, op)
-        same_asym = (
-            p.base.asymmetric_cross_section is not None
-            and p.base.asymmetric_cross_section == op.base.asymmetric_cross_section
-        )
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
         match (use_mirror, use_angle):
             case True, True:
@@ -1204,17 +1246,10 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 raise NotImplementedError("This shouldn't happen")
 
         self.trans = dcplx_trans
-        if same_asym:
-            try:
-                p_ = self[p.name]
-            except Exception:
-                logger.warning(
-                    f"Couldn't find port {p.name!r} in instance, skipping asymmetry"
-                    " compatibility check."
-                )
-            else:
-                if not p_.mirror != op.mirror:
-                    raise AsymmetricMirrorRequiredError(p, op)
+        if check_xs and not allow_cross_section_mismatch:
+            _check_asymmetric_orientation(
+                p, op, self.trans.mirror ^ p.dcplx_trans.mirror
+            )
         return self
 
     def transform(

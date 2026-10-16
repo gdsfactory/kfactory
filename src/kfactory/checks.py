@@ -267,6 +267,7 @@ def port_mismatch_check(
     check_width: bool = True,
     check_angle: bool = True,
     check_type: bool = True,
+    check_cross_section: bool = False,
     check_port_overlap: bool = True,
     check_missing_physical_shape: bool = True,
     check_partial_physical_shape: bool = True,
@@ -291,6 +292,10 @@ def port_mismatch_check(
         check_width: Emit `WidthMismatch` items.
         check_angle: Emit `AngleMismatch` items.
         check_type: Emit `TypeMismatch` items.
+        check_cross_section: Emit `CrossSectionMismatch` items for ports with
+            matching width and main layer but different cross sections, e.g.
+            a different enclosure. Off by default, as ports created from only
+            a width and a layer commonly connect to fully specified ones.
         check_port_overlap: Emit `PortOverlap` items when 2+ instance ports
             share a coord (and either differ from a cell port or pile up >2).
         check_missing_physical_shape: Emit `MissingPhysicalShape` items.
@@ -315,6 +320,7 @@ def port_mismatch_check(
             check_width=check_width,
             check_angle=check_angle,
             check_type=check_type,
+            check_cross_section=check_cross_section,
             check_port_overlap=check_port_overlap,
             check_missing_physical_shape=check_missing_physical_shape,
             check_partial_physical_shape=check_partial_physical_shape,
@@ -396,6 +402,26 @@ def port_mismatch_check(
             )
         if check_type and not result & PortCheck.port_type:
             subc = _get_or_create_subcategory(db_, lc, "TypeMismatch")
+            create_port_error(
+                p_a,
+                p_b,
+                c_a,
+                c_b,
+                db_,
+                db_cell,
+                subc,
+                cell.kcl.dbu,
+                inst_name1=inst_name1,
+                inst_name2=inst_name2,
+            )
+        # Width and layer mismatches are reported by their own categories.
+        if (
+            check_cross_section
+            and result & PortCheck.width
+            and result & PortCheck.layer
+            and not result & PortCheck.cross_section
+        ):
+            subc = _get_or_create_subcategory(db_, lc, "CrossSectionMismatch")
             create_port_error(
                 p_a,
                 p_b,

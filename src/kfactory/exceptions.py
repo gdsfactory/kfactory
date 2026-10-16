@@ -10,8 +10,10 @@ if TYPE_CHECKING:
     from .port import ProtoPort
 
 __all__ = [
+    "AsymmetricCoreMismatchError",
     "AsymmetricMirrorRequiredError",
     "CellNameError",
+    "CrossSectionMismatchError",
     "CrossSectionNamingConflictError",
     "CrossSectionSymmetryMismatchError",
     "DuplicateCellNameError",
@@ -186,11 +188,59 @@ class AsymmetricMirrorRequiredError(ValueError):
         )
 
 
+class CrossSectionMismatchError(ValueError):
+    """Raised when connecting asymmetric ports with different cross sections.
+
+    The ports have the same width and main layer, but their cross sections
+    differ. Pass `allow_cross_section_mismatch=True` to `connect` to only
+    require matching core offsets.
+    """
+
+    def __init__(
+        self,
+        p1: ProtoPort[Any],
+        p2: ProtoPort[Any],
+        *args: Any,
+    ) -> None:
+        super().__init__(
+            f"Cross section mismatch between the ports {p1.name!r}"
+            f" ({p1.base.any_cross_section.name!r}) and {p2.name!r}"
+            f" ({p2.base.any_cross_section.name!r}).",
+            *args,
+        )
+
+
+class AsymmetricCoreMismatchError(ValueError):
+    """Raised when the core offsets of two asymmetric ports differ.
+
+    Raised with `allow_cross_section_mismatch`, which only requires the cores of
+    asymmetric cross sections to match.
+    """
+
+    def __init__(
+        self,
+        p1: ProtoPort[Any],
+        p2: ProtoPort[Any],
+        *args: Any,
+    ) -> None:
+        xs1 = p1.base.asymmetric_cross_section
+        xs2 = p2.base.asymmetric_cross_section
+        assert xs1 is not None
+        assert xs2 is not None
+        super().__init__(
+            f"Core offset mismatch between the asymmetric ports {p1.name!r}"
+            f" ({xs1.section_min}, {xs1.section_max}) and {p2.name!r}"
+            f" ({xs2.section_min}, {xs2.section_max}).",
+            *args,
+        )
+
+
 class CrossSectionSymmetryMismatchError(ValueError):
     """Raised when connecting ports whose cross sections differ in symmetry.
 
-    A symmetric and an asymmetric cross section cannot be connected even with
-    `allow_width_mismatch`, since they are structurally different objects.
+    A symmetric and an asymmetric cross section with the same width and layer
+    cannot be connected, since they are structurally different objects. Use
+    `allow_cross_section_mismatch` to connect them anyway.
     """
 
     def __init__(
