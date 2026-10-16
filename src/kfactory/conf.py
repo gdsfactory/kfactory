@@ -246,7 +246,12 @@ class Settings(BaseSettings):
     allow_width_mismatch: bool = False
     allow_layer_mismatch: bool = False
     allow_type_mismatch: bool = False
-    allow_cross_section_mismatch: bool = False
+    allow_cross_section_mismatch: bool = True
+    """Only compare core offsets of asymmetric cross sections in `connect`.
+
+    Set to `False` to require identical cross sections. The default is planned
+    to change to `False` in kfactory 4.0.
+    """
     allow_undefined_layers: bool = False
     cell_layout_cache: bool = False
     cell_overwrite_existing: bool = False

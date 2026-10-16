@@ -21,6 +21,7 @@ All variables use the prefix `KFACTORY_`. Nested fields use `_` as a delimiter.
 | `KFACTORY_ALLOW_WIDTH_MISMATCH` | `bool` | `False` | Allow connecting ports with different widths |
 | `KFACTORY_ALLOW_LAYER_MISMATCH` | `bool` | `False` | Allow connecting ports on different layers |
 | `KFACTORY_ALLOW_TYPE_MISMATCH` | `bool` | `False` | Allow connecting ports of different types |
+| `KFACTORY_ALLOW_CROSS_SECTION_MISMATCH` | `bool` | `True` | Only compare core offsets of asymmetric cross sections in `connect()`; `False` requires identical cross sections (planned default in 4.0), see [Cross section checks in `connect`](components/cross_sections.py#cross-section-checks-in-connect) |
 | `KFACTORY_ALLOW_UNDEFINED_LAYERS` | `bool` | `False` | Skip errors for layers not in the `LayerInfos` |
 | `KFACTORY_CELL_LAYOUT_CACHE` | `bool` | `False` | Cache cells per `KCLayout` instead of globally |
 | `KFACTORY_CELL_OVERWRITE_EXISTING` | `bool` | `False` | Overwrite existing cells with the same name |
