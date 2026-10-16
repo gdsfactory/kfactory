@@ -171,7 +171,7 @@ Ports:
 
 ## 6\. Stream to KLayout (optional)
 
-If [klive](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/klive_setup/index.md>) is installed and KLayout is open, a single call pushes the GDS to the viewer:
+If [klive](<https://gdsfactory.github.io/kfactory/3.5.0/getting_started/klive_setup/index.md>) is installed and KLayout is open, a single call pushes the GDS to the viewer:
 
 ```
 kf.show(arm)
@@ -181,9 +181,9 @@ kf.show(arm)
 
 | Topic | Where |
 | --- | --- |
-| Cells in depth | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) |
-| Layers &amp; layer stacks | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/layers/index.md>) |
-| Port system | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
-| DBU vs µm coordinates | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
-| Optical routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
-| Enclosures / cladding | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) |
+| Cells in depth | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/kcell/index.md>) |
+| Layers &amp; layer stacks | [Core Concepts: Layers](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/layers/index.md>) |
+| Port system | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/ports/index.md>) |
+| DBU vs µm coordinates | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/dbu_vs_um/index.md>) |
+| Optical routing | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.5.0/routing/optical/index.md>) |
+| Enclosures / cladding | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.5.0/enclosures/layer_enclosure/index.md>) |

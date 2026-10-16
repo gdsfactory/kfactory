@@ -287,7 +287,7 @@ ce
 | Route *N* optical waveguides | `kf.routing.optical.route_bundle(c, starts, ends, sep, straight_factory=..., bend90_cell=...)` |
 | Route *N* metal wires | `kf.routing.electrical.route_bundle(c, starts, ends, sep, place_layer=...)` |
 | Avoid obstacles | add `bboxes=[kdb.Box(...)]` to `route_bundle` |
-| U-turn loopback (with GCs) | see [Routing: Optical § 4](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| U-turn loopback (with GCs) | see [Routing: Optical § 4](<https://gdsfactory.github.io/kfactory/3.5.0/routing/optical/index.md>) |
 
 All coordinates in `KCell`-based APIs are in **DBU** (1 nm = 1 DBU with default `dbu = 0.001`). Use `kf.kcl.to_dbu(x_um)` to convert from µm. For a purely µm-native workflow use `DKCell` / `DPort` variants instead.
 
@@ -295,11 +295,11 @@ All coordinates in `KCell`-based APIs are in **DBU** (1 nm = 1 DBU with default 
 
 | Topic | Where |
 | --- | --- |
-| Optical route options: waypoints, path-length matching, loopbacks | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
-| Electrical (metal wire) routing | [Routing: Electrical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/electrical/index.md>) |
-| Manhattan backbone algorithm and Steps API | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.4.0/routing/manhattan/index.md>) |
-| All-angle (diagonal) routing | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/all_angle/index.md>) |
-| Bundle routing: sort, separation, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>) |
-| Equal path-length routing | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.4.0/routing/path_length/index.md>) |
-| Euler bend cells and effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
-| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
+| Optical route options: waypoints, path-length matching, loopbacks | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.5.0/routing/optical/index.md>) |
+| Electrical (metal wire) routing | [Routing: Electrical](<https://gdsfactory.github.io/kfactory/3.5.0/routing/electrical/index.md>) |
+| Manhattan backbone algorithm and Steps API | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.5.0/routing/manhattan/index.md>) |
+| All-angle (diagonal) routing | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.5.0/routing/all_angle/index.md>) |
+| Bundle routing: sort, separation, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.5.0/routing/bundle/index.md>) |
+| Equal path-length routing | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.5.0/routing/path_length/index.md>) |
+| Euler bend cells and effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/euler/index.md>) |
+| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/dbu_vs_um/index.md>) |

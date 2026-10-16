@@ -310,7 +310,7 @@ loop
 
 | Topic | Where |
 | --- | --- |
-| Placing and connecting instances with ports | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/instances/index.md>) |
-| Cross-sections (port width + enclosure spec) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
-| Optical routing between ports | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
-| Port-based component assembly | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/overview/index.md>) |
+| Placing and connecting instances with ports | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/instances/index.md>) |
+| Cross-sections (port width + enclosure spec) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.5.0/components/cross_sections/index.md>) |
+| Optical routing between ports | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.5.0/routing/overview/index.md>) |
+| Port-based component assembly | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/overview/index.md>) |

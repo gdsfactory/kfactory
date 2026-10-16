@@ -67,15 +67,15 @@ Initialize the InstanceGroup.
 ### connect
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoPort[Any], *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
+connect(port: str | ProtoPort[Any] | None, other: ProtoPort[Any], *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
 ```
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any], other_port_name: str | int | tuple[int | str, int, int] | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
+connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any], other_port_name: str | int | tuple[int | str, int, int] | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
 ```
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any] | ProtoPort[Any], other_port_name: str | int | tuple[int | str, int, int] | None = None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
+connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any] | ProtoPort[Any], other_port_name: str | int | tuple[int | str, int, int] | None = None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
 ```
 
 Align port with name `portname` to a port.
@@ -93,6 +93,7 @@ Parameters:
 | `allow_width_mismatch` | `bool \| None` | Skip width check between the ports if set. | `None` |
 | `allow_layer_mismatch` | `bool \| None` | Skip layer check between the ports if set. | `None` |
 | `allow_type_mismatch` | `bool \| None` | Skip port\_type check between the ports if set. | `None` |
+| `allow_cross_section_mismatch` | `bool \| None` | Only compare the core offsets of asymmetric cross sections if set, instead of requiring identical cross sections. Asymmetric profiles must not be flipped against each other either way. These checks only apply to ports with the same width and layer. | `None` |
 | `use_mirror` | `bool \| None` | If False mirror flag does not get applied from the connection. | `None` |
 | `use_angle` | `bool \| None` | If False the angle does not get applied from the connection. | `None` |
 

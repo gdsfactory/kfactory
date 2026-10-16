@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.4.0/schematics/crossing45/">
+        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.5.0/schematics/crossing45/">
       
       
         <link rel="describedby" href="../../llms.txt">
@@ -85,15 +85,15 @@
   <meta property="og:type" content="website" />
 <meta property="og:title" content="45° Crossing - KFactory" />
 <meta property="og:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/schematics/crossing45.png" />
+<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.5.0/assets/images/social/schematics/crossing45.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.4.0/schematics/crossing45/" />
+<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.5.0/schematics/crossing45/" />
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:title" content="45° Crossing - KFactory" />
 <meta property="twitter:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/schematics/crossing45.png" />
+<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.5.0/assets/images/social/schematics/crossing45.png" />
 </head>
   
   
@@ -6117,7 +6117,7 @@ that the schematic can reference as a plain string.</p>
 <span class="c1"># cross-section is available there as well.</span>
 <span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_icross_section</span><span class="p">(</span><span class="n">xs_wg1</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>&lt;kfactory.cross_section.CrossSection at 0x7f14110abc50&gt;
+<div class="highlight"><pre><span></span><code>&lt;kfactory.cross_section.CrossSection at 0x7f7457cabb10&gt;
 </code></pre></div>
 <h2 id="the-cross-cell">The <code>cross</code> cell</h2>
 <p>A single 45° crossing: four waveguide arms radiating from the center.</p>
@@ -6515,7 +6515,7 @@ repetitive routing primitives.</p>
 <span class="n">c</span> <span class="o">=</span> <span class="n">crossing45</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">cross_section</span><span class="o">=</span><span class="s2">"WG1000"</span><span class="p">)</span>
 <span class="n">c</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-10-15 19:00:47.852[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
+<div class="highlight"><pre><span></span><code>[32m2026-10-16 04:30:36.865[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
 </code></pre></div>
 <p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
@@ -6547,7 +6547,7 @@ with collaborators or archived for reproducibility.</p>
 
 <span class="n">Code</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">schematic</span><span class="o">.</span><span class="n">code_str</span><span class="p">())</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>[32m2026-10-15 19:00:48.182[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+<div class="highlight"><pre><span></span><code>[32m2026-10-16 04:30:37.200[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 

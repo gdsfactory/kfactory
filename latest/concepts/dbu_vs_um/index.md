@@ -250,7 +250,7 @@ Port o1 dwidth: 0.5 µm
 
 | Topic | Where |
 | --- | --- |
-| KCell and DKCell side-by-side | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) |
-| Port width and position in DBU | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
-| Factory functions and their unit conventions | [Components: Factory Functions](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
-| FAQ — when to use DBU vs µm | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.4.0/howto/faq/index.md>) |
+| KCell and DKCell side-by-side | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/kcell/index.md>) |
+| Port width and position in DBU | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/ports/index.md>) |
+| Factory functions and their unit conventions | [Components: Factory Functions](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/overview/index.md>) |
+| FAQ — when to use DBU vs µm | [How-To: FAQ](<https://gdsfactory.github.io/kfactory/3.5.0/howto/faq/index.md>) |

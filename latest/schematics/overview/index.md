@@ -284,7 +284,7 @@ Code(generated)
 ```
 
 ```
-[32m2026-10-15 19:00:48.354[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-16 04:30:37.505[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -351,7 +351,7 @@ The generated code is a regular `@kcl.schematic_cell`-decorated function — you
 
 | Topic | Where |
 | --- | --- |
-| Netlist data model | [Schematics: Netlist](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/netlist/index.md>) |
-| 45° crossing with virtual cells | [Schematics: 45° Crossing](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/crossing45/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
+| Netlist data model | [Schematics: Netlist](<https://gdsfactory.github.io/kfactory/3.5.0/schematics/netlist/index.md>) |
+| 45° crossing with virtual cells | [Schematics: 45° Crossing](<https://gdsfactory.github.io/kfactory/3.5.0/schematics/crossing45/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.5.0/pdk/creating_pdk/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/pcells/index.md>) |

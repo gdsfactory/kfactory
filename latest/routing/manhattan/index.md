@@ -331,8 +331,8 @@ Num instances:  4
 
 | Topic | Where |
 | --- | --- |
-| High-level optical routing (`route_bundle`, loopbacks) | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
-| Bundle routing built on top of manhattan | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>) |
-| Euler bend cells and effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
-| Port direction conventions (angle 0/1/2/3) | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
-| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
+| High-level optical routing (`route_bundle`, loopbacks) | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.5.0/routing/optical/index.md>) |
+| Bundle routing built on top of manhattan | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.5.0/routing/bundle/index.md>) |
+| Euler bend cells and effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/euler/index.md>) |
+| Port direction conventions (angle 0/1/2/3) | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/ports/index.md>) |
+| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/dbu_vs_um/index.md>) |

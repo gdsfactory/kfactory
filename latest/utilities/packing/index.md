@@ -189,7 +189,7 @@ ig = kf.packing.pack_instances(
 
 | Topic | Where |
 | --- | --- |
-| Array / grid layout | [Utilities: Grid](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/grid/index.md>) |
-| Components overview &amp; gallery | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/overview/index.md>) |
-| Instance placement | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/instances/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| Array / grid layout | [Utilities: Grid](<https://gdsfactory.github.io/kfactory/3.5.0/utilities/grid/index.md>) |
+| Components overview &amp; gallery | [Components: Overview](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/overview/index.md>) |
+| Instance placement | [Core Concepts: Instances](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/instances/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.5.0/pdk/creating_pdk/index.md>) |

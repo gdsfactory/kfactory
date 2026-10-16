@@ -105,7 +105,7 @@ for name in L.model_fields:
   FLOORPLAN     layer=10  datatype=0
 
 
-/tmp/ipykernel_2795/971822332.py:1: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_2726/971822332.py:1: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in L.model_fields:
 ```
 
@@ -247,7 +247,7 @@ Layer palette:
   m2      z=1.2…1.70 µm  Al
 
 
-/tmp/ipykernel_2795/3302201102.py:18: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_2726/3302201102.py:18: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in pdk_layers.model_fields:
 ```
 
@@ -255,7 +255,7 @@ Layer palette:
 
 | Topic | Where |
 | --- | --- |
-| KCLayout — the layout registry that owns layers | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kclayout/index.md>) |
-| Cross-sections built on top of layers | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
-| LayerLevel and full 3-D stack in a PDK | [PDK: Technology &amp; Layer Stack](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/technology/index.md>) |
-| Assembling a full PDK with layers | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| KCLayout — the layout registry that owns layers | [Core Concepts: KCLayout](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/kclayout/index.md>) |
+| Cross-sections built on top of layers | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.5.0/components/cross_sections/index.md>) |
+| LayerLevel and full 3-D stack in a PDK | [PDK: Technology &amp; Layer Stack](<https://gdsfactory.github.io/kfactory/3.5.0/pdk/technology/index.md>) |
+| Assembling a full PDK with layers | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.5.0/pdk/creating_pdk/index.md>) |

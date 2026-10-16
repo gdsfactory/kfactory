@@ -1,4 +1,4 @@
-# KFactory 3.4.0
+# KFactory 3.5.0
 
 KFactory is a Python framework for photonic and electronic chip layout, built on [KLayout](<https://klayout.de>)'s C++ geometry engine. It provides parametric cells with caching, optical and electrical routing, enclosures via Minkowski sums, and schematic-driven design with LVS.
 
@@ -46,11 +46,11 @@ This installs the development environment and sets up pre-commit hooks.
 
 Full documentation is available at [gdsfactory.github.io/kfactory](<https://gdsfactory.github.io/kfactory>).
 
-Upgrading from an earlier version? See the [migration guide](<https://gdsfactory.github.io/kfactory/3.4.0/docs/source/migration/index.md>).
+Upgrading from an earlier version? See the [migration guide](<https://gdsfactory.github.io/kfactory/3.5.0/docs/source/migration/index.md>).
 
 ## License
 
-[MIT](<https://gdsfactory.github.io/kfactory/3.4.0/LICENSE>)
+[MIT](<https://gdsfactory.github.io/kfactory/3.5.0/LICENSE>)
 
 ---
 

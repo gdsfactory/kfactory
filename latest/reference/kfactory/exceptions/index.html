@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.4.0/reference/kfactory/exceptions/">
+        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.5.0/reference/kfactory/exceptions/">
       
       
         <link rel="describedby" href="../../../llms.txt">
@@ -85,15 +85,15 @@
   <meta property="og:type" content="website" />
 <meta property="og:title" content="exceptions - KFactory" />
 <meta property="og:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/reference/kfactory/exceptions.png" />
+<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.5.0/assets/images/social/reference/kfactory/exceptions.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.4.0/reference/kfactory/exceptions/" />
+<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.5.0/reference/kfactory/exceptions/" />
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:title" content="exceptions - KFactory" />
 <meta property="twitter:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/reference/kfactory/exceptions.png" />
+<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.5.0/assets/images/social/reference/kfactory/exceptions.png" />
 </head>
   
   
@@ -3679,6 +3679,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#kfactory.exceptions.AsymmetricCoreMismatchError" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;AsymmetricCoreMismatchError
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#kfactory.exceptions.AsymmetricMirrorRequiredError" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -3694,6 +3705,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;CellNameError
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kfactory.exceptions.CrossSectionMismatchError" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;CrossSectionMismatchError
       </span>
     </span>
   </a>
@@ -5957,6 +5979,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#kfactory.exceptions.AsymmetricCoreMismatchError" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;AsymmetricCoreMismatchError
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#kfactory.exceptions.AsymmetricMirrorRequiredError" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -5972,6 +6005,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;CellNameError
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kfactory.exceptions.CrossSectionMismatchError" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;CrossSectionMismatchError
       </span>
     </span>
   </a>
@@ -6638,6 +6682,106 @@
 
 
 
+<h2 id="kfactory.exceptions.AsymmetricCoreMismatchError" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">AsymmetricCoreMismatchError</span>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError">ValueError</a></code></p>
+
+
+
+        <p>Raised when the core offsets of two asymmetric ports differ.</p>
+<p>Raised with <code>allow_cross_section_mismatch</code>, which only requires the cores of
+asymmetric cross sections to match.</p>
+
+          
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>kfactory/exceptions.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AsymmetricCoreMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Raised when the core offsets of two asymmetric ports differ.</span>
+
+<span class="sd">    Raised with `allow_cross_section_mismatch`, which only requires the cores of</span>
+<span class="sd">    asymmetric cross sections to match.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">p1</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+        <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">xs1</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span>
+        <span class="n">xs2</span> <span class="o">=</span> <span class="n">p2</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">asymmetric_cross_section</span>
+        <span class="k">assert</span> <span class="n">xs1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">xs2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Core offset mismatch between the asymmetric ports </span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">xs1</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">xs1</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">) and </span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">xs2</span><span class="o">.</span><span class="n">section_min</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">xs2</span><span class="o">.</span><span class="n">section_max</span><span class="si">}</span><span class="s2">)."</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
 <h2 id="kfactory.exceptions.AsymmetricMirrorRequiredError" class="doc doc-heading">
             <span class="doc doc-object-name doc-class-name">AsymmetricMirrorRequiredError</span>
 
@@ -6652,9 +6796,9 @@
 
 
         <p>Raised when connecting two asymmetric ports without <code>mirror=True</code>.</p>
-<p>Two ports carrying the same <code>AsymmetricalCrossSection</code> can only be
-connected via an M90 (mirror) transformation, since R180 would flip the
-left/right halves of the profile. Pass <code>mirror=True</code> to <code>connect</code>.</p>
+<p>Two ports carrying an <code>AsymmetricalCrossSection</code> can only be connected via
+an M90 (mirror) transformation, since R180 would flip the left/right halves
+of the profile. Pass <code>mirror=True</code> to <code>connect</code>.</p>
 
           
 
@@ -6666,9 +6810,7 @@ left/right halves of the profile. Pass <code>mirror=True</code> to <code>connect
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
@@ -6686,12 +6828,14 @@ left/right halves of the profile. Pass <code>mirror=True</code> to <code>connect
 <span class="normal">183</span>
 <span class="normal">184</span>
 <span class="normal">185</span>
-<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AsymmetricMirrorRequiredError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AsymmetricMirrorRequiredError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Raised when connecting two asymmetric ports without `mirror=True`.</span>
 
-<span class="sd">    Two ports carrying the same `AsymmetricalCrossSection` can only be</span>
-<span class="sd">    connected via an M90 (mirror) transformation, since R180 would flip the</span>
-<span class="sd">    left/right halves of the profile. Pass `mirror=True` to `connect`.</span>
+<span class="sd">    Two ports carrying an `AsymmetricalCrossSection` can only be connected via</span>
+<span class="sd">    an M90 (mirror) transformation, since R180 would flip the left/right halves</span>
+<span class="sd">    of the profile. Pass `mirror=True` to `connect`.</span>
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -6701,8 +6845,8 @@ left/right halves of the profile. Pass <code>mirror=True</code> to <code>connect
         <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"Cannot connect ports </span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> carrying the same"</span>
-            <span class="s2">" asymmetric cross section without `mirror=True`. Asymmetric profiles"</span>
+            <span class="sa">f</span><span class="s2">"Cannot connect ports </span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> and </span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> carrying"</span>
+            <span class="s2">" asymmetric cross sections without `mirror=True`. Asymmetric profiles"</span>
             <span class="s2">" require an M90 transformation (mirror) — R180 would flip the"</span>
             <span class="s2">" left/right halves. Pass `mirror=True` to `connect`."</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
@@ -6760,11 +6904,106 @@ left/right halves of the profile. Pass <code>mirror=True</code> to <code>connect
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">212</span>
-<span class="normal">213</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CellNameError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">262</span>
+<span class="normal">263</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CellNameError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Raised if a KCell is created and the automatic assigned name is taken."""</span>
 </code></pre></div></td></tr></table></div>
               </details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="kfactory.exceptions.CrossSectionMismatchError" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">CrossSectionMismatchError</span>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError">ValueError</a></code></p>
+
+
+
+        <p>Raised when connecting asymmetric ports with different cross sections.</p>
+<p>The ports have the same width and main layer, but their cross sections
+differ. Pass <code>allow_cross_section_mismatch=True</code> to <code>connect</code> to only
+require matching core offsets.</p>
+
+          
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>kfactory/exceptions.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CrossSectionMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Raised when connecting asymmetric ports with different cross sections.</span>
+
+<span class="sd">    The ports have the same width and main layer, but their cross sections</span>
+<span class="sd">    differ. Pass `allow_cross_section_mismatch=True` to `connect` to only</span>
+<span class="sd">    require matching core offsets.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">p1</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+        <span class="n">p2</span><span class="p">:</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Cross section mismatch between the ports </span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">p1</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">any_cross_section</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">) and </span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">p2</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">any_cross_section</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">)."</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
 
     </div>
 
@@ -6803,14 +7042,14 @@ signature (or to reuse a name for a different signature) raises this error.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">52</span>
 <span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
 <span class="normal">56</span>
-<span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CrossSectionNamingConflictError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CrossSectionNamingConflictError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Raised when a second name is registered for an existing structural signature.</span>
 
 <span class="sd">    Cross sections and enclosures are canonicalized by their name-independent</span>
@@ -6843,8 +7082,9 @@ signature (or to reuse a name for a different signature) raises this error.</p>
 
 
         <p>Raised when connecting ports whose cross sections differ in symmetry.</p>
-<p>A symmetric and an asymmetric cross section cannot be connected even with
-<code>allow_width_mismatch</code>, since they are structurally different objects.</p>
+<p>A symmetric and an asymmetric cross section with the same width and layer
+cannot be connected, since they are structurally different objects. Use
+<code>allow_cross_section_mismatch</code> to connect them anyway.</p>
 
           
 
@@ -6856,31 +7096,33 @@ signature (or to reuse a name for a different signature) raises this error.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CrossSectionSymmetryMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CrossSectionSymmetryMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Raised when connecting ports whose cross sections differ in symmetry.</span>
 
-<span class="sd">    A symmetric and an asymmetric cross section cannot be connected even with</span>
-<span class="sd">    `allow_width_mismatch`, since they are structurally different objects.</span>
+<span class="sd">    A symmetric and an asymmetric cross section with the same width and layer</span>
+<span class="sd">    cannot be connected, since they are structurally different objects. Use</span>
+<span class="sd">    `allow_cross_section_mismatch` to connect them anyway.</span>
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -6952,12 +7194,12 @@ about which names are duplicated and which cells are involved.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DuplicateCellNameError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DuplicateCellNameError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Raised when writing a layout with multiple cells sharing the same name.</span>
 
 <span class="sd">    GDS/OASIS formats require unique cell names. This error provides details</span>
@@ -7036,12 +7278,12 @@ cross sections with the same geometry share one config.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
 <span class="normal">63</span>
 <span class="normal">64</span>
-<span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExtrudeConfigConflictError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExtrudeConfigConflictError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Raised when a cross section already has a different extrude config.</span>
 
 <span class="sd">    Extrude configs are keyed by the cross section's structural signature, so</span>
@@ -7083,8 +7325,8 @@ cross sections with the same geometry share one config.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">42</span>
-<span class="normal">43</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FactoriesLockedError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">44</span>
+<span class="normal">45</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FactoriesLockedError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Raised when trying to add a factory to a locked Factories collection."""</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -7122,8 +7364,8 @@ cross sections with the same geometry share one config.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">224</span>
-<span class="normal">225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InvalidLayerError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">274</span>
+<span class="normal">275</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">InvalidLayerError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Raised when a layer is not valid."""</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -7231,9 +7473,7 @@ cross sections with the same geometry share one config.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">31</span>
 <span class="normal">32</span>
 <span class="normal">33</span>
 <span class="normal">34</span>
@@ -7241,7 +7481,9 @@ cross sections with the same geometry share one config.</p>
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
-<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LockedError</span><span class="p">(</span><span class="ne">AttributeError</span><span class="p">):</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LockedError</span><span class="p">(</span><span class="ne">AttributeError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Raised when a locked cell is being modified."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcell</span><span class="p">:</span> <span class="n">AnyKCell</span> <span class="o">|</span> <span class="n">BaseKCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -7287,14 +7529,14 @@ cross sections with the same geometry share one config.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
-<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcell</span><span class="p">:</span> <span class="n">AnyKCell</span> <span class="o">|</span> <span class="n">BaseKCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kcell</span><span class="p">:</span> <span class="n">AnyKCell</span> <span class="o">|</span> <span class="n">BaseKCell</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Throw _locked error."""</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">kcell</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is locked and likely stored in cache. Modifications are "</span>
@@ -7345,8 +7587,8 @@ cross sections with the same geometry share one config.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
-<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MergeError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">48</span>
+<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MergeError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Raised if two layout's have conflicting cell definitions."""</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -7384,9 +7626,7 @@ cross sections with the same geometry share one config.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
@@ -7421,7 +7661,9 @@ cross sections with the same geometry share one config.</p>
 <span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span>
-<span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortLayerMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortLayerMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Error thrown when two ports don't have a matching `layer`."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -7494,9 +7736,7 @@ cross sections with the same geometry share one config.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
@@ -7528,7 +7768,9 @@ cross sections with the same geometry share one config.</p>
 <span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span>
-<span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">kcl</span><span class="p">:</span> <span class="n">KCLayout</span><span class="p">,</span>
     <span class="n">inst</span><span class="p">:</span> <span class="n">ProtoInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoInstanceGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
@@ -7606,9 +7848,7 @@ cross sections with the same geometry share one config.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
 <span class="normal">140</span>
 <span class="normal">141</span>
 <span class="normal">142</span>
@@ -7632,7 +7872,9 @@ cross sections with the same geometry share one config.</p>
 <span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span>
-<span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortTypeMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortTypeMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Error thrown when two ports don't have a matching `port_type`."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -7694,9 +7936,7 @@ cross sections with the same geometry share one config.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">142</span>
 <span class="normal">143</span>
 <span class="normal">144</span>
 <span class="normal">145</span>
@@ -7717,7 +7957,9 @@ cross sections with the same geometry share one config.</p>
 <span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span>
-<span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">inst</span><span class="p">:</span> <span class="n">ProtoInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoInstanceGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">other_inst</span><span class="p">:</span> <span class="n">ProtoInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoInstanceGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
@@ -7784,9 +8026,7 @@ cross sections with the same geometry share one config.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">70</span>
 <span class="normal">71</span>
 <span class="normal">72</span>
 <span class="normal">73</span>
@@ -7810,7 +8050,9 @@ cross sections with the same geometry share one config.</p>
 <span class="normal">91</span>
 <span class="normal">92</span>
 <span class="normal">93</span>
-<span class="normal">94</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortWidthMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PortWidthMismatchError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Error thrown when two ports don't have a matching `width`."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -7872,9 +8114,7 @@ cross sections with the same geometry share one config.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/exceptions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">73</span>
 <span class="normal">74</span>
 <span class="normal">75</span>
 <span class="normal">76</span>
@@ -7895,7 +8135,9 @@ cross sections with the same geometry share one config.</p>
 <span class="normal">91</span>
 <span class="normal">92</span>
 <span class="normal">93</span>
-<span class="normal">94</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">inst</span><span class="p">:</span> <span class="n">ProtoInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoInstanceGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">other_inst</span><span class="p">:</span> <span class="n">ProtoInstance</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoInstanceGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProtoPort</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>

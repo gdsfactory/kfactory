@@ -92,7 +92,7 @@ bend_um.plot()
 ```
 
 ```
-[32m2026-10-15 19:00:59.645[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-16 04:30:49.543[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_2 (cell_index=2) to bend_euler_CSsym_67c2bf20_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_67c2bf20_500_R10_A90_R150 (cell_index=0), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -225,7 +225,7 @@ c_two.plot()
 ```
 
 ```
-[32m2026-10-15 19:00:59.845[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-16 04:30:49.699[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_12 (cell_index=12) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=11), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -280,7 +280,7 @@ The typical PDK workflow is: 1. Define a `LayerEnclosure` for each waveguide typ
 
 | Topic | Where |
 | --- | --- |
-| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
-| Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/kcell_enclosure/index.md>) |
-| Straight waveguide (uses enclosure) | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/straight/index.md>) |
-| Width tapers (uses enclosure) | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/taper/index.md>) |
+| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.5.0/components/cross_sections/index.md>) |
+| Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](<https://gdsfactory.github.io/kfactory/3.5.0/enclosures/kcell_enclosure/index.md>) |
+| Straight waveguide (uses enclosure) | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/straight/index.md>) |
+| Width tapers (uses enclosure) | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/taper/index.md>) |

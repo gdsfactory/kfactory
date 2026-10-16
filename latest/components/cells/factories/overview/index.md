@@ -11,11 +11,11 @@ A **factory** in kfactory is a function that returns another function — a *cel
 
 | Factory | Module | Page |
 | --- | --- | --- |
-| `straight_dbu_factory` | `kf.factories.straight` | [Straight](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/straight/index.md>) |
-| `bend_euler_factory` / `bend_s_euler_factory` | `kf.factories.euler` | [Euler](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
-| `bend_circular_factory` | `kf.factories.circular` | [Circular](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/circular/index.md>) |
-| `bend_s_bezier_factory` | `kf.factories.bezier` | [Bezier](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/bezier/index.md>) |
-| `taper_factory` | `kf.factories.taper` | [Taper](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/taper/index.md>) |
+| `straight_dbu_factory` | `kf.factories.straight` | [Straight](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/straight/index.md>) |
+| `bend_euler_factory` / `bend_s_euler_factory` | `kf.factories.euler` | [Euler](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/euler/index.md>) |
+| `bend_circular_factory` | `kf.factories.circular` | [Circular](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/circular/index.md>) |
+| `bend_s_bezier_factory` | `kf.factories.bezier` | [Bezier](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/bezier/index.md>) |
+| `taper_factory` | `kf.factories.taper` | [Taper](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/taper/index.md>) |
 
 ## Factories and routing
 
@@ -64,7 +64,7 @@ __all__ = ["pdk", "straight", "bend_euler", "taper"]
 
 | Topic | Where |
 | --- | --- |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
-| Cross-sections | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
-| Routing integration | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
-| PDK bundling pattern | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/pcells/index.md>) |
+| Cross-sections | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.5.0/components/cross_sections/index.md>) |
+| Routing integration | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.5.0/routing/overview/index.md>) |
+| PDK bundling pattern | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.5.0/pdk/creating_pdk/index.md>) |

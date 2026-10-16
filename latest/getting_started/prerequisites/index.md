@@ -26,12 +26,12 @@ Download: [klayout.de/build.html](<https://www.klayout.de/build.html>)
 
 [klive](<https://github.com/gdsfactory/klive>) is a KLayout plug-in that streams GDS files directly from Python into the running KLayout window. It is not required to run kfactory, but it makes the interactive design loop much faster.
 
-See [KLive Setup](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/klive_setup/index.md>) for installation instructions.
+See [KLive Setup](<https://gdsfactory.github.io/kfactory/3.5.0/getting_started/klive_setup/index.md>) for installation instructions.
 
 ## See Also
 
 | Topic | Where |
 | --- | --- |
-| Installing kfactory | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/installation/index.md>) |
-| KLive streaming setup | [Getting Started: KLive Setup](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/klive_setup/index.md>) |
-| 5-minute quickstart | [Getting Started: Quickstart](<https://gdsfactory.github.io/kfactory/3.4.0/getting_started/quickstart/index.md>) |
+| Installing kfactory | [Getting Started: Installation](<https://gdsfactory.github.io/kfactory/3.5.0/getting_started/installation/index.md>) |
+| KLive streaming setup | [Getting Started: KLive Setup](<https://gdsfactory.github.io/kfactory/3.5.0/getting_started/klive_setup/index.md>) |
+| 5-minute quickstart | [Getting Started: Quickstart](<https://gdsfactory.github.io/kfactory/3.5.0/getting_started/quickstart/index.md>) |

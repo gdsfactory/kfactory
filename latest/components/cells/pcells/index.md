@@ -418,8 +418,8 @@ settings: KCellSettings(width=0.5, length=10)
 
 | Topic | Where |
 | --- | --- |
-| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
-| Virtual (non-physical) cells | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/virtual/index.md>) |
-| KCell / DKCell / VKCell basics | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) |
-| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/dbu_vs_um/index.md>) |
-| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) |
+| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/overview/index.md>) |
+| Virtual (non-physical) cells | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/virtual/index.md>) |
+| KCell / DKCell / VKCell basics | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/kcell/index.md>) |
+| DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/dbu_vs_um/index.md>) |
+| Creating a full PDK | [PDK: Creating a PDK](<https://gdsfactory.github.io/kfactory/3.5.0/pdk/creating_pdk/index.md>) |

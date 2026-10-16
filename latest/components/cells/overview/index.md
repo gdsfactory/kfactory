@@ -412,12 +412,12 @@ arm.plot()
 
 | Topic | Where |
 | --- | --- |
-| Straight waveguide deep-dive | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/straight/index.md>) |
-| Euler (clothoid) bends | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
-| Circular (constant-radius) bends | [Components: Circular Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/circular/index.md>) |
-| Width tapers | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/taper/index.md>) |
-| Bezier S-bends | [Components: Bezier](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/bezier/index.md>) |
-| Virtual (non-physical) cells | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/virtual/index.md>) |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
-| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
-| KCell / DKCell / VKCell | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kcell/index.md>) |
+| Straight waveguide deep-dive | [Components: Straight](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/straight/index.md>) |
+| Euler (clothoid) bends | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/euler/index.md>) |
+| Circular (constant-radius) bends | [Components: Circular Bends](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/circular/index.md>) |
+| Width tapers | [Components: Tapers](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/taper/index.md>) |
+| Bezier S-bends | [Components: Bezier](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/bezier/index.md>) |
+| Virtual (non-physical) cells | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/virtual/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/pcells/index.md>) |
+| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/overview/index.md>) |
+| KCell / DKCell / VKCell | [Core Concepts: KCell](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/kcell/index.md>) |

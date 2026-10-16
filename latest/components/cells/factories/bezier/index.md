@@ -95,7 +95,7 @@ print("cell info:", dict(b_meta.info))
 ```
 
 ```
-[32m2026-10-15 19:01:04.847[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
+[32m2026-10-16 04:30:55.477[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
 Renaming Unnamed_8 (cell_index=8) to bend_s_bezier_CSsym_028523d7_500_H5_L20_NP99_TS0_TS1 would cause it to be named the same as:
  - bend_s_bezier_CSsym_028523d7_500_H5_L20_NP99_TS0_TS1 (cell_index=0), function_name=_bend_s_bezier, basename=bend_s_bezier[0m
 
@@ -107,6 +107,6 @@ cell info: {'pdk': 'FACTORIES_BEZIER_DEMO', 'component_type': 'bezier_sbend'}
 
 | Topic | Where |
 | --- | --- |
-| Factory overview | [Factories: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
-| Euler S-bend (clothoid alternative) | [Factories: Euler](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
-| All-angle routing with S-bends | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/all_angle/index.md>) |
+| Factory overview | [Factories: Overview](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/overview/index.md>) |
+| Euler S-bend (clothoid alternative) | [Factories: Euler](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/euler/index.md>) |
+| All-angle routing with S-bends | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.5.0/routing/all_angle/index.md>) |

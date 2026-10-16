@@ -11,7 +11,7 @@ A minimal PDK has four ingredients:
 | `LayerEnclosure` | Cladding/slab geometry rules around waveguide cores |
 | Factories | Functions that stamp cells into the layout (straight, bend, taper, …) |
 
-The section on [KCLayout](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/kclayout/index.md>) covers the layout object in depth. The section on [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) covers cross-section registration. This page shows how to wire everything together into a single reusable module.
+The section on [KCLayout](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/kclayout/index.md>) covers the layout object in depth. The section on [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.5.0/components/cross_sections/index.md>) covers cross-section registration. This page shows how to wire everything together into a single reusable module.
 
 ## 1 · Layers
 
@@ -51,7 +51,7 @@ print(f"WG layer index: {pdk.find_layer(L.WG)}")
 ```
 
 ```
-PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7fe4f5d90a70> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fe544d8c5f0> factories=<kfactory.layout.Factories object at 0x7fe4f5d0b750> virtual_factories=<kfactory.layout.Factories object at 0x7fe4f5d19940> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fe51c1c0040> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fe4f5da8370> info=Info() settings=KCellSettings(version='3.4.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fe4f5d0b9d0> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
+PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7fe8e3ba4b00> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fe93896c500> factories=<kfactory.layout.Factories object at 0x7fe8e3b27610> virtual_factories=<kfactory.layout.Factories object at 0x7fe8e3b2da70> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fe906fd4460> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fe8e3bbcaf0> info=Info() settings=KCellSettings(version='3.5.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fe8e3b27890> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
 dbu:  0.001 µm/DBU  (1 nm grid)
 WG layer index: WG
 ```
@@ -420,9 +420,9 @@ Top cells: ['straight_CSsym_STRIP_500_L20000', 'bend_euler_CSsym_STRIP_500_R10_A
 
 | Topic | Where |
 | --- | --- |
-| Layer stacks &amp; technology data | [PDK: Technology](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/technology/index.md>) |
-| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
-| Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) |
-| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/pcells/index.md>) |
-| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/overview/index.md>) |
-| Session caching (fast reload) | [Utilities: Session Cache](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/session_cache/index.md>) |
+| Layer stacks &amp; technology data | [PDK: Technology](<https://gdsfactory.github.io/kfactory/3.5.0/pdk/technology/index.md>) |
+| Cross-sections (port geometry) | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.5.0/components/cross_sections/index.md>) |
+| Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.5.0/enclosures/layer_enclosure/index.md>) |
+| PCells &amp; caching | [Components: PCells](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/pcells/index.md>) |
+| Factory functions reference | [Components: Factories](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/overview/index.md>) |
+| Session caching (fast reload) | [Utilities: Session Cache](<https://gdsfactory.github.io/kfactory/3.5.0/utilities/session_cache/index.md>) |

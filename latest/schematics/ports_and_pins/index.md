@@ -7,7 +7,7 @@ A schematic exposes connectivity to the outside world through two complementary 
 
 This tutorial covers both APIs end-to-end: how to expose ports at the schematic level, how to pin them together, how the schematic stores everything as Pydantic data, and how the YAML round-trip works.
 
-For schematic basics (instances, placements, connections) see [Schematic-Driven Design](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/overview/index.md>).
+For schematic basics (instances, placements, connections) see [Schematic-Driven Design](<https://gdsfactory.github.io/kfactory/3.5.0/schematics/overview/index.md>).
 
 ```
 import kfactory as kf
@@ -133,7 +133,7 @@ def fanout_port() -> kf.Schematic:
 
 > [!NOTE]
 >
-> `create_port` requires a registered cross-section. The example above assumes a `WG_500` cross-section was registered on the PDK; in this notebook we don't instantiate `fanout_port()` because the PDK has no cross-section table — it's here for API illustration only. See the [PDK page](<https://gdsfactory.github.io/kfactory/3.4.0/pdk/creating_pdk/index.md>) for setting up cross-sections.
+> `create_port` requires a registered cross-section. The example above assumes a `WG_500` cross-section was registered on the PDK; in this notebook we don't instantiate `fanout_port()` because the PDK has no cross-section table — it's here for API illustration only. See the [PDK page](<https://gdsfactory.github.io/kfactory/3.5.0/pdk/creating_pdk/index.md>) for setting up cross-sections.
 
 ## Part 2 — Pins
 

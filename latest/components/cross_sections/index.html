@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/">
+        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.5.0/components/cross_sections/">
       
       
         <link rel="describedby" href="../../llms.txt">
@@ -85,15 +85,15 @@
   <meta property="og:type" content="website" />
 <meta property="og:title" content="Cross-Sections - KFactory" />
 <meta property="og:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/components/cross_sections.png" />
+<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.5.0/assets/images/social/components/cross_sections.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/" />
+<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.5.0/components/cross_sections/" />
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:title" content="Cross-Sections - KFactory" />
 <meta property="twitter:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/components/cross_sections.png" />
+<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.5.0/assets/images/social/components/cross_sections.png" />
 </head>
   
   
@@ -1863,6 +1863,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Summary of asymmetric port behavior
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-section-checks-in-connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Cross section checks in <code>connect</code>
       </span>
     </span>
   </a>
@@ -6153,6 +6164,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#cross-section-checks-in-connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Cross section checks in <code>connect</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -6704,7 +6726,9 @@ up with a mirror flag.</p>
 <p>kfactory validates this by requiring the two connected asymmetric ports to
 have opposite mirror flags in world space. If they'd line up with the same
 orientation (an R180 join, which flips the profile), it raises
-<code>AsymmetricMirrorRequiredError</code>.</p>
+<code>AsymmetricMirrorRequiredError</code>. This applies to all asymmetric ports of the
+same width and layer, see
+<a href="#cross-section-checks-in-connect">Cross section checks in <code>connect</code></a>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">parent_chain</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"asym_chain_ok"</span><span class="p">)</span>
 <span class="n">ia</span> <span class="o">=</span> <span class="n">parent_chain</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
 <span class="n">ib</span> <span class="o">=</span> <span class="n">parent_chain</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
@@ -6743,7 +6767,7 @@ too, but the result has one of the two instances flipped.</p>
 <span class="n">parent_o1o1</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>WITHOUT mirror=True, o1↔o1 raises:
-  AsymmetricMirrorRequiredError: Cannot connect ports 'o1' and 'o1' carrying the same asymmetric cross section without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
+  AsymmetricMirrorRequiredError: Cannot connect ports 'o1' and 'o1' carrying asymmetric cross sections without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
 
 WITH mirror=True (one instance mirrored):
   ia2.trans: r0 0,0  (mirror=False)
@@ -6753,10 +6777,10 @@ WITH mirror=True (one instance mirrored):
 </code></pre></div>
 <img alt="png" src="../cross_sections/output_26_1.png" /></p>
 <h3 id="connecting-symmetric-asymmetric-structural-mismatch">Connecting symmetric ↔ asymmetric: structural mismatch</h3>
-<p>A port carrying a <code>SymmetricalCrossSection</code> cannot connect to one carrying an
-<code>AsymmetricalCrossSection</code> — the two are structurally different objects.
-This raises <code>CrossSectionSymmetryMismatchError</code> <strong>before</strong> the width/layer
-checks, and it's not bypassable by <code>allow_width_mismatch=True</code>.</p>
+<p>With strict cross section checks, a port carrying a <code>SymmetricalCrossSection</code>
+cannot connect to one carrying an <code>AsymmetricalCrossSection</code> of the same width
+and layer — the two are structurally different objects. This raises
+<code>CrossSectionSymmetryMismatchError</code>. By default, they connect.</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@kf</span><span class="o">.</span><span class="n">cell</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">sym_straight</span><span class="p">(</span><span class="n">cross_section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"WG_500"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Plain symmetric straight for the mismatch demo."""</span>
@@ -6771,25 +6795,38 @@ checks, and it's not bypassable by <code>allow_width_mismatch=True</code>.</p>
     <span class="k">return</span> <span class="n">c</span>
 
 
+<span class="c1"># A 500-dbu asymmetric strip, so that it matches WG_500 in width and layer.</span>
+<span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">AsymmetricalCrossSection</span><span class="p">(</span>
+        <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span> <span class="n">section_min</span><span class="o">=-</span><span class="mi">200</span><span class="p">,</span> <span class="n">section_max</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"ASYM_500"</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
 <span class="n">parent_mix</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"asym_sym_mismatch"</span><span class="p">)</span>
 <span class="n">sym_inst</span> <span class="o">=</span> <span class="n">parent_mix</span> <span class="o">&lt;&lt;</span> <span class="n">sym_straight</span><span class="p">(</span><span class="s2">"WG_500"</span><span class="p">)</span>
-<span class="n">asym_inst</span> <span class="o">=</span> <span class="n">parent_mix</span> <span class="o">&lt;&lt;</span> <span class="n">straight</span>
+<span class="n">asym_inst</span> <span class="o">=</span> <span class="n">parent_mix</span> <span class="o">&lt;&lt;</span> <span class="n">asym_straight</span><span class="p">(</span><span class="s2">"ASYM_500"</span><span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">asym_inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">sym_inst</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">)</span>
+    <span class="n">asym_inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">sym_inst</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">,</span> <span class="n">allow_cross_section_mismatch</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">except</span> <span class="n">CrossSectionSymmetryMismatchError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Symmetric ↔ asymmetric connect raises:"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Strict symmetric ↔ asymmetric connect raises:"</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  CrossSectionSymmetryMismatchError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="n">asym_inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">sym_inst</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Default connect succeeds."</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Symmetric ↔ asymmetric connect raises:
+<div class="highlight"><pre><span></span><code>Strict symmetric ↔ asymmetric connect raises:
+
+
   CrossSectionSymmetryMismatchError: Cross section symmetry mismatch between ports 'o1' (asymmetric) and 'o2' (symmetric). Symmetric and asymmetric cross sections cannot be connected.
+Default connect succeeds.
 </code></pre></div>
 <h3 id="summary-of-asymmetric-port-behavior">Summary of asymmetric port behavior</h3>
 <table>
 <thead>
 <tr>
 <th>Scenario</th>
-<th>Default <code>connect()</code></th>
+<th><code>connect()</code></th>
 <th><code>connect(mirror=True)</code></th>
 </tr>
 </thead>
@@ -6810,16 +6847,125 @@ checks, and it's not bypassable by <code>allow_width_mismatch=True</code>.</p>
 <td>works, one instance mirrored</td>
 </tr>
 <tr>
-<td>sym ↔ asym</td>
-<td><code>CrossSectionSymmetryMismatchError</code> (not bypassable)</td>
-<td>same error</td>
+<td>sym ↔ asym (same width and layer)</td>
+<td>works; strict: <code>CrossSectionSymmetryMismatchError</code></td>
+<td>same</td>
 </tr>
 </tbody>
 </table>
 <p>The check is on the <strong>mirror flags</strong>: kfactory requires the two connected
 asymmetric ports to end up with opposite mirror orientations (an M90 join). A
 natural <code>o2 → o1</code> chain already satisfies this via the port frames, so it
-works by default and adding <code>mirror=True</code> would over-mirror it and raise.</p>
+works without <code>mirror=True</code>, and adding <code>mirror=True</code> would over-mirror it and
+raise.</p>
+<h3 id="cross-section-checks-in-connect">Cross section checks in <code>connect</code></h3>
+<p>Besides width, layer and port type, <code>connect</code> checks the cross sections of
+the two ports. These checks only apply to ports with the same width and main
+layer: a cross section determines both, so an allowed width or layer mismatch
+already implies a cross section mismatch, and the checks are skipped.</p>
+<p>Two asymmetric profiles must never be flipped against each other: their
+ports need opposite mirror flags after the connection, otherwise
+<code>AsymmetricMirrorRequiredError</code> is raised (see above). Only then do both
+profiles share a frame, and the <code>allow_cross_section_mismatch</code> flag selects
+how strictly they are compared:</p>
+<table>
+<thead>
+<tr>
+<th>Ports (same width and layer)</th>
+<th><code>True</code> (default)</th>
+<th><code>False</code> (strict)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>symmetric ↔ asymmetric</td>
+<td>connects</td>
+<td><code>CrossSectionSymmetryMismatchError</code></td>
+</tr>
+<tr>
+<td>asymmetric, identical</td>
+<td>connects</td>
+<td>connects</td>
+</tr>
+<tr>
+<td>asymmetric, different</td>
+<td>core offsets (<code>section_min</code>/<code>section_max</code>) must match, otherwise <code>AsymmetricCoreMismatchError</code></td>
+<td><code>CrossSectionMismatchError</code></td>
+</tr>
+<tr>
+<td>symmetric, different enclosure</td>
+<td>connects</td>
+<td>connects</td>
+</tr>
+</tbody>
+</table>
+<p>The default is <code>True</code> for now. It is planned to change to <code>False</code> in
+kfactory 4.0.</p>
+<p><strong>For a single connection</strong>, pass the flag to <code>connect</code>. <code>VInstance.connect</code>
+and <code>InstanceGroup.connect</code> take it as well:</p>
+<div class="highlight"><pre><span></span><code><span class="n">inst</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">,</span> <span class="n">allow_cross_section_mismatch</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Globally</strong>, set it in the config. A value passed to <code>connect</code> still takes
+precedence:</p>
+<div class="highlight"><pre><span></span><code><span class="n">kf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">allow_cross_section_mismatch</span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div>
+<p>The config can also be set from the environment or a <code>.env</code> file, see
+<a href="../../config/">Config</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">KFACTORY_ALLOW_CROSS_SECTION_MISMATCH</span><span class="o">=</span><span class="nb">false</span>
+</code></pre></div>
+<p><strong>Impact.</strong> The default doesn't catch symmetric ↔ asymmetric connections or
+asymmetric cross sections that only differ outside their core. Strict checks
+do, but:</p>
+<ul>
+<li>Every connection between asymmetric ports of the same width and layer
+  needs identical cross sections. Different extra sections or offset cores
+  raise <code>CrossSectionMismatchError</code>.</li>
+<li>Connecting a symmetric to an asymmetric port of the same width and layer
+  raises <code>CrossSectionSymmetryMismatchError</code>.</li>
+<li>Connections between symmetric ports are unaffected: <code>connect</code> never
+  compares enclosures. Use
+  <code>kf.checks.port_mismatch_check(cell, check_cross_section=True)</code> to report
+  connected ports whose cross sections differ.</li>
+<li>Routing functions don't take the flag and use the config value, so setting
+  it globally applies to routes as well.</li>
+</ul>
+<p>The demo below connects two asymmetric cross sections that share a core but
+differ in their extra sections.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">kfactory.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">CrossSectionMismatchError</span>
+
+<span class="n">kf</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">get_asymmetrical_cross_section</span><span class="p">(</span>
+    <span class="n">kf</span><span class="o">.</span><span class="n">AsymmetricalCrossSection</span><span class="p">(</span>
+        <span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WG</span><span class="p">,</span>
+        <span class="n">section_min</span><span class="o">=-</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">section_max</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">sections</span><span class="o">=</span><span class="p">(</span>
+            <span class="n">kf</span><span class="o">.</span><span class="n">CrossSectionLayer</span><span class="p">(</span><span class="n">layer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">WGCLAD</span><span class="p">,</span> <span class="n">section_min</span><span class="o">=-</span><span class="mi">200</span><span class="p">,</span> <span class="n">section_max</span><span class="o">=</span><span class="mi">2_300</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"ASYM_500_CLAD"</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">parent_xs</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"asym_xs_mismatch"</span><span class="p">)</span>
+<span class="n">plain</span> <span class="o">=</span> <span class="n">parent_xs</span> <span class="o">&lt;&lt;</span> <span class="n">asym_straight</span><span class="p">(</span><span class="s2">"ASYM_500"</span><span class="p">)</span>
+<span class="n">clad</span> <span class="o">=</span> <span class="n">parent_xs</span> <span class="o">&lt;&lt;</span> <span class="n">asym_straight</span><span class="p">(</span><span class="s2">"ASYM_500_CLAD"</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">clad</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">plain</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">,</span> <span class="n">allow_cross_section_mismatch</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">CrossSectionMismatchError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Strict connect raises:"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  CrossSectionMismatchError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="n">clad</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">"o1"</span><span class="p">,</span> <span class="n">plain</span><span class="p">,</span> <span class="s2">"o2"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Default connect succeeds, the cores match."</span><span class="p">)</span>
+<span class="n">parent_xs</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>Strict connect raises:
+  CrossSectionMismatchError: Cross section mismatch between the ports 'o1' ('ASYM_500_CLAD') and 'o2' ('ASYM_500').
+
+Default connect succeeds, the cores match.
+</code></pre></div>
+<p><div class="highlight"><pre><span></span><code>
+</code></pre></div>
+<img alt="png" src="../cross_sections/output_31_1.png" /></p>
 <h2 id="bounding-box-layers">Bounding-box layers</h2>
 <p>Both symmetric and asymmetric cross-section wrappers provide <code>add_bbox</code>.
 It draws <code>bbox_sections</code>, not the ordinary cladding <code>sections</code>, into a KCell,

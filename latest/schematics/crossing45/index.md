@@ -58,7 +58,7 @@ kf.kcl.get_icross_section(xs_wg1)
 ```
 
 ```
-<kfactory.cross_section.CrossSection at 0x7f14110abc50>
+<kfactory.cross_section.CrossSection at 0x7f7457cabb10>
 ```
 
 ## The `cross` cell
@@ -465,7 +465,7 @@ c
 ```
 
 ```
-[32m2026-10-15 19:00:47.852[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
+[32m2026-10-16 04:30:36.865[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
 ```
 
 ```
@@ -510,7 +510,7 @@ Code(c.schematic.code_str())
 ```
 
 ```
-[32m2026-10-15 19:00:48.182[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-16 04:30:37.200[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -1537,7 +1537,7 @@ This example combined several advanced kfactory features:
 
 | Topic | Where |
 | --- | --- |
-| Schematic basics (placement, connect, LVS) | [Schematics: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/overview/index.md>) |
-| Netlist data model &amp; serialization | [Schematics: Netlist](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/netlist/index.md>) |
-| Virtual cells in detail | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/virtual/index.md>) |
-| Cross-sections &amp; enclosures | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>) |
+| Schematic basics (placement, connect, LVS) | [Schematics: Overview](<https://gdsfactory.github.io/kfactory/3.5.0/schematics/overview/index.md>) |
+| Netlist data model &amp; serialization | [Schematics: Netlist](<https://gdsfactory.github.io/kfactory/3.5.0/schematics/netlist/index.md>) |
+| Virtual cells in detail | [Components: Virtual Cells](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/virtual/index.md>) |
+| Cross-sections &amp; enclosures | [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.5.0/components/cross_sections/index.md>) |

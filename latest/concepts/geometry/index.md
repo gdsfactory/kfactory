@@ -308,6 +308,6 @@ Wrote demo_geometry.gds (1032 bytes)
 
 | Topic | Where |
 | --- | --- |
-| DRC spacing fixes (Region-based) | [Utilities: DRC Fixing](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/drc_fix/index.md>) |
-| Auto-cladding via Minkowski sum | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.4.0/enclosures/layer_enclosure/index.md>) |
-| Fill tiling with Region exclusions | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.4.0/utilities/fill/index.md>) |
+| DRC spacing fixes (Region-based) | [Utilities: DRC Fixing](<https://gdsfactory.github.io/kfactory/3.5.0/utilities/drc_fix/index.md>) |
+| Auto-cladding via Minkowski sum | [Enclosures: Layer Enclosure](<https://gdsfactory.github.io/kfactory/3.5.0/enclosures/layer_enclosure/index.md>) |
+| Fill tiling with Region exclusions | [Utilities: Fill](<https://gdsfactory.github.io/kfactory/3.5.0/utilities/fill/index.md>) |

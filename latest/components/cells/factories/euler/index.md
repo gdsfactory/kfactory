@@ -97,4 +97,4 @@ S-bend: bend_s_euler_CSsym_028523d7_500_O5_R10_R150
 
 | Topic | Where |
 | --- | --- |
-| Optical routing with euler bends | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.4.0/routing/optical/index.md>) |
+| Optical routing with euler bends | [Routing: Optical](<https://gdsfactory.github.io/kfactory/3.5.0/routing/optical/index.md>) |

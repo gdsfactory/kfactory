@@ -1,6 +1,6 @@
 # Optical Routing — Deep Dive
 
-This page covers advanced optical routing features. For a quick intro see [Routing Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>).
+This page covers advanced optical routing features. For a quick intro see [Routing Overview](<https://gdsfactory.github.io/kfactory/3.5.0/routing/overview/index.md>).
 
 | Topic | API |
 | --- | --- |
@@ -396,10 +396,10 @@ All coordinates passed to `KCell`-based APIs are in **DBU** (1 nm = 1 DBU with d
 
 | Topic | Where |
 | --- | --- |
-| Routing overview (optical + electrical entry point) | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.4.0/routing/overview/index.md>) |
-| Bundle routing details: sort, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>) |
-| Equal path-length loops | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.4.0/routing/path_length/index.md>) |
-| Low-level backbone + Steps API | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.4.0/routing/manhattan/index.md>) |
-| All-angle (non-manhattan) routing | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.4.0/routing/all_angle/index.md>) |
-| Euler bend effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.4.0/components/cells/factories/euler/index.md>) |
-| Port construction and connection | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.4.0/concepts/ports/index.md>) |
+| Routing overview (optical + electrical entry point) | [Routing: Overview](<https://gdsfactory.github.io/kfactory/3.5.0/routing/overview/index.md>) |
+| Bundle routing details: sort, sbend, bbox modes | [Routing: Bundle](<https://gdsfactory.github.io/kfactory/3.5.0/routing/bundle/index.md>) |
+| Equal path-length loops | [Routing: Path Length](<https://gdsfactory.github.io/kfactory/3.5.0/routing/path_length/index.md>) |
+| Low-level backbone + Steps API | [Routing: Manhattan](<https://gdsfactory.github.io/kfactory/3.5.0/routing/manhattan/index.md>) |
+| All-angle (non-manhattan) routing | [Routing: All-Angle](<https://gdsfactory.github.io/kfactory/3.5.0/routing/all_angle/index.md>) |
+| Euler bend effective radius | [Components: Euler Bends](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/euler/index.md>) |
+| Port construction and connection | [Core Concepts: Ports](<https://gdsfactory.github.io/kfactory/3.5.0/concepts/ports/index.md>) |

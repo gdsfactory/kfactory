@@ -1,0 +1,227 @@
+# Coming from gdsfactory
+
+kfactory is based on KLayout and therefore has quite a few fundamental differences to gdsfactory.
+
+A Component in gdsfactory corresponds to a KCell in kfactory. ComponentReference is represented in kfactory as an Instance.
+
+## KCLayout / KCell / Instance
+
+KLayout uses a [Layout](<https://klayout.de/doc/code/class_Layout.html>) object as a base. Cells (and KCells) must have a Layout as a base, they cannot work without one. Therefore a KCell will always be attached to a KCLayout which is an extension of a layout object. Kfactory provides a default KCLayout objective kfactory.kcl which all KCells not specifying another KCLayout in the constructor will use.
+
+This KCLayout object contains all the KCells and also keeps track of the layers.
+
+Similar to the KCell, which cannot exist without a KCLayout, an instance cannot exist without being part of a KCell. It must be created through the KCell.
+
+## Layers
+
+Compared to gdsfactory, KLayout needs to initialize new layers. Layers are always associated or part of one KCLayout. They cannot be shared or used in another KCLayout without a function that specifically copies it from one KCLayout to another. It can be done directly in the KCLayout object with `kcl.layer(layernumber, datatype)` which will return an integer. This integer is the internal index of the layer, meaning KLayout will keep layers in a mapping (dictionary) like structure.
+
+kfactory also provides an enum class LayerEnum to do the mapping for the (default) KCLayout. This can be done in the standard enum way
+
+> [!NOTE]
+>
+> **LayerEnum**
+>
+> ```
+> class LAYER(kfactory.LayerEnum):
+>     WG = (1, 0)
+>     WGEXCLUDE = (1, 1)
+> ```
+
+Or it can be done dynamically with a slightly more complex syntax.
+
+> [!NOTE]
+>
+> **Dynamic LayerEnum**
+>
+> ```
+> LAYER = kfactory.LayerEnum("LAYER", {"WG": (1, 0), "WGEXCLUDE": (1, 1)})
+> ```
+
+The first argument represents the name of the enum that will be used for the `__str__` or `__repr__` methods. It is strongly recommended to name it the same as the variable it is assigned to. This will make sure that the behavior is the same as the one that was constructed first.
+
+The LayerEnum also allows mapping from string to layer index and layer number and datatype:
+
+> [!NOTE]
+>
+> **Accessing LayerEnum by index or name and getting layer number &amp; datatype**
+>
+> ```
+> >>> LAYER = kfactory.LayerEnum("LAYER", {"WG": (1,0), "WGEXCLUDE": (1,1)})
+> >>> LAYER.WG
+> <LAYER.WG: 0>
+> >>> LAYER["WG"]
+> <LAYER.WG: 0>
+> >>> LAYER(0)
+> <LAYER.WG: 0>
+> >>> LAYER.WG.datatype
+> 0
+> >>> LAYER.WG.layer
+> 1
+> ```
+
+> [!CAUTION]
+>
+> **Layer Indexes**
+>
+> In KLayout it is possible to push shapes or other layer associated objects into layer indexes that do not exist (yet or even ever). Therefore always use either the `LayerEnum` to access a shapes object or use the KLayout tools to do so. E.g. shapes on layer `(1,0)` can either be accessed with `c.shapes(LAYER.WG)` or `c.shapes(c.kcl.layer(1,0))`. It is never good practice to do `c.shapes(0)` even if layer index 0 exists. If you import this module later on, index 0 might be something else, or even worse, be deleted.
+
+## Shapes
+
+In contrast to gdsfactory, every geometrical dimension is represented as an object. All the objects are available in two flavors. Integer based for the mapping to the grid of gds/oasis in database units (dbu) or a floating version, which is measured in micrometer.
+
+| Object (dbu) | Object (um) | Description |
+| --- | --- | --- |
+| Point | DPoint | Holds x/y coordinate in dbu |
+| Vector | DVector | Similar to a point, but can be used for geometry operations and can be multiplied |
+| Edge | DEdge | Connection of two points (p1/p2) and is aware of the two sides |
+| Box | DBox | A rectangle defined through two points. Rotating a box will result in a bigger box |
+| SimplePolygon | DSimplePolygon | A polygon that has no holes (this is what all polygons will be converted to when inserting) |
+| Polygon | DPolygon | Like the simple polygon but this one can have holes and allows operations like sizing |
+| Text | DText | Labels. They can have a full transformation, but KLayout does not show full transformations by default |
+| Shape | \- | A generalized container for other geometric objects that allows storage and retrieval |
+| Shapes | \- | A flat collection of shapes. Used by KCells to access shapes in a cell |
+| Region | \- | Flat or deep collection of polygons. Any other dbu shape can be inserted (except Texts) |
+
+In kfactory and KLayout these objects can live outside of a (K)Cell. Therefore it is not possible to create them through the KCell like in gdsfactory.
+
+These objects can be inserted into a KCell with `c.shapes(layer_index).insert(shape_like_object)`.
+
+### gdsfactory's `add_polygon` in kfactory
+
+In gdsfactory polygons are usually created through `c.add_polygon(pts, layer_tuple)`. In kfactory this is not directly possible, nor very useful, as not all geometrical objects are polygons. Additionally, kfactory and KLayout do not know layers without a datatype and integers alone are interpreted as layer indexes not as a `(layer_number, 0)` tuple (a data structure consisting of multiple parts).
+
+In kfactory a `Polygon` can be created like this and then inserted into KCell `c` with `c.shapes(layer_index).insert(polygon)`. Since the objects are not linked to any KCell, they can be used multiple times. Using the `LAYER` object from above, a code could look like this:
+
+> [!NOTE]
+>
+> **Polygon**
+>
+> ```
+> # dbu based
+> points = [kfactory.kdb.Point(x, y) for x, y in [(0, 0), (1000, 0), (500, 500)]]
+> polygon = kfactory.kdb.Polygon(points)
+> c.shapes(LAYER.WG).insert(polygon)
+> c.shapes(LAYER.WGEXCLUDE).insert(polygon)
+> # um based
+> dpoints = [kfactory.kdb.DPoint(x, y) for x, y in [(0, 0), (1000, 0), (500, 500)]]
+> dpolygon = kfactory.kdb.DPolygon(dpoints)
+> c.shapes(LAYER.WG).insert(dpolygon)
+> c.shapes(LAYER.WGEXCLUDE).insert(dpolygon)
+> ```
+
+Due to the bulky nature of this code, kfactory provides convenience functions for polygons and dpolygons to convert arrays of shapes `[n, 2]` into a `(D)Polygon` directly:
+
+> [!NOTE]
+>
+> **Polygon from Array**
+>
+> ```
+> # dbu based
+> polygon = kfactory.polygon_from_array([(0, 0), (10, 0), (5, 5)])
+> c.shapes(LAYER.WG).insert(polygon)
+> c.shapes(LAYER.WGEXCLUDE).insert(polygon)
+> # um based
+> dpolygon = kfactory.dpolygon_from_array([(0, 0), (10, 0), (5, 5)])
+> c.shapes(LAYER.WG).insert(dpolygon)
+> c.shapes(LAYER.WGEXCLUDE).insert(dpolygon)
+> ```
+
+### gdsfactory's `add_label` in kfactory
+
+Similar to the `add_polygon` function, `add_label` acts as a text record to a cell. Due to the nature of the layer number, which is isolated in gdsfactory vs layer index in kfactory, there is no `add_label` in kfactory. Instead they can be used like any other shape object.
+
+> [!NOTE]
+>
+> **Text**
+>
+> ```
+> # dbu based
+> c.shapes(LAYER.WG).insert(kfactory.kdb.Text("any string here", x_dbu, y_dbu))
+> # um based
+> c.shapes(LAYER.WG).insert(kfactory.kdb.DText("any string here", x_um, y_um))
+> ```
+
+## Connecting Ports
+
+kfactory also offers `c.connect(port_name, other_port)` like gdsfactory does. It does not exactly do the same thing as in gdsfactory though. A Port in kfactory will always try to be on a grid. Additionally the port is using `kfactory.kdb.Trans` and `kfactory.kdb.DCplxTrans` by default, similar to an instance. This also means that a port is aware of mirroring. Since a `connect` can be simplified to `instance.trans = other_port.trans * kfactory.kdb.Trans.R180 * port.trans.inversed()` (for the 90° on-grid cases), it can be seen that the center, angle and mirror flag of the `instance` is overwritten. Therefore, any move / rotation / mirror of the instance `connect` is called on, will have no influence on the state after the connect.
+
+Also, as with gdsfactory `connect`, it is not final. It does not imply any shared link between the instances after the `connect`, it is simply a transformation with some checks concerning the layer, width and port type matching.
+
+> [!NOTE]
+>
+> **Example**
+>
+> ```
+> # inst1,inst2 are instances
+> # connect inst1 "o1" to inst2 "o2"
+> inst1.connect("o1", inst2.ports["o2"])
+> # also possible
+> inst1.connect("o1", inst2, "o2")
+> ### If inst2 "o2" had trans.is_mirror() == True, inst1's transformation now also has is_mirror() == True
+> ```
+
+## Cross-Sections &amp; Enclosures
+
+kfactory has full support for cross-sections. CrossSection and DCrossSection define port geometry — width, layer, and an optional LayerEnclosure for cladding. SymmetricalCrossSection is the most common form: it defines a symmetric waveguide profile by combining a core layer with an enclosure.
+
+Cross-sections can be registered on a `KCLayout` and looked up by name, making them cacheable:
+
+```
+import kfactory as kf
+
+
+class LAYER(kf.LayerInfos):
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
+
+
+L = LAYER()
+kf.kcl.infos = L
+
+enc = kf.LayerEnclosure(
+    sections=[(kf.kcl.find_layer(L.WGEX), 2000)], main_layer=kf.kcl.find_layer(L.WG)
+)
+xs = kf.SymmetricalCrossSection(
+    width=500, enclosure=enc, layer=kf.kcl.find_layer(L.WG), name="xs_wg"
+)
+kf.kcl.get_icross_section(xs)  # registers & returns the cross-section
+
+# Later — retrieve by name (hashable, safe inside @kf.cell):
+xs_retrieved = kf.kcl.get_icross_section("xs_wg")
+```
+
+See [Cross-Sections &amp; Enclosures](<https://gdsfactory.github.io/kfactory/3.5.0/components/cross_sections/index.md>) for a full walkthrough.
+
+Beyond cross-sections, kfactory provides a more generalised cladding system: enclosures are not limited to path-like backbones. LayerEnclosure can apply cladding/exclusion to arbitrary regions or entire layers, and KCellEnclosure can merge all sub-cell geometry before expanding — useful for complex multi-component assemblies.
+
+See [Layer Enclosures](<https://gdsfactory.github.io/kfactory/3.5.0/enclosures/layer_enclosure/index.md>) and [KCell Enclosures](<https://gdsfactory.github.io/kfactory/3.5.0/enclosures/kcell_enclosure/index.md>) for details.
+
+## Routing
+
+kfactory has comprehensive routing support across several sub-modules:
+
+| Sub-module | Use case |
+| --- | --- |
+| `kf.routing.optical` | Bend-based optical routing: `route_bundle`, `place_manhattan`, `route_loopback`, path-length matching |
+| `kf.routing.electrical` | Wire routing: `route_bundle`, dual-rail (`route_bundle_dual_rails`) |
+| `kf.routing.manhattan` | Low-level Manhattan backbone: `route_manhattan`, `route_manhattan_180`, Steps API |
+| `kf.routing.aa.optical` | All-angle (diagonal) routing via `route` / `route_bundle` |
+
+### Comparing with gdsfactory routing
+
+| gdsfactory | kfactory equivalent |
+| --- | --- |
+| `route_single` | `route_bundle` with one start/end port |
+| `route_bundle` | `kf.routing.optical.route_bundle` |
+| `get_bundle` | `kf.routing.optical.route_bundle` (returns `ManhattanRoute` objects) |
+| `get_route` | `kf.routing.optical.route_bundle` (single route) |
+| Cross-section in route | Pass `straight_factory` + `bend90_cell` built from your cross-section |
+
+> [!NOTE]
+>
+> **Effective bend radius**
+>
+> Euler bends extend slightly beyond their nominal radius. Always use `kf.routing.optical.get_radius(bend_cell.ports)` (not the nominal µm value) when passing `bend90_radius` to DBU-based routing functions; the result is in DBU. See [Euler Bends](<https://gdsfactory.github.io/kfactory/3.5.0/components/cells/factories/euler/index.md>) for details.
+
+See the [Routing](<https://gdsfactory.github.io/kfactory/3.5.0/routing/overview/index.md>) section for full examples.

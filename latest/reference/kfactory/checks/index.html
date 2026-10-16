@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.4.0/reference/kfactory/checks/">
+        <link rel="canonical" href="https://gdsfactory.github.io/kfactory/3.5.0/reference/kfactory/checks/">
       
       
         <link rel="describedby" href="../../../llms.txt">
@@ -85,15 +85,15 @@
   <meta property="og:type" content="website" />
 <meta property="og:title" content="checks - KFactory" />
 <meta property="og:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/reference/kfactory/checks.png" />
+<meta property="og:image" content="https://gdsfactory.github.io/kfactory/3.5.0/assets/images/social/reference/kfactory/checks.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.4.0/reference/kfactory/checks/" />
+<meta property="og:url" content="https://gdsfactory.github.io/kfactory/3.5.0/reference/kfactory/checks/" />
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:title" content="checks - KFactory" />
 <meta property="twitter:description" content="Python framework for photonic and electronic chip layout, built on KLayout&#39;s C++ geometry engine." />
-<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.4.0/assets/images/social/reference/kfactory/checks.png" />
+<meta property="twitter:image" content="https://gdsfactory.github.io/kfactory/3.5.0/assets/images/social/reference/kfactory/checks.png" />
 </head>
   
   
@@ -6479,33 +6479,7 @@ Typical use is multi-contact pads where <code>e1</code>, <code>e2</code>, <code>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/checks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">576</span>
-<span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span>
-<span class="normal">584</span>
-<span class="normal">585</span>
-<span class="normal">586</span>
-<span class="normal">587</span>
-<span class="normal">588</span>
-<span class="normal">589</span>
-<span class="normal">590</span>
-<span class="normal">591</span>
-<span class="normal">592</span>
-<span class="normal">593</span>
-<span class="normal">594</span>
-<span class="normal">595</span>
-<span class="normal">596</span>
-<span class="normal">597</span>
-<span class="normal">598</span>
-<span class="normal">599</span>
-<span class="normal">600</span>
-<span class="normal">601</span>
-<span class="normal">602</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">602</span>
 <span class="normal">603</span>
 <span class="normal">604</span>
 <span class="normal">605</span>
@@ -6573,7 +6547,33 @@ Typical use is multi-contact pads where <code>e1</code>, <code>e2</code>, <code>
 <span class="normal">667</span>
 <span class="normal">668</span>
 <span class="normal">669</span>
-<span class="normal">670</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dangling_ports_check</span><span class="p">(</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dangling_ports_check</span><span class="p">(</span>
     <span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">port_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6809,33 +6809,7 @@ of another instance are reported under <code>InstanceOverlap</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/checks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">689</span>
-<span class="normal">690</span>
-<span class="normal">691</span>
-<span class="normal">692</span>
-<span class="normal">693</span>
-<span class="normal">694</span>
-<span class="normal">695</span>
-<span class="normal">696</span>
-<span class="normal">697</span>
-<span class="normal">698</span>
-<span class="normal">699</span>
-<span class="normal">700</span>
-<span class="normal">701</span>
-<span class="normal">702</span>
-<span class="normal">703</span>
-<span class="normal">704</span>
-<span class="normal">705</span>
-<span class="normal">706</span>
-<span class="normal">707</span>
-<span class="normal">708</span>
-<span class="normal">709</span>
-<span class="normal">710</span>
-<span class="normal">711</span>
-<span class="normal">712</span>
-<span class="normal">713</span>
-<span class="normal">714</span>
-<span class="normal">715</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">715</span>
 <span class="normal">716</span>
 <span class="normal">717</span>
 <span class="normal">718</span>
@@ -6865,7 +6839,33 @@ of another instance are reported under <code>InstanceOverlap</code>.</p>
 <span class="normal">742</span>
 <span class="normal">743</span>
 <span class="normal">744</span>
-<span class="normal">745</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">instance_overlap_check</span><span class="p">(</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span>
+<span class="normal">759</span>
+<span class="normal">760</span>
+<span class="normal">761</span>
+<span class="normal">762</span>
+<span class="normal">763</span>
+<span class="normal">764</span>
+<span class="normal">765</span>
+<span class="normal">766</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">instance_overlap_check</span><span class="p">(</span>
     <span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -6936,7 +6936,7 @@ of another instance are reported under <code>InstanceOverlap</code>.</p>
 
 
 </h2>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">port_mismatch_check</span><span class="p">(</span><span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">port_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">db</span><span class="p">:</span> <span class="n">ReportDatabase</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">add_cell_ports</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">check_width</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_angle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_type</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_port_overlap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_missing_physical_shape</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_partial_physical_shape</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">width_mismatch_ignore_layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">rdb</span><span class="o">.</span><span class="n">ReportDatabase</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">port_mismatch_check</span><span class="p">(</span><span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">port_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">db</span><span class="p">:</span> <span class="n">ReportDatabase</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">add_cell_ports</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">check_width</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_angle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_type</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_cross_section</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">check_port_overlap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_missing_physical_shape</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_partial_physical_shape</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">width_mismatch_ignore_layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="n">LayerInfo</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">rdb</span><span class="o">.</span><span class="n">ReportDatabase</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -7105,6 +7105,25 @@ considered.</p>
             </td>
             <td>
                   <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>check_cross_section</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Emit <code>CrossSectionMismatch</code> items for ports with
+matching width and main layer but different cross sections, e.g.
+a different enclosure. Off by default, as ports created from only
+a width and a layer commonly connect to fully specified ones.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -7429,7 +7448,33 @@ a via stack are intentional.</p>
 <span class="normal">468</span>
 <span class="normal">469</span>
 <span class="normal">470</span>
-<span class="normal">471</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">port_mismatch_check</span><span class="p">(</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">port_mismatch_check</span><span class="p">(</span>
     <span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">port_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -7440,6 +7485,7 @@ a via stack are intentional.</p>
     <span class="n">check_width</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_angle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_type</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">check_cross_section</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">check_port_overlap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_missing_physical_shape</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_partial_physical_shape</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -7464,6 +7510,10 @@ a via stack are intentional.</p>
 <span class="sd">        check_width: Emit `WidthMismatch` items.</span>
 <span class="sd">        check_angle: Emit `AngleMismatch` items.</span>
 <span class="sd">        check_type: Emit `TypeMismatch` items.</span>
+<span class="sd">        check_cross_section: Emit `CrossSectionMismatch` items for ports with</span>
+<span class="sd">            matching width and main layer but different cross sections, e.g.</span>
+<span class="sd">            a different enclosure. Off by default, as ports created from only</span>
+<span class="sd">            a width and a layer commonly connect to fully specified ones.</span>
 <span class="sd">        check_port_overlap: Emit `PortOverlap` items when 2+ instance ports</span>
 <span class="sd">            share a coord (and either differ from a cell port or pile up &gt;2).</span>
 <span class="sd">        check_missing_physical_shape: Emit `MissingPhysicalShape` items.</span>
@@ -7488,6 +7538,7 @@ a via stack are intentional.</p>
             <span class="n">check_width</span><span class="o">=</span><span class="n">check_width</span><span class="p">,</span>
             <span class="n">check_angle</span><span class="o">=</span><span class="n">check_angle</span><span class="p">,</span>
             <span class="n">check_type</span><span class="o">=</span><span class="n">check_type</span><span class="p">,</span>
+            <span class="n">check_cross_section</span><span class="o">=</span><span class="n">check_cross_section</span><span class="p">,</span>
             <span class="n">check_port_overlap</span><span class="o">=</span><span class="n">check_port_overlap</span><span class="p">,</span>
             <span class="n">check_missing_physical_shape</span><span class="o">=</span><span class="n">check_missing_physical_shape</span><span class="p">,</span>
             <span class="n">check_partial_physical_shape</span><span class="o">=</span><span class="n">check_partial_physical_shape</span><span class="p">,</span>
@@ -7569,6 +7620,26 @@ a via stack are intentional.</p>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">check_type</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">result</span> <span class="o">&amp;</span> <span class="n">PortCheck</span><span class="o">.</span><span class="n">port_type</span><span class="p">:</span>
             <span class="n">subc</span> <span class="o">=</span> <span class="n">_get_or_create_subcategory</span><span class="p">(</span><span class="n">db_</span><span class="p">,</span> <span class="n">lc</span><span class="p">,</span> <span class="s2">"TypeMismatch"</span><span class="p">)</span>
+            <span class="n">create_port_error</span><span class="p">(</span>
+                <span class="n">p_a</span><span class="p">,</span>
+                <span class="n">p_b</span><span class="p">,</span>
+                <span class="n">c_a</span><span class="p">,</span>
+                <span class="n">c_b</span><span class="p">,</span>
+                <span class="n">db_</span><span class="p">,</span>
+                <span class="n">db_cell</span><span class="p">,</span>
+                <span class="n">subc</span><span class="p">,</span>
+                <span class="n">cell</span><span class="o">.</span><span class="n">kcl</span><span class="o">.</span><span class="n">dbu</span><span class="p">,</span>
+                <span class="n">inst_name1</span><span class="o">=</span><span class="n">inst_name1</span><span class="p">,</span>
+                <span class="n">inst_name2</span><span class="o">=</span><span class="n">inst_name2</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># Width and layer mismatches are reported by their own categories.</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">check_cross_section</span>
+            <span class="ow">and</span> <span class="n">result</span> <span class="o">&amp;</span> <span class="n">PortCheck</span><span class="o">.</span><span class="n">width</span>
+            <span class="ow">and</span> <span class="n">result</span> <span class="o">&amp;</span> <span class="n">PortCheck</span><span class="o">.</span><span class="n">layer</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">result</span> <span class="o">&amp;</span> <span class="n">PortCheck</span><span class="o">.</span><span class="n">cross_section</span>
+        <span class="p">):</span>
+            <span class="n">subc</span> <span class="o">=</span> <span class="n">_get_or_create_subcategory</span><span class="p">(</span><span class="n">db_</span><span class="p">,</span> <span class="n">lc</span><span class="p">,</span> <span class="s2">"CrossSectionMismatch"</span><span class="p">)</span>
             <span class="n">create_port_error</span><span class="p">(</span>
                 <span class="n">p_a</span><span class="p">,</span>
                 <span class="n">p_b</span><span class="p">,</span>
@@ -7783,33 +7854,7 @@ instances are reported under <code>CellShapeInstanceOverlap</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/checks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">748</span>
-<span class="normal">749</span>
-<span class="normal">750</span>
-<span class="normal">751</span>
-<span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
-<span class="normal">755</span>
-<span class="normal">756</span>
-<span class="normal">757</span>
-<span class="normal">758</span>
-<span class="normal">759</span>
-<span class="normal">760</span>
-<span class="normal">761</span>
-<span class="normal">762</span>
-<span class="normal">763</span>
-<span class="normal">764</span>
-<span class="normal">765</span>
-<span class="normal">766</span>
-<span class="normal">767</span>
-<span class="normal">768</span>
-<span class="normal">769</span>
-<span class="normal">770</span>
-<span class="normal">771</span>
-<span class="normal">772</span>
-<span class="normal">773</span>
-<span class="normal">774</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">774</span>
 <span class="normal">775</span>
 <span class="normal">776</span>
 <span class="normal">777</span>
@@ -7835,7 +7880,33 @@ instances are reported under <code>CellShapeInstanceOverlap</code>.</p>
 <span class="normal">797</span>
 <span class="normal">798</span>
 <span class="normal">799</span>
-<span class="normal">800</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">shape_instance_overlap_check</span><span class="p">(</span>
+<span class="normal">800</span>
+<span class="normal">801</span>
+<span class="normal">802</span>
+<span class="normal">803</span>
+<span class="normal">804</span>
+<span class="normal">805</span>
+<span class="normal">806</span>
+<span class="normal">807</span>
+<span class="normal">808</span>
+<span class="normal">809</span>
+<span class="normal">810</span>
+<span class="normal">811</span>
+<span class="normal">812</span>
+<span class="normal">813</span>
+<span class="normal">814</span>
+<span class="normal">815</span>
+<span class="normal">816</span>
+<span class="normal">817</span>
+<span class="normal">818</span>
+<span class="normal">819</span>
+<span class="normal">820</span>
+<span class="normal">821</span>
+<span class="normal">822</span>
+<span class="normal">823</span>
+<span class="normal">824</span>
+<span class="normal">825</span>
+<span class="normal">826</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">shape_instance_overlap_check</span><span class="p">(</span>
     <span class="n">cell</span><span class="p">:</span> <span class="n">ProtoTKCell</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

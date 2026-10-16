@@ -6,9 +6,9 @@
 
 #### New Features
 
-- **Routing constraints &amp; path-length matching** — the new `PathLengthMatch` constraint API enables length-matched bundle routing directly. See [Path-Length Matching](<https://gdsfactory.github.io/kfactory/3.4.0/routing/path_length/index.md>).
-- **Asymmetrical cross-sections** — `AsymmetricCrossSection` allows non-symmetric waveguide profiles. See [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.4.0/components/cross_sections/index.md>).
-- **Netlist extraction as a separate package** — netlist generation now lives in [kfnetlist](<https://github.com/gdsfactory/kfnetlist>), a standalone package that is pulled in as a dependency. See [Netlist &amp; I/O](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/netlist/index.md>).
+- **Routing constraints &amp; path-length matching** — the new `PathLengthMatch` constraint API enables length-matched bundle routing directly. See [Path-Length Matching](<https://gdsfactory.github.io/kfactory/3.5.0/routing/path_length/index.md>).
+- **Asymmetrical cross-sections** — `AsymmetricCrossSection` allows non-symmetric waveguide profiles. See [Cross-Sections](<https://gdsfactory.github.io/kfactory/3.5.0/components/cross_sections/index.md>).
+- **Netlist extraction as a separate package** — netlist generation now lives in [kfnetlist](<https://github.com/gdsfactory/kfnetlist>), a standalone package that is pulled in as a dependency. See [Netlist &amp; I/O](<https://gdsfactory.github.io/kfactory/3.5.0/schematics/netlist/index.md>).
 - **Factory metadata** — the new `FactoryMetadata` / `PortSpec` API captures structured metadata (including port specs) for factories.
 - **Connectivity checks module** — connectivity checking now lives in its own `kfactory.checks` module.
 
@@ -18,8 +18,8 @@
 
 #### Improved Features
 
-- **Schematics** — tighter pin integration, virtual schematic connections, and the `@kcl.routing_strategy` registry for schematic-driven routing. See [Schematics Overview](<https://gdsfactory.github.io/kfactory/3.4.0/schematics/overview/index.md>).
-- **Bundle routing** — expanded documentation and tutorial. See [Bundle Routing Tutorial](<https://gdsfactory.github.io/kfactory/3.4.0/routing/bundle/index.md>).
+- **Schematics** — tighter pin integration, virtual schematic connections, and the `@kcl.routing_strategy` registry for schematic-driven routing. See [Schematics Overview](<https://gdsfactory.github.io/kfactory/3.5.0/schematics/overview/index.md>).
+- **Bundle routing** — expanded documentation and tutorial. See [Bundle Routing Tutorial](<https://gdsfactory.github.io/kfactory/3.5.0/routing/bundle/index.md>).
 
 #### Infrastructure
 
