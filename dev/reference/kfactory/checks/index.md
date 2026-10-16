@@ -47,7 +47,7 @@ Parameters:
 ## port\_mismatch\_check
 
 ```
-port_mismatch_check(cell: ProtoTKCell[Any], *, port_types: list[str] | None = None, layers: list[int] | None = None, db: ReportDatabase | None = None, recursive: bool = True, add_cell_ports: bool = False, check_width: bool = True, check_angle: bool = True, check_type: bool = True, check_port_overlap: bool = True, check_missing_physical_shape: bool = True, check_partial_physical_shape: bool = True, width_mismatch_ignore_layers: list[int | LayerInfo | str] | None = None) -> rdb.ReportDatabase
+port_mismatch_check(cell: ProtoTKCell[Any], *, port_types: list[str] | None = None, layers: list[int] | None = None, db: ReportDatabase | None = None, recursive: bool = True, add_cell_ports: bool = False, check_width: bool = True, check_angle: bool = True, check_type: bool = True, check_cross_section: bool = False, check_port_overlap: bool = True, check_missing_physical_shape: bool = True, check_partial_physical_shape: bool = True, width_mismatch_ignore_layers: list[int | LayerInfo | str] | None = None) -> rdb.ReportDatabase
 ```
 
 Report port-pair / port-shape mismatches as one logical check.
@@ -69,6 +69,7 @@ Parameters:
 | `check_width` | `bool` | Emit `WidthMismatch` items. | `True` |
 | `check_angle` | `bool` | Emit `AngleMismatch` items. | `True` |
 | `check_type` | `bool` | Emit `TypeMismatch` items. | `True` |
+| `check_cross_section` | `bool` | Emit `CrossSectionMismatch` items for ports with matching width and main layer but different cross sections, e.g. a different enclosure. Off by default, as ports created from only a width and a layer commonly connect to fully specified ones. | `False` |
 | `check_port_overlap` | `bool` | Emit `PortOverlap` items when 2+ instance ports share a coord (and either differ from a cell port or pile up \>2). | `True` |
 | `check_missing_physical_shape` | `bool` | Emit `MissingPhysicalShape` items. | `True` |
 | `check_partial_physical_shape` | `bool` | Emit `PartialPhysicalShape` items. | `True` |

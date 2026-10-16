@@ -61,6 +61,16 @@ KFactory settings object.
 
 n\_threads: Number of threads to use for tiling processor, defaults to all available cores. logger: The loguru class to use for logging. Shouldn't be necessary to configure by hand. logfilter: The filter to use. Can be configured to set log level and filter messages by regex. display\_type: The type of image to show when calling the jupyter display function. meta\_format: Metadata format to use for reading KLayout metadata. If set to 'default', metadata will be read as instances such as Trans/DCplxTrans. If the metadata is in the old string format (there was a bug in how to read metadata in some versions), use 'string'. console: The rich console to use for displaying rich content. max\_cellname\_length: The maximum length of a cell name.
 
+### allow\_cross\_section\_mismatch
+
+```
+allow_cross_section_mismatch: bool = True
+```
+
+Only compare core offsets of asymmetric cross sections in `connect`.
+
+Set to `False` to require identical cross sections. The default is planned to change to `False` in kfactory 4.0.
+
 ### display\_type
 
 ```

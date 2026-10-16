@@ -1934,7 +1934,7 @@ for name in L.model_fields:
   FLOORPLAN     layer=10  datatype=0
 
 
-/tmp/ipykernel_2963/971822332.py:1: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_2753/971822332.py:1: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in L.model_fields:
 ```
 
@@ -2076,7 +2076,7 @@ Layer palette:
   m2      z=1.2…1.70 µm  Al
 
 
-/tmp/ipykernel_2963/3302201102.py:18: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+/tmp/ipykernel_2753/3302201102.py:18: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
   for name in pdk_layers.model_fields:
 ```
 
@@ -2505,7 +2505,7 @@ print("cell info:", dict(b_meta.info))
 ```
 
 ```
-[32m2026-10-15 19:04:31.679[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
+[32m2026-10-16 04:22:55.430[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/bezier.py::_bend_s_bezier at line 169
 Renaming Unnamed_8 (cell_index=8) to bend_s_bezier_CSsym_028523d7_500_H5_L20_NP99_TS0_TS1 would cause it to be named the same as:
  - bend_s_bezier_CSsym_028523d7_500_H5_L20_NP99_TS0_TS1 (cell_index=0), function_name=_bend_s_bezier, basename=bend_s_bezier[0m
 
@@ -4462,7 +4462,7 @@ o2 trans: m0 5000,0  mirror=True
 
 Connecting `inst_b.o1` to `inst_a.o2` is the natural chain. With the port convention above, `o2` already carries the `mirror` flag, so the join between the two ports is an M90 (mirror) transform — exactly what an asymmetric profile needs to keep its left/right halves aligned. `connect` does **not** copy the other port's mirror flag onto the instance; it simply honors the per-port frames, so the default `connect` succeeds and neither instance ends up with a mirror flag.
 
-kfactory validates this by requiring the two connected asymmetric ports to have opposite mirror flags in world space. If they'd line up with the same orientation (an R180 join, which flips the profile), it raises `AsymmetricMirrorRequiredError`.
+kfactory validates this by requiring the two connected asymmetric ports to have opposite mirror flags in world space. If they'd line up with the same orientation (an R180 join, which flips the profile), it raises `AsymmetricMirrorRequiredError`. This applies to all asymmetric ports of the same width and layer, see [Cross section checks in `connect`](<#cross-section-checks-in-connect>).
 
 ```
 parent_chain = kf.KCell(name="asym_chain_ok")
@@ -4511,7 +4511,9 @@ parent_o1o1.plot()
 
 ```
 WITHOUT mirror=True, o1↔o1 raises:
-  AsymmetricMirrorRequiredError: Cannot connect ports 'o1' and 'o1' carrying the same asymmetric cross section without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
+
+
+  AsymmetricMirrorRequiredError: Cannot connect ports 'o1' and 'o1' carrying asymmetric cross sections without `mirror=True`. Asymmetric profiles require an M90 transformation (mirror) — R180 would flip the left/right halves. Pass `mirror=True` to `connect`.
 
 WITH mirror=True (one instance mirrored):
   ia2.trans: r0 0,0  (mirror=False)
@@ -4524,7 +4526,7 @@ WITH mirror=True (one instance mirrored):
 
 ### Connecting symmetric ↔ asymmetric: structural mismatch
 
-A port carrying a `SymmetricalCrossSection` cannot connect to one carrying an `AsymmetricalCrossSection` — the two are structurally different objects. This raises `CrossSectionSymmetryMismatchError` **before** the width/layer checks, and it's not bypassable by `allow_width_mismatch=True`.
+With strict cross section checks, a port carrying a `SymmetricalCrossSection` cannot connect to one carrying an `AsymmetricalCrossSection` of the same width and layer — the two are structurally different objects. This raises `CrossSectionSymmetryMismatchError`. By default, they connect.
 
 ```
 @kf.cell
@@ -4541,34 +4543,125 @@ def sym_straight(cross_section: str = "WG_500") -> kf.KCell:
     return c
 
 
+# A 500-dbu asymmetric strip, so that it matches WG_500 in width and layer.
+kf.kcl.get_asymmetrical_cross_section(
+    kf.AsymmetricalCrossSection(
+        layer=L.WG, section_min=-200, section_max=300, name="ASYM_500"
+    )
+)
+
 parent_mix = kf.KCell(name="asym_sym_mismatch")
 sym_inst = parent_mix << sym_straight("WG_500")
-asym_inst = parent_mix << straight
+asym_inst = parent_mix << asym_straight("ASYM_500")
 
 try:
-    asym_inst.connect("o1", sym_inst, "o2")
+    asym_inst.connect("o1", sym_inst, "o2", allow_cross_section_mismatch=False)
 except CrossSectionSymmetryMismatchError as e:
-    print("Symmetric ↔ asymmetric connect raises:")
+    print("Strict symmetric ↔ asymmetric connect raises:")
     print(f"  CrossSectionSymmetryMismatchError: {e}")
+
+asym_inst.connect("o1", sym_inst, "o2")
+print("Default connect succeeds.")
 ```
 
 ```
-Symmetric ↔ asymmetric connect raises:
-
-
+Strict symmetric ↔ asymmetric connect raises:
   CrossSectionSymmetryMismatchError: Cross section symmetry mismatch between ports 'o1' (asymmetric) and 'o2' (symmetric). Symmetric and asymmetric cross sections cannot be connected.
+Default connect succeeds.
 ```
 
 ### Summary of asymmetric port behavior
 
-| Scenario | Default `connect()` | `connect(mirror=True)` |
+| Scenario | `connect()` | `connect(mirror=True)` |
 | --- | --- | --- |
 | sym ↔ sym | works | works |
 | asym o2 → asym o1 (chain) | works, no instance mirrored | `AsymmetricMirrorRequiredError` |
 | asym o1 ↔ asym o1 | `AsymmetricMirrorRequiredError` | works, one instance mirrored |
-| sym ↔ asym | `CrossSectionSymmetryMismatchError` (not bypassable) | same error |
+| sym ↔ asym (same width and layer) | works; strict: `CrossSectionSymmetryMismatchError` | same |
 
-The check is on the **mirror flags**: kfactory requires the two connected asymmetric ports to end up with opposite mirror orientations (an M90 join). A natural `o2 → o1` chain already satisfies this via the port frames, so it works by default and adding `mirror=True` would over-mirror it and raise.
+The check is on the **mirror flags**: kfactory requires the two connected asymmetric ports to end up with opposite mirror orientations (an M90 join). A natural `o2 → o1` chain already satisfies this via the port frames, so it works without `mirror=True`, and adding `mirror=True` would over-mirror it and raise.
+
+### Cross section checks in `connect`
+
+Besides width, layer and port type, `connect` checks the cross sections of the two ports. These checks only apply to ports with the same width and main layer: a cross section determines both, so an allowed width or layer mismatch already implies a cross section mismatch, and the checks are skipped.
+
+Two asymmetric profiles must never be flipped against each other: their ports need opposite mirror flags after the connection, otherwise `AsymmetricMirrorRequiredError` is raised (see above). Only then do both profiles share a frame, and the `allow_cross_section_mismatch` flag selects how strictly they are compared:
+
+| Ports (same width and layer) | `True` (default) | `False` (strict) |
+| --- | --- | --- |
+| symmetric ↔ asymmetric | connects | `CrossSectionSymmetryMismatchError` |
+| asymmetric, identical | connects | connects |
+| asymmetric, different | core offsets (`section_min`/`section_max`) must match, otherwise `AsymmetricCoreMismatchError` | `CrossSectionMismatchError` |
+| symmetric, different enclosure | connects | connects |
+
+The default is `True` for now. It is planned to change to `False` in kfactory 4.0.
+
+**For a single connection**, pass the flag to `connect`. `VInstance.connect` and `InstanceGroup.connect` take it as well:
+
+```
+inst.connect("o1", other, "o2", allow_cross_section_mismatch=False)
+```
+
+**Globally**, set it in the config. A value passed to `connect` still takes precedence:
+
+```
+kf.config.allow_cross_section_mismatch = False
+```
+
+The config can also be set from the environment or a `.env` file, see [Config](<https://gdsfactory.github.io/kfactory/dev/config/index.md>):
+
+```
+export KFACTORY_ALLOW_CROSS_SECTION_MISMATCH=false
+```
+
+**Impact.** The default doesn't catch symmetric ↔ asymmetric connections or asymmetric cross sections that only differ outside their core. Strict checks do, but:
+
+- Every connection between asymmetric ports of the same width and layer needs identical cross sections. Different extra sections or offset cores raise `CrossSectionMismatchError`.
+- Connecting a symmetric to an asymmetric port of the same width and layer raises `CrossSectionSymmetryMismatchError`.
+- Connections between symmetric ports are unaffected: `connect` never compares enclosures. Use `kf.checks.port_mismatch_check(cell, check_cross_section=True)` to report connected ports whose cross sections differ.
+- Routing functions don't take the flag and use the config value, so setting it globally applies to routes as well.
+
+The demo below connects two asymmetric cross sections that share a core but differ in their extra sections.
+
+```
+from kfactory.exceptions import CrossSectionMismatchError
+
+kf.kcl.get_asymmetrical_cross_section(
+    kf.AsymmetricalCrossSection(
+        layer=L.WG,
+        section_min=-200,
+        section_max=300,
+        sections=(
+            kf.CrossSectionLayer(layer=L.WGCLAD, section_min=-200, section_max=2_300),
+        ),
+        name="ASYM_500_CLAD",
+    )
+)
+parent_xs = kf.KCell(name="asym_xs_mismatch")
+plain = parent_xs << asym_straight("ASYM_500")
+clad = parent_xs << asym_straight("ASYM_500_CLAD")
+
+try:
+    clad.connect("o1", plain, "o2", allow_cross_section_mismatch=False)
+except CrossSectionMismatchError as e:
+    print("Strict connect raises:")
+    print(f"  CrossSectionMismatchError: {e}\n")
+
+clad.connect("o1", plain, "o2")
+print("Default connect succeeds, the cores match.")
+parent_xs.plot()
+```
+
+```
+Strict connect raises:
+  CrossSectionMismatchError: Cross section mismatch between the ports 'o1' ('ASYM_500_CLAD') and 'o2' ('ASYM_500').
+
+Default connect succeeds, the cores match.
+```
+
+```
+
+```
 
 ## Bounding-box layers
 
@@ -4743,7 +4836,7 @@ bend_pair_multi(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 19:04:23.342[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-16 04:22:47.987[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_4 (cell_index=4) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -4790,7 +4883,7 @@ single_bend_npts(radius=10, width=0.5, n_pts=8).plot()
 ```
 
 ```
-[32m2026-10-15 19:04:23.813[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-16 04:22:48.285[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_7 (cell_index=7) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler[0m
@@ -4808,7 +4901,7 @@ single_bend_npts(radius=10, width=0.5, n_pts=64).plot()
 ```
 
 ```
-[32m2026-10-15 19:04:23.890[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-16 04:22:48.341[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_10 (cell_index=10) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
@@ -4898,7 +4991,7 @@ vertical_straight_clad_x(length=20.0, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 19:04:24.046[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
+[32m2026-10-16 04:22:48.449[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
 Renaming Unnamed_16 (cell_index=16) to straight_CSsym_028523d7_500_L20000 would cause it to be named the same as:
  - straight_CSsym_028523d7_500_L20000 (cell_index=13), function_name=_straight, basename=straight[0m
 ```
@@ -4955,7 +5048,7 @@ bend_pair_diamond(radius=10, width=0.5).plot()
 ```
 
 ```
-[32m2026-10-15 19:04:24.098[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-16 04:22:48.497[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_19 (cell_index=19) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=1), function_name=_bend_euler, basename=bend_euler
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=4), function_name=_bend_euler, basename=bend_euler
@@ -5098,7 +5191,7 @@ bend_um.plot()
 ```
 
 ```
-[32m2026-10-15 19:04:24.191[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-16 04:22:49.558[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_2 (cell_index=2) to bend_euler_CSsym_67c2bf20_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_67c2bf20_500_R10_A90_R150 (cell_index=0), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -5231,7 +5324,7 @@ c_two.plot()
 ```
 
 ```
-[32m2026-10-15 19:04:24.418[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
+[32m2026-10-16 04:22:49.704[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/euler.py::_bend_euler at line 316
 Renaming Unnamed_12 (cell_index=12) to bend_euler_CSsym_028523d7_500_R10_A90_R150 would cause it to be named the same as:
  - bend_euler_CSsym_028523d7_500_R10_A90_R150 (cell_index=11), function_name=_bend_euler, basename=bend_euler[0m
 ```
@@ -8017,7 +8110,7 @@ print(f"WG layer index: {pdk.find_layer(L.WG)}")
 ```
 
 ```
-PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7f420c678290> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7f420c7365d0> factories=<kfactory.layout.Factories object at 0x7f420c7e3750> virtual_factories=<kfactory.layout.Factories object at 0x7f420c7f1940> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7f422b1ac040> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7f420c64af80> info=Info() settings=KCellSettings(version='3.4.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7f420c7e39d0> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
+PDK:  name='MY_PDK' layout=<klayout.dbcore.Layout object at 0x7fa49ba4cb00> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fa49bb2a6c0> factories=<kfactory.layout.Factories object at 0x7fa49b9cb610> virtual_factories=<kfactory.layout.Factories object at 0x7fa49b9d5a70> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), WGCLAD=WGCLAD (2/0), SLAB=SLAB (3/0), METAL=METAL (20/0), METALEX=METALEX (20/1), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fa4bf3c4250> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fa49ba60dc0> info=Info() settings=KCellSettings(version='3.4.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fa49b9cb890> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
 dbu:  0.001 µm/DBU  (1 nm grid)
 WG layer index: WG
 ```
@@ -8623,7 +8716,7 @@ print(f"Stack: {list(STACK.layers.keys())} layers defined")
 ```
 
 ```
-PDK:   name='DEMO_TECH_PDK' layout=<klayout.dbcore.Layout object at 0x7fc81fd2cb90> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7fc81fe065d0> factories=<kfactory.layout.Factories object at 0x7fc81fca7390> virtual_factories=<kfactory.layout.Factories object at 0x7fc81fcb2060> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7fc83e3afd70> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7fc81fd398b0> info=Info() settings=KCellSettings(version='3.4.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7fc81fca7750> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
+PDK:   name='DEMO_TECH_PDK' layout=<klayout.dbcore.Layout object at 0x7f74f3038dd0> layer_enclosures=LayerEnclosureModel(root={}) cross_sections={} extrude_configs={} enclosure=KCellEnclosure(enclosures=LayerEnclosureCollection(enclosures=[])) library=<klayout.dbcore.Library object at 0x7f74f311e6c0> factories=<kfactory.layout.Factories object at 0x7f74f2fbb250> virtual_factories=<kfactory.layout.Factories object at 0x7f74f2fc6060> generic_factories={} tkcells={} infos=LAYER(WG=WG (1/0), SLAB=SLAB (3/0), WGCLAD=WGCLAD (111/0), METAL=METAL (41/0), FLOORPLAN=FLOORPLAN (99/0)) layer_stack=LayerStack(layers={}) netlist_layer_mapping={} sparameters_path=None interconnect_cml_path=None constants=Constants() rename_function=<function rename_clockwise_multi at 0x7f7511bcc250> thread_lock=<unlocked _thread.RLock object owner=0 count=0 at 0x7f74f304df40> info=Info() settings=KCellSettings(version='3.4.0', klayout_version='0.30.12', meta_format='v3') decorators=<kfactory.decorators.Decorators object at 0x7f74f2fbb610> default_cell_output_type=<class 'kfactory.kcell.KCell'> default_vcell_output_type=<class 'kfactory.kcell.VKCell'> connectivity=[] routing_strategies={} technology_file=None layers=<aenum 'LAYER'>
 Stack: ['wg', 'clad'] layers defined
 ```
 
@@ -8789,7 +8882,7 @@ kf.kcl.get_icross_section(xs_wg1)
 ```
 
 ```
-<kfactory.cross_section.CrossSection at 0x7f4911d03c50>
+<kfactory.cross_section.CrossSection at 0x7fda5f293b10>
 ```
 
 ## The `cross` cell
@@ -9196,7 +9289,7 @@ c
 ```
 
 ```
-[32m2026-10-15 19:04:10.040[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
+[32m2026-10-16 04:22:38.525[0m | [1mINFO    [0m | [36mkfactory.enclosure[0m:[36mapply_minkowski_tiled[0m:[36m1068[0m - [1mStarting minkowski on Unnamed_0[0m
 ```
 
 ```
@@ -9241,7 +9334,7 @@ Code(c.schematic.code_str())
 ```
 
 ```
-[32m2026-10-15 19:04:10.531[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-16 04:22:38.814[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -10978,7 +11071,7 @@ Code(generated)
 ```
 
 ```
-[32m2026-10-15 19:04:10.725[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
+[32m2026-10-16 04:22:38.796[0m | [33m[1mWARNING [0m | [36mkfactory.schematic[0m:[36mcode_str[0m:[36m2132[0m - [33m[1mRuff not found or installed. Returning unformatted string.[0m
 
 
 
@@ -11138,7 +11231,7 @@ print("cell ports:", [p.name for p in cell.ports])
 ```
 
 ```
-cell ports: ['left', 'right']
+cell ports: ['right', 'left']
 ```
 
 Inside the schematic, the entries are `PortRef` objects pointing at the underlying instance:
@@ -11448,7 +11541,7 @@ c
 ```
 
 ```
-[32m2026-10-15 19:04:13.768[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
+[32m2026-10-16 04:22:41.325[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
 ```
 
 ```
@@ -13664,7 +13757,7 @@ print(f"factory bundle type: {type(factories)}")
 ```
 
 ```
-[32m2026-10-15 19:04:22.655[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
+[32m2026-10-16 04:22:47.826[0m | [31m[1mERROR   [0m | [36mkfactory.decorators[0m:[36mwrapped_cell[0m:[36m564[0m - [31m[1mName conflict in /home/runner/work/kfactory/kfactory/src/kfactory/factories/straight.py::_straight at line 159
 Renaming Unnamed_8 (cell_index=8) to straight_CSsym_028523d7_500_L10000 would cause it to be named the same as:
  - straight_CSsym_028523d7_500_L10000 (cell_index=1), function_name=_straight, basename=straight[0m
 
@@ -14106,6 +14199,7 @@ All variables use the prefix `KFACTORY_`. Nested fields use `_` as a delimiter.
 | `KFACTORY_ALLOW_WIDTH_MISMATCH` | `bool` | `False` | Allow connecting ports with different widths |
 | `KFACTORY_ALLOW_LAYER_MISMATCH` | `bool` | `False` | Allow connecting ports on different layers |
 | `KFACTORY_ALLOW_TYPE_MISMATCH` | `bool` | `False` | Allow connecting ports of different types |
+| `KFACTORY_ALLOW_CROSS_SECTION_MISMATCH` | `bool` | `True` | Only compare core offsets of asymmetric cross sections in `connect()`; `False` requires identical cross sections (planned default in 4.0), see [Cross section checks in `connect`](<https://gdsfactory.github.io/kfactory/dev/components/cross_sections/#cross-section-checks-in-connect>) |
 | `KFACTORY_ALLOW_UNDEFINED_LAYERS` | `bool` | `False` | Skip errors for layers not in the `LayerInfos` |
 | `KFACTORY_CELL_LAYOUT_CACHE` | `bool` | `False` | Cache cells per `KCLayout` instead of globally |
 | `KFACTORY_CELL_OVERWRITE_EXISTING` | `bool` | `False` | Overwrite existing cells with the same name |
@@ -14846,7 +14940,7 @@ Parameters:
 ## port\_mismatch\_check
 
 ```
-port_mismatch_check(cell: ProtoTKCell[Any], *, port_types: list[str] | None = None, layers: list[int] | None = None, db: ReportDatabase | None = None, recursive: bool = True, add_cell_ports: bool = False, check_width: bool = True, check_angle: bool = True, check_type: bool = True, check_port_overlap: bool = True, check_missing_physical_shape: bool = True, check_partial_physical_shape: bool = True, width_mismatch_ignore_layers: list[int | LayerInfo | str] | None = None) -> rdb.ReportDatabase
+port_mismatch_check(cell: ProtoTKCell[Any], *, port_types: list[str] | None = None, layers: list[int] | None = None, db: ReportDatabase | None = None, recursive: bool = True, add_cell_ports: bool = False, check_width: bool = True, check_angle: bool = True, check_type: bool = True, check_cross_section: bool = False, check_port_overlap: bool = True, check_missing_physical_shape: bool = True, check_partial_physical_shape: bool = True, width_mismatch_ignore_layers: list[int | LayerInfo | str] | None = None) -> rdb.ReportDatabase
 ```
 
 Report port-pair / port-shape mismatches as one logical check.
@@ -14868,6 +14962,7 @@ Parameters:
 | `check_width` | `bool` | Emit `WidthMismatch` items. | `True` |
 | `check_angle` | `bool` | Emit `AngleMismatch` items. | `True` |
 | `check_type` | `bool` | Emit `TypeMismatch` items. | `True` |
+| `check_cross_section` | `bool` | Emit `CrossSectionMismatch` items for ports with matching width and main layer but different cross sections, e.g. a different enclosure. Off by default, as ports created from only a width and a layer commonly connect to fully specified ones. | `False` |
 | `check_port_overlap` | `bool` | Emit `PortOverlap` items when 2+ instance ports share a coord (and either differ from a cell port or pile up \>2). | `True` |
 | `check_missing_physical_shape` | `bool` | Emit `MissingPhysicalShape` items. | `True` |
 | `check_partial_physical_shape` | `bool` | Emit `PartialPhysicalShape` items. | `True` |
@@ -14982,6 +15077,16 @@ KFactory settings object.
 **Attrs**
 
 n\_threads: Number of threads to use for tiling processor, defaults to all available cores. logger: The loguru class to use for logging. Shouldn't be necessary to configure by hand. logfilter: The filter to use. Can be configured to set log level and filter messages by regex. display\_type: The type of image to show when calling the jupyter display function. meta\_format: Metadata format to use for reading KLayout metadata. If set to 'default', metadata will be read as instances such as Trans/DCplxTrans. If the metadata is in the old string format (there was a bug in how to read metadata in some versions), use 'string'. console: The rich console to use for displaying rich content. max\_cellname\_length: The maximum length of a cell name.
+
+### allow\_cross\_section\_mismatch
+
+```
+allow_cross_section_mismatch: bool = True
+```
+
+Only compare core offsets of asymmetric cross sections in `connect`.
+
+Set to `False` to require identical cross sections. The default is planned to change to `False` in kfactory 4.0.
 
 ### display\_type
 
@@ -16658,19 +16763,35 @@ Convert a list of points to a polygon.
 
 # exceptions
 
+## AsymmetricCoreMismatchError
+
+Bases: `ValueError`
+
+Raised when the core offsets of two asymmetric ports differ.
+
+Raised with `allow_cross_section_mismatch`, which only requires the cores of asymmetric cross sections to match.
+
 ## AsymmetricMirrorRequiredError
 
 Bases: `ValueError`
 
 Raised when connecting two asymmetric ports without `mirror=True`.
 
-Two ports carrying the same `AsymmetricalCrossSection` can only be connected via an M90 (mirror) transformation, since R180 would flip the left/right halves of the profile. Pass `mirror=True` to `connect`.
+Two ports carrying an `AsymmetricalCrossSection` can only be connected via an M90 (mirror) transformation, since R180 would flip the left/right halves of the profile. Pass `mirror=True` to `connect`.
 
 ## CellNameError
 
 Bases: `ValueError`
 
 Raised if a KCell is created and the automatic assigned name is taken.
+
+## CrossSectionMismatchError
+
+Bases: `ValueError`
+
+Raised when connecting asymmetric ports with different cross sections.
+
+The ports have the same width and main layer, but their cross sections differ. Pass `allow_cross_section_mismatch=True` to `connect` to only require matching core offsets.
 
 ## CrossSectionNamingConflictError
 
@@ -16686,7 +16807,7 @@ Bases: `ValueError`
 
 Raised when connecting ports whose cross sections differ in symmetry.
 
-A symmetric and an asymmetric cross section cannot be connected even with `allow_width_mismatch`, since they are structurally different objects.
+A symmetric and an asymmetric cross section with the same width and layer cannot be connected, since they are structurally different objects. Use `allow_cross_section_mismatch` to connect them anyway.
 
 ## DuplicateCellNameError
 
@@ -18799,19 +18920,19 @@ Return a string representation of the instance.
 ### connect
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoPort[Any], *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
+connect(port: str | ProtoPort[Any] | None, other: ProtoPort[Any], *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
 ```
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any], other_port_name: str | int | tuple[int | str, int, int] | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
+connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any], other_port_name: str | int | tuple[int | str, int, int] | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
 ```
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: VInstance, other_port_name: str | int | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
+connect(port: str | ProtoPort[Any] | None, other: VInstance, other_port_name: str | int | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
 ```
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoInstance[Any] | ProtoPort[Any], other_port_name: str | int | tuple[int | str, int, int] | None = None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
+connect(port: str | ProtoPort[Any] | None, other: ProtoInstance[Any] | ProtoPort[Any], other_port_name: str | int | tuple[int | str, int, int] | None = None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
 ```
 
 Align port with name `portname` to a port.
@@ -18829,6 +18950,7 @@ Parameters:
 | `allow_width_mismatch` | `bool \| None` | Skip width check between the ports if set. | `None` |
 | `allow_layer_mismatch` | `bool \| None` | Skip layer check between the ports if set. | `None` |
 | `allow_type_mismatch` | `bool \| None` | Skip port\_type check between the ports if set. | `None` |
+| `allow_cross_section_mismatch` | `bool \| None` | Only compare the core offsets of asymmetric cross sections if set, instead of requiring identical cross sections. Asymmetric profiles must not be flipped against each other either way. These checks only apply to ports with the same width and layer. | `None` |
 | `use_mirror` | `bool \| None` | If False mirror flag does not get applied from the connection. | `None` |
 | `use_angle` | `bool \| None` | If False the angle does not get applied from the connection. | `None` |
 
@@ -18923,19 +19045,19 @@ Return a string representation of the instance.
 ### connect
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoPort[Any], *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
+connect(port: str | ProtoPort[Any] | None, other: ProtoPort[Any], *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
 ```
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any], other_port_name: str | int | tuple[int | str, int, int] | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
+connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any], other_port_name: str | int | tuple[int | str, int, int] | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
 ```
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: VInstance, other_port_name: str | int | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
+connect(port: str | ProtoPort[Any] | None, other: VInstance, other_port_name: str | int | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
 ```
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoInstance[Any] | ProtoPort[Any], other_port_name: str | int | tuple[int | str, int, int] | None = None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
+connect(port: str | ProtoPort[Any] | None, other: ProtoInstance[Any] | ProtoPort[Any], other_port_name: str | int | tuple[int | str, int, int] | None = None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> Self
 ```
 
 Align port with name `portname` to a port.
@@ -18953,6 +19075,7 @@ Parameters:
 | `allow_width_mismatch` | `bool \| None` | Skip width check between the ports if set. | `None` |
 | `allow_layer_mismatch` | `bool \| None` | Skip layer check between the ports if set. | `None` |
 | `allow_type_mismatch` | `bool \| None` | Skip port\_type check between the ports if set. | `None` |
+| `allow_cross_section_mismatch` | `bool \| None` | Only compare the core offsets of asymmetric cross sections if set, instead of requiring identical cross sections. Asymmetric profiles must not be flipped against each other either way. These checks only apply to ports with the same width and layer. | `None` |
 | `use_mirror` | `bool \| None` | If False mirror flag does not get applied from the connection. | `None` |
 | `use_angle` | `bool \| None` | If False the angle does not get applied from the connection. | `None` |
 
@@ -19025,15 +19148,15 @@ Initialize the InstanceGroup.
 ### connect
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoPort[Any], *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
+connect(port: str | ProtoPort[Any] | None, other: ProtoPort[Any], *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
 ```
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any], other_port_name: str | int | tuple[int | str, int, int] | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
+connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any], other_port_name: str | int | tuple[int | str, int, int] | None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
 ```
 
 ```
-connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any] | ProtoPort[Any], other_port_name: str | int | tuple[int | str, int, int] | None = None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
+connect(port: str | ProtoPort[Any] | None, other: ProtoTInstance[Any] | ProtoPort[Any], other_port_name: str | int | tuple[int | str, int, int] | None = None, *, mirror: bool = False, allow_width_mismatch: bool | None = None, allow_layer_mismatch: bool | None = None, allow_type_mismatch: bool | None = None, allow_cross_section_mismatch: bool | None = None, use_mirror: bool | None = None, use_angle: bool | None = None) -> None
 ```
 
 Align port with name `portname` to a port.
@@ -19051,6 +19174,7 @@ Parameters:
 | `allow_width_mismatch` | `bool \| None` | Skip width check between the ports if set. | `None` |
 | `allow_layer_mismatch` | `bool \| None` | Skip layer check between the ports if set. | `None` |
 | `allow_type_mismatch` | `bool \| None` | Skip port\_type check between the ports if set. | `None` |
+| `allow_cross_section_mismatch` | `bool \| None` | Only compare the core offsets of asymmetric cross sections if set, instead of requiring identical cross sections. Asymmetric profiles must not be flipped against each other either way. These checks only apply to ports with the same width and layer. | `None` |
 | `use_mirror` | `bool \| None` | If False mirror flag does not get applied from the connection. | `None` |
 | `use_angle` | `bool \| None` | If False the angle does not get applied from the connection. | `None` |
 

@@ -3661,6 +3661,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#kfactory.conf.Settings.allow_cross_section_mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;allow_cross_section_mismatch
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kfactory.conf.Settings.display_type" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -6041,6 +6052,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#kfactory.conf.Settings.allow_cross_section_mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;allow_cross_section_mismatch
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kfactory.conf.Settings.display_type" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -7145,7 +7167,16 @@ max_cellname_length: The maximum length of a cell name.</p>
 <span class="normal">344</span>
 <span class="normal">345</span>
 <span class="normal">346</span>
-<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Settings</span><span class="p">(</span><span class="n">BaseSettings</span><span class="p">):</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Settings</span><span class="p">(</span><span class="n">BaseSettings</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""KFactory settings object.</span>
 
 <span class="sd">    Attrs:</span>
@@ -7195,6 +7226,12 @@ max_cellname_length: The maximum length of a cell name.</p>
     <span class="n">allow_width_mismatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">allow_layer_mismatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">allow_type_mismatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">allow_cross_section_mismatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="w">    </span><span class="sd">"""Only compare core offsets of asymmetric cross sections in `connect`.</span>
+
+<span class="sd">    Set to `False` to require identical cross sections. The default is planned</span>
+<span class="sd">    to change to `False` in kfactory 4.0.</span>
+<span class="sd">    """</span>
     <span class="n">allow_undefined_layers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">cell_layout_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">cell_overwrite_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -7271,7 +7308,10 @@ max_cellname_length: The maximum length of a cell name.</p>
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="nd">@field_validator</span><span class="p">(</span>
-        <span class="s2">"allow_width_mismatch"</span><span class="p">,</span> <span class="s2">"allow_layer_mismatch"</span><span class="p">,</span> <span class="s2">"allow_type_mismatch"</span>
+        <span class="s2">"allow_width_mismatch"</span><span class="p">,</span>
+        <span class="s2">"allow_layer_mismatch"</span><span class="p">,</span>
+        <span class="s2">"allow_type_mismatch"</span><span class="p">,</span>
+        <span class="s2">"allow_cross_section_mismatch"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_debug_info_on_global_setting</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="n">ValidationInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -7306,6 +7346,34 @@ max_cellname_length: The maximum length of a cell name.</p>
 
 
 
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="kfactory.conf.Settings.allow_cross_section_mismatch" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">allow_cross_section_mismatch</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">allow_cross_section_mismatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Only compare core offsets of asymmetric cross sections in <code>connect</code>.</p>
+<p>Set to <code>False</code> to require identical cross sections. The default is planned
+to change to <code>False</code> in kfactory 4.0.</p>
+
+          
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-attribute">
 
@@ -7492,9 +7560,9 @@ max_cellname_length: The maximum length of a cell name.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>kfactory/conf.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Set log filter and run pydantic."""</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>

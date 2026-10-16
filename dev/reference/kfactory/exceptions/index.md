@@ -1,18 +1,34 @@
 # exceptions
 
+## AsymmetricCoreMismatchError
+
+Bases: `ValueError`
+
+Raised when the core offsets of two asymmetric ports differ.
+
+Raised with `allow_cross_section_mismatch`, which only requires the cores of asymmetric cross sections to match.
+
 ## AsymmetricMirrorRequiredError
 
 Bases: `ValueError`
 
 Raised when connecting two asymmetric ports without `mirror=True`.
 
-Two ports carrying the same `AsymmetricalCrossSection` can only be connected via an M90 (mirror) transformation, since R180 would flip the left/right halves of the profile. Pass `mirror=True` to `connect`.
+Two ports carrying an `AsymmetricalCrossSection` can only be connected via an M90 (mirror) transformation, since R180 would flip the left/right halves of the profile. Pass `mirror=True` to `connect`.
 
 ## CellNameError
 
 Bases: `ValueError`
 
 Raised if a KCell is created and the automatic assigned name is taken.
+
+## CrossSectionMismatchError
+
+Bases: `ValueError`
+
+Raised when connecting asymmetric ports with different cross sections.
+
+The ports have the same width and main layer, but their cross sections differ. Pass `allow_cross_section_mismatch=True` to `connect` to only require matching core offsets.
 
 ## CrossSectionNamingConflictError
 
@@ -28,7 +44,7 @@ Bases: `ValueError`
 
 Raised when connecting ports whose cross sections differ in symmetry.
 
-A symmetric and an asymmetric cross section cannot be connected even with `allow_width_mismatch`, since they are structurally different objects.
+A symmetric and an asymmetric cross section with the same width and layer cannot be connected, since they are structurally different objects. Use `allow_cross_section_mismatch` to connect them anyway.
 
 ## DuplicateCellNameError
 
