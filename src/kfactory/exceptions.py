@@ -168,9 +168,9 @@ class PortTypeMismatchError(ValueError):
 class AsymmetricMirrorRequiredError(ValueError):
     """Raised when connecting two asymmetric ports without `mirror=True`.
 
-    Two ports carrying the same `AsymmetricalCrossSection` can only be
-    connected via an M90 (mirror) transformation, since R180 would flip the
-    left/right halves of the profile. Pass `mirror=True` to `connect`.
+    Two ports carrying an `AsymmetricalCrossSection` can only be connected via
+    an M90 (mirror) transformation, since R180 would flip the left/right halves
+    of the profile. Pass `mirror=True` to `connect`.
     """
 
     def __init__(
@@ -180,8 +180,8 @@ class AsymmetricMirrorRequiredError(ValueError):
         *args: Any,
     ) -> None:
         super().__init__(
-            f"Cannot connect ports {p1.name!r} and {p2.name!r} carrying the same"
-            " asymmetric cross section without `mirror=True`. Asymmetric profiles"
+            f"Cannot connect ports {p1.name!r} and {p2.name!r} carrying"
+            " asymmetric cross sections without `mirror=True`. Asymmetric profiles"
             " require an M90 transformation (mirror) — R180 would flip the"
             " left/right halves. Pass `mirror=True` to `connect`.",
             *args,

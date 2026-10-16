@@ -179,8 +179,9 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
             allow_type_mismatch: Skip port_type check between the ports if set.
             allow_cross_section_mismatch: Only compare the core offsets of
                 asymmetric cross sections if set, instead of requiring identical
-                cross sections (and matching profile orientation). These checks
-                only apply to ports with the same width and layer.
+                cross sections. Asymmetric profiles must not be flipped against
+                each other either way. These checks only apply to ports with the
+                same width and layer.
             use_mirror: If False mirror flag does not get applied from the connection.
             use_angle: If False the angle does not get applied from the connection.
         """
@@ -287,7 +288,7 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
                 case _:
                     raise NotImplementedError("This shouldn't happen")
 
-        if check_xs and not allow_cross_section_mismatch:
+        if check_xs:
             _check_asymmetric_orientation(p, op, p_mirror ^ flipped)
 
 

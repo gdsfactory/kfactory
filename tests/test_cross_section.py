@@ -742,7 +742,6 @@ def test_cell_cross_section_spec_cache_key_parity(kcl: kf.KCLayout) -> None:
     assert "wg" in from_obj.name
 
 
-@pytest.mark.usefixtures("strict_cross_sections")
 def test_connect_asym_to_asym_requires_mirror_when_misaligned() -> None:
     """Two R0-facing asymmetric ports cannot connect without a mirror.
 
@@ -771,11 +770,11 @@ def test_connect_asym_to_asym_requires_mirror_when_misaligned() -> None:
     ib = parent << b
     with pytest.raises(AsymmetricMirrorRequiredError):
         ia.connect("o1", ib, "o1")
-    # the layer flag doesn't cover cross sections
+    # neither the layer nor the cross section flag skip the mirror check
     with pytest.raises(AsymmetricMirrorRequiredError):
         ia.connect("o1", ib, "o1", allow_layer_mismatch=True)
-    ia.connect("o1", ib, "o1", allow_cross_section_mismatch=True)
-    assert not ia.trans.mirror
+    with pytest.raises(AsymmetricMirrorRequiredError):
+        ia.connect("o1", ib, "o1", allow_cross_section_mismatch=True)
     # mirror=True succeeds and produces M90 trans
     ia.connect("o1", ib, "o1", mirror=True)
     assert ia.trans.mirror
@@ -802,7 +801,6 @@ def _make_asym_wg(kcl: kf.KCLayout, name: str) -> kf.KCell:
     return c
 
 
-@pytest.mark.usefixtures("strict_cross_sections")
 def test_asym_waveguide_chain_o2_to_o1_with_mirror_true() -> None:
     """o2 (M0) → o1 (R180) chain succeeds with `mirror=True`, result is unmirrored."""
     kcl = kf.KCLayout("ASYM_WG_CHAIN")
@@ -825,7 +823,6 @@ def test_asym_waveguide_chain_o2_to_o1_with_mirror_true() -> None:
 
 @pytest.mark.parametrize("angle", [0, 30])
 @pytest.mark.parametrize("virtual", [False, True])
-@pytest.mark.usefixtures("strict_cross_sections")
 def test_asym_connect_moving_mirrored_port(
     kcl: kf.KCLayout, angle: float, virtual: bool
 ) -> None:
@@ -850,7 +847,6 @@ def test_asym_connect_moving_mirrored_port(
         b.connect("o2", a, "o1", mirror=True)
 
 
-@pytest.mark.usefixtures("strict_cross_sections")
 def test_asym_waveguide_o1_to_o1_requires_one_mirror() -> None:
     """o1 (R180) ↔ o1 (R180) succeeds with `mirror=True` and result is mirrored."""
     kcl = kf.KCLayout("ASYM_WG_O1O1")
@@ -867,7 +863,6 @@ def test_asym_waveguide_o1_to_o1_requires_one_mirror() -> None:
     assert a.trans.mirror ^ b.trans.mirror
 
 
-@pytest.mark.usefixtures("strict_cross_sections")
 def test_asym_connect_check_ignores_input_mirror_flag_when_use_mirror_false() -> None:
     """When use_mirror=False, the geometric check still rejects misaligned results.
 
@@ -978,7 +973,10 @@ def test_asym_connect_same_core_different_sections(
 def test_connect_cross_section_default_only_compares_cores(
     kcl: kf.KCLayout, layers: Layers
 ) -> None:
-    """By default (`config.allow_cross_section_mismatch=True`) only cores count."""
+    """By default (`config.allow_cross_section_mismatch=True`) only cores count.
+
+    The profiles still must not be flipped against each other.
+    """
     assert kf.config.allow_cross_section_mismatch
     a = _asym_port_cell(kcl, layers, "a", -250, 250)
     same_core = _asym_port_cell(
@@ -997,14 +995,13 @@ def test_connect_cross_section_default_only_compares_cores(
     sym = kcl.kcell("sym")
     sym.create_port(name="o1", trans=kf.kdb.Trans.R0, width=500, layer_info=layers.WG)
     parent = kcl.kcell("parent")
-    ia = parent << a
 
-    # neither the mirror nor the symmetry check apply
-    ia.connect("o1", parent << a, "o1")
-    ia.connect("o1", parent << sym, "o1")
-    ia.connect("o1", parent << same_core, "o1", mirror=True)
+    (parent << a).connect("o1", parent << sym, "o1")
+    (parent << a).connect("o1", parent << same_core, "o1", mirror=True)
+    with pytest.raises(AsymmetricMirrorRequiredError):
+        (parent << a).connect("o1", parent << same_core, "o1")
     with pytest.raises(AsymmetricCoreMismatchError):
-        ia.connect("o1", parent << offset, "o1", mirror=True)
+        (parent << a).connect("o1", parent << offset, "o1", mirror=True)
 
 
 def test_asym_connect_core_check_skipped_on_width_mismatch(

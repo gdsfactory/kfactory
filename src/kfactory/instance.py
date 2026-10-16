@@ -82,10 +82,11 @@ def _check_cross_sections(
 def _check_asymmetric_orientation(
     p: ProtoPort[Any], op: ProtoPort[Any], p_mirror: bool
 ) -> None:
-    """Check that two connected identical asymmetric profiles aren't flipped.
+    """Check that two connected asymmetric profiles aren't flipped.
 
     Port mirror flags describe the profile orientation, so the world mirror
-    flags of the two ports must differ.
+    flags of the two ports must differ. Only then do both profiles share a
+    frame, which the comparisons in `_check_cross_sections` rely on.
 
     Args:
         p: The port that was moved, in any frame.
@@ -94,6 +95,7 @@ def _check_asymmetric_orientation(
     """
     if (
         p.base.asymmetric_cross_section is not None
+        and op.base.asymmetric_cross_section is not None
         and p_mirror == op.dcplx_trans.mirror
     ):
         raise AsymmetricMirrorRequiredError(p, op)
@@ -455,8 +457,9 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
             allow_type_mismatch: Skip port_type check between the ports if set.
             allow_cross_section_mismatch: Only compare the core offsets of
                 asymmetric cross sections if set, instead of requiring identical
-                cross sections (and matching profile orientation). These checks
-                only apply to ports with the same width and layer.
+                cross sections. Asymmetric profiles must not be flipped against
+                each other either way. These checks only apply to ports with the
+                same width and layer.
             use_mirror: If False mirror flag does not get applied from the connection.
             use_angle: If False the angle does not get applied from the connection.
         """
@@ -552,7 +555,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
 
             self._instance.trans = trans
 
-        if check_xs and not allow_cross_section_mismatch:
+        if check_xs:
             _check_asymmetric_orientation(
                 p, op, self.dcplx_trans.mirror ^ p.dcplx_trans.mirror
             )
@@ -1181,8 +1184,9 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             allow_type_mismatch: Skip port_type check between the ports if set.
             allow_cross_section_mismatch: Only compare the core offsets of
                 asymmetric cross sections if set, instead of requiring identical
-                cross sections (and matching profile orientation). These checks
-                only apply to ports with the same width and layer.
+                cross sections. Asymmetric profiles must not be flipped against
+                each other either way. These checks only apply to ports with the
+                same width and layer.
             use_mirror: If False mirror flag does not get applied from the connection.
             use_angle: If False the angle does not get applied from the connection.
         """
@@ -1246,7 +1250,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 raise NotImplementedError("This shouldn't happen")
 
         self.trans = dcplx_trans
-        if check_xs and not allow_cross_section_mismatch:
+        if check_xs:
             _check_asymmetric_orientation(
                 p, op, self.trans.mirror ^ p.dcplx_trans.mirror
             )

@@ -391,12 +391,12 @@ straight.plot()
 # per-port frames, so the default `connect` succeeds and neither instance ends
 # up with a mirror flag.
 #
-# With strict cross section checks (`allow_cross_section_mismatch=False`, see
-# [Cross section checks in `connect`](#cross-section-checks-in-connect)),
 # kfactory validates this by requiring the two connected asymmetric ports to
 # have opposite mirror flags in world space. If they'd line up with the same
 # orientation (an R180 join, which flips the profile), it raises
-# `AsymmetricMirrorRequiredError`.
+# `AsymmetricMirrorRequiredError`. This applies to all asymmetric ports of the
+# same width and layer, see
+# [Cross section checks in `connect`](#cross-section-checks-in-connect).
 
 # %%
 parent_chain = kf.KCell(name="asym_chain_ok")
@@ -422,7 +422,7 @@ ia2 = parent_o1o1 << straight
 ib2 = parent_o1o1 << straight
 
 try:
-    ib2.connect("o1", ia2, "o1", allow_cross_section_mismatch=False)
+    ib2.connect("o1", ia2, "o1")
 except AsymmetricMirrorRequiredError as e:
     print("WITHOUT mirror=True, o1↔o1 raises:")
     print(f"  AsymmetricMirrorRequiredError: {e}\n")
@@ -480,22 +480,18 @@ print("Default connect succeeds.")
 # %% [markdown]
 # ### Summary of asymmetric port behavior
 #
-# With strict cross section checks (`allow_cross_section_mismatch=False`):
-#
 # | Scenario | `connect()` | `connect(mirror=True)` |
 # |---|---|---|
 # | sym ↔ sym | works | works |
 # | asym o2 → asym o1 (chain) | works, no instance mirrored | `AsymmetricMirrorRequiredError` |
 # | asym o1 ↔ asym o1 | `AsymmetricMirrorRequiredError` | works, one instance mirrored |
-# | sym ↔ asym (same width and layer) | `CrossSectionSymmetryMismatchError` | same error |
+# | sym ↔ asym (same width and layer) | works; strict: `CrossSectionSymmetryMismatchError` | same |
 #
 # The check is on the **mirror flags**: kfactory requires the two connected
 # asymmetric ports to end up with opposite mirror orientations (an M90 join). A
 # natural `o2 → o1` chain already satisfies this via the port frames, so it
 # works without `mirror=True`, and adding `mirror=True` would over-mirror it and
 # raise.
-#
-# By default, all of these connect; see below.
 
 # %% [markdown]
 # ### Cross section checks in `connect`
@@ -503,13 +499,18 @@ print("Default connect succeeds.")
 # Besides width, layer and port type, `connect` checks the cross sections of
 # the two ports. These checks only apply to ports with the same width and main
 # layer: a cross section determines both, so an allowed width or layer mismatch
-# already implies a cross section mismatch, and the checks are skipped. The
-# `allow_cross_section_mismatch` flag selects how strict they are:
+# already implies a cross section mismatch, and the checks are skipped.
+#
+# Two asymmetric profiles must never be flipped against each other: their
+# ports need opposite mirror flags after the connection, otherwise
+# `AsymmetricMirrorRequiredError` is raised (see above). Only then do both
+# profiles share a frame, and the `allow_cross_section_mismatch` flag selects
+# how strictly they are compared:
 #
 # | Ports (same width and layer) | `True` (default) | `False` (strict) |
 # |---|---|---|
 # | symmetric ↔ asymmetric | connects | `CrossSectionSymmetryMismatchError` |
-# | asymmetric, identical | connects | must not flip the profile, otherwise `AsymmetricMirrorRequiredError` |
+# | asymmetric, identical | connects | connects |
 # | asymmetric, different | core offsets (`section_min`/`section_max`) must match, otherwise `AsymmetricCoreMismatchError` | `CrossSectionMismatchError` |
 # | symmetric, different enclosure | connects | connects |
 #
@@ -537,16 +538,17 @@ print("Default connect succeeds.")
 # export KFACTORY_ALLOW_CROSS_SECTION_MISMATCH=false
 # ```
 #
-# **Impact.** The default doesn't catch flipped asymmetric profiles or
-# symmetric ↔ asymmetric connections. Strict checks do, but:
+# **Impact.** The default doesn't catch symmetric ↔ asymmetric connections or
+# asymmetric cross sections that only differ outside their core. Strict checks
+# do, but:
 #
 # - Every connection between asymmetric ports of the same width and layer
 #   needs identical cross sections. Different extra sections or offset cores
 #   raise `CrossSectionMismatchError`.
-# - Cells with asymmetric ports must follow the port convention above (or the
-#   connection must use `mirror=True`), otherwise
-#   `AsymmetricMirrorRequiredError` is raised.
-# - Symmetric ports are unaffected: `connect` never compares enclosures. Use
+# - Connecting a symmetric to an asymmetric port of the same width and layer
+#   raises `CrossSectionSymmetryMismatchError`.
+# - Connections between symmetric ports are unaffected: `connect` never
+#   compares enclosures. Use
 #   `kf.checks.port_mismatch_check(cell, check_cross_section=True)` to report
 #   connected ports whose cross sections differ.
 # - Routing functions don't take the flag and use the config value, so setting
