@@ -73,6 +73,12 @@ def wg_enc(kcl: kf.KCLayout, layers: Layers) -> kf.LayerEnclosure:
 
 
 @pytest.fixture
+def strict_cross_sections(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Require identical cross sections in `connect` (the kfactory 4.0 default)."""
+    monkeypatch.setattr(kf.config, "allow_cross_section_mismatch", False)
+
+
+@pytest.fixture
 def sym_enc() -> Callable[..., kf.LayerEnclosure]:
     """Build a fixed-structure enclosure, optionally named."""
 

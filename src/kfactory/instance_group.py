@@ -12,7 +12,15 @@ from .exceptions import (
     PortWidthMismatchError,
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
-from .instance import DInstance, Instance, ProtoInstance, ProtoTInstance, VInstance
+from .instance import (
+    DInstance,
+    Instance,
+    ProtoInstance,
+    ProtoTInstance,
+    VInstance,
+    _check_asymmetric_orientation,
+    _check_cross_sections,
+)
 from .port import BasePort, DPort, Port, ProtoPort
 from .ports import DCreatePort, DPorts, ICreatePort, Ports, ProtoPorts
 
@@ -117,6 +125,7 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
         allow_width_mismatch: bool | None = None,
         allow_layer_mismatch: bool | None = None,
         allow_type_mismatch: bool | None = None,
+        allow_cross_section_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> None: ...
@@ -132,6 +141,7 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
         allow_width_mismatch: bool | None = None,
         allow_layer_mismatch: bool | None = None,
         allow_type_mismatch: bool | None = None,
+        allow_cross_section_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> None: ...
@@ -146,6 +156,7 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
         allow_width_mismatch: bool | None = None,
         allow_layer_mismatch: bool | None = None,
         allow_type_mismatch: bool | None = None,
+        allow_cross_section_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> None:
@@ -166,6 +177,11 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
             allow_width_mismatch: Skip width check between the ports if set.
             allow_layer_mismatch: Skip layer check between the ports if set.
             allow_type_mismatch: Skip port_type check between the ports if set.
+            allow_cross_section_mismatch: Only compare the core offsets of
+                asymmetric cross sections if set, instead of requiring identical
+                cross sections. Asymmetric profiles must not be flipped against
+                each other either way. These checks only apply to ports with the
+                same width and layer.
             use_mirror: If False mirror flag does not get applied from the connection.
             use_angle: If False the angle does not get applied from the connection.
         """
@@ -175,6 +191,8 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
             allow_layer_mismatch = config.allow_layer_mismatch
         if allow_type_mismatch is None:
             allow_type_mismatch = config.allow_type_mismatch
+        if allow_cross_section_mismatch is None:
+            allow_cross_section_mismatch = config.allow_cross_section_mismatch
         if use_mirror is None:
             use_mirror = config.connect_use_mirror
         if use_angle is None:
@@ -198,12 +216,18 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
         assert isinstance(p, Port)
         assert isinstance(op, Port)
 
+        check_xs = p.width == op.width and p.layer == op.layer
+        if check_xs:
+            _check_cross_sections(p, op, allow_cross_section_mismatch)
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
             raise PortLayerMismatchError(self.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatchError(self, other, p, op)
+        # `p` may share its base with a group port, which the transformation
+        # below mutates, so capture its mirror flag first.
+        p_mirror = p.dcplx_trans.mirror
         if p.base.dcplx_trans or op.base.dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
             match (use_mirror, use_angle):
@@ -212,6 +236,7 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
                         op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
                     )
                     self.transform(dcplx_trans)
+                    flipped = dcplx_trans.mirror
                 case False, True:
                     dconn_trans = (
                         kdb.DCplxTrans.M90
@@ -222,15 +247,18 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
                     op_trans.mirror = False
                     dcplx_trans = op_trans * dconn_trans * p.dcplx_trans.inverted()
                     self.transform(dcplx_trans)
+                    flipped = dcplx_trans.mirror
                 case False, False:
                     self.transform(
                         kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
                     )
+                    flipped = False
                 case True, False:
                     self.transform(
                         kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
                     )
                     self.dmirror_y(op.dcplx_trans.disp.y)
+                    flipped = True
                 case _:
                     raise NotImplementedError("This shouldn't happen")
 
@@ -240,6 +268,7 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
                 case True, True:
                     trans = op.trans * conn_trans * p.trans.inverted()
                     self.transform(trans)
+                    flipped = trans.is_mirror()
                 case False, True:
                     conn_trans = (
                         kdb.Trans.M90 if mirror ^ p.trans.mirror else kdb.Trans.R180
@@ -248,13 +277,19 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
                     op_trans.mirror = False
                     trans = op_trans * conn_trans * p.trans.inverted()
                     self.transform(trans)
+                    flipped = trans.is_mirror()
                 case False, False:
                     self.transform(kdb.Trans(op.trans.disp - p.trans.disp))
+                    flipped = False
                 case True, False:
                     self.transform(kdb.Trans(op.trans.disp - p.trans.disp))
                     self.dmirror_y(op.dcplx_trans.disp.y)
+                    flipped = True
                 case _:
                     raise NotImplementedError("This shouldn't happen")
+
+        if check_xs:
+            _check_asymmetric_orientation(p, op, p_mirror ^ flipped)
 
 
 class ProtoTInstanceGroup[T: (int, float), TI: ProtoTInstance[Any]](

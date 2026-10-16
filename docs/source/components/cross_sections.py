@@ -394,7 +394,9 @@ straight.plot()
 # kfactory validates this by requiring the two connected asymmetric ports to
 # have opposite mirror flags in world space. If they'd line up with the same
 # orientation (an R180 join, which flips the profile), it raises
-# `AsymmetricMirrorRequiredError`.
+# `AsymmetricMirrorRequiredError`. This applies to all asymmetric ports of the
+# same width and layer, see
+# [Cross section checks in `connect`](#cross-section-checks-in-connect).
 
 # %%
 parent_chain = kf.KCell(name="asym_chain_ok")
@@ -434,10 +436,10 @@ parent_o1o1.plot()
 # %% [markdown]
 # ### Connecting symmetric ↔ asymmetric: structural mismatch
 #
-# A port carrying a `SymmetricalCrossSection` cannot connect to one carrying an
-# `AsymmetricalCrossSection` — the two are structurally different objects.
-# This raises `CrossSectionSymmetryMismatchError` **before** the width/layer
-# checks, and it's not bypassable by `allow_width_mismatch=True`.
+# With strict cross section checks, a port carrying a `SymmetricalCrossSection`
+# cannot connect to one carrying an `AsymmetricalCrossSection` of the same width
+# and layer — the two are structurally different objects. This raises
+# `CrossSectionSymmetryMismatchError`. By default, they connect.
 
 
 # %%
@@ -455,30 +457,133 @@ def sym_straight(cross_section: str = "WG_500") -> kf.KCell:
     return c
 
 
+# A 500-dbu asymmetric strip, so that it matches WG_500 in width and layer.
+kf.kcl.get_asymmetrical_cross_section(
+    kf.AsymmetricalCrossSection(
+        layer=L.WG, section_min=-200, section_max=300, name="ASYM_500"
+    )
+)
+
 parent_mix = kf.KCell(name="asym_sym_mismatch")
 sym_inst = parent_mix << sym_straight("WG_500")
-asym_inst = parent_mix << straight
+asym_inst = parent_mix << asym_straight("ASYM_500")
 
 try:
-    asym_inst.connect("o1", sym_inst, "o2")
+    asym_inst.connect("o1", sym_inst, "o2", allow_cross_section_mismatch=False)
 except CrossSectionSymmetryMismatchError as e:
-    print("Symmetric ↔ asymmetric connect raises:")
+    print("Strict symmetric ↔ asymmetric connect raises:")
     print(f"  CrossSectionSymmetryMismatchError: {e}")
+
+asym_inst.connect("o1", sym_inst, "o2")
+print("Default connect succeeds.")
 
 # %% [markdown]
 # ### Summary of asymmetric port behavior
 #
-# | Scenario | Default `connect()` | `connect(mirror=True)` |
+# | Scenario | `connect()` | `connect(mirror=True)` |
 # |---|---|---|
 # | sym ↔ sym | works | works |
 # | asym o2 → asym o1 (chain) | works, no instance mirrored | `AsymmetricMirrorRequiredError` |
 # | asym o1 ↔ asym o1 | `AsymmetricMirrorRequiredError` | works, one instance mirrored |
-# | sym ↔ asym | `CrossSectionSymmetryMismatchError` (not bypassable) | same error |
+# | sym ↔ asym (same width and layer) | works; strict: `CrossSectionSymmetryMismatchError` | same |
 #
 # The check is on the **mirror flags**: kfactory requires the two connected
 # asymmetric ports to end up with opposite mirror orientations (an M90 join). A
 # natural `o2 → o1` chain already satisfies this via the port frames, so it
-# works by default and adding `mirror=True` would over-mirror it and raise.
+# works without `mirror=True`, and adding `mirror=True` would over-mirror it and
+# raise.
+
+# %% [markdown]
+# ### Cross section checks in `connect`
+#
+# Besides width, layer and port type, `connect` checks the cross sections of
+# the two ports. These checks only apply to ports with the same width and main
+# layer: a cross section determines both, so an allowed width or layer mismatch
+# already implies a cross section mismatch, and the checks are skipped.
+#
+# Two asymmetric profiles must never be flipped against each other: their
+# ports need opposite mirror flags after the connection, otherwise
+# `AsymmetricMirrorRequiredError` is raised (see above). Only then do both
+# profiles share a frame, and the `allow_cross_section_mismatch` flag selects
+# how strictly they are compared:
+#
+# | Ports (same width and layer) | `True` (default) | `False` (strict) |
+# |---|---|---|
+# | symmetric ↔ asymmetric | connects | `CrossSectionSymmetryMismatchError` |
+# | asymmetric, identical | connects | connects |
+# | asymmetric, different | core offsets (`section_min`/`section_max`) must match, otherwise `AsymmetricCoreMismatchError` | `CrossSectionMismatchError` |
+# | symmetric, different enclosure | connects | connects |
+#
+# The default is `True` for now. It is planned to change to `False` in
+# kfactory 4.0.
+#
+# **For a single connection**, pass the flag to `connect`. `VInstance.connect`
+# and `InstanceGroup.connect` take it as well:
+#
+# ```python
+# inst.connect("o1", other, "o2", allow_cross_section_mismatch=False)
+# ```
+#
+# **Globally**, set it in the config. A value passed to `connect` still takes
+# precedence:
+#
+# ```python
+# kf.config.allow_cross_section_mismatch = False
+# ```
+#
+# The config can also be set from the environment or a `.env` file, see
+# [Config](../config.md):
+#
+# ```bash
+# export KFACTORY_ALLOW_CROSS_SECTION_MISMATCH=false
+# ```
+#
+# **Impact.** The default doesn't catch symmetric ↔ asymmetric connections or
+# asymmetric cross sections that only differ outside their core. Strict checks
+# do, but:
+#
+# - Every connection between asymmetric ports of the same width and layer
+#   needs identical cross sections. Different extra sections or offset cores
+#   raise `CrossSectionMismatchError`.
+# - Connecting a symmetric to an asymmetric port of the same width and layer
+#   raises `CrossSectionSymmetryMismatchError`.
+# - Connections between symmetric ports are unaffected: `connect` never
+#   compares enclosures. Use
+#   `kf.checks.port_mismatch_check(cell, check_cross_section=True)` to report
+#   connected ports whose cross sections differ.
+# - Routing functions don't take the flag and use the config value, so setting
+#   it globally applies to routes as well.
+#
+# The demo below connects two asymmetric cross sections that share a core but
+# differ in their extra sections.
+
+# %%
+from kfactory.exceptions import CrossSectionMismatchError
+
+kf.kcl.get_asymmetrical_cross_section(
+    kf.AsymmetricalCrossSection(
+        layer=L.WG,
+        section_min=-200,
+        section_max=300,
+        sections=(
+            kf.CrossSectionLayer(layer=L.WGCLAD, section_min=-200, section_max=2_300),
+        ),
+        name="ASYM_500_CLAD",
+    )
+)
+parent_xs = kf.KCell(name="asym_xs_mismatch")
+plain = parent_xs << asym_straight("ASYM_500")
+clad = parent_xs << asym_straight("ASYM_500_CLAD")
+
+try:
+    clad.connect("o1", plain, "o2", allow_cross_section_mismatch=False)
+except CrossSectionMismatchError as e:
+    print("Strict connect raises:")
+    print(f"  CrossSectionMismatchError: {e}\n")
+
+clad.connect("o1", plain, "o2")
+print("Default connect succeeds, the cores match.")
+parent_xs.plot()
 
 # %% [markdown]
 # ## Bounding-box layers
