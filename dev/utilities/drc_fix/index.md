@@ -108,7 +108,7 @@ c
 ```
 
 ```
-[32m2026-10-16 04:41:12.750[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
+[32m2026-10-23 02:01:21.596[0m | [1mINFO    [0m | [36mkfactory.utils.violations[0m:[36mfix_spacing_minkowski_tiled[0m:[36m272[0m - [1mStarting minkowski on drc_demo[0m
 ```
 
 ```

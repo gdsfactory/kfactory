@@ -582,8 +582,6 @@ parent_xs.plot()
 
 ```
 Strict connect raises:
-
-
   CrossSectionMismatchError: Cross section mismatch between the ports 'o1' ('ASYM_500_CLAD') and 'o2' ('ASYM_500').
 
 Default connect succeeds, the cores match.
