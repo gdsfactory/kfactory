@@ -52,7 +52,7 @@ optional-dependencies.dev = [
   "kfactory[ci]",
   "pre-commit>=4.7,<4.8",
   "ruff~=0.17.1",
-  "rust-just~=1.58.0",
+  "rust-just>=1.58,<1.60",
   "scipy-stubs>=1.18.1.1,<1.19",
   "tbump>=6.11,<6.12",
   "ty>=0.0.88,<0.1",
