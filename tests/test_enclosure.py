@@ -410,3 +410,30 @@ def test_extrude_path_cross_section_asymmetric(
     assert kf.kdb.Region(c.shapes(kcl.layer(layers.WGCLAD))).bbox() == kf.kdb.Box(
         0, -100, length_dbu, 900
     )
+
+
+def test_extrude_path_does_not_mutate_enclosure(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    """Extruding along the main layer must not add sections to the enclosure."""
+    enc = kf.LayerEnclosure(
+        sections=[(layers.WG, 500, 1000), (layers.WGCLAD, 0, 2000)],
+        main_layer=layers.WG,
+        name="enc_no_mutate",
+    )
+    n_sections = {
+        layer: len(section.sections) for layer, section in enc.layer_sections.items()
+    }
+    path = [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(10, 0)]
+
+    c1 = kcl.kcell("extrude_no_mutate_1")
+    kf.enclosure.extrude_path(c1, layers.WG, path, 1, enc)
+    assert {
+        layer: len(section.sections) for layer, section in enc.layer_sections.items()
+    } == n_sections
+
+    c2 = kcl.kcell("extrude_no_mutate_2")
+    kf.enclosure.extrude_path(c2, layers.WG, path, 1, enc)
+    for layer in (layers.WG, layers.WGCLAD):
+        li = kcl.layer(layer)
+        assert (kf.kdb.Region(c1.shapes(li)) ^ kf.kdb.Region(c2.shapes(li))).is_empty()

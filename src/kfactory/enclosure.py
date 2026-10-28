@@ -206,6 +206,7 @@ def extrude_path(
             j = 0
         else:
             layer_list = enclosure.layer_sections.copy()
+            layer_list[layer] = LayerSection(sections=list(layer_list[layer].sections))
             j = layer_list[layer].add_section(Section(d_max=0))
 
     for _layer, layer_sec in layer_list.items():
