@@ -248,6 +248,8 @@ class Direction(StrEnum):
 def _check_instances(
     cell: ProtoTKCell[Any], kcl: KCLayout, check_instances: CheckInstances
 ) -> None:
+    if not cell.kdb_cell.child_instances():
+        return
     match check_instances:
         case CheckInstances.RAISE:
             if any(inst.is_complex() for inst in cell.each_inst()):
@@ -571,7 +573,9 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                 if check_pins:
                     _check_pins(cell)
                 match check_unnamed_cells:
-                    case CheckUnnamedCells.RAISE | CheckUnnamedCells.WARNING:
+                    case CheckUnnamedCells.RAISE | CheckUnnamedCells.WARNING if (
+                        cell.kdb_cell.child_instances()
+                    ):
                         unnamed_cells: list[str] = []
                         for ci in cell.kdb_cell.each_child_cell():
                             c = cell.kcl[ci]
