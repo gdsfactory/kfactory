@@ -248,6 +248,8 @@ class Direction(StrEnum):
 def _check_instances(
     cell: ProtoTKCell[Any], kcl: KCLayout, check_instances: CheckInstances
 ) -> None:
+    if not cell.kdb_cell.child_instances():
+        return
     match check_instances:
         case CheckInstances.RAISE:
             if any(inst.is_complex() for inst in cell.each_inst()):
@@ -522,7 +524,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                                 return kcl.get_cell(
                                     layout_cell.cell_index(), output_type
                                 )
-                    logger.debug(f"Constructing {kcl._future_cell_name}")
+                    logger.debug("Constructing {}", name)
                     name_: str | None = name
                 else:
                     name_ = None
@@ -571,11 +573,16 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                 if check_pins:
                     _check_pins(cell)
                 match check_unnamed_cells:
-                    case CheckUnnamedCells.RAISE | CheckUnnamedCells.WARNING:
+                    case CheckUnnamedCells.RAISE | CheckUnnamedCells.WARNING if (
+                        cell.kdb_cell.child_instances()
+                    ):
                         unnamed_cells: list[str] = []
+                        layout = cell.kcl.layout
                         for ci in cell.kdb_cell.each_child_cell():
-                            c = cell.kcl[ci]
-                            if re.fullmatch(_fixed_unnamed_pattern, c.name):
+                            if re.fullmatch(
+                                _fixed_unnamed_pattern, layout.cell(ci).name
+                            ):
+                                c = cell.kcl[ci]
                                 factory_name = c.basename or c.function_name
                                 factory_string = (
                                     f"factory_name={factory_name!r}"
@@ -847,7 +854,7 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
                     else:
                         name = get_cell_name(self.name, **params)
                     kcl._future_cell_name = name
-                    logger.debug(f"Constructing {kcl._future_cell_name}")
+                    logger.debug("Constructing {}", name)
                     name_: str | None = name
                 else:
                     name_ = None
