@@ -2836,6 +2836,15 @@ class KCLayout(
         self, cross_section: str | AnyCrossSectionInput
     ) -> ExtrudeConfig | None:
         """Get the default extrusion settings of a cross section, if any."""
+        if (
+            isinstance(cross_section, TCrossSection | TAsymmetricCrossSection)
+            and cross_section.kcl is self
+        ):
+            # Skip resolving an already registered cross section
+            base = cross_section.base
+            auto_name = base.auto_name()
+            if self.cross_sections.cross_sections.get(auto_name) is base:
+                return self.extrude_configs.get(auto_name)
         xs = self.get_base_cross_section(cross_section)
         return self.extrude_configs.get(xs.auto_name())
 
