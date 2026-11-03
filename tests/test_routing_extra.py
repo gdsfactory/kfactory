@@ -93,6 +93,23 @@ def test_place_single_wire_basic(kcl: kf.KCLayout, layers: Layers) -> None:
     assert route.length_straights == 50_000
 
 
+def test_place_single_wire_multi_segment_length(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    c = kcl.kcell("psw_multi_segment")
+    p1 = _e_port(kcl, layers, "in", 0, 0, 0)
+    p2 = _e_port(kcl, layers, "out", 2, 30_000, 20_000)
+    pts = [
+        kf.kdb.Point(0, 0),
+        kf.kdb.Point(10_000, 0),
+        kf.kdb.Point(10_000, 20_000),
+        kf.kdb.Point(30_000, 20_000),
+    ]
+    route = place_single_wire(c, p1, p2, pts)
+    assert route.length_straights == 50_000
+    assert route.length_straights == route.length_backbone
+
+
 def test_place_single_wire_extra_kwargs_raises(
     kcl: kf.KCLayout, layers: Layers
 ) -> None:
