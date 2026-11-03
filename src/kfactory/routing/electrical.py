@@ -875,6 +875,8 @@ def place_dual_rails(
         bend90_radius=0,
         polygons={layer_info: shapes},
         instances=[],
+        length_straights=round(sum((b - a).length() for a, b in pairwise(pts))),
+        length_function=get_length_from_backbone,
     )
 
 

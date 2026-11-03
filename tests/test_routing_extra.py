@@ -158,6 +158,24 @@ def test_place_dual_rails_basic(kcl: kf.KCLayout, layers: Layers) -> None:
     assert route.polygons[layers.METAL1]
 
 
+def test_place_dual_rails_multi_segment_length(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    c = kcl.kcell("pdr_multi_segment")
+    p1 = _e_port(kcl, layers, "in", 0, 0, 0, width=4000)
+    p2 = _e_port(kcl, layers, "out", 2, 30_000, 20_000, width=4000)
+    pts = [
+        kf.kdb.Point(0, 0),
+        kf.kdb.Point(10_000, 0),
+        kf.kdb.Point(10_000, 20_000),
+        kf.kdb.Point(30_000, 20_000),
+    ]
+    route = place_dual_rails(c, p1, p2, pts, separation_rails=1000)
+    assert route.length_straights == 50_000
+    assert route.length_backbone == 50_000
+    assert route.length == 50_000
+
+
 def test_place_dual_rails_missing_separation(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.kcell("pdr_no_sep")
     p1 = _e_port(kcl, layers, "in", 0, 0, 0, width=4000)
