@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from itertools import pairwise
 from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeGuard, cast
 
 import klayout.db as kdb
@@ -118,12 +119,7 @@ class ManhattanRoute(BaseModel, arbitrary_types_allowed=True):
     @property
     def length_backbone(self) -> dbu:
         """Length of the backbone in dbu."""
-        length = 0
-        p_old = self.backbone[0]
-        for p in self.backbone[1:]:
-            length += int((p - p_old).length())
-            p_old = p
-        return length
+        return round(sum((b - a).length() for a, b in pairwise(self.backbone)))
 
     @property
     def length(self) -> int | float:

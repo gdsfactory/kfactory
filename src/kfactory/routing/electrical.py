@@ -808,11 +808,6 @@ def place_single_wire(
         .polygon
     )
 
-    length = 0.0
-    pt1 = pts[0]
-    for pt2 in pts[1:]:
-        length += (pt2 - pt1).length()
-
     return ManhattanRoute(
         backbone=list(pts),
         start_port=p1,
@@ -821,7 +816,7 @@ def place_single_wire(
         bend90_radius=0,
         polygons={layer_info: [shape]},
         instances=[],
-        length_straights=round(length),
+        length_straights=round(sum((b - a).length() for a, b in pairwise(pts))),
         length_function=get_length_from_backbone,
     )
 
@@ -880,6 +875,8 @@ def place_dual_rails(
         bend90_radius=0,
         polygons={layer_info: shapes},
         instances=[],
+        length_straights=round(sum((b - a).length() for a, b in pairwise(pts))),
+        length_function=get_length_from_backbone,
     )
 
 

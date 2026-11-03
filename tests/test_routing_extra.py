@@ -93,6 +93,35 @@ def test_place_single_wire_basic(kcl: kf.KCLayout, layers: Layers) -> None:
     assert route.length_straights == 50_000
 
 
+def test_place_single_wire_multi_segment_length(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    c = kcl.kcell("psw_multi_segment")
+    p1 = _e_port(kcl, layers, "in", 0, 0, 0)
+    p2 = _e_port(kcl, layers, "out", 2, 30_000, 20_000)
+    pts = [
+        kf.kdb.Point(0, 0),
+        kf.kdb.Point(10_000, 0),
+        kf.kdb.Point(10_000, 20_000),
+        kf.kdb.Point(30_000, 20_000),
+    ]
+    route = place_single_wire(c, p1, p2, pts)
+    assert route.length_straights == 50_000
+    assert route.length_straights == route.length_backbone
+
+
+def test_place_single_wire_diagonal_length_matches_backbone(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    c = kcl.kcell("psw_diagonal")
+    p1 = _e_port(kcl, layers, "in", 0, 0, 0)
+    p2 = _e_port(kcl, layers, "out", 2, 2_001, 2_001)
+    pts = [kf.kdb.Point(0, 0), kf.kdb.Point(1_000, 1_001), kf.kdb.Point(2_001, 2_001)]
+    route = place_single_wire(c, p1, p2, pts)
+    assert route.length_straights == 2830
+    assert route.length_backbone == route.length_straights
+
+
 def test_place_single_wire_extra_kwargs_raises(
     kcl: kf.KCLayout, layers: Layers
 ) -> None:
@@ -127,6 +156,24 @@ def test_place_dual_rails_basic(kcl: kf.KCLayout, layers: Layers) -> None:
     assert route.end_port is p2
     # The shape polygons live on the port's layer
     assert route.polygons[layers.METAL1]
+
+
+def test_place_dual_rails_multi_segment_length(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    c = kcl.kcell("pdr_multi_segment")
+    p1 = _e_port(kcl, layers, "in", 0, 0, 0, width=4000)
+    p2 = _e_port(kcl, layers, "out", 2, 30_000, 20_000, width=4000)
+    pts = [
+        kf.kdb.Point(0, 0),
+        kf.kdb.Point(10_000, 0),
+        kf.kdb.Point(10_000, 20_000),
+        kf.kdb.Point(30_000, 20_000),
+    ]
+    route = place_dual_rails(c, p1, p2, pts, separation_rails=1000)
+    assert route.length_straights == 50_000
+    assert route.length_backbone == 50_000
+    assert route.length == 50_000
 
 
 def test_place_dual_rails_missing_separation(kcl: kf.KCLayout, layers: Layers) -> None:
