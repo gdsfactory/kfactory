@@ -957,14 +957,14 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     kcl=self.kcl,
                     ports=[c.base.ports[port_mapping[id(port)]] for port in p.ports],
                     pin_type=p.pin_type,
-                    info=p.info,
+                    info=p.info.model_copy(deep=True),
                 )
                 for p in self._base.pins
             ]
 
         c._base.settings = self.settings.model_copy()
         c._base.settings_units = self.settings_units.model_copy()
-        c._base.info = self.info.model_copy()
+        c._base.info = self.info.model_copy(deep=True)
         c._base.instance_infos = {
             name: info.model_copy(deep=True)
             for name, info in self.instance_infos.items()
@@ -3451,7 +3451,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
 
         c.settings = self.settings.model_copy()
         c.settings_units = self.settings_units.model_copy()
-        c.info = self._base.info.model_copy()
+        c.info = self._base.info.model_copy(deep=True)
         for layer, shapes in self.shapes().items():
             for shape in shapes:
                 c.shapes(layer).insert(shape)

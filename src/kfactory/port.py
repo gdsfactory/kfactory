@@ -189,7 +189,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             asymmetric_cross_section=self.asymmetric_cross_section,
             trans=self.trans.dup() if self.trans else None,
             dcplx_trans=self.dcplx_trans.dup() if self.dcplx_trans else None,
-            info=self.info.model_copy(),
+            info=self.info.model_copy(deep=True),
             port_type=self.port_type,
         )
 

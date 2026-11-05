@@ -46,7 +46,7 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
             ports=[
                 p.transformed(trans=trans, post_trans=post_trans) for p in self.ports
             ],
-            info=self.info.model_copy(),
+            info=self.info.model_copy(deep=True),
             pin_type=self.pin_type,
         )
 
