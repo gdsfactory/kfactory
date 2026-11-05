@@ -114,6 +114,61 @@ def test_metainfo_dup(straight: kf.KCell) -> None:
     assert c_.ports == straight.ports
 
 
+def _port_with_nested_info(c: kf.KCell) -> kf.Port:
+    p = c.create_port(
+        name="o1", trans=kf.kdb.Trans.R0, width=1000, layer=c.kcl.layout.layer(1, 0)
+    )
+    p.info["d"] = {"a": 1}
+    return p
+
+
+@pytest.mark.parametrize("cell_type", [kf.KCell, kf.VKCell])
+def test_dup_does_not_share_nested_info(cell_type: type) -> None:
+    original = cell_type()
+    original.info["d"] = {"a": 1}
+    original.info["l"] = [1]
+
+    copy = original.dup()
+    copy.info["d"]["a"] = 2
+    copy.info["l"].append(2)
+
+    assert original.info["d"] == {"a": 1}
+    assert original.info["l"] == [1]
+
+
+def test_port_copy_does_not_share_nested_info() -> None:
+    p = _port_with_nested_info(kf.KCell())
+
+    p.copy().info["d"]["a"] = 2
+    kf.KCell().add_port(port=p).info["d"]["a"] = 3
+
+    assert p.info["d"] == {"a": 1}
+
+
+def test_pin_copy_does_not_share_nested_info() -> None:
+    c = kf.KCell()
+    pin = c.create_pin(
+        name="p1", ports=[_port_with_nested_info(c)], info={"d": {"a": 1}}
+    )
+
+    pin.copy().info["d"]["a"] = 2
+
+    assert pin.info["d"] == {"a": 1}
+
+
+def test_dup_does_not_share_nested_port_and_pin_info() -> None:
+    c = kf.KCell()
+    p = _port_with_nested_info(c)
+    pin = c.create_pin(name="p1", ports=[p], info={"d": {"a": 1}})
+
+    copy = c.dup()
+    copy.ports["o1"].info["d"]["a"] = 2
+    copy.pins["p1"].info["d"]["a"] = 2
+
+    assert p.info["d"] == {"a": 1}
+    assert pin.info["d"] == {"a": 1}
+
+
 def test_metainfo_read(straight: kf.KCell) -> None:
     """Test whether we can read written metadata to ports."""
     with NamedTemporaryFile("a", suffix=".oas") as t:
