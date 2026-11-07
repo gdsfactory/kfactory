@@ -322,7 +322,7 @@ def route_bundle(
             route_width = [c.kcl.to_dbu(width) for width in route_width]
         else:
             route_width = c.kcl.to_dbu(route_width)
-    angles: dict[int | float, int] = {0: 0, 90: 1, 180: 2, 270: 30}
+    angles: dict[int | float, int] = {0: 0, 90: 1, 180: 2, 270: 3}
     if start_angles is not None:
         if isinstance(start_angles, list):
             start_angles = [angles[angle] for angle in start_angles]

@@ -1718,3 +1718,36 @@ def test_route_bundle_facing_closer_than_separation(
         on_collision=None,
     )[0]
     assert route.backbone == [t * kf.kdb.Point(0, 0), t * kf.kdb.Point(distance, 0)]
+
+
+@pytest.mark.parametrize("end_angle", [0, 90, 180, 270])
+def test_electrical_route_bundle_end_angles(kcl: kf.KCLayout, end_angle: int) -> None:
+    """`end_angles=a` must act like a port that natively faces `a` degrees.
+
+    Regression test: 270 degrees used to be converted to orientation 30
+    instead of 3 for DKCell electrical routing.
+    """
+    layer = kf.kdb.LayerInfo(1, 0)
+
+    def route(end_orientation: int, end_angles: int | None) -> list[kf.kdb.Point]:
+        c = kcl.dkcell()
+        start = c.create_port(
+            name="start", dcplx_trans=kf.kdb.DCplxTrans(), width=1, layer_info=layer
+        )
+        end = c.create_port(
+            name="end",
+            dcplx_trans=kf.kdb.DCplxTrans(1, end_orientation * 90, False, 100, 100),
+            width=1,
+            layer_info=layer,
+        )
+        [r] = kf.routing.electrical.route_bundle(
+            c, [start], [end], separation=2, place_layer=layer, end_angles=end_angles
+        )
+        return list(r.backbone)
+
+    native_orientation = end_angle // 90
+    # The end port faces a different direction, but is overridden to face `end_angle`.
+    wrong_orientation = (native_orientation + 1) % 4
+    overridden = route(end_orientation=wrong_orientation, end_angles=end_angle)
+    native = route(end_orientation=native_orientation, end_angles=None)
+    assert overridden == native

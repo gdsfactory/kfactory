@@ -130,6 +130,16 @@ class LayerEnum(int, Enum):  # ty:ignore[unsupported-base]
         """Return the name of the LayerEnum."""
         return self.name
 
+    def __eq__(self, other: object) -> bool:
+        """If other is a tuple, compare with (layer, datatype). Otherwise use `is`."""
+        if isinstance(other, tuple):
+            return (self.layer, self.datatype) == other
+        return self is other
+
+    def __hash__(self) -> int:
+        """Hash of (layer, datatype)."""
+        return hash((self.layer, self.datatype))
+
 
 class LayerLevel(BaseModel):
     """Level for 3D LayerStack.
