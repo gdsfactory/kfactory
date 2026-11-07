@@ -64,7 +64,7 @@ def test_layer_enum_equality(layers: Layers) -> None:
     layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
 
     assert layer_enum.WG == (1, 0)
-    assert layer_enum.WG == (1, 0)
+    assert (1, 0) == layer_enum.WG # noqa: SIM101
 
     assert layer_enum.WG != (1, 1)
     assert layer_enum.WG != (1, 1)
