@@ -132,12 +132,12 @@ class LayerEnum(int, Enum):  # ty:ignore[unsupported-base]
 
     def __eq__(self, other: object) -> bool:
         """Compares against other LayerEnum, tuple, or int.
-        
+
         If other is tuple, compare with (layer, datatype). If other is int,
         compare with `int(self)`. Else, use `is`."""
         if isinstance(other, tuple):
             return (self.layer, self.datatype) == other
-        elif isinstance(other, int):
+        if isinstance(other, int):
             return int(self) == other
         return self is other
 
