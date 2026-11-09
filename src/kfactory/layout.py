@@ -2825,10 +2825,16 @@ class KCLayout(
             )
         existing = self.extrude_configs.get(xs.auto_name())
         if on_conflict == "raise" and existing is not None and existing != config:
+            diff = "; ".join(
+                f"{field} is {getattr(existing, field)!r}, not "
+                f"{getattr(config, field)!r}"
+                for field in type(config).model_fields
+                if getattr(existing, field) != getattr(config, field)
+            )
             raise ExtrudeConfigConflictError(
-                f"Cross section {xs.name!r} already has the extrude config "
-                f"{existing!r}, cannot set {config!r}. Cross sections with the "
-                "same geometry share one extrude config."
+                f"Cross section {xs.name!r} already has a different extrude config "
+                f"({diff}). Cross sections with the same geometry share one "
+                "extrude config, so define it the same way everywhere."
             )
         self.extrude_configs[xs.auto_name()] = config
 
