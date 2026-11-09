@@ -182,7 +182,7 @@ def get_affinity() -> int:
     """
     try:
         return len(
-            os.sched_getaffinity(0)  # ty:ignore[unresolved-attribute, unused-ignore-comment]
+            os.sched_getaffinity(0)  # ty:ignore[missing-attribute, unused-ignore-comment]
         )
     except AttributeError:
         try:

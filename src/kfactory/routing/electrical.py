@@ -384,9 +384,9 @@ def route_bundle(
             on_collision=on_collision,
             on_placer_error=on_placer_error,
             collision_check_layers=collision_check_layers,
-            start_angles=start_angles,
-            end_angles=end_angles,
-            route_width=route_width,
+            start_angles=cast("int | list[int] | None", start_angles),
+            end_angles=cast("int | list[int] | None", end_angles),
+            route_width=cast("int | list[int] | None", route_width),
             constraints=constraints,
             route_debug=route_debug,
         )

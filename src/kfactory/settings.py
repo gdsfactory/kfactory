@@ -17,7 +17,7 @@ class SettingMixin:
 
     def __getattr__(self, key: str) -> Any:
         """Get the value of a setting."""
-        return super().__getattr__(key)  # ty:ignore[unresolved-attribute]
+        return super().__getattr__(key)  # ty:ignore[missing-attribute]
 
     def __getitem__(self, key: str) -> Any:
         """Get the value of a setting."""

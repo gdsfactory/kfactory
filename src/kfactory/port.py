@@ -213,7 +213,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         if isinstance(post_trans, kdb.Trans):
             post_trans = kdb.DCplxTrans(post_trans.to_dtype(self.kcl.dbu))
         dcplx_trans = self.dcplx_trans or kdb.DCplxTrans(
-            t=self.trans.to_dtype(self.kcl.dbu)  # ty:ignore[unresolved-attribute]
+            t=self.trans.to_dtype(self.kcl.dbu)  # ty:ignore[missing-union-attribute]
         )
 
         base.trans = None
@@ -240,7 +240,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         if isinstance(post_trans, kdb.Trans):
             post_trans = kdb.DCplxTrans(post_trans.to_dtype(self.kcl.dbu))
         dcplx_trans = self.dcplx_trans or kdb.DCplxTrans(
-            t=self.trans.to_dtype(self.kcl.dbu)  # ty:ignore[unresolved-attribute]
+            t=self.trans.to_dtype(self.kcl.dbu)  # ty:ignore[missing-union-attribute]
         )
 
         base.trans = None

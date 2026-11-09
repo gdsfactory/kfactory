@@ -483,7 +483,7 @@ class KCLayout(
             info=Info(**info) if info else Info(),
             settings=KCellSettings(
                 version=__version__,
-                klayout_version=kdb.__version__,  # ty:ignore[unresolved-attribute]
+                klayout_version=kdb.__version__,  # ty:ignore[missing-attribute]
                 meta_format="v3",
             ),
             decorators=Decorators(self),
@@ -1652,7 +1652,7 @@ class KCLayout(
             elif sig.return_annotation is not inspect.Signature.empty:
                 # Use get_type_hints to resolve string annotations
                 try:
-                    type_hints = get_type_hints(f, globalns=f.__globals__)  # ty:ignore[unresolved-attribute]
+                    type_hints = get_type_hints(f, globalns=f.__globals__)  # ty:ignore[missing-attribute]
                     output_cell_type_ = type_hints.get("return", sig.return_annotation)
 
                 except Exception:
@@ -1881,7 +1881,7 @@ class KCLayout(
             elif sig.return_annotation is not inspect.Signature.empty:
                 # Use get_type_hints to resolve string annotations
                 try:
-                    type_hints = get_type_hints(f, globalns=f.__globals__)  # ty:ignore[unresolved-attribute]
+                    type_hints = get_type_hints(f, globalns=f.__globals__)  # ty:ignore[missing-attribute]
                     output_cell_type_ = type_hints.get("return", sig.return_annotation)
 
                 except Exception:
@@ -1958,7 +1958,7 @@ class KCLayout(
             and name not in self.__class__.__private_attributes__
         ):
             return self.layout.__getattribute__(name)
-        return super().__getattr__(name)  # ty:ignore[unresolved-attribute]
+        return super().__getattr__(name)  # ty:ignore[missing-attribute]
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Use a custom setter to automatically set attributes.
@@ -2363,14 +2363,14 @@ class KCLayout(
                         yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                         err_msg += (
                             "\nLayout Meta Diff:\n```\n"
-                            + yaml.dumps(dict(diff.layout_meta_diff))  # ty:ignore[unresolved-attribute]
+                            + yaml.dumps(dict(diff.layout_meta_diff))  # ty:ignore[missing-attribute]
                             + "\n```"
                         )
                     if diff.cells_meta_diff:
                         yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                         err_msg += (
                             "\nLayout Meta Diff:\n```\n"
-                            + yaml.dumps(dict(diff.cells_meta_diff))  # ty:ignore[unresolved-attribute]
+                            + yaml.dumps(dict(diff.cells_meta_diff))  # ty:ignore[missing-attribute]
                             + "\n```"
                         )
 

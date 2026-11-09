@@ -293,7 +293,7 @@ def yaml_regression(
     def _check(
         schematic: kf.schematic.TSchematic[Any],
     ) -> None:
-        dumped = yaml.dump_to_string(  # ty:ignore[unresolved-attribute]
+        dumped = yaml.dump_to_string(  # ty:ignore[missing-attribute]
             schematic.model_dump(exclude_defaults=True, warnings=False)
         )
         file_regression.check(

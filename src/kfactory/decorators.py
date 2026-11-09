@@ -612,8 +612,8 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                         for port in cell.ports:
                             mapped: Direction = Direction(mapping[port.trans.angle])
                             if mapped not in received_ports:
-                                received_ports[mapped] = []  # ty:ignore[invalid-key]
-                            received_ports[mapped].append(port.name)  # ty:ignore[invalid-key]
+                                received_ports[mapped] = []  # ty:ignore[non-literal-typed-dict-key]
+                            received_ports[mapped].append(port.name)  # ty:ignore[non-literal-typed-dict-key]
                         raise ValueError(
                             "The `@cell` decorator defines ports, but they do not match"
                             " the extracted ports. Declared ports: "
@@ -627,7 +627,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                         for port in cell.ports:
                             if (
                                 port.name
-                                not in self.ports_definition[mapping[port.trans.angle]]  # ty:ignore[invalid-key]
+                                not in self.ports_definition[mapping[port.trans.angle]]  # ty:ignore[non-literal-typed-dict-key]
                             ):
                                 found_errors = True
                         if found_errors:
@@ -635,8 +635,8 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                             for port in cell.ports:
                                 mapped = Direction(mapping[port.trans.angle])
                                 if mapped not in received_ports:
-                                    received_ports[mapped] = []  # ty:ignore[invalid-key]
-                                received_ports[mapped].append(port.name)  # ty:ignore[invalid-key]
+                                    received_ports[mapped] = []  # ty:ignore[non-literal-typed-dict-key]
+                                received_ports[mapped].append(port.name)  # ty:ignore[non-literal-typed-dict-key]
                             raise ValueError(
                                 "The `@cell` decorator defines ports, but they do not"
                                 " match the extracted ports. Declared ports: "
@@ -648,7 +648,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                         port_names: list[str | None] = []
                         for direction in Direction:
                             if direction in self.ports_definition:
-                                port_names.extend(self.ports_definition[direction])  # ty:ignore[invalid-key]
+                                port_names.extend(self.ports_definition[direction])  # ty:ignore[non-literal-typed-dict-key]
 
                         found_errors = False
                         for port in cell.ports:
@@ -685,7 +685,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
 
     @property
     def qualified_name(self) -> str:
-        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"  # ty:ignore[unresolved-attribute]
+        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"  # ty:ignore[missing-attribute]
 
     def prune(self) -> None:
         cells = [c for c in self.cache.values() if not c._destroyed()]
@@ -918,8 +918,8 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
                         for port in cell.ports:
                             mapped: Direction = Direction(mapping[port.trans.angle])
                             if mapped not in received_ports:
-                                received_ports[mapped] = []  # ty:ignore[invalid-key]
-                            received_ports[mapped].append(port.name)  # ty:ignore[invalid-key]
+                                received_ports[mapped] = []  # ty:ignore[non-literal-typed-dict-key]
+                            received_ports[mapped].append(port.name)  # ty:ignore[non-literal-typed-dict-key]
                         raise ValueError(
                             "The `@cell` decorator defines ports, but they do not match"
                             " the extracted ports. Declared ports: "
@@ -931,7 +931,7 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
                     port_names: list[str | None] = []
                     for direction in Direction:
                         if direction in self.ports_definition:
-                            port_names.extend(self.ports_definition[direction])  # ty:ignore[invalid-key]
+                            port_names.extend(self.ports_definition[direction])  # ty:ignore[non-literal-typed-dict-key]
 
                     found_errors = False
                     for port in cell.ports:
@@ -968,7 +968,7 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
 
     @property
     def qualified_name(self) -> str:
-        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"  # ty:ignore[unresolved-attribute]
+        return f"{self._f_orig.__module__}.{self._f_orig.__qualname__}"  # ty:ignore[missing-attribute]
 
     def metadata_providers(self) -> tuple[_FactoryMetadataProviderRecord, ...]:
         """Return all metadata provider records registered for this factory."""
@@ -1001,7 +1001,7 @@ def _get_path(f: Callable[..., Any]) -> Path:
     if isinstance(f, functools.partial):
         return _get_path(f.func)
     try:
-        return Path(f.__code__.co_filename).resolve()  # ty:ignore[unresolved-attribute]
+        return Path(f.__code__.co_filename).resolve()  # ty:ignore[missing-attribute]
     except Exception as e:
         raise ValueError("Failed to retrieve path of code for function {f}") from e
 

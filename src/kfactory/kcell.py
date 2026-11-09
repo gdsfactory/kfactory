@@ -586,7 +586,7 @@ class TKCell(BaseKCell):
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         try:
-            return super().__getattr__(name)  # ty:ignore[unresolved-attribute]
+            return super().__getattr__(name)  # ty:ignore[missing-attribute]
         except Exception:
             return getattr(self.kdb_cell, name)
 
@@ -1628,14 +1628,14 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.layout_meta_diff))  # ty:ignore[unresolved-attribute]
+                        + yaml.dumps(dict(diff.layout_meta_diff))  # ty:ignore[missing-attribute]
                         + "\n```"
                     )
                 if diff.cells_meta_diff:
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.cells_meta_diff))  # ty:ignore[unresolved-attribute]
+                        + yaml.dumps(dict(diff.cells_meta_diff))  # ty:ignore[missing-attribute]
                         + "\n```"
                     )
 
