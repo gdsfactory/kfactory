@@ -1209,6 +1209,25 @@ def test_radius_excluded_from_name_but_conflicts_on_registration(
         )
 
 
+def test_cell_accepts_cross_section_lists(
+    kcl: kf.KCLayout, sym_enc: Callable[..., kf.LayerEnclosure]
+) -> None:
+    base = kcl.get_symmetrical_cross_section(
+        kf.SymmetricalCrossSection(width=1000, enclosure=kcl.get_enclosure(sym_enc()))
+    )
+    xs = kf.DCrossSection(kcl=kcl, base=base)
+    same = kf.DCrossSection(kcl=kcl, base=base)
+    assert hash(xs) == hash(same)
+    assert xs == xs.to_itype() == base
+    assert hash(xs) == hash(xs.to_itype()) == hash(base)
+
+    @kcl.cell
+    def cell_with_profiles(profiles: list[kf.DCrossSection]) -> kf.KCell:
+        return kcl.kcell()
+
+    assert cell_with_profiles([xs, xs]) is cell_with_profiles([same, same])
+
+
 def test_asymmetric_unnamed_resolves_to_named(kcl: kf.KCLayout) -> None:
     named = kcl.get_asymmetrical_cross_section(_make_asym("named_asym"))
     assert named.is_named
