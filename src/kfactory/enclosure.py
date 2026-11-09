@@ -722,7 +722,6 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         return hash(
             (
                 str(self),
-                self.main_layer,
                 tuple(self.layer_sections.items()),
                 tuple(
                     (str(layer), offset) for layer, offset in self.bbox_sections.items()

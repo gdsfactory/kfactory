@@ -1436,6 +1436,9 @@ class TCrossSection[T: (int, float)](ABC):
             return self.base == o
         return False
 
+    def __hash__(self) -> int:
+        return hash(self._base)
+
     @property
     def main_layer(self) -> kdb.LayerInfo:
         """Main Layer of the enclosure and cross section."""

@@ -441,7 +441,7 @@ def test_schematic_route(
 
         return schematic
 
-    assert pdk.factories["route_example"]._f_orig is route_example.__wrapped__  # ty:ignore[unresolved-attribute]
+    assert pdk.factories["route_example"]._f_orig is route_example.__wrapped__  # ty:ignore[missing-attribute]
 
     oas_regression(route_example())
 
