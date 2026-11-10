@@ -121,7 +121,7 @@ def test_extrude_config_conflict_raises(
     xs = kf.SymmetricalCrossSection(width=1000, enclosure=sym_enc())
     config = kf.ExtrudeConfig(ports={})
     kcl.set_extrude_config(xs, config, on_conflict="raise")
-    with pytest.raises(ExtrudeConfigConflictError):
+    with pytest.raises(ExtrudeConfigConflictError, match="add_bbox is False, not True"):
         kcl.set_extrude_config(xs, kf.ExtrudeConfig(add_bbox=True), on_conflict="raise")
     assert kcl.get_extrude_config(xs) is config
 
