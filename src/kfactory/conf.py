@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 import loguru
-import pygit2
 import rich.console
 from dotenv import find_dotenv
 from loguru import logger as logger  # noqa: PLC0414
@@ -345,6 +344,14 @@ class Settings(BaseSettings):
         """Find the current working directory's project dir.
 
         This is the git repo if it exists, cwd otherwise."""
+        try:
+            import pygit2
+        except ImportError as e:
+            msg = (
+                "pygit2 is required to detect the project directory; "
+                "install it with `pip install pygit2`."
+            )
+            raise ImportError(msg) from e
         try:
             repo = pygit2.Repository(Path.cwd())
             return Path(repo.workdir or repo.path).resolve()
