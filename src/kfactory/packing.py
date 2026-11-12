@@ -1,8 +1,7 @@
 """Utilities for packing KCells and Instances."""
 
 from collections.abc import Sequence
-
-import rpack
+from typing import Any
 
 from . import kdb
 from .instance import Instance
@@ -10,6 +9,16 @@ from .instance_group import InstanceGroup
 from .kcell import KCell
 
 __all__ = ["pack_instances", "pack_kcells"]
+
+
+def _rpack() -> Any:
+    """Import rpack lazily (not available on e.g. Pyodide)."""
+    try:
+        import rpack
+    except ImportError as e:
+        msg = "rpack is required for packing; install it with `pip install rpack`."
+        raise ImportError(msg) from e
+    return rpack
 
 
 def pack_kcells(
@@ -31,7 +40,7 @@ def pack_kcells(
     insts = [target << kc for kc in kcells]
     bbs = [(inst, inst.bbox()) for inst in insts]
 
-    packed_bbs = rpack.pack(
+    packed_bbs = _rpack().pack(
         ((bb[1].width() + spacing, bb[1].height() + spacing) for bb in bbs),
         max_width=max_width,
         max_height=max_height,
@@ -66,7 +75,7 @@ def pack_instances(
     """
     bbs = [(inst, inst.bbox()) for inst in instances]
 
-    packed_bbs = rpack.pack(
+    packed_bbs = _rpack().pack(
         ((bb[1].width() + spacing, bb[1].height() + spacing) for bb in bbs),
         max_width=max_width,
         max_height=max_height,
