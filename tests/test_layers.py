@@ -60,10 +60,45 @@ def test_layer_enum_str(layers: Layers) -> None:
     assert str(layer_enum.WG) == "WG"
 
 
+def test_layer_enum_equality(layers: Layers) -> None:
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
+
+    assert layer_enum.WG == (1, 0)
+
+    assert layer_enum.WG != (1, 1)
+
+    assert layer_enum.WG != (0, 0)
+
+    assert layer_enum.WG != (2, 2)
+
+    assert layer_enum.WG != layer_enum.WGEX
+
+
 def test_layer_enum_getitem(layers: Layers) -> None:
     layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
     assert layer_enum["WG"][0] == 1
     assert layer_enum["WG"][1] == 0
+
+
+def test_layer_enum_hash(layers: Layers) -> None:
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
+
+    assert hash(layer_enum.WG) == hash((1, 0))
+    assert hash(layer_enum.WG) != hash((1, 1))
+
+    layer_dict1 = {
+        layer_enum.WG: "waveguide",
+        layer_enum.FILL1: "fill 1",
+    }
+    assert layer_dict1[(1, 0)] == "waveguide"
+    assert layer_dict1[(2, 0)] == "fill 1"
+
+    layer_dict2 = {
+        (1, 0): "waveguide",
+        (2, 0): "fill 1",
+    }
+    assert layer_dict2[layer_enum.WG] == "waveguide"
+    assert layer_dict2[layer_enum.FILL1] == "fill 1"
 
 
 def test_layer_enum_len(layers: Layers) -> None:
