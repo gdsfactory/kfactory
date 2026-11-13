@@ -46,5 +46,5 @@ jobs:
         with:
           mode: minimum
           count: 1
-          labels: "breaking, bug, github_actions, documentation, dependencies, enhancement, feature, maintenance, security, typing"
+          labels: "breaking, cells, bug, github_actions, documentation, dependencies, enhancement, maintenance, refactor, routing, typing"
           add_comment: true
