@@ -217,3 +217,31 @@ def test_instnace_group_iter(
     instance1, *_ = instance_groups
     for inst in instance1:
         assert isinstance(inst, kf.Instance)
+
+
+def test_instance_group_bbox_layer_datatype_tuple(kcl: kf.KCLayout) -> None:
+    child = kcl.kcell()
+    l1 = kcl.layout.layer(1, 0)
+    l2 = kcl.layout.layer(2, 0)
+    child.shapes(l1).insert(kf.kdb.Box(0, 0, 1000, 2000))
+    child.shapes(l2).insert(kf.kdb.Box(0, 0, 3000, 4000))
+    parent = kcl.kcell()
+    ref1 = parent << child
+    ref2 = parent << child
+    ref2.transform(kf.kdb.Trans(10_000, 0))
+
+    group = kf.InstanceGroup(insts=[ref1, ref2])
+    assert group.ibbox((1, 0)) == group.ibbox(l1) == kf.kdb.Box(0, 0, 11_000, 2000)
+    assert group.ibbox((2, 0)) == group.ibbox(l2) == kf.kdb.Box(0, 0, 13_000, 4000)
+    assert group.dbbox((1, 0)) == group.dbbox(l1) == kf.kdb.DBox(0, 0, 11, 2)
+    assert group.dbbox((2, 0)) == group.dbbox(l2) == kf.kdb.DBox(0, 0, 13, 4)
+    assert group.bbox((1, 0)) == kf.kdb.Box(0, 0, 11_000, 2000)
+    assert group.bbox((2, 0)) == kf.kdb.Box(0, 0, 13_000, 4000)
+
+    dparent = kcl.dkcell()
+    dref1 = dparent << child
+    dref2 = dparent << child
+    dref2.dmove((10, 0))
+    dgroup = kf.DInstanceGroup(insts=[dref1, dref2])
+    assert dgroup.bbox((1, 0)) == kf.kdb.DBox(0, 0, 11, 2)
+    assert dgroup.bbox((2, 0)) == kf.kdb.DBox(0, 0, 13, 4)

@@ -98,14 +98,14 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoInstance[Any]](
         for p in self.ports:
             p.transform(trans)
 
-    def ibbox(self, layer: int | None = None) -> kdb.Box:
+    def ibbox(self, layer: int | tuple[int, int] | None = None) -> kdb.Box:
         """Get the total bounding box or the bounding box of a layer in dbu."""
         bb = kdb.Box()
         for _bb in (inst.ibbox(layer) for inst in self.insts):
             bb += _bb
         return bb
 
-    def dbbox(self, layer: int | None = None) -> kdb.DBox:
+    def dbbox(self, layer: int | tuple[int, int] | None = None) -> kdb.DBox:
         """Get the total bounding box or the bounding box of a layer in um."""
         bb = kdb.DBox()
         for _bb in (inst.dbbox(layer) for inst in self.insts):

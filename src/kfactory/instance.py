@@ -23,7 +23,12 @@ from .exceptions import (
     PortTypeMismatchError,
     PortWidthMismatchError,
 )
-from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
+from .geometry import (
+    DBUGeometricObject,
+    GeometricObject,
+    UMGeometricObject,
+    _layer_index,
+)
 from .port import DPort, Port, ProtoPort
 from .settings import Info
 
@@ -157,15 +162,15 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
     def instance(self) -> kdb.Instance:
         return self._instance
 
-    def ibbox(self, layer: int | None = None) -> kdb.Box:
+    def ibbox(self, layer: int | tuple[int, int] | None = None) -> kdb.Box:
         if layer is None:
             return self._instance.bbox()
-        return self._instance.bbox(layer)
+        return self._instance.bbox(_layer_index(self.kcl, layer))
 
-    def dbbox(self, layer: int | None = None) -> kdb.DBox:
+    def dbbox(self, layer: int | tuple[int, int] | None = None) -> kdb.DBox:
         if layer is None:
             return self._instance.dbbox()
-        return self._instance.dbbox(layer)
+        return self._instance.dbbox(_layer_index(self.kcl, layer))
 
     @property
     def cell_name(self) -> str:
@@ -863,10 +868,10 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     def cell_name(self) -> str | None:
         return self.cell.name
 
-    def ibbox(self, layer: int | LayerEnum | None = None) -> kdb.Box:
+    def ibbox(self, layer: int | LayerEnum | tuple[int, int] | None = None) -> kdb.Box:
         return self.dbbox(layer).to_itype(self.kcl.dbu)
 
-    def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
+    def dbbox(self, layer: int | LayerEnum | tuple[int, int] | None = None) -> kdb.DBox:
         cell_bb = self.cell.dbbox(layer)
         na_ = self.na - 1
         nb_ = self.nb - 1

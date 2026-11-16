@@ -110,19 +110,26 @@ class SizeInfo[T: (int, float)]:
         return (c.x, c.y)
 
 
+def _layer_index(kcl: KCLayout, layer: int | tuple[int, int]) -> int:
+    """Convert a layer index or (layer, datatype) tuple to a layer index."""
+    if isinstance(layer, tuple):
+        return kcl.layout.layer(*layer)
+    return layer
+
+
 class GeometricObject[T: (int, float)](ABC):
     @property
     @abstractmethod
     def kcl(self) -> KCLayout: ...
 
     @abstractmethod
-    def bbox(self, layer: int | None = None) -> BoxLike[T]: ...
+    def bbox(self, layer: int | tuple[int, int] | None = None) -> BoxLike[T]: ...
 
     @abstractmethod
-    def ibbox(self, layer: int | None = None) -> kdb.Box: ...
+    def ibbox(self, layer: int | tuple[int, int] | None = None) -> kdb.Box: ...
 
     @abstractmethod
-    def dbbox(self, layer: int | None = None) -> kdb.DBox: ...
+    def dbbox(self, layer: int | tuple[int, int] | None = None) -> kdb.DBox: ...
 
     @abstractmethod
     def _standard_trans(self) -> type[kdb.Trans | kdb.DCplxTrans]: ...
@@ -742,7 +749,7 @@ class GeometricObject[T: (int, float)](ABC):
 
 
 class DBUGeometricObject(GeometricObject[int], ABC):
-    def bbox(self, layer: int | None = None) -> kdb.Box:
+    def bbox(self, layer: int | tuple[int, int] | None = None) -> kdb.Box:
         return self.ibbox(layer)
 
     def _standard_trans(self) -> type[kdb.Trans]:
@@ -764,7 +771,7 @@ class DBUGeometricObject(GeometricObject[int], ABC):
 
 
 class UMGeometricObject(GeometricObject[float], ABC):
-    def bbox(self, layer: int | None = None) -> kdb.DBox:
+    def bbox(self, layer: int | tuple[int, int] | None = None) -> kdb.DBox:
         return self.dbbox(layer)
 
     def _standard_trans(self) -> type[kdb.DCplxTrans]:
