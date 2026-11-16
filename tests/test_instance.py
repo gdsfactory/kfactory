@@ -723,3 +723,25 @@ def test_to_dtype(kcl: kf.KCLayout) -> None:
     ref = dref.to_itype()
     assert ref.bbox() == kf.kdb.Box(-5000, -5000, 5000, 5000)
     assert isinstance(ref, kf.Instance)
+
+
+def test_bbox_layer_datatype_tuple(kcl: kf.KCLayout) -> None:
+    child = kcl.kcell()
+    l1 = kcl.layout.layer(1, 0)
+    l2 = kcl.layout.layer(2, 0)
+    child.shapes(l1).insert(kdb.Box(0, 0, 1000, 2000))
+    child.shapes(l2).insert(kdb.Box(0, 0, 3000, 4000))
+    parent = kcl.kcell()
+    inst = parent << child
+
+    for obj in (child, inst, parent):
+        assert obj.ibbox((1, 0)) == obj.ibbox(l1) == kdb.Box(0, 0, 1000, 2000)
+        assert obj.ibbox((2, 0)) == obj.ibbox(l2) == kdb.Box(0, 0, 3000, 4000)
+        assert obj.dbbox((1, 0)) == obj.dbbox(l1) == kdb.DBox(0, 0, 1, 2)
+        assert obj.dbbox((2, 0)) == obj.dbbox(l2) == kdb.DBox(0, 0, 3, 4)
+
+    dcell = kcl.dkcell()
+    dcell.shapes(l1).insert(kdb.Box(0, 0, 1000, 2000))
+    dcell.shapes(l2).insert(kdb.Box(0, 0, 3000, 4000))
+    assert dcell.bbox((1, 0)) == kdb.DBox(0, 0, 1, 2)
+    assert dcell.bbox((2, 0)) == kdb.DBox(0, 0, 3, 4)

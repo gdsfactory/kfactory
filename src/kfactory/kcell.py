@@ -71,7 +71,12 @@ from .cross_section import (
     TCrossSection,
 )
 from .exceptions import DuplicateCellNameError, LockedError, MergeError
-from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
+from .geometry import (
+    DBUGeometricObject,
+    GeometricObject,
+    UMGeometricObject,
+    _layer_index,
+)
 from .instance import DInstance, Instance, ProtoInstance, ProtoTInstance, VInstance
 from .instances import (
     DInstances,
@@ -2138,7 +2143,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
 
                     self.add_port(port=port, keep_mirror=True)
 
-    def ibbox(self, layer: int | None = None) -> kdb.Box:
+    def ibbox(self, layer: int | tuple[int, int] | None = None) -> kdb.Box:
         """Bounds in dbu, including approximate bounds of pending virtual instances.
 
         With pending vinsts, warn that bounds may be inaccurate until
@@ -2147,7 +2152,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         if layer is None:
             box = self._base.kdb_cell.bbox()
         else:
-            box = self._base.kdb_cell.bbox(layer)
+            box = self._base.kdb_cell.bbox(_layer_index(self.kcl, layer))
         if self.vinsts:
             logger.warning(
                 "Bounding box of cell {!r} includes virtual instances and may be "
@@ -2158,7 +2163,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 box += vinst.ibbox(layer)
         return box
 
-    def dbbox(self, layer: int | None = None) -> kdb.DBox:
+    def dbbox(self, layer: int | tuple[int, int] | None = None) -> kdb.DBox:
         """Bounds in micrometers, including pending virtual instances.
 
         With pending vinsts, warn that bounds may be inaccurate until
@@ -2167,7 +2172,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         if layer is None:
             box = self._base.kdb_cell.dbbox()
         else:
-            box = self._base.kdb_cell.dbbox(layer)
+            box = self._base.kdb_cell.dbbox(_layer_index(self.kcl, layer))
         if self.vinsts:
             logger.warning(
                 "Bounding box of cell {!r} includes virtual instances and may be "
@@ -3353,7 +3358,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             if name:
                 self._base.name = name
 
-    def ibbox(self, layer: int | None = None) -> kdb.Box:
+    def ibbox(self, layer: int | tuple[int, int] | None = None) -> kdb.Box:
         return self.dbbox(layer).to_itype(self.kcl.dbu)
 
     def transform(
@@ -3392,7 +3397,9 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             raise LockedError(self)
         self._base.pins = [pin.base for pin in new_pins]
 
-    def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
+    def dbbox(self, layer: int | LayerEnum | tuple[int, int] | None = None) -> kdb.DBox:
+        if isinstance(layer, tuple):
+            layer = _layer_index(self.kcl, layer)
         layers_ = set(self.shapes().keys())
 
         layers = layers_ if layer is None else {layer} & layers_
